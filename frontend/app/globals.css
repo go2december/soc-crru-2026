@@ -1,26 +1,124 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ==========================================
+   SCHOLAR PALETTE - Custom Design Tokens
+   ========================================== */
+@theme {
+  /* Primary Colors */
+  --color-scholar-accent: #F14627;    /* ส้มแดง - CTA, Active, Buttons */
+  --color-scholar-deep: #0F172A;      /* น้ำเงินเข้ม - Navbar, Headings */
+  --color-scholar-text: #334155;      /* เทาอมฟ้า - Body Text */
+  --color-scholar-soft: #F8FAFC;      /* พื้นหลังรอง - Section Background */
+  
+  /* Extended Palette */
+  --color-scholar-gold: #F59E0B;      /* สีทอง - Highlight, Awards */
+  --color-scholar-success: #10B981;   /* เขียว - Success states */
+  --color-scholar-info: #3B82F6;      /* ฟ้า - Info, Links */
+  --color-scholar-warning: #F59E0B;   /* ส้ม - Warnings */
+  --color-scholar-error: #EF4444;     /* แดง - Errors */
+  
+  /* Gradients */
+  --color-scholar-gradient-start: #0F172A;
+  --color-scholar-gradient-end: #1E3A5F;
+  
+  /* Fonts */
+  --font-sans: "Inter", "Kanit", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Kanit", "Inter", ui-sans-serif, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ==========================================
+   DaisyUI Theme Configuration
+   ========================================== */
+@plugin "daisyui" {
+  themes: socTheme --default;
+}
+
+@plugin "daisyui/theme" {
+  name: "socTheme";
+  default: true;
+  
+  --color-base-100: #FFFFFF;
+  --color-base-200: #F8FAFC;
+  --color-base-300: #E2E8F0;
+  --color-base-content: #334155;
+  
+  --color-primary: #F14627;
+  --color-primary-content: #FFFFFF;
+  
+  --color-secondary: #0F172A;
+  --color-secondary-content: #FFFFFF;
+  
+  --color-accent: #F59E0B;
+  --color-accent-content: #FFFFFF;
+  
+  --color-neutral: #334155;
+  --color-neutral-content: #FFFFFF;
+  
+  --color-info: #3B82F6;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  
+  --border-radius-box: 0.75rem;
+  --border-radius-btn: 0.5rem;
+  --border-radius-badge: 1rem;
+}
+
+/* ==========================================
+   Global Styles
+   ========================================== */
+:root {
+  --background: #ffffff;
+  --foreground: #334155;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0F172A;
+    --foreground: #F8FAFC;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* ==========================================
+   Custom Utility Classes
+   ========================================== */
+
+/* Gradient Background for Hero sections */
+.bg-scholar-gradient {
+  background: linear-gradient(135deg, var(--color-scholar-deep) 0%, #1E3A5F 50%, #2D4A6F 100%);
+}
+
+/* Text Gradient for headings */
+.text-scholar-gradient {
+  background: linear-gradient(135deg, var(--color-scholar-accent) 0%, var(--color-scholar-gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--color-scholar-accent);
+  color: white;
 }
