@@ -1,0 +1,56 @@
+# ==========================================
+# SOC-CRRU-WEB Monorepo .gitignore
+# ==========================================
+
+# ----- Node.js / NPM -----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ----- Next.js (Frontend) -----
+frontend/.next/
+frontend/out/
+frontend/.vercel
+
+# ----- NestJS (Backend) -----
+backend/dist/
+
+# ----- Environment Variables -----
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# ----- Database -----
+database/pgdata/
+
+# ----- IDE / Editor -----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ----- OS Files -----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- Logs -----
+logs/
+*.log
+
+# ----- Build / Cache -----
+*.tsbuildinfo
+.cache/
+
+# ----- Testing -----
+coverage/
+.nyc_output/
+
+# ----- Docker -----
+# Uncomment if you don't want to track docker volumes
+# docker-compose.override.yml
