@@ -136,15 +136,40 @@ export default function Navbar() {
                     <DropdownMenu name="academics" title="การจัดการศึกษา">
                         <NavItem href="/academics/overview" title="ภาพรวมวิชาการ (Overview)" />
 
-                        <MenuHeading title="ระดับปริญญาตรี (Bachelor)" />
-                        <NavItem href="/programs/social-dev" title="สาขาวิชาการพัฒนาสังคม" />
-                        <NavItem href="/programs/social-sci" title="สาขาวิชาสังคมศาสตร์" />
-                        <NavItem href="/programs/home-eco" title="สาขาวิชาคหกรรมศาสตร์ประยุกต์" />
+                        {/* Social Sciences Group */}
+                        <div className="relative group">
+                            <NavItem href="/programs/social-sci" title="สาขาวิชาสังคมศาสตร์ (ภาพรวม)" />
+                            <div className="pl-4 border-l border-white/10 ml-2 mt-1 mb-1 space-y-1">
+                                <Link href="/programs/social-sci/sociology" className="block px-3 py-1.5 text-xs text-white/70 hover:text-scholar-accent hover:bg-white/5 rounded-md transition-colors">
+                                    - แขนงวิชาสังคมวิทยาและมานุษยวิทยา
+                                </Link>
+                                <Link href="/programs/social-sci/crm" className="block px-3 py-1.5 text-xs text-white/70 hover:text-scholar-accent hover:bg-white/5 rounded-md transition-colors">
+                                    - แขนงวิชาการจัดการทรัพยากรทางวัฒนธรรม
+                                </Link>
+                            </div>
+                        </div>
+
+                        <NavItem href="/programs/social-dev" title="สาขาวิชานวัตกรรมการพัฒนาสังคม" />
+
+                        {/* Home Economics Group */}
+                        <div className="relative group">
+                            <NavItem href="/programs/home-eco" title="สาขาวิชาคหกรรมศาสตร์ (ภาพรวม)" />
+                            <div className="pl-4 border-l border-white/10 ml-2 mt-1 mb-1 space-y-1">
+                                <Link href="/programs/home-eco/culinary" className="block px-3 py-1.5 text-xs text-white/70 hover:text-scholar-accent hover:bg-white/5 rounded-md transition-colors">
+                                    - วิชาเอกการประกอบอาหารและบริการ
+                                </Link>
+                                <Link href="/programs/home-eco/applied" className="block px-3 py-1.5 text-xs text-white/70 hover:text-scholar-accent hover:bg-white/5 rounded-md transition-colors">
+                                    - วิชาเอกคหกรรมศาสตร์ประยุกต์
+                                </Link>
+                            </div>
+                        </div>
+
                         <NavItem href="/programs/social-psych" title="สาขาวิชาจิตวิทยาสังคม" />
-                        <NavItem href="/programs/gis" title="สาขาวิชาภูมิสารสนเทศ (GIS)" />
+                        <NavItem href="/programs/gis" title="สาขาวิชาภูมิศาสตร์และภูมิสารสนเทศ" />
 
                         <MenuHeading title="ระดับบัณฑิตศึกษา (Graduate)" />
-                        <NavItem href="/programs/master-phd" title="ยุทธศาสตร์การพัฒนาภูมิภาค" />
+                        <NavItem href="/programs/regional-dev-ma" title="ปริญญาโท ยุทธศาสตร์การพัฒนาภูมิภาค" />
+                        <NavItem href="/programs/regional-dev-phd" title="ปริญญาเอก ยุทธศาสตร์การพัฒนาภูมิภาค" />
 
                         <MenuHeading title="การเรียนรู้ตลอดชีวิต" />
                         <NavItem href="/academics/credit-bank" title="ระบบคลังหน่วยกิต (Credit Bank)" />
@@ -153,8 +178,24 @@ export default function Navbar() {
 
                     {/* C. การรับสมัคร (Admissions) */}
                     <DropdownMenu name="admissions" title="การรับสมัคร">
-                        <NavItem href="/admissions/tcas" title="ระดับปริญญาตรี (TCAS)" />
-                        <NavItem href="/admissions/grad" title="ระดับบัณฑิตศึกษา" />
+                        <li className="mb-2 pb-2 border-b border-white/10">
+                            <Link href="/admissions" className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-scholar-gold hover:text-white hover:bg-scholar-accent rounded-md transition-all" onClick={() => setOpenDropdown(null)}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                                </svg>
+                                ศูนย์รับสมัคร (Admission Center)
+                            </Link>
+                        </li>
+                        <li className="block">
+                            <a href="https://admission.crru.ac.th/" target="_blank" rel="noopener noreferrer" className="block px-3 py-2 text-sm text-white/90 hover:text-scholar-accent hover:bg-white/10 rounded-md transition-colors" onClick={() => setOpenDropdown(null)}>
+                                ระดับปริญญาตรี (TCAS)
+                            </a>
+                        </li>
+                        <li className="block">
+                            <a href="https://orasis.crru.ac.th/gds_crru/index.php/main/home" target="_blank" rel="noopener noreferrer" className="block px-3 py-2 text-sm text-white/90 hover:text-scholar-accent hover:bg-white/10 rounded-md transition-colors" onClick={() => setOpenDropdown(null)}>
+                                ระดับบัณฑิตศึกษา
+                            </a>
+                        </li>
                         <div className="divider my-1 border-white/10"></div>
                         <NavItem href="/admissions/short-course" title="สมัครเรียนหลักสูตรระยะสั้น" />
                     </DropdownMenu>
