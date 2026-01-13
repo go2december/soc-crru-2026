@@ -70,74 +70,92 @@ export default function AcademicsOverview() {
                     </div>
 
                     {/* Departments / Programs Navigation */}
+                    {/* Departments / Programs Navigation */}
                     <div className="mb-12">
                         <div className="flex items-center gap-4 mb-8">
                             <div className="w-1 h-8 bg-scholar-accent rounded-full"></div>
                             <h2 className="text-2xl font-bold text-scholar-deep">หลักสูตรของเรา (Our Programs)</h2>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
                             {/* Bachelor Degrees */}
-                            <div className="bg-white border rounded-xl p-6 shadow-sm hover:border-scholar-accent transition-colors">
+                            <div className="bg-white border rounded-xl p-6 shadow-sm hover:border-scholar-accent transition-colors lg:col-span-2">
                                 <h3 className="text-lg font-bold text-scholar-deep mb-4 border-b pb-2">ระดับปริญญาตรี (Bachelor's Degrees)</h3>
-                                <ul className="space-y-3">
-                                    <li>
-                                        <Link href="/programs/social-dev" className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                                            <span className="text-gray-700 font-medium group-hover:text-scholar-accent">สาขาวิชาการพัฒนาสังคม</span>
-                                            <svg className="w-4 h-4 text-gray-300 group-hover:text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/programs/social-sci" className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                                            <span className="text-gray-700 font-medium group-hover:text-scholar-accent">สาขาวิชาสังคมศาสตร์</span>
-                                            <svg className="w-4 h-4 text-gray-300 group-hover:text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/programs/home-eco" className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                                            <span className="text-gray-700 font-medium group-hover:text-scholar-accent">สาขาวิชาคหกรรมศาสตร์ประยุกต์</span>
-                                            <svg className="w-4 h-4 text-gray-300 group-hover:text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/programs/social-psych" className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                                            <span className="text-gray-700 font-medium group-hover:text-scholar-accent">สาขาวิชาจิตวิทยาสังคม</span>
-                                            <svg className="w-4 h-4 text-gray-300 group-hover:text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/programs/gis" className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                                            <span className="text-gray-700 font-medium group-hover:text-scholar-accent">สาขาวิชาภูมิสารสนเทศ</span>
-                                            <svg className="w-4 h-4 text-gray-300 group-hover:text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                        </Link>
-                                    </li>
-                                </ul>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Link href="/programs/social-sci" className="flex items-center justify-between group hover:bg-gray-50 p-3 rounded-lg transition-colors border border-transparent hover:border-gray-100">
+                                        <div className="flex flex-col">
+                                            <span className="text-gray-900 font-bold group-hover:text-scholar-accent">สาขาวิชาสังคมศาสตร์</span>
+                                            <span className="text-xs text-gray-500">Social Sciences</span>
+                                        </div>
+                                        <svg className="w-5 h-5 text-gray-300 group-hover:text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                    </Link>
+
+                                    <Link href="/programs/social-dev" className="flex items-center justify-between group hover:bg-gray-50 p-3 rounded-lg transition-colors border border-transparent hover:border-gray-100">
+                                        <div className="flex flex-col">
+                                            <span className="text-gray-900 font-bold group-hover:text-scholar-accent">สาขาวิชานวัตกรรมการพัฒนาสังคม</span>
+                                            <span className="text-xs text-gray-500">Social Development Innovation</span>
+                                        </div>
+                                        <svg className="w-5 h-5 text-gray-300 group-hover:text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                    </Link>
+
+                                    <Link href="/programs/home-eco" className="flex items-center justify-between group hover:bg-gray-50 p-3 rounded-lg transition-colors border border-transparent hover:border-gray-100">
+                                        <div className="flex flex-col">
+                                            <span className="text-gray-900 font-bold group-hover:text-scholar-accent">สาขาวิชาคหกรรมศาสตร์</span>
+                                            <span className="text-xs text-gray-500">Home Economics</span>
+                                        </div>
+                                        <svg className="w-5 h-5 text-gray-300 group-hover:text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                    </Link>
+
+                                    <Link href="/programs/social-psych" className="flex items-center justify-between group hover:bg-gray-50 p-3 rounded-lg transition-colors border border-transparent hover:border-gray-100">
+                                        <div className="flex flex-col">
+                                            <span className="text-gray-900 font-bold group-hover:text-scholar-accent">สาขาวิชาจิตวิทยาสังคม</span>
+                                            <span className="text-xs text-gray-500">Social Psychology</span>
+                                        </div>
+                                        <svg className="w-5 h-5 text-gray-300 group-hover:text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                    </Link>
+
+                                    <Link href="/programs/gis" className="flex items-center justify-between group hover:bg-gray-50 p-3 rounded-lg transition-colors border border-transparent hover:border-gray-100">
+                                        <div className="flex flex-col">
+                                            <span className="text-gray-900 font-bold group-hover:text-scholar-accent">สาขาวิชาภูมิศาสตร์และภูมิสารสนเทศ</span>
+                                            <span className="text-xs text-gray-500">Geography and Geo-Informatics</span>
+                                        </div>
+                                        <svg className="w-5 h-5 text-gray-300 group-hover:text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                    </Link>
+                                </div>
                             </div>
 
                             {/* Graduate & Short Courses */}
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 <div className="bg-white border rounded-xl p-6 shadow-sm hover:border-scholar-gold transition-colors">
-                                    <h3 className="text-lg font-bold text-scholar-deep mb-4 border-b pb-2">ระดับบัณฑิตศึกษา (Graduate School)</h3>
-                                    <ul className="space-y-3">
-                                        <li>
-                                            <Link href="/programs/master-phd" className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                                                <span className="text-gray-700 font-medium group-hover:text-scholar-gold">หลักสูตรยุทธศาสตร์การพัฒนาภูมิภาค (ป.โท / ป.เอก)</span>
-                                                <svg className="w-4 h-4 text-gray-300 group-hover:text-scholar-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                            </Link>
-                                        </li>
-                                    </ul>
+                                    <h3 className="text-lg font-bold text-scholar-deep mb-4 border-b pb-2">ระดับบัณฑิตศึกษา (Graduate)</h3>
+                                    <div className="space-y-3">
+                                        <Link href="/programs/regional-dev-ma" className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group">
+                                            <div className="w-8 h-8 rounded-full bg-scholar-gold/10 flex items-center justify-center text-scholar-gold font-bold text-xs group-hover:bg-scholar-gold group-hover:text-white transition-colors">MA</div>
+                                            <span className="text-sm font-medium text-gray-700 group-hover:text-scholar-deep">ป.โท ยุทธศาสตร์การพัฒนาภูมิภาค</span>
+                                        </Link>
+                                        <Link href="/programs/regional-dev-phd" className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group">
+                                            <div className="w-8 h-8 rounded-full bg-scholar-deep/10 flex items-center justify-center text-scholar-deep font-bold text-xs group-hover:bg-scholar-deep group-hover:text-white transition-colors">PhD</div>
+                                            <span className="text-sm font-medium text-gray-700 group-hover:text-scholar-deep">ป.เอก ยุทธศาสตร์การพัฒนาภูมิภาค</span>
+                                        </Link>
+                                    </div>
                                 </div>
 
-                                <div className="bg-scholar-deep text-white rounded-xl p-6 shadow-md relative overflow-hidden group">
+                                <div className="bg-gradient-to-br from-scholar-deep to-gray-900 text-white rounded-xl p-6 shadow-md relative overflow-hidden group">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-scholar-gold/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
                                     <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
                                         Lifelong Learning
                                         <span className="badge badge-warning bg-scholar-gold text-scholar-deep border-none text-xs">Recommended</span>
                                     </h3>
-                                    <p className="text-white/70 text-sm mb-4">หลักสูตรระยะสั้นเพื่อการ Upskill/Reskill และระบบคลังหน่วยกิต (Credit Bank)</p>
-                                    <Link href="/academics/short-courses" className="btn btn-sm bg-white text-scholar-deep border-none hover:bg-scholar-gold hover:text-white w-full">
-                                        ดูคอร์สระยะสั้นทั้งหมด
-                                    </Link>
+                                    <p className="text-white/70 text-sm mb-4 leading-relaxed">พัฒนาทักษะใหม่ด้วยหลักสูตรระยะสั้น และระบบสะสมหน่วยกิต (Credit Bank)</p>
+                                    <div className="flex gap-2">
+                                        <Link href="/academics/credit-bank" className="btn btn-sm bg-scholar-gold border-none text-scholar-deep hover:bg-white flex-1">
+                                            Credit Bank
+                                        </Link>
+                                        <Link href="/academics/short-courses" className="btn btn-sm btn-outline text-white hover:bg-white hover:text-scholar-deep flex-1">
+                                            ดูคอร์ส
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         </div>

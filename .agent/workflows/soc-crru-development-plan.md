@@ -13,6 +13,7 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] ปรับ **Navbar** ให้ตรงกับ Sitemap ใหม่ (เปลี่ยน "หลักสูตร" เป็น "การจัดการศึกษา (Academics)" และจัดกลุ่มเมนูตามโครงสร้างใหม่)
     - [x] สร้าง **Footer** ที่มีข้อมูลติดต่อและ Social Links ครบถ้วน
     - [x] สร้าง **Breadcrumb** component สำหรับนำทาง
+    - [x] **Branding Update**: ปรับเปลี่ยน Logo และชื่อหน่วยงาน (Navbar/Footer) เป็น "Faculty of Social Sciences"
 
 ## 🏠 Phase 2: Homepage (หน้าแรก)
 - [x] **Hero Banner**: ภาพบรรยากาศ Area-Based + คำโปรย Vision + ปุ่ม Action หลัก
@@ -42,11 +43,14 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] **Academic Services**: บริการวิชาการแก่สังคม
 
 ## 🏢 Phase 5: Organization & E-Service (องค์กร & บริการ)
-- [ ] **About Us Pages**:
-    - [ ] History & Vision timeline
-    - [ ] Interactive Strategy Map (แผนยุทธศาสตร์)
-    - [ ] **Staff Directory**: ระบบค้นหาอาจารย์และบุคลากร
-- [ ] **E-Service Portal**: หน้ารวมลิงก์บริการ (นักศึกษา/บุคลากร)
+- [x] **About Us Pages**:
+    - [x] **Overview Page**: History, Vision, Mission, Identity (Refactored)
+    - [x] **Strategic Plan Pages**:
+        - [x] Main Strategy Page with Cards
+        - [x] Dynamic Strategy Details Pages (`/about/strategy/[id]`) with Goals/Tactics
+    - [x] **Organizational Structure**: Dedicated page for Org Chart
+    - [x] **Staff Directory**: ระบบค้นหาอาจารย์และบุคลากร
+- [x] **E-Service Portal**: หน้ารวมลิงก์บริการ (นักศึกษา/บุคลากร)
 
 ## ⚙️ Phase 6: Backend & Database (NestJS + PostgreSQL)
 - [ ] **Database Schema Design**: ออกแบบตาราง Users, Courses, Staff, Research, News

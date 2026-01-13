@@ -113,17 +113,21 @@ export default function Navbar() {
                         <li><Link href="/admissions">การรับสมัคร</Link></li>
                         <li><Link href="/research">วิจัยและนวัตกรรม</Link></li>
                         <li><Link href="/about">เกี่ยวกับคณะ</Link></li>
-                        <li><Link href="/e-service" className="text-yellow-400">ระบบสารสนเทศ</Link></li>
+                        <li><Link href="/eservice" className="text-yellow-400">ระบบสารสนเทศ</Link></li>
                     </ul>
                 </div>
-                <Link href="/" className="btn btn-ghost text-xl font-bold tracking-wider flex items-center gap-3 hover:bg-transparent">
-                    {/* Placeholder Logo Icon */}
-                    <div className="w-8 h-8 rounded bg-gradient-to-br from-scholar-accent to-scholar-gold flex items-center justify-center text-white text-xs font-bold shadow-lg">
-                        SC
+                <Link href="/" className="btn btn-ghost text-xl font-bold tracking-wider flex items-center gap-3 hover:bg-transparent group">
+                    {/* Logo Image */}
+                    <div className="relative w-10 h-10 flex items-center justify-center">
+                        <img
+                            src="/images/soc-logo.png"
+                            alt="Faculty of Social Sciences Logo"
+                            className="w-full h-full object-contain"
+                        />
                     </div>
                     <div className="flex flex-col items-start justify-center h-full">
-                        <span className="text-lg font-bold leading-none tracking-wide">SOC CRRU</span>
-                        <span className="text-[10px] font-light text-scholar-gold tracking-[0.2em] uppercase opacity-90">Social Innovator</span>
+                        <span className="text-sm font-bold leading-none tracking-wide group-hover:text-scholar-accent transition-colors">Faculty of Social Sciences</span>
+                        <span className="text-[10px] font-light text-scholar-gold tracking-[0.05em] uppercase opacity-90">Chiang Rai Rajabhat University</span>
                     </div>
                 </Link>
             </div>
@@ -136,33 +140,9 @@ export default function Navbar() {
                     <DropdownMenu name="academics" title="การจัดการศึกษา">
                         <NavItem href="/academics/overview" title="ภาพรวมวิชาการ (Overview)" />
 
-                        {/* Social Sciences Group */}
-                        <div className="relative group">
-                            <NavItem href="/programs/social-sci" title="สาขาวิชาสังคมศาสตร์ (ภาพรวม)" />
-                            <div className="pl-4 border-l border-white/10 ml-2 mt-1 mb-1 space-y-1">
-                                <Link href="/programs/social-sci/sociology" className="block px-3 py-1.5 text-xs text-white/70 hover:text-scholar-accent hover:bg-white/5 rounded-md transition-colors">
-                                    - แขนงวิชาสังคมวิทยาและมานุษยวิทยา
-                                </Link>
-                                <Link href="/programs/social-sci/crm" className="block px-3 py-1.5 text-xs text-white/70 hover:text-scholar-accent hover:bg-white/5 rounded-md transition-colors">
-                                    - แขนงวิชาการจัดการทรัพยากรทางวัฒนธรรม
-                                </Link>
-                            </div>
-                        </div>
-
+                        <NavItem href="/programs/social-sci" title="สาขาวิชาสังคมศาสตร์" />
                         <NavItem href="/programs/social-dev" title="สาขาวิชานวัตกรรมการพัฒนาสังคม" />
-
-                        {/* Home Economics Group */}
-                        <div className="relative group">
-                            <NavItem href="/programs/home-eco" title="สาขาวิชาคหกรรมศาสตร์ (ภาพรวม)" />
-                            <div className="pl-4 border-l border-white/10 ml-2 mt-1 mb-1 space-y-1">
-                                <Link href="/programs/home-eco/culinary" className="block px-3 py-1.5 text-xs text-white/70 hover:text-scholar-accent hover:bg-white/5 rounded-md transition-colors">
-                                    - วิชาเอกการประกอบอาหารและบริการ
-                                </Link>
-                                <Link href="/programs/home-eco/applied" className="block px-3 py-1.5 text-xs text-white/70 hover:text-scholar-accent hover:bg-white/5 rounded-md transition-colors">
-                                    - วิชาเอกคหกรรมศาสตร์ประยุกต์
-                                </Link>
-                            </div>
-                        </div>
+                        <NavItem href="/programs/home-eco" title="สาขาวิชาคหกรรมศาสตร์" />
 
                         <NavItem href="/programs/social-psych" title="สาขาวิชาจิตวิทยาสังคม" />
                         <NavItem href="/programs/gis" title="สาขาวิชาภูมิศาสตร์และภูมิสารสนเทศ" />
@@ -208,17 +188,21 @@ export default function Navbar() {
                     </DropdownMenu>
 
                     {/* E. เกี่ยวกับคณะ */}
+                    {/* E. เกี่ยวกับคณะ */}
                     <DropdownMenu name="about" title="เกี่ยวกับคณะ">
-                        <NavItem href="/about/history" title="รู้จักเรา (History & Vision)" />
-                        <NavItem href="/about/structure" title="โครงสร้างองค์กร" />
-                        <NavItem href="/about/strategy" title="แผนยุทธศาสตร์" />
-                        <NavItem href="/about/staff" title="ทำเนียบบุคลากร" />
+                        <NavItem href="/about" title="ภาพรวมคณะ (Vision & History)" />
+                        <NavItem href="/about/strategy" title="แผนยุทธศาสตร์ (Strategic Plan)" />
+                        <NavItem href="/about/structure" title="โครงสร้างการบริหาร (Org. Structure)" />
+                        <div className="divider my-1 border-white/10"></div>
+                        <NavItem href="/about/staff" title="ทำเนียบบุคลากร (Staff)" />
                     </DropdownMenu>
 
                     {/* F. ระบบสารสนเทศ (E-Service) */}
                     <DropdownMenu name="eservice" title="ระบบสารสนเทศ" highlight>
-                        <NavItem href="/eservice/student" title="สำหรับนักศึกษา" />
-                        <NavItem href="/eservice/staff" title="สำหรับบุคลากร" />
+                        <NavItem href="/eservice/student" title="สำหรับนักศึกษา (Student)" />
+                        <NavItem href="/eservice/staff" title="สำหรับบุคลากร (Staff)" />
+                        <div className="divider my-1 border-white/10"></div>
+                        <NavItem href="/eservice/calendar" title="ปฏิทินวิชาการ" />
                     </DropdownMenu>
 
                 </ul>

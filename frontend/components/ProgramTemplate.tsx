@@ -92,6 +92,7 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                                 เกี่ยวกับสาขาวิชา
                             </h2>
                             <p className="text-lg text-gray-600 leading-relaxed indent-8">
+                                {data.description}
                             </p>
                         </section>
 

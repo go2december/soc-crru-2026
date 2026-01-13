@@ -6,6 +6,7 @@ services:
   db:
     image: postgres:18-alpine
     container_name: soc_postgres
+    pull_policy: missing
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER:-soc_admin}
@@ -27,8 +28,9 @@ services:
   # DATABASE ADMIN: pgAdmin 4
   # -----------------------------------------------------------------
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:8
     container_name: soc_pgadmin
+    pull_policy: missing
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@soc.crru.ac.th

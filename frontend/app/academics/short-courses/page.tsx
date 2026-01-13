@@ -1,6 +1,9 @@
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/link';
 import Breadcrumb from '@/components/Breadcrumb';
+import { useState } from 'react';
 
 interface Course {
     id: number;
@@ -67,6 +70,13 @@ const courses: Course[] = [
 ];
 
 export default function ShortCoursesPage() {
+    const [filterType, setFilterType] = useState<'all' | 'credit-bank'>('all');
+
+    const filteredCourses = courses.filter(course => {
+        if (filterType === 'credit-bank') return course.creditBank;
+        return true;
+    });
+
     return (
         <div className="bg-white font-sans text-scholar-text">
 
@@ -85,12 +95,21 @@ export default function ShortCoursesPage() {
             {/* Filter & List */}
             <div className="container mx-auto px-4 py-12">
 
-                {/* Search Bar (Mock UI) */}
+                {/* Filter Tabs & Search */}
                 <div className="flex flex-col md:flex-row gap-4 mb-8 justify-between items-center">
-                    <div className="tabs tabs-boxed bg-gray-100">
-                        <a className="tab tab-active bg-white text-scholar-deep shadow-sm">ทั้งหมด</a>
-                        <a className="tab">เปิดรับสมัคร</a>
-                        <a className="tab">เร็วๆ นี้</a>
+                    <div className="tabs tabs-boxed bg-gray-100 p-1 rounded-full">
+                        <button
+                            className={`tab rounded-full px-6 transition-all ${filterType === 'all' ? 'tab-active bg-scholar-accent text-white shadow-md' : 'text-gray-600 hover:text-scholar-deep'}`}
+                            onClick={() => setFilterType('all')}
+                        >
+                            Upskill/Reskill
+                        </button>
+                        <button
+                            className={`tab rounded-full px-6 transition-all ${filterType === 'credit-bank' ? 'tab-active bg-scholar-gold text-scholar-deep shadow-md font-bold' : 'text-gray-600 hover:text-scholar-deep'}`}
+                            onClick={() => setFilterType('credit-bank')}
+                        >
+                            Credit Bank
+                        </button>
                     </div>
                     <div className="join w-full md:w-auto">
                         <input className="input input-bordered join-item w-full md:w-64 bg-white" placeholder="ค้นหาหลักสูตร..." />
@@ -99,54 +118,61 @@ export default function ShortCoursesPage() {
                 </div>
 
                 {/* Course Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {courses.map((course) => (
-                        <div key={course.id} className="card bg-white shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group">
-                            <figure className="relative h-48 overflow-hidden">
-                                <Image
-                                    src={course.image}
-                                    alt={course.title}
-                                    fill
-                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                />
-                                <div className="absolute top-3 right-3">
-                                    {course.status === 'open' && <span className="badge badge-success text-white">เปิดรับสมัคร</span>}
-                                    {course.status === 'soon' && <span className="badge badge-warning text-white">เร็วๆ นี้</span>}
-                                    {course.status === 'closed' && <span className="badge badge-neutral text-white">ปิดรับสมัคร</span>}
-                                </div>
-                                {course.creditBank && (
-                                    <div className="absolute bottom-3 left-3">
-                                        <span className="badge bg-white/90 text-scholar-deep text-xs font-bold shadow-sm flex items-center gap-1">
-                                            <svg className="w-3 h-3 text-scholar-gold" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                                            Credit Bank
-                                        </span>
+                {filteredCourses.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredCourses.map((course) => (
+                            <div key={course.id} className="card bg-white shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group">
+                                <figure className="relative h-48 overflow-hidden">
+                                    <Image
+                                        src={course.image}
+                                        alt={course.title}
+                                        fill
+                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                    <div className="absolute top-3 right-3">
+                                        {course.status === 'open' && <span className="badge badge-success text-white">เปิดรับสมัคร</span>}
+                                        {course.status === 'soon' && <span className="badge badge-warning text-white">เร็วๆ นี้</span>}
+                                        {course.status === 'closed' && <span className="badge badge-neutral text-white">ปิดรับสมัคร</span>}
                                     </div>
-                                )}
-                            </figure>
-                            <div className="card-body p-6">
-                                <div className="text-xs font-semibold text-scholar-accent uppercase mb-1">{course.category}</div>
-                                <h2 className="card-title text-lg font-bold text-scholar-deep leading-snug min-h-[3.5rem]">
-                                    {course.title}
-                                </h2>
-                                <div className="flex items-center justify-between mt-4 text-sm text-gray-500 border-t pt-4">
-                                    <span className="flex items-center gap-1">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        {course.hours} ชั่วโมง
-                                    </span>
-                                    <span className="font-bold text-scholar-deep text-lg">{course.price.toLocaleString()} บาท</span>
-                                </div>
-                                <div className="card-actions mt-4">
-                                    {course.status === 'open' ? (
-                                        <button className="btn btn-primary bg-scholar-accent border-none text-white w-full hover:bg-[#D9341C]">สมัครเรียน</button>
-                                    ) : (
-                                        <button className="btn btn-disabled w-full bg-gray-200 text-gray-400">ดูรายละเอียด</button>
+                                    {course.creditBank && (
+                                        <div className="absolute bottom-3 left-3">
+                                            <span className="badge bg-white/90 text-scholar-deep text-xs font-bold shadow-sm flex items-center gap-1">
+                                                <svg className="w-3 h-3 text-scholar-gold" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                                Credit Bank
+                                            </span>
+                                        </div>
                                     )}
+                                </figure>
+                                <div className="card-body p-6">
+                                    <div className="text-xs font-semibold text-scholar-accent uppercase mb-1">{course.category}</div>
+                                    <h2 className="card-title text-lg font-bold text-scholar-deep leading-snug min-h-[3.5rem]">
+                                        {course.title}
+                                    </h2>
+                                    <div className="flex items-center justify-between mt-4 text-sm text-gray-500 border-t pt-4">
+                                        <span className="flex items-center gap-1">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            {course.hours} ชั่วโมง
+                                        </span>
+                                        <span className="font-bold text-scholar-deep text-lg">{course.price.toLocaleString()} บาท</span>
+                                    </div>
+                                    <div className="card-actions mt-4">
+                                        {course.status === 'open' ? (
+                                            <button className="btn btn-primary bg-scholar-accent border-none text-white w-full hover:bg-[#D9341C]">สมัครเรียน</button>
+                                        ) : (
+                                            <button className="btn btn-disabled w-full bg-gray-200 text-gray-400">ดูรายละเอียด</button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 className="text-lg font-medium text-gray-500">ไม่พบหลักสูตรที่เลือก</h3>
+                        <p className="text-gray-400">กรุณาลองเลือกประเภทอื่น หรือค้นหาใหม่</p>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -10,12 +10,16 @@ export default function Footer() {
                     {/* Column 1: Brand & Address */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded bg-gradient-to-br from-scholar-accent to-scholar-gold flex items-center justify-center text-white text-sm font-bold shadow-lg">
-                                SC
+                            <div className="relative w-12 h-12 flex items-center justify-center">
+                                <img
+                                    src="/images/soc-logo.png"
+                                    alt="Faculty of Social Sciences Logo"
+                                    className="w-full h-full object-contain"
+                                />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold text-white leading-none">SOC CRRU</span>
-                                <span className="text-xs text-scholar-gold uppercase tracking-widest">Social Innovator</span>
+                                <span className="text-lg font-bold text-white leading-none">Faculty of Social Sciences</span>
+                                <span className="text-[10px] text-scholar-gold uppercase tracking-widest mt-1">Chiang Rai Rajabhat University</span>
                             </div>
                         </div>
                         <p className="text-sm leading-relaxed">
@@ -61,7 +65,7 @@ export default function Footer() {
                             <li><Link href="/academics/credit-bank" className="hover:text-white transition-colors">ระบบคลังหน่วยกิต (Credit Bank)</Link></li>
                             <li><Link href="/academics/short-courses" className="hover:text-white transition-colors">คอร์สฝึกอบรมระยะสั้น</Link></li>
                             <li><Link href="/research/database" className="hover:text-white transition-colors">ฐานข้อมูลงานวิจัย</Link></li>
-                            <li><Link href="/e-service" className="hover:text-white transition-colors">ระบบสารสนเทศ (E-Service)</Link></li>
+                            <li><Link href="/eservice/student" className="hover:text-white transition-colors">บริการนักศึกษา (Student Service)</Link></li>
                             <li><Link href="/contact" className="hover:text-white transition-colors">ติดต่อเรา</Link></li>
                         </ul>
                     </div>

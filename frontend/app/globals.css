@@ -68,23 +68,7 @@
 /* ==========================================
    Global Styles
    ========================================== */
-:root {
-  --background: #ffffff;
-  --foreground: #334155;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0F172A;
-    --foreground: #F8FAFC;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-}
+/* Body default handled by Tailwind classes in layout.tsx */
 
 /* ==========================================
    Custom Utility Classes
