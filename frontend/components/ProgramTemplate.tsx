@@ -79,7 +79,22 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
             </header>
 
             <div className="container mx-auto px-4 py-8">
-                <Breadcrumb items={[{ label: 'การจัดการศึกษา', href: '/academics/overview' }, { label: 'หลักสูตรปริญญาตรี', href: '/academics/bachelor' }, { label: data.title }]} />
+                <Breadcrumb items={[
+                    { label: 'หลักสูตร', href: '/programs' },
+                    {
+                        label: data.level?.includes('เอก') || data.level?.includes('Doctor')
+                            ? 'หลักสูตรปริญญาเอก'
+                            : data.level?.includes('โท') || data.level?.includes('Master')
+                                ? 'หลักสูตรปริญญาโท'
+                                : 'หลักสูตรปริญญาตรี',
+                        href: data.level?.includes('เอก') || data.level?.includes('Doctor')
+                            ? '/programs?level=doctoral'
+                            : data.level?.includes('โท') || data.level?.includes('Master')
+                                ? '/programs?level=master'
+                                : '/programs?level=bachelor'
+                    },
+                    { label: data.title }
+                ]} />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mt-8">
 

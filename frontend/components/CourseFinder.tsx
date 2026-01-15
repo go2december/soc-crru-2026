@@ -1,7 +1,6 @@
 "use client";
 
 import Link from 'next/link';
-import ProgramList from './ProgramList';
 
 export default function CourseFinder() {
     return (
@@ -80,9 +79,6 @@ export default function CourseFinder() {
                         </div>
                     </Link>
                 </div>
-
-                {/* API Data Section */}
-                <ProgramList />
 
             </div>
         </section>
