@@ -28,7 +28,7 @@ services:
   # DATABASE ADMIN: pgAdmin 4
   # -----------------------------------------------------------------
   pgadmin:
-    image: dpage/pgadmin4:8
+    image: dpage/pgadmin4:latest
     container_name: soc_pgadmin
     pull_policy: missing
     restart: always
@@ -64,6 +64,7 @@ services:
       DATABASE_USER: ${DB_USER:-soc_admin}
       DATABASE_PASSWORD: ${DB_PASSWORD:-soc_secure_pass}
       DATABASE_NAME: ${DB_NAME:-soc_db}
+      DATABASE_URL: postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-soc_secure_pass}@db:5432/${DB_NAME:-soc_db}?schema=public
     networks:
       - soc-network
     depends_on:
@@ -88,6 +89,7 @@ services:
       - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3001
+      INTERNAL_API_URL: http://backend:3000
       WATCHPACK_POLLING: "true"
     networks:
       - soc-network

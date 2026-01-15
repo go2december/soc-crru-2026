@@ -52,13 +52,19 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] **Staff Directory**: ระบบค้นหาอาจารย์และบุคลากร
 - [x] **E-Service Portal**: หน้ารวมลิงก์บริการ (นักศึกษา/บุคลากร)
 
-## ⚙️ Phase 6: Backend & Database (NestJS + PostgreSQL)
-- [ ] **Database Schema Design**: ออกแบบตาราง Users, Courses, Staff, Research, News
-- [ ] **API Development**:
-    - [ ] CRUD หลักสูตร (Courses)
-    - [ ] CRUD บุคลากร (Staff)
+## ⚙️ Phase 6: Backend & Database (NestJS + Drizzle ORM)
+- [x] **Database Schema Design**: ออกแบบตาราง Users, Courses, Staff, Research, News (Migrated to Drizzle)
+- [x] **ORM Setup**: ติดตั้งและตั้งค่า Drizzle ORM + Drizzle Kit
+- [x] **API Development**:
+    - [x] CRUD หลักสูตร (Courses/Programs) - *Full data: highlights, careers, structure, concentrations*
+    - [x] CRUD บุคลากร (Staff) - *Completed via Drizzle ORM*
+    - [x] CRUD ภาควิชา (Departments)
     - [ ] CRUD ข่าวสาร (News)
-- [ ] **Integration**: เชื่อมต่อ Frontend กับ API
+- [x] **Integration**: เชื่อมต่อ Frontend กับ API
+    - [x] Programs: Dynamic route `/programs/[code]` ดึงข้อมูลจาก API
+    - [x] ProgramTemplate: Conditional rendering for concentrations (แสดงเฉพาะเมื่อมีข้อมูล)
+    - [x] Hub Pages: `social-sci`, `home-eco` ใช้หน้า Static สำหรับเลือกวิชาเอก
+    - [ ] Staff Directory: เชื่อมต่อ `/about/staff` กับ `/api/staff`
 
 ## 🧹 Phase 7: Optimization & Launch
 - [ ] **SEO Optimization**: ตั้งค่า Meta tags ตามหลักสูตร

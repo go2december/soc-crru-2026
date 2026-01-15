@@ -97,7 +97,7 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                         </section>
 
                         {/* Concentrations / Majors */}
-                        {data.concentrations && (
+                        {data.concentrations && data.concentrations.length > 0 && (
                             <section>
                                 <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3">
                                     แขนงวิชา / วิชาเอก
