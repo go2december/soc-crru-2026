@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Kanit } from "next/font/google";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Link from "next/link";
+import ClientLayout from "@/components/ClientLayout";
 import "./globals.css";
 
 // Google Fonts Setup
@@ -42,11 +42,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${kanit.variable} font-sans antialiased bg-white text-scholar-text flex flex-col min-h-screen`}
       >
-        <Navbar />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

@@ -65,13 +65,22 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] CRUD หลักสูตร (Courses/Programs) - *Full data: highlights, careers, structure, concentrations*
     - [x] CRUD บุคลากร (Staff) - *Completed via Drizzle ORM*
     - [x] CRUD ภาควิชา (Departments)
-    - [ ] CRUD ข่าวสาร (News)
+    - [x] CRUD ข่าวสาร (News)
+- [x] **Authentication & Admin Dashboard**:
+    - [x] **Google OAuth**: รองรับ Login ด้วย @crru.ac.th (Mock Mode for Dev)
+    - [x] **Role-Based Access Control (RBAC)**: ADMIN, EDITOR, STAFF
+    - [x] **Admin Panel**:
+        - [x] Dashboard Overview stats
+        - [x] Staff Management (List/Edit)
+        - [x] News Management (List/Create/Delete)
+        - [x] User Management (Role assignment)
+        - [x] **Layout**: Minimal Design (Hidden Main Navbar/Footer)
 - [x] **Integration**: เชื่อมต่อ Frontend กับ API
     - [x] Programs List: `/programs` แสดงรายการทั้งหมด พร้อม filter ตามระดับ
     - [x] Programs Detail: Dynamic route `/programs/[code]` ดึงข้อมูลจาก API
     - [x] ProgramTemplate: Conditional rendering for concentrations (แสดงเฉพาะเมื่อมีข้อมูล)
     - [x] Hub Pages: `social-sci`, `home-eco` ใช้หน้า Static สำหรับเลือกวิชาเอก
-    - [ ] Staff Directory: เชื่อมต่อ `/about/staff` กับ `/api/staff`
+    - [x] Staff Directory: เชื่อมต่อ `/about/staff` กับ `/api/staff` (Schema ใหม่ตาม Excel: staffType, academicPosition, adminPosition, education)
 
 ## 🧹 Phase 7: Optimization & Launch
 - [ ] **SEO Optimization**: ตั้งค่า Meta tags ตามหลักสูตร
@@ -79,5 +88,5 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
 - [ ] **Deployment**: ตรวจสอบ Docker Compose สำหรับ Production
 
 ---
-*Last Updated: 2026-01-15*
+*Last Updated: 2026-01-29*
 

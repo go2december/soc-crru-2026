@@ -133,11 +133,12 @@ async function main() {
     try {
         for (const program of programsData) {
             // Check if exists
-            const existing = await db.query.programs.findFirst({
-                where: (programs, { eq }) => eq(programs.code, program.code),
-            });
+            const existingProgram = await db
+                .select()
+                .from(schema.programs)
+                .where(eq(schema.programs.code, program.code));
 
-            if (!existing) {
+            if (existingProgram.length === 0) {
                 await db.insert(schema.programs).values(program);
                 console.log(`✅ Created program: ${program.code}`);
             } else {
@@ -149,63 +150,99 @@ async function main() {
         // Departments Data
         console.log('🌱 Seeding departments...');
         const departmentsData = [
-            { nameTh: 'ภาควิชาสังคมศาสตร์', nameEn: 'Department of Social Sciences' },
-            { nameTh: 'ภาควิชาภูมิศาสตร์', nameEn: 'Department of Geography' },
-            { nameTh: 'ภาควิชาจิตวิทยา', nameEn: 'Department of Psychology' },
+            { nameTh: 'ผู้บริหาร', nameEn: 'Executives', isAcademicUnit: false },
+            { nameTh: 'สำนักงานคณะ', nameEn: 'Faculty Office', isAcademicUnit: false },
+            { nameTh: 'สาขาวิชาสังคมศาสตร์', nameEn: 'Department of Social Sciences', isAcademicUnit: true },
+            { nameTh: 'สาขาวิชานวัตกรรมการพัฒนาสังคม', nameEn: 'Department of Social Development Innovation', isAcademicUnit: true },
+            { nameTh: 'สาขาวิชาคหกรรมศาสตร์', nameEn: 'Department of Home Economics', isAcademicUnit: true },
+            { nameTh: 'สาขาวิชาจิตวิทยาสังคม', nameEn: 'Department of Social Psychology', isAcademicUnit: true },
+            { nameTh: 'สาขาวิชาภูมิศาสตร์และภูมิสารสนเทศ', nameEn: 'Department of Geography and Geoinformatics', isAcademicUnit: true },
+            { nameTh: 'สาขาวิชายุทธศาสตร์การพัฒนาภูมิภาค', nameEn: 'Department of Regional Development Strategy', isAcademicUnit: true },
         ];
 
         for (const dept of departmentsData) {
-            const existing = await db.query.departments.findFirst({
-                where: (departments, { eq }) => eq(departments.nameTh, dept.nameTh),
-            });
-            if (!existing) {
+            const existingDept = await db
+                .select()
+                .from(schema.departments)
+                .where(eq(schema.departments.nameTh, dept.nameTh));
+            if (existingDept.length === 0) {
                 await db.insert(schema.departments).values(dept);
                 console.log(`✅ Created department: ${dept.nameTh}`);
             }
         }
 
-        // Users & Staff Data
-        console.log('🌱 Seeding users and staff...');
-        const userEmail = 'staff@crru.ac.th';
+        // Sample Staff Data
+        console.log('🌱 Seeding staff profiles...');
+        const deptSocSciResult = await db
+            .select()
+            .from(schema.departments)
+            .where(eq(schema.departments.nameTh, 'สาขาวิชาสังคมศาสตร์'));
+        const deptSocSci = deptSocSciResult[0];
 
-        let user = await db.query.users.findFirst({
-            where: (users, { eq }) => eq(users.email, userEmail),
-        });
+        const deptExecResult = await db
+            .select()
+            .from(schema.departments)
+            .where(eq(schema.departments.nameTh, 'ผู้บริหาร'));
+        const deptExec = deptExecResult[0];
 
-        if (!user) {
-            const result = await db.insert(schema.users).values({
-                email: userEmail,
-                passwordHash: 'hashed_password_placeholder',
-                role: 'STAFF' as const,
-            }).returning();
-            user = result[0];
-            console.log(`✅ Created user: ${userEmail}`);
-        } else {
-            console.log(`⚠️ User already exists: ${userEmail}`);
+        if (deptExec) {
+            // Sample Executive Staff
+            const execStaff = {
+                departmentId: deptExec.id,
+                prefixTh: 'ดร.',
+                firstNameTh: 'สมชาย',
+                lastNameTh: 'ใจดี',
+                prefixEn: 'Dr.',
+                firstNameEn: 'Somchai',
+                lastNameEn: 'Jaidee',
+                staffType: 'ACADEMIC' as const,
+                academicPosition: 'ASSISTANT_PROF' as const,
+                adminPosition: 'คณบดีคณะสังคมศาสตร์',
+                education: [
+                    { level: 'BACHELOR' as const, detail: 'ศศ.บ. (สังคมศึกษา) มหาวิทยาลัยเชียงใหม่' },
+                    { level: 'MASTER' as const, detail: 'ศศ.ม. (สังคมวิทยา) มหาวิทยาลัยเชียงใหม่' },
+                    { level: 'DOCTORAL' as const, detail: 'ปร.ด. (สังคมศาสตร์) มหาวิทยาลัยเชียงใหม่' }
+                ],
+                contactEmail: 'somchai@crru.ac.th',
+                sortOrder: 1,
+            };
+
+            const existingExec = await db
+                .select()
+                .from(schema.staffProfiles)
+                .where(eq(schema.staffProfiles.firstNameTh, execStaff.firstNameTh));
+
+            if (existingExec.length === 0) {
+                await db.insert(schema.staffProfiles).values(execStaff);
+                console.log(`✅ Created staff: ${execStaff.prefixTh}${execStaff.firstNameTh}`);
+            }
         }
 
-        const dept = await db.query.departments.findFirst({
-            where: (departments, { eq }) => eq(departments.nameTh, 'ภาควิชาสังคมศาสตร์'),
-        });
+        if (deptSocSci) {
+            // Sample Academic Staff
+            const academicStaff = {
+                departmentId: deptSocSci.id,
+                prefixTh: '',
+                firstNameTh: 'ใจรัก',
+                lastNameTh: 'พัฒนา',
+                staffType: 'ACADEMIC' as const,
+                academicPosition: 'LECTURER' as const,
+                education: [
+                    { level: 'BACHELOR' as const, detail: 'ศศ.บ. (สังคมวิทยา) มหาวิทยาลัยธรรมศาสตร์' },
+                    { level: 'MASTER' as const, detail: 'ศศ.ม. (สังคมวิทยา) มหาวิทยาลัยธรรมศาสตร์' }
+                ],
+                contactEmail: 'jairak@crru.ac.th',
+                sortOrder: 10,
+            };
 
-        if (user && dept) {
-            const existingStaff = await db.query.staffProfiles.findFirst({
-                where: (staff, { eq }) => eq(staff.userId, user.id),
-            });
+            const existingAcad = await db
+                .select()
+                .from(schema.staffProfiles)
+                .where(eq(schema.staffProfiles.firstNameTh, academicStaff.firstNameTh));
 
-            if (!existingStaff) {
-                await db.insert(schema.staffProfiles).values({
-                    userId: user.id,
-                    departmentId: dept.id,
-                    prefixTh: 'ดร.',
-                    firstNameTh: 'ตัวอย่าง',
-                    lastNameTh: 'บุคลากร',
-                    position: 'อาจารย์ประจำ',
-                    bio: 'เชี่ยวชาญด้านสังคมศาสตร์และการพัฒนา',
-                });
-                console.log(`✅ Created staff profile for: ${userEmail}`);
-            } else {
-                console.log(`⚠️ Staff profile already exists for: ${userEmail}`);
+            if (existingAcad.length === 0) {
+                await db.insert(schema.staffProfiles).values(academicStaff);
+                console.log(`✅ Created staff: ${academicStaff.firstNameTh}`);
             }
         }
 
