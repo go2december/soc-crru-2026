@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DrizzleService } from '../drizzle/drizzle.service';
-import { users } from '../drizzle/schema';
+import { users, staffProfiles, news, researchAuthors } from '../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
 interface GoogleUser {
@@ -47,7 +47,7 @@ export class AuthService {
                 .returning();
             user = updated[0];
         } else {
-            // สร้าง user ใหม่ (default role = STAFF)
+            // สร้าง user ใหม่ (default roles = ['STAFF'])
             const newUser = await this.drizzle.db
                 .insert(users)
                 .values({
@@ -55,7 +55,7 @@ export class AuthService {
                     googleId: googleUser.googleId,
                     name: googleUser.name,
                     avatar: googleUser.avatar,
-                    role: 'STAFF',
+                    roles: ['STAFF'],
                     isActive: true,
                     lastLoginAt: new Date(),
                 })
@@ -70,7 +70,7 @@ export class AuthService {
         const payload = {
             sub: user.id,
             email: user.email,
-            role: user.role,
+            roles: user.roles,
             name: user.name,
         };
 
@@ -81,7 +81,7 @@ export class AuthService {
                 email: user.email,
                 name: user.name,
                 avatar: user.avatar,
-                role: user.role,
+                roles: user.roles,
             },
         };
     }
@@ -93,7 +93,7 @@ export class AuthService {
                 email: users.email,
                 name: users.name,
                 avatar: users.avatar,
-                role: users.role,
+                roles: users.roles,
                 isActive: users.isActive,
                 lastLoginAt: users.lastLoginAt,
                 createdAt: users.createdAt,
@@ -111,7 +111,7 @@ export class AuthService {
                 email: users.email,
                 name: users.name,
                 avatar: users.avatar,
-                role: users.role,
+                roles: users.roles,
                 isActive: users.isActive,
                 lastLoginAt: users.lastLoginAt,
                 createdAt: users.createdAt,
@@ -119,10 +119,10 @@ export class AuthService {
             .from(users);
     }
 
-    async updateUserRole(userId: string, role: 'ADMIN' | 'EDITOR' | 'STAFF' | 'GUEST') {
+    async updateUserRoles(userId: string, roles: string[]) {
         const updated = await this.drizzle.db
             .update(users)
-            .set({ role, updatedAt: new Date() })
+            .set({ roles, updatedAt: new Date() })
             .where(eq(users.id, userId))
             .returning();
 
@@ -137,6 +137,33 @@ export class AuthService {
             .returning();
 
         return updated[0];
+    }
+
+    async deleteUser(userId: string) {
+        // 1. Unlink Staff Profiles (Set userId = NULL)
+        await this.drizzle.db
+            .update(staffProfiles)
+            .set({ userId: null })
+            .where(eq(staffProfiles.userId, userId));
+
+        // 2. Unlink News (Set authorId = NULL)
+        await this.drizzle.db
+            .update(news)
+            .set({ authorId: null })
+            .where(eq(news.authorId, userId));
+
+        // 3. Delete from Research Authors?
+        // researchAuthors links staffId (not userId), and staffProfiles links userId.
+        // So deleting User unlinks StaffProfile, but StaffProfile remains.
+        // So ResearchAuthors is safe (referenced to StaffProfile).
+
+        // 4. Finally Delete User
+        const deleted = await this.drizzle.db
+            .delete(users)
+            .where(eq(users.id, userId))
+            .returning();
+
+        return deleted[0];
     }
 
     // สำหรับ Dev Mode เท่านั้น
@@ -155,13 +182,17 @@ export class AuthService {
                 googleId: 'dev-admin-id',
                 name: 'Dev Admin',
                 avatar: 'https://ui-avatars.com/api/?name=Admin&background=random',
-                role: 'ADMIN',
+                roles: ['ADMIN'],
                 isActive: true,
             }).returning();
             user = newUser[0];
-        } else if (user.role !== 'ADMIN') {
-            // บังคับเปลี่ยนเป็น ADMIN
-            const updated = await this.drizzle.db.update(users).set({ role: 'ADMIN' }).where(eq(users.id, user.id)).returning();
+        } else if (!user.roles.includes('ADMIN')) {
+            // บังคับเพิ่มสิทธิ์ ADMIN ถ้ายังไม่มี
+            const newRoles = [...(user.roles || []), 'ADMIN'];
+            // remove duplicates just in case
+            const uniqueRoles = [...new Set(newRoles)];
+
+            const updated = await this.drizzle.db.update(users).set({ roles: uniqueRoles }).where(eq(users.id, user.id)).returning();
             user = updated[0];
         }
 

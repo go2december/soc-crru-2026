@@ -7,7 +7,8 @@ interface User {
     email: string;
     name: string;
     avatar: string | null;
-    role: 'ADMIN' | 'EDITOR' | 'STAFF' | 'GUEST';
+    avatar: string | null;
+    roles: string[];
     lastLoginAt: string;
 }
 
@@ -60,6 +61,14 @@ export default function AdminDashboardPage() {
         fetchData();
     }, []);
 
+    const getPrimaryRole = (roles: string[] | undefined) => {
+        if (!roles || roles.length === 0) return 'GUEST';
+        if (roles.includes('ADMIN')) return 'ADMIN';
+        if (roles.includes('EDITOR')) return 'EDITOR';
+        if (roles.includes('STAFF')) return 'STAFF';
+        return 'GUEST';
+    };
+
     const getRoleLabel = (role: string) => {
         switch (role) {
             case 'ADMIN': return 'ผู้ดูแลระบบ';
@@ -67,6 +76,11 @@ export default function AdminDashboardPage() {
             case 'STAFF': return 'บุคลากร';
             default: return 'ผู้เยี่ยมชม';
         }
+    };
+
+    const hasPermission = (roles: string[] | undefined, requiredRoles: string[]) => {
+        if (!roles) return false;
+        return requiredRoles.some(r => roles.includes(r));
     };
 
     if (loading) {
@@ -97,7 +111,7 @@ export default function AdminDashboardPage() {
                         <h1 className="text-3xl font-bold">สวัสดี, {user?.name || 'ผู้ใช้'}</h1>
                         <p className="opacity-90 mt-1">ยินดีต้อนรับสู่ระบบจัดการเว็บไซต์คณะสังคมศาสตร์</p>
                         <div className="flex items-center gap-3 mt-3">
-                            <span className="badge badge-lg bg-white/20 border-0">{getRoleLabel(user?.role || 'GUEST')}</span>
+                            <span className="badge badge-lg bg-white/20 border-0">{getRoleLabel(getPrimaryRole(user?.roles))}</span>
                             <span className="text-sm opacity-75">{user?.email}</span>
                         </div>
                     </div>
@@ -182,20 +196,20 @@ export default function AdminDashboardPage() {
                         <h2 className="card-title">📋 สิทธิ์การใช้งานของคุณ</h2>
                         <ul className="mt-4 space-y-2">
                             <li className="flex items-center gap-2">
-                                <span className={user?.role === 'ADMIN' || user?.role === 'EDITOR' ? 'text-success' : 'text-error'}>
-                                    {user?.role === 'ADMIN' || user?.role === 'EDITOR' ? '✅' : '❌'}
+                                <span className={hasPermission(user?.roles, ['ADMIN', 'EDITOR']) ? 'text-success' : 'text-error'}>
+                                    {hasPermission(user?.roles, ['ADMIN', 'EDITOR']) ? '✅' : '❌'}
                                 </span>
                                 จัดการบุคลากร
                             </li>
                             <li className="flex items-center gap-2">
-                                <span className={user?.role === 'ADMIN' || user?.role === 'EDITOR' ? 'text-success' : 'text-error'}>
-                                    {user?.role === 'ADMIN' || user?.role === 'EDITOR' ? '✅' : '❌'}
+                                <span className={hasPermission(user?.roles, ['ADMIN', 'EDITOR']) ? 'text-success' : 'text-error'}>
+                                    {hasPermission(user?.roles, ['ADMIN', 'EDITOR']) ? '✅' : '❌'}
                                 </span>
                                 จัดการข่าวสาร
                             </li>
                             <li className="flex items-center gap-2">
-                                <span className={user?.role === 'ADMIN' ? 'text-success' : 'text-error'}>
-                                    {user?.role === 'ADMIN' ? '✅' : '❌'}
+                                <span className={hasPermission(user?.roles, ['ADMIN']) ? 'text-success' : 'text-error'}>
+                                    {hasPermission(user?.roles, ['ADMIN']) ? '✅' : '❌'}
                                 </span>
                                 จัดการผู้ใช้และสิทธิ์
                             </li>

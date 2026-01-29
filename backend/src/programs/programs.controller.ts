@@ -8,10 +8,14 @@ import {
     Delete,
     HttpCode,
     HttpStatus,
+    UseGuards,
 } from '@nestjs/common';
 import { ProgramsService } from './programs.service';
 import { CreateProgramDto } from './dto/create-program.dto';
 import { UpdateProgramDto } from './dto/update-program.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('programs')
 export class ProgramsController {
@@ -21,6 +25,8 @@ export class ProgramsController {
      * POST /programs - Create a new program
      */
     @Post()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('ADMIN', 'EDITOR')
     create(@Body() createProgramDto: CreateProgramDto) {
         return this.programsService.create(createProgramDto);
     }
@@ -53,6 +59,8 @@ export class ProgramsController {
      * PATCH /programs/:id - Update a program
      */
     @Patch(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('ADMIN', 'EDITOR')
     update(@Param('id') id: string, @Body() updateProgramDto: UpdateProgramDto) {
         return this.programsService.update(id, updateProgramDto);
     }
@@ -62,6 +70,8 @@ export class ProgramsController {
      */
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('ADMIN', 'EDITOR')
     remove(@Param('id') id: string) {
         return this.programsService.remove(id);
     }

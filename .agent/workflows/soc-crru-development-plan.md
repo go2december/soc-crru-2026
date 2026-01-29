@@ -71,7 +71,7 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] **Role-Based Access Control (RBAC)**: ADMIN, EDITOR, STAFF
     - [x] **Admin Panel**:
         - [x] Dashboard Overview stats
-        - [x] Staff Management (List/Edit)
+        - [x] Staff Management (List/Edit/Link User Account)
         - [x] News Management (List/Create/Delete)
         - [x] User Management (Role assignment)
         - [x] **Layout**: Minimal Design (Hidden Main Navbar/Footer)

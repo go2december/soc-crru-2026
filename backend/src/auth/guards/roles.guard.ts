@@ -23,7 +23,9 @@ export class RolesGuard implements CanActivate {
             throw new ForbiddenException('กรุณาเข้าสู่ระบบ');
         }
 
-        const hasRole = requiredRoles.some((role) => user.role === role);
+        // Check if user has ANY of the required roles
+        // user.roles is now an string[] (e.g. ['STAFF', 'EDITOR'])
+        const hasRole = requiredRoles.some((role) => user.roles?.includes(role));
 
         if (!hasRole) {
             throw new ForbiddenException('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้');

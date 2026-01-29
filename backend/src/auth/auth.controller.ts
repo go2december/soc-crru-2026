@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Res, UseGuards, Param, Patch, Body } from '@nestjs/common';
+import { Controller, Get, Req, Res, UseGuards, Param, Patch, Body, Delete as NestDelete } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -57,15 +57,15 @@ export class AuthController {
         return this.authService.getAllUsers();
     }
 
-    // อัปเดต Role ของ User (Admin เท่านั้น)
+    // อัปเดต Roles ของ User (Admin เท่านั้น)
     @Patch('users/:id/role')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('ADMIN')
     async updateUserRole(
         @Param('id') id: string,
-        @Body('role') role: 'ADMIN' | 'EDITOR' | 'STAFF' | 'GUEST',
+        @Body('roles') roles: string[],
     ) {
-        return this.authService.updateUserRole(id, role);
+        return this.authService.updateUserRoles(id, roles);
     }
 
     // เปิด/ปิดการใช้งาน User (Admin เท่านั้น)
@@ -77,5 +77,13 @@ export class AuthController {
         @Body('isActive') isActive: boolean,
     ) {
         return this.authService.toggleUserActive(id, isActive);
+    }
+
+    // ลบผู้ใช้ (Admin เท่านั้น)
+    @NestDelete('users/:id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('ADMIN')
+    async deleteUser(@Param('id') id: string) {
+        return this.authService.deleteUser(id);
     }
 }

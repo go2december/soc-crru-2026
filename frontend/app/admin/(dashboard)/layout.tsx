@@ -9,7 +9,7 @@ interface User {
     email: string;
     name: string;
     avatar: string | null;
-    role: 'ADMIN' | 'EDITOR' | 'STAFF' | 'GUEST';
+    roles: string[];
 }
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -58,6 +58,30 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         router.push('/admin/login');
     };
 
+
+
+    // กำหนดลำดับขั้นของสิทธิ์ (Hierarchy)
+    const ROLE_LEVELS: Record<string, number> = {
+        'ADMIN': 3,
+        'EDITOR': 2,
+        'STAFF': 1,
+        'GUEST': 0
+    };
+
+    const getUserRoleLevel = (roles: string[] | undefined) => {
+        if (!roles || roles.length === 0) return 0;
+        // หา Level สูงสุดจาก Roles ที่ user มี
+        return Math.max(...roles.map(r => ROLE_LEVELS[r] || 0));
+    };
+
+    const getPrimaryRole = (roles: string[] | undefined) => {
+        const level = getUserRoleLevel(roles);
+        if (level >= 3) return 'ADMIN';
+        if (level >= 2) return 'EDITOR';
+        if (level >= 1) return 'STAFF';
+        return 'GUEST';
+    };
+
     const getRoleBadgeClass = (role: string) => {
         switch (role) {
             case 'ADMIN': return 'badge-error';
@@ -76,26 +100,26 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         }
     };
 
+    // Menu Items พร้อมกำหนด Minimum Role Level ที่เข้าถึงได้
     const menuItems = [
-        { href: '/admin/dashboard', label: 'หน้าหลัก', icon: '🏠', roles: ['ADMIN', 'EDITOR', 'STAFF'] },
-        { href: '/admin/staff', label: 'บุคลากร', icon: '👥', roles: ['ADMIN', 'EDITOR'] },
-        { href: '/admin/news', label: 'ข่าวสาร', icon: '📰', roles: ['ADMIN', 'EDITOR'] },
-        { href: '/admin/programs', label: 'หลักสูตร', icon: '📚', roles: ['ADMIN', 'EDITOR'] },
-        { href: '/admin/users', label: 'จัดการผู้ใช้', icon: '⚙️', roles: ['ADMIN'] },
-        { href: '/admin/profile', label: 'โปรไฟล์ของฉัน', icon: '👤', roles: ['ADMIN', 'EDITOR', 'STAFF'] },
+        { href: '/admin/dashboard', label: 'หน้าหลัก', icon: '🏠', minLevel: 1 }, // Staff ขึ้นไป
+        { href: '/admin/staff', label: 'บุคลากร', icon: '👥', minLevel: 2 }, // Editor ขึ้นไป
+        { href: '/admin/news', label: 'ข่าวสาร', icon: '📰', minLevel: 2 }, // Editor ขึ้นไป
+        { href: '/admin/programs', label: 'หลักสูตร', icon: '📚', minLevel: 2 }, // Editor ขึ้นไป
+        { href: '/admin/users', label: 'จัดการผู้ใช้', icon: '⚙️', minLevel: 3 }, // Admin เท่านั้น
+        { href: '/admin/profile', label: 'โปรไฟล์ของฉัน', icon: '👤', minLevel: 1 }, // Staff ขึ้นไป
     ];
 
     if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-base-200">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
-            </div>
-        );
+        // ...
     }
 
     if (!user) {
         return null;
     }
+
+    const userLevel = getUserRoleLevel(user.roles);
+    const primaryRole = getPrimaryRole(user.roles);
 
     return (
         <div className="min-h-screen bg-base-200 flex">
@@ -120,7 +144,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 <nav className="flex-1 p-4">
                     <ul className="menu gap-1">
                         {menuItems
-                            .filter(item => item.roles.includes(user.role))
+                            .filter(item => userLevel >= item.minLevel)
                             .map((item) => (
                                 <li key={item.href}>
                                     <Link
@@ -152,8 +176,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         {sidebarOpen && (
                             <div className="flex-1 min-w-0">
                                 <p className="font-medium text-sm truncate">{user.name}</p>
-                                <span className={`badge badge-xs ${getRoleBadgeClass(user.role)}`}>
-                                    {getRoleLabel(user.role)}
+                                <span className={`badge badge-xs ${getRoleBadgeClass(primaryRole)}`}>
+                                    {getRoleLabel(primaryRole)}
                                 </span>
                             </div>
                         )}
@@ -195,6 +219,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                     {children}
                 </main>
             </div>
-        </div>
+        </div >
     );
 }

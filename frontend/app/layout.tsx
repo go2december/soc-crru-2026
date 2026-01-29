@@ -38,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" data-theme="socTheme" suppressHydrationWarning>
+    <html lang="th" data-theme="socTheme" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={`${inter.variable} ${kanit.variable} font-sans antialiased bg-white text-scholar-text flex flex-col min-h-screen`}
       >

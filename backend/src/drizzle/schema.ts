@@ -29,7 +29,8 @@ export const users = pgTable('users', {
     name: varchar('name', { length: 255 }), // ชื่อจาก Google
     avatar: varchar('avatar', { length: 500 }), // รูปโปรไฟล์จาก Google
     passwordHash: varchar('password_hash', { length: 255 }), // Optional: สำหรับ local auth
-    role: userRoleEnum('role').default('STAFF').notNull(), // ADMIN, EDITOR, STAFF, GUEST
+    // role: userRoleEnum('role').default('STAFF').notNull(), // OLD
+    roles: text('roles').array().default(['STAFF']).notNull(), // NEW: Multiple Roles
     isActive: boolean('is_active').default(true).notNull(),
     lastLoginAt: timestamp('last_login_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
