@@ -7,8 +7,13 @@ export default function AdminLoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [error, setError] = useState<string | null>(null);
+    const [apiUrl, setApiUrl] = useState<string>('');
 
     useEffect(() => {
+        // Set API URL from environment
+        const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        setApiUrl(url);
+
         const errorParam = searchParams.get('error');
         if (errorParam) {
             setError(decodeURIComponent(errorParam));
@@ -22,8 +27,11 @@ export default function AdminLoginPage() {
     }, [searchParams, router]);
 
     const handleGoogleLogin = () => {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
         window.location.href = `${apiUrl}/api/auth/google`;
+    };
+
+    const handleDevLogin = () => {
+        window.location.href = `${apiUrl}/api/auth/dev/login`;
     };
 
     return (
@@ -76,10 +84,7 @@ export default function AdminLoginPage() {
                     {/* DEV MODE ONLY */}
                     <div className="divider my-4 text-xs opacity-50">Developer Mode</div>
                     <button
-                        onClick={() => {
-                            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
-                            window.location.href = `${apiUrl}/api/auth/dev/login`;
-                        }}
+                        onClick={handleDevLogin}
                         className="btn btn-outline btn-warning w-full btn-sm"
                     >
                         🔑 Developer Login (Bypass)
@@ -93,6 +98,13 @@ export default function AdminLoginPage() {
                         </svg>
                         กลับหน้าหลัก
                     </a>
+
+                    {/* System Info (Debug) */}
+                    <div className="mt-6 pt-4 border-t border-base-200 w-full">
+                        <div className="text-xs text-center opacity-40">
+                            <p>API: <code className="bg-base-200 px-1 rounded">{apiUrl}</code></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

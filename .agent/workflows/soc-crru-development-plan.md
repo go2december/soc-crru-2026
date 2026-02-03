@@ -14,6 +14,9 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] สร้าง **Footer** ที่มีข้อมูลติดต่อและ Social Links ครบถ้วน
     - [x] สร้าง **Breadcrumb** component สำหรับนำทาง
     - [x] **Branding Update**: ปรับเปลี่ยน Logo และชื่อหน่วยงาน (Navbar/Footer) เป็น "Faculty of Social Sciences"
+- [x] **Environment Configuration**:
+    - [x] ระบบกำหนด Port แบบ Dynamic ผ่าน `.env` (BACKEND_PORT, FRONTEND_PORT)
+    - [x] Auto-inject FRONTEND_URL และ NEXT_PUBLIC_API_URL ใน docker-compose.yml
 
 ## 🏠 Phase 2: Homepage (หน้าแรก)
 - [x] **Hero Banner**: ภาพบรรยากาศ Area-Based + คำโปรย Vision + ปุ่ม Action หลัก
@@ -66,14 +69,23 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] CRUD บุคลากร (Staff) - *Completed via Drizzle ORM*
     - [x] CRUD ภาควิชา (Departments)
     - [x] CRUD ข่าวสาร (News)
+- [x] **File Upload System**:
+    - [x] ระบบอัปโหลดรูปภาพ Staff (Sharp Image Processing)
+    - [x] บีบอัดและแปลงเป็น PNG (Max 768x1024)
+    - [x] Static File Serving จาก `/uploads`
+    - [x] **Dependencies Fixed**: uuid, @types/uuid, sharp (Fixed: 2026-02-03)
+    - [x] **Type Issues Resolved**: Express.Multer.File namespace, sharp default import
 - [x] **Authentication & Admin Dashboard**:
     - [x] **Google OAuth**: รองรับ Login ด้วย @crru.ac.th (Mock Mode for Dev)
+    - [x] **Dev Login**: ระบบ Bypass Login สำหรับ Development ✅ **(Fixed: 2026-02-03)**
     - [x] **Role-Based Access Control (RBAC)**: ADMIN, EDITOR, STAFF
     - [x] **Admin Panel**:
         - [x] Dashboard Overview stats
         - [x] Staff Management (List/Edit/Link User Account)
+        - [x] Staff Image Upload (PNG Compression)
         - [x] News Management (List/Create/Delete)
         - [x] User Management (Role assignment)
+        - [x] **Sidebar**: จัดกลุ่มเมนูเป็นหมวดหมู่ (ภาพรวม, ข้อมูลองค์กร, เนื้อหา, ระบบ)
         - [x] **Layout**: Minimal Design (Hidden Main Navbar/Footer)
 - [x] **Integration**: เชื่อมต่อ Frontend กับ API
     - [x] Programs List: `/programs` แสดงรายการทั้งหมด พร้อม filter ตามระดับ
@@ -87,6 +99,12 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
 - [ ] **Performance Tuning**: ทำ Image optimization และ Caching
 - [ ] **Deployment**: ตรวจสอบ Docker Compose สำหรับ Production
 
+## 🛠️ Bug Fixes & Maintenance Log
+| Date | Issue | Solution |
+|------|-------|----------|
+| 2026-02-03 | `/api/auth/dev/login` error | Fixed missing dependencies (uuid, @types/uuid), corrected Multer type imports, fixed sharp default import |
+| 2026-02-03 | TypeScript compilation errors in upload.service.ts | Changed `import * as sharp` to `import sharp`, fixed Express.Multer.File namespace |
+
 ---
-*Last Updated: 2026-01-29*
+*Last Updated: 2026-02-03*
 

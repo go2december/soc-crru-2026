@@ -20,9 +20,15 @@ export class AuthController {
     // Dev Login (Bypass Google)
     @Get('dev/login')
     async devLogin(@Res() res: Response) {
-        const token = await this.authService.loginAsDevAdmin();
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
-        res.redirect(`${frontendUrl}/admin/callback?token=${token.accessToken}`);
+        try {
+            const token = await this.authService.loginAsDevAdmin();
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
+            res.redirect(`${frontendUrl}/admin/callback?token=${token.accessToken}`);
+        } catch (error) {
+            console.error('Dev Login Error:', error);
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
+            res.redirect(`${frontendUrl}/admin/login?error=${encodeURIComponent(error.message || 'Unknown error')}`);
+        }
     }
 
     // Callback หลังจาก Google OAuth สำเร็จ

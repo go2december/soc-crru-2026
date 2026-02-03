@@ -57,6 +57,7 @@ export class StaffService {
                 imageUrl: staffProfiles.imageUrl,
                 contactEmail: staffProfiles.contactEmail,
                 sortOrder: staffProfiles.sortOrder,
+                isExecutive: staffProfiles.isExecutive,
                 department: departments.nameTh,
                 departmentEn: departments.nameEn,
             })
@@ -86,6 +87,7 @@ export class StaffService {
                 sortOrder: staffProfiles.sortOrder,
                 departmentId: staffProfiles.departmentId,
                 userId: staffProfiles.userId,
+                isExecutive: staffProfiles.isExecutive,
                 department: departments.nameTh,
                 departmentEn: departments.nameEn,
             })

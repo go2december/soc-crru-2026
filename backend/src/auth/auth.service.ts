@@ -186,7 +186,7 @@ export class AuthService {
                 isActive: true,
             }).returning();
             user = newUser[0];
-        } else if (!user.roles.includes('ADMIN')) {
+        } else if (!user.roles || !user.roles.includes('ADMIN')) {
             // บังคับเพิ่มสิทธิ์ ADMIN ถ้ายังไม่มี
             const newRoles = [...(user.roles || []), 'ADMIN'];
             // remove duplicates just in case

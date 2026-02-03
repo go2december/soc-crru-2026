@@ -86,6 +86,7 @@ export const staffProfiles = pgTable('staff_profiles', {
     imageUrl: varchar('image_url', { length: 500 }),
     bio: text('bio'),
     sortOrder: integer('sort_order').default(0).notNull(), // สำหรับเรียงลำดับการแสดงผล
+    isExecutive: boolean('is_executive').default(false).notNull(), // สถานะผู้บริหาร (แยกจากประเภทบุคลากร)
 });
 
 // ------------------------------------------

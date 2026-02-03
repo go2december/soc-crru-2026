@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber, IsIn, IsEmail } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID, IsNumber, IsIn, IsEmail, IsBoolean } from 'class-validator';
 
 export class CreateStaffDto {
     @IsUUID()
@@ -77,4 +77,8 @@ export class CreateStaffDto {
     @IsNumber()
     @IsOptional()
     sortOrder?: number;
+
+    @IsBoolean()
+    @IsOptional()
+    isExecutive?: boolean;
 }

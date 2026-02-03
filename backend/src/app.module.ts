@@ -9,15 +9,25 @@ import { StaffModule } from './staff/staff.module';
 import { AuthModule } from './auth/auth.module';
 import { NewsModule } from './news/news.module';
 
+import { UploadModule } from './upload/upload.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    // Serve static files from /uploads
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     DrizzleModule,
     AuthModule,
     ProgramsModule,
     DepartmentsModule,
     StaffModule,
     NewsModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

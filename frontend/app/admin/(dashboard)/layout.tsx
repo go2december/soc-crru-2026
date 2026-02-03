@@ -100,18 +100,43 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         }
     };
 
-    // Menu Items พร้อมกำหนด Minimum Role Level ที่เข้าถึงได้
-    const menuItems = [
-        { href: '/admin/dashboard', label: 'หน้าหลัก', icon: '🏠', minLevel: 1 }, // Staff ขึ้นไป
-        { href: '/admin/staff', label: 'บุคลากร', icon: '👥', minLevel: 2 }, // Editor ขึ้นไป
-        { href: '/admin/news', label: 'ข่าวสาร', icon: '📰', minLevel: 2 }, // Editor ขึ้นไป
-        { href: '/admin/programs', label: 'หลักสูตร', icon: '📚', minLevel: 2 }, // Editor ขึ้นไป
-        { href: '/admin/users', label: 'จัดการผู้ใช้', icon: '⚙️', minLevel: 3 }, // Admin เท่านั้น
-        { href: '/admin/profile', label: 'โปรไฟล์ของฉัน', icon: '👤', minLevel: 1 }, // Staff ขึ้นไป
+    // Menu Definitions (Grouped)
+    const menuGroups = [
+        {
+            title: 'ภาพรวม',
+            items: [
+                { href: '/admin/dashboard', label: 'หน้าหลัก', icon: '🏠', minLevel: 1 },
+            ]
+        },
+        {
+            title: 'ข้อมูลองค์กร',
+            items: [
+                { href: '/admin/staff', label: 'บุคลากร', icon: '👥', minLevel: 2 },
+                { href: '/admin/departments', label: 'จัดการสังกัด', icon: '🏢', minLevel: 3 },
+            ]
+        },
+        {
+            title: 'เนื้อหาเว็บไซต์',
+            items: [
+                { href: '/admin/news', label: 'ข่าวสาร/ประชาสัมพันธ์', icon: '📰', minLevel: 2 },
+                { href: '/admin/programs', label: 'หลักสูตร', icon: '📚', minLevel: 2 },
+            ]
+        },
+        {
+            title: 'ระบบ',
+            items: [
+                { href: '/admin/users', label: 'จัดการผู้ใช้', icon: '⚙️', minLevel: 3 },
+                { href: '/admin/profile', label: 'โปรไฟล์ของฉัน', icon: '👤', minLevel: 1 },
+            ]
+        }
     ];
 
     if (loading) {
-        // ...
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-base-200">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
     }
 
     if (!user) {
@@ -124,15 +149,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return (
         <div className="min-h-screen bg-base-200 flex">
             {/* Sidebar */}
-            <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-base-100 shadow-xl transition-all duration-300 flex flex-col`}>
+            <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-base-100 shadow-xl transition-all duration-300 flex flex-col fixed h-full z-30`}>
                 {/* Logo */}
-                <div className="p-4 border-b border-base-200">
+                <div className="p-4 border-b border-base-200 bg-base-100 relative z-20">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold flex-shrink-0">
                             SOC
                         </div>
                         {sidebarOpen && (
-                            <div>
+                            <div className="overflow-hidden whitespace-nowrap">
                                 <p className="font-bold text-sm">Admin Panel</p>
                                 <p className="text-xs opacity-60">คณะสังคมศาสตร์</p>
                             </div>
@@ -141,42 +166,56 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 </div>
 
                 {/* Menu */}
-                <nav className="flex-1 p-4">
-                    <ul className="menu gap-1">
-                        {menuItems
-                            .filter(item => userLevel >= item.minLevel)
-                            .map((item) => (
-                                <li key={item.href}>
-                                    <Link
-                                        href={item.href}
-                                        className={`${pathname === item.href ? 'active' : ''} ${!sidebarOpen ? 'justify-center' : ''}`}
-                                    >
-                                        <span className="text-lg">{item.icon}</span>
-                                        {sidebarOpen && <span>{item.label}</span>}
-                                    </Link>
+                <nav className="flex-1 p-4 overflow-y-auto no-scrollbar">
+                    <ul className="menu gap-4 px-0">
+                        {menuGroups.map((group, groupIdx) => {
+                            // Filter valid items in group
+                            const validItems = group.items.filter(item => userLevel >= item.minLevel);
+                            if (validItems.length === 0) return null;
+
+                            return (
+                                <li key={groupIdx}>
+                                    {sidebarOpen && (
+                                        <h2 className="menu-title px-4 mb-1 text-xs font-bold opacity-50 uppercase tracking-wider">
+                                            {group.title}
+                                        </h2>
+                                    )}
+                                    <ul className="menu gap-1 p-0">
+                                        {validItems.map((item) => (
+                                            <li key={item.href}>
+                                                <Link
+                                                    href={item.href}
+                                                    className={`${pathname === item.href ? 'active text-primary-content bg-primary' : 'text-base-content'} ${!sidebarOpen ? 'justify-center px-0' : ''} rounded-lg`}
+                                                    title={!sidebarOpen ? item.label : ''}
+                                                >
+                                                    <span className="text-lg">{item.icon}</span>
+                                                    {sidebarOpen && <span className="font-medium">{item.label}</span>}
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </li>
-                            ))}
+                            );
+                        })}
                     </ul>
                 </nav>
 
                 {/* User Info */}
-                <div className="p-4 border-t border-base-200">
+                <div className="p-4 border-t border-base-200 bg-base-100">
                     <div className="flex items-center gap-3">
-                        <div className="avatar">
-                            <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                        <div className="avatar placeholder">
+                            <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 bg-neutral text-neutral-content">
                                 {user.avatar ? (
                                     <img src={user.avatar} alt={user.name} />
                                 ) : (
-                                    <div className="bg-primary/20 w-full h-full flex items-center justify-center text-primary font-bold">
-                                        {user.name?.charAt(0) || 'U'}
-                                    </div>
+                                    <span className="text-xl">{user.name?.charAt(0) || 'U'}</span>
                                 )}
                             </div>
                         </div>
                         {sidebarOpen && (
-                            <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm truncate">{user.name}</p>
-                                <span className={`badge badge-xs ${getRoleBadgeClass(primaryRole)}`}>
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                                <p className="font-medium text-sm truncate" title={user.name}>{user.name}</p>
+                                <span className={`badge badge-xs mt-1 ${getRoleBadgeClass(primaryRole)}`}>
                                     {getRoleLabel(primaryRole)}
                                 </span>
                             </div>
@@ -185,10 +224,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col">
+            {/* Main Content (Push content right when sidebar matches width) */}
+            <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
                 {/* Top Bar */}
-                <header className="h-16 bg-base-100 shadow-sm flex items-center justify-between px-6">
+                <header className="h-16 bg-base-100 shadow-sm flex items-center justify-between px-6 sticky top-0 z-20">
                     <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
                         className="btn btn-ghost btn-sm btn-square"
