@@ -1,116 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-interface Staff {
-    id: string;
-    prefixTh: string | null;
-    firstNameTh: string;
-    lastNameTh: string;
-    prefixEn: string | null;
-    firstNameEn: string | null;
-    lastNameEn: string | null;
-    staffType: 'ACADEMIC' | 'SUPPORT';
-    academicPosition: string | null;
-    adminPosition: string | null;
-    education: { level: string; detail: string }[] | null;
-    expertise: string[] | null;
-    imageUrl: string | null;
-    contactEmail: string | null;
-    department: string | null;
-    departmentId: number | null;
-    sortOrder: number;
-    userId: string | null;
-    isExecutive: boolean;
-}
-
-interface User {
-    id: string;
-    email: string;
-    name: string;
-    roles: string[];
-}
-
-interface Department {
-    id: number;
-    nameTh: string;
-    nameEn: string | null;
-}
-
-const ACADEMIC_POSITIONS = [
-    { value: 'LECTURER', label: 'อาจารย์' },
-    { value: 'ASSISTANT_PROF', label: 'ผู้ช่วยศาสตราจารย์ (ผศ.)' },
-    { value: 'ASSOCIATE_PROF', label: 'รองศาสตราจารย์ (รศ.)' },
-    { value: 'PROFESSOR', label: 'ศาสตราจารย์ (ศ.)' },
-];
-
-const EDU_LEVELS = [
-    { value: 'DOCTORAL', label: 'ปริญญาเอก (Doctoral)' },
-    { value: 'MASTER', label: 'ปริญญาโท (Master)' },
-    { value: 'BACHELOR', label: 'ปริญญาตรี (Bachelor)' },
-];
+import { useState, useMemo, useRef } from 'react';
+import { useStaffData, Staff } from './hooks/useStaffData';
+import StaffForm, { ACADEMIC_POSITIONS } from './components/StaffForm';
 
 export default function AdminStaffPage() {
-    const [staffList, setStaffList] = useState<Staff[]>([]);
-    const [departments, setDepartments] = useState<Department[]>([]);
-    const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { staffList, departments, users, loading, refetch } = useStaffData();
     const [searchTerm, setSearchTerm] = useState('');
-
     const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
     const [staffToDelete, setStaffToDelete] = useState<Staff | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
-    // Form Data
-    const [formData, setFormData] = useState({
-        prefixTh: '', firstNameTh: '', lastNameTh: '',
-        prefixEn: '', firstNameEn: '', lastNameEn: '',
-        staffType: 'ACADEMIC',
-        academicPosition: '',
-        adminPosition: '',
-        contactEmail: '',
-        departmentId: '',
-        userId: '',
-        isExecutive: false,
-        imageUrl: '',
-    });
-
-    // Dynamic Lists State
-    const [eduList, setEduList] = useState<{ level: string; detail: string }[]>([]);
-    const [expertiseList, setExpertiseList] = useState<string[]>([]);
-
-    // Inputs for adding new items
-    const [newEduLevel, setNewEduLevel] = useState('DOCTORAL');
-    const [newEduDetail, setNewEduDetail] = useState('');
-    const [newExpertise, setNewExpertise] = useState('');
-
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
-        try {
-            const token = localStorage.getItem('admin_token');
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
-
-            const [staffRes, deptRes, usersRes] = await Promise.all([
-                fetch(`${apiUrl}/api/staff`),
-                fetch(`${apiUrl}/api/departments`),
-                fetch(`${apiUrl}/api/auth/users`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
-            ]);
-
-            if (staffRes.ok) setStaffList(await staffRes.json());
-            if (deptRes.ok) setDepartments(await deptRes.json());
-            if (usersRes.ok) setUsers(await usersRes.json());
-
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Dialog Refs
+    const formModalRef = useRef<HTMLDialogElement>(null);
+    const deleteModalRef = useRef<HTMLDialogElement>(null);
 
     const getAcademicPositionLabel = (position: string | null) => {
         const found = ACADEMIC_POSITIONS.find(p => p.value === position);
@@ -123,96 +26,18 @@ export default function AdminStaffPage() {
 
     const handleOpenModal = (staff: Staff | null) => {
         setEditingStaff(staff);
-        if (staff) {
-            setFormData({
-                prefixTh: staff.prefixTh || '',
-                firstNameTh: staff.firstNameTh,
-                lastNameTh: staff.lastNameTh,
-                prefixEn: staff.prefixEn || '',
-                firstNameEn: staff.firstNameEn || '',
-                lastNameEn: staff.lastNameEn || '',
-                staffType: staff.staffType,
-                academicPosition: staff.academicPosition || '',
-                adminPosition: staff.adminPosition || '',
-                contactEmail: staff.contactEmail || '',
-                departmentId: staff.departmentId ? staff.departmentId.toString() : '',
-                userId: staff.userId || '',
-                isExecutive: staff.isExecutive || false,
-                imageUrl: staff.imageUrl || '',
-            });
-            setEduList(staff.education || []);
-            setExpertiseList(staff.expertise || []);
-        } else {
-            setFormData({
-                prefixTh: '', firstNameTh: '', lastNameTh: '',
-                prefixEn: '', firstNameEn: '', lastNameEn: '',
-                staffType: 'ACADEMIC',
-                academicPosition: '',
-                adminPosition: '',
-                contactEmail: '',
-                departmentId: '',
-                userId: '',
-                isExecutive: false,
-                imageUrl: '',
-            });
-            setEduList([]);
-            setExpertiseList([]);
-        }
-        (document.getElementById('staff_modal') as HTMLDialogElement).showModal();
+        formModalRef.current?.showModal();
     };
 
-    const handleUserSelect = (userId: string) => {
-        const selectedUser = users.find(u => u.id === userId);
-        if (selectedUser) {
-            setFormData(prev => ({
-                ...prev,
-                userId: userId,
-                contactEmail: prev.contactEmail || selectedUser.email,
-            }));
-        } else {
-            setFormData(prev => ({ ...prev, userId: '' }));
-        }
+    const handleCloseModal = () => {
+        formModalRef.current?.close();
+        setEditingStaff(null);
     };
 
-    // Sub-handlers for Dynamic Lists
-    const addEducation = () => {
-        if (!newEduDetail.trim()) return;
-        setEduList([...eduList, { level: newEduLevel, detail: newEduDetail.trim() }]);
-        setNewEduDetail(''); // Clear input
-    };
-
-    const removeEducation = (index: number) => {
-        setEduList(eduList.filter((_, i) => i !== index));
-    };
-
-    const addExpertise = () => {
-        if (!newExpertise.trim()) return;
-        if (!expertiseList.includes(newExpertise.trim())) {
-            setExpertiseList([...expertiseList, newExpertise.trim()]);
-        }
-        setNewExpertise('');
-    };
-
-    const removeExpertise = (tag: string) => {
-        setExpertiseList(expertiseList.filter(t => t !== tag));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (payload: any) => {
         setSubmitting(true);
-
         const token = localStorage.getItem('admin_token');
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
-
-        const payload = {
-            ...formData,
-            departmentId: parseInt(formData.departmentId || '0'),
-            academicPosition: formData.staffType === 'ACADEMIC' && formData.academicPosition ? formData.academicPosition : undefined,
-            userId: formData.userId || undefined,
-            // Add array fields
-            education: eduList,
-            expertise: expertiseList,
-        };
 
         try {
             let res;
@@ -237,8 +62,8 @@ export default function AdminStaffPage() {
             }
 
             if (res.ok) {
-                await fetchData();
-                (document.getElementById('staff_modal') as HTMLDialogElement).close();
+                await refetch();
+                handleCloseModal();
             } else {
                 const err = await res.text();
                 if (err.includes("Staff profile already exists for this user")) {
@@ -269,8 +94,8 @@ export default function AdminStaffPage() {
             });
 
             if (res.ok) {
-                await fetchData();
-                (document.getElementById('delete_staff_modal') as HTMLDialogElement).close();
+                await refetch();
+                deleteModalRef.current?.close();
                 setStaffToDelete(null);
             } else {
                 alert('Failed to delete staff member');
@@ -282,17 +107,20 @@ export default function AdminStaffPage() {
         }
     };
 
-    const filteredStaff = staffList.filter(staff =>
-        staff.firstNameTh.includes(searchTerm) ||
-        staff.lastNameTh.includes(searchTerm) ||
-        (staff.firstNameEn && staff.firstNameEn.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (staff.contactEmail && staff.contactEmail.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    // Optimize filter logic with useMemo
+    const filteredStaff = useMemo(() => {
+        return staffList.filter(staff =>
+            staff.firstNameTh.includes(searchTerm) ||
+            staff.lastNameTh.includes(searchTerm) ||
+            (staff.firstNameEn && staff.firstNameEn.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (staff.contactEmail && staff.contactEmail.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+    }, [staffList, searchTerm]);
 
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <span className="loading loading-spinner loading-lg"></span>
+                <span className="loading loading-spinner loading-lg text-primary"></span>
             </div>
         );
     }
@@ -302,106 +130,122 @@ export default function AdminStaffPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold">👥 จัดการบุคลากร</h1>
-                    <p className="opacity-70">จัดการข้อมูลอาจารย์และบุคลากรคณะสังคมศาสตร์</p>
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">👥 จัดการบุคลากร</h1>
+                    <p className="opacity-70 text-sm">จัดการข้อมูลอาจารย์และบุคลากรในคณะสังคมศาสตร์</p>
                 </div>
-                <div className="flex gap-2">
-                    <input
-                        type="text"
-                        placeholder="🔍 ค้นหาชื่อ..."
-                        className="input input-bordered w-full md:w-64"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                <div className="flex gap-2 w-full md:w-auto">
+                    <div className="relative w-full md:w-64">
+                        <input
+                            type="text"
+                            placeholder="🔍 ค้นหาชื่อ..."
+                            className="input input-bordered w-full pl-10"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <span className="absolute left-3 top-3 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </span>
+                    </div>
                     <button
                         onClick={() => handleOpenModal(null)}
-                        className="btn btn-primary gap-2 whitespace-nowrap"
+                        className="btn btn-primary gap-2 whitespace-nowrap shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow"
                     >
-                        ➕ เพิ่มบุคลากร
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                        เพิ่มบุคลากร
                     </button>
                 </div>
             </div>
 
             {/* Staff Table */}
-            <div className="card bg-base-100 shadow-lg">
+            <div className="card bg-base-100 shadow-xl border border-base-200">
                 <div className="card-body p-0">
                     <div className="overflow-x-auto">
-                        <table className="table table-zebra">
-                            <thead className="bg-base-200">
+                        <table className="table table-zebra w-full">
+                            <thead className="bg-base-200/50 text-base-content/70">
                                 <tr>
-                                    <th>ลำดับ</th>
+                                    <th className="w-16 text-center">#</th>
                                     <th>ข้อมูลส่วนตัว</th>
-                                    <th>ตำแหน่ง</th>
+                                    <th>ตำแหน่ง/สังกัด</th>
                                     <th>สถานะ</th>
-                                    <th>จัดการ</th>
+                                    <th className="text-right pr-6">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredStaff.map((staff, index) => {
                                     const linkedUser = users.find(u => u.id === staff.userId);
                                     return (
-                                        <tr key={staff.id}>
-                                            <td>{staff.sortOrder || index + 1}</td>
+                                        <tr key={staff.id} className="hover">
+                                            <td className="text-center font-mono opacity-50">{index + 1}</td>
                                             <td>
-                                                <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-4">
                                                     <div className="avatar">
-                                                        <div className="mask mask-squircle w-12 h-12 bg-gray-100">
+                                                        <div className="mask mask-squircle w-12 h-12 bg-gray-100 ring-1 ring-base-300 ring-offset-2">
                                                             {staff.imageUrl ? (
-                                                                <img src={staff.imageUrl} alt={staff.firstNameTh} />
+                                                                <img src={staff.imageUrl} alt={staff.firstNameTh} className="object-cover" />
                                                             ) : (
-                                                                <div className="flex items-center justify-center w-full h-full text-xs text-gray-400">No Img</div>
+                                                                <div className="flex items-center justify-center w-full h-full text-xs text-gray-400 font-bold">No Img</div>
                                                             )}
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <div className="font-bold">{getFullName(staff)}</div>
-                                                        <div className="text-sm opacity-50">{staff.firstNameEn} {staff.lastNameEn}</div>
-                                                        {linkedUser && (
-                                                            <div className="badge badge-accent badge-outline badge-xs gap-1 mt-1">
-                                                                Linked: {linkedUser.name}
-                                                            </div>
-                                                        )}
+                                                        <div className="font-bold text-base">{getFullName(staff)}</div>
+                                                        <div className="text-xs opacity-60 flex gap-2">
+                                                            <span>{staff.firstNameEn} {staff.lastNameEn}</span>
+                                                            {linkedUser && (
+                                                                <span className="text-success font-medium flex items-center gap-0.5" title={`Linked to ${linkedUser.email}`}>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M8 1a3.5 3.5 0 0 0-3.5 3.5V7A1.5 1.5 0 0 0 3 8.5v5A1.5 1.5 0 0 0 4.5 15h7a1.5 1.5 0 0 0 1.5-1.5v-5A1.5 1.5 0 0 0 11.5 7V4.5A3.5 3.5 0 0 0 8 1Zm2 6V4.5a2 2 0 1 0-4 0V7h4Z" clipRule="evenodd" /></svg>
+                                                                    Linked
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div className="flex flex-col gap-1">
-                                                    <span className="font-semibold text-sm">
+                                                    <span className="font-semibold text-sm text-primary-content/80 text-primary">
                                                         {staff.adminPosition || getAcademicPositionLabel(staff.academicPosition)}
                                                     </span>
-                                                    <span className="text-xs opacity-70">
-                                                        {staff.department || '-'}
-                                                    </span>
-                                                    <span className={`badge badge-xs ${staff.staffType === 'ACADEMIC' ? 'badge-primary' : 'badge-secondary'}`}>
-                                                        {staff.staffType === 'ACADEMIC' ? 'วิชาการ' : 'สนับสนุน'}
-                                                    </span>
+                                                    <div className="flex items-center gap-2 text-xs opacity-70">
+                                                        <span className="badge badge-ghost badge-sm">{staff.department || '-'}</span>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                {staff.isExecutive && (
-                                                    <span className="badge badge-warning text-white gap-1">
-                                                        👑 ผู้บริหาร
+                                                <div className="flex flex-wrap gap-1">
+                                                    <span className={`badge badge-sm ${staff.staffType === 'ACADEMIC' ? 'badge-primary badge-outline' : 'badge-secondary badge-outline'}`}>
+                                                        {staff.staffType === 'ACADEMIC' ? 'วิชาการ' : 'สนับสนุน'}
                                                     </span>
-                                                )}
+                                                    {staff.isExecutive && (
+                                                        <span className="badge badge-warning badge-sm gap-1 text-warning-content shadow-sm">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M5.75 2a.75.75 0 0 1 .75.75V4h7a.75.75 0 0 1 0 1.5H6.5v1.25a.75.75 0 0 1-1.5 0V5.5h-1a.75.75 0 0 1 0-1.5h1V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v2.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-2.5c0-.69-.56-1.25-1.25-1.25H4.75Z" clipRule="evenodd" /></svg>
+                                                            ผู้บริหาร
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
-                                            <td>
-                                                <div className="flex gap-2">
+                                            <td className="text-right pr-6">
+                                                <div className="flex justify-end gap-2">
                                                     <button
                                                         onClick={() => handleOpenModal(staff)}
-                                                        className="btn btn-ghost btn-xs text-info tooltip"
-                                                        data-tip="แก้ไข"
+                                                        className="btn btn-square btn-ghost btn-sm text-info hover:bg-info/10 tooltip tooltip-left"
+                                                        data-tip="แก้ไขข้อมูล"
                                                     >
-                                                        ✏️
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                        </svg>
                                                     </button>
                                                     <button
                                                         onClick={() => {
                                                             setStaffToDelete(staff);
-                                                            (document.getElementById('delete_staff_modal') as HTMLDialogElement).showModal();
+                                                            deleteModalRef.current?.showModal();
                                                         }}
-                                                        className="btn btn-ghost btn-xs text-error tooltip"
-                                                        data-tip="ลบ"
+                                                        className="btn btn-square btn-ghost btn-sm text-error hover:bg-error/10 tooltip tooltip-left"
+                                                        data-tip="ลบข้อมูล"
                                                     >
-                                                        🗑️
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                        </svg>
                                                     </button>
                                                 </div>
                                             </td>
@@ -412,278 +256,76 @@ export default function AdminStaffPage() {
                         </table>
 
                         {filteredStaff.length === 0 && (
-                            <div className="text-center py-12 opacity-60">
-                                <p className="text-lg">ไม่พบข้อมูลบุคลากร</p>
+                            <div className="flex flex-col items-center justify-center py-16 opacity-60">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-16 h-16 text-gray-300 mb-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg>
+                                <p className="text-lg font-medium">ไม่พบข้อมูลบุคลากร</p>
+                                <p className="text-sm">ลองค้นหาด้วยคำอื่น หรือเพิ่มบุคลากรใหม่</p>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Add/Edit Modal (Native Dialog) */}
-            <dialog id="staff_modal" className="modal">
-                <div className="modal-box w-full max-w-4xl bg-base-100 shadow-2xl relative">
-                    <h3 className="font-bold text-lg mb-4">
-                        {editingStaff ? '✏️ แก้ไขข้อมูลบุคลากร' : '➕ เพิ่มบุคลากรใหม่'}
+            {/* Add/Edit Modal */}
+            <dialog ref={formModalRef} className="modal backdrop-blur-sm">
+                <div className="modal-box w-full max-w-4xl bg-base-100 shadow-2xl p-6">
+                    <h3 className="font-bold text-2xl mb-6 flex items-center gap-2 border-b pb-4">
+                        {editingStaff ? (
+                            <>
+                                <span className="text-primary">✏️</span> แก้ไขข้อมูลบุคลากร
+                                <span className="text-sm font-normal opacity-50 ml-auto bg-base-200 px-2 py-1 rounded">ID: {editingStaff.id}</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-success">➕</span> เพิ่มบุคลากรใหม่
+                            </>
+                        )}
                     </h3>
 
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
-
-                        {/* 1. General Info */}
-                        <div className="collapse collapse-arrow bg-base-200">
-                            <input type="radio" name="staff_accordion" defaultChecked />
-                            <div className="collapse-title text-xl font-medium">
-                                📝 ข้อมูลทั่วไป (General Info)
-                            </div>
-                            <div className="collapse-content">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* User Link Section */}
-                                    <div className="md:col-span-2 p-3 rounded-lg border border-base-300 bg-base-100">
-                                        <label className="label pt-0"><span className="label-text font-bold">🔗 บัญชีผู้ใช้ (User Account)</span></label>
-                                        <select className="select select-bordered w-full" value={formData.userId} onChange={(e) => handleUserSelect(e.target.value)}>
-                                            <option value="">-- ไม่ระบุ / ไม่เชื่อมโยง --</option>
-                                            {users.map(u => (<option key={u.id} value={u.id}>{u.email} ({u.name})</option>))}
-                                        </select>
-                                    </div>
-
-                                    {/* Name TH */}
-                                    <div className="form-control">
-                                        <label className="label"><span className="label-text">คำนำหน้า (ไทย)</span></label>
-                                        <input type="text" className="input input-bordered" value={formData.prefixTh} onChange={e => setFormData({ ...formData, prefixTh: e.target.value })} placeholder="เช่น ผศ., ดร." />
-                                    </div>
-                                    <div className="form-control">
-                                        <label className="label"><span className="label-text">ชื่อ (ไทย) *</span></label>
-                                        <input type="text" className="input input-bordered" required value={formData.firstNameTh} onChange={e => setFormData({ ...formData, firstNameTh: e.target.value })} />
-                                    </div>
-                                    <div className="form-control md:col-span-2">
-                                        <label className="label"><span className="label-text">นามสกุล (ไทย) *</span></label>
-                                        <input type="text" className="input input-bordered" required value={formData.lastNameTh} onChange={e => setFormData({ ...formData, lastNameTh: e.target.value })} />
-                                    </div>
-
-                                    {/* Name EN */}
-                                    <div className="form-control">
-                                        <label className="label"><span className="label-text">Prefix (EN)</span></label>
-                                        <input type="text" className="input input-bordered" value={formData.prefixEn} onChange={e => setFormData({ ...formData, prefixEn: e.target.value })} />
-                                    </div>
-                                    <div className="form-control">
-                                        <label className="label"><span className="label-text">First Name (EN)</span></label>
-                                        <input type="text" className="input input-bordered" value={formData.firstNameEn} onChange={e => setFormData({ ...formData, firstNameEn: e.target.value })} />
-                                    </div>
-                                    <div className="form-control md:col-span-2">
-                                        <label className="label"><span className="label-text">Last Name (EN)</span></label>
-                                        <input type="text" className="input input-bordered" value={formData.lastNameEn} onChange={e => setFormData({ ...formData, lastNameEn: e.target.value })} />
-                                    </div>
-
-                                    {/* Image Upload */}
-                                    <div className="form-control md:col-span-2">
-                                        <label className="label"><span className="label-text">รูปโปรไฟล์ (Image Upload)</span></label>
-                                        <div className="flex flex-col md:flex-row gap-4 items-start">
-                                            <div className="flex-1 w-full">
-                                                <div className="flex gap-2 mb-2">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        className="file-input file-input-bordered w-full"
-                                                        onChange={async (e) => {
-                                                            const file = e.target.files?.[0];
-                                                            if (!file) return;
-
-                                                            // Upload Logic
-                                                            const uploadData = new FormData();
-                                                            uploadData.append('file', file);
-                                                            const token = localStorage.getItem('admin_token');
-                                                            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
-
-                                                            try {
-                                                                const res = await fetch(`${apiUrl}/api/upload/staff`, {
-                                                                    method: 'POST',
-                                                                    headers: { Authorization: `Bearer ${token}` }, // No Content-Type header for FormData, browser sets it
-                                                                    body: uploadData
-                                                                });
-                                                                if (res.ok) {
-                                                                    const data = await res.json();
-                                                                    // Append API URL if relative path
-                                                                    const fullUrl = data.url.startsWith('http') ? data.url : `${apiUrl}${data.url}`;
-                                                                    setFormData(prev => ({ ...prev, imageUrl: fullUrl }));
-                                                                } else {
-                                                                    alert('Upload failed');
-                                                                }
-                                                            } catch (err) {
-                                                                console.error('Upload error', err);
-                                                                alert('Upload error');
-                                                            }
-                                                        }}
-                                                    />
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    className="input input-sm input-ghost w-full text-xs opacity-50"
-                                                    value={formData.imageUrl}
-                                                    placeholder="หรือใส่ URL รูปภาพโดยตรง..."
-                                                    onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                                                />
-                                            </div>
-
-                                            <div className="aspect-[1/1] w-32 bg-base-200 rounded-lg overflow-hidden border border-base-300 relative group">
-                                                {formData.imageUrl ? (
-                                                    <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Error'} />
-                                                ) : (
-                                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 text-xs p-2 text-center">
-                                                        <span>No Image</span>
-                                                        <span className="text-[10px]">1:1 Ratio</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <label className="label pt-0 pb-0">
-                                            <span className="label-text-alt text-gray-500">ระบบจะปรับขนาดรูปอัตโนมัติ (Max 768x1024) และแปลงเป็น PNG</span>
-                                        </label>
-                                    </div>
-
-                                    <div className="form-control md:col-span-2">
-                                        <label className="label"><span className="label-text">อีเมลติดต่อ</span></label>
-                                        <input type="email" className="input input-bordered" value={formData.contactEmail} onChange={e => setFormData({ ...formData, contactEmail: e.target.value })} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 2. Position & Status */}
-                        <div className="collapse collapse-arrow bg-base-200">
-                            <input type="radio" name="staff_accordion" />
-                            <div className="collapse-title text-xl font-medium">
-                                💼 ตำแหน่งและสังกัด (Position)
-                            </div>
-                            <div className="collapse-content">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="form-control">
-                                        <label className="label"><span className="label-text">ประเภทบุคลากร *</span></label>
-                                        <select className="select select-bordered" value={formData.staffType} onChange={e => setFormData({ ...formData, staffType: e.target.value as any })}>
-                                            <option value="ACADEMIC">สายวิชาการ</option>
-                                            <option value="SUPPORT">สายสนับสนุน</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-control">
-                                        <label className="label"><span className="label-text">สังกัด (Department) *</span></label>
-                                        <select className="select select-bordered" required value={formData.departmentId} onChange={e => setFormData({ ...formData, departmentId: e.target.value })}>
-                                            <option value="">-- เลือกสังกัด --</option>
-                                            {departments.map(dept => (<option key={dept.id} value={dept.id}>{dept.nameTh}</option>))}
-                                        </select>
-                                    </div>
-
-                                    {formData.staffType === 'ACADEMIC' && (
-                                        <div className="form-control">
-                                            <label className="label"><span className="label-text">ตำแหน่งทางวิชาการ</span></label>
-                                            <select className="select select-bordered" value={formData.academicPosition} onChange={e => setFormData({ ...formData, academicPosition: e.target.value })}>
-                                                <option value="">-- ไม่มี --</option>
-                                                {ACADEMIC_POSITIONS.map(p => (<option key={p.value} value={p.value}>{p.label}</option>))}
-                                            </select>
-                                        </div>
-                                    )}
-                                    <div className="form-control">
-                                        <label className="label"><span className="label-text">ตำแหน่งบริหาร / ตำแหน่งหน้าที่ (Administrative / Functional Position)</span></label>
-                                        <input type="text" className="input input-bordered" value={formData.adminPosition} onChange={e => setFormData({ ...formData, adminPosition: e.target.value })} placeholder="เช่น คณบดี, หัวหน้าสำนักงาน, นักวิชาการศึกษา" />
-                                    </div>
-
-                                    <div className="form-control md:col-span-2 border border-green-200 bg-green-50 p-3 rounded-lg">
-                                        <label className="label cursor-pointer justify-start gap-4">
-                                            <input type="checkbox" className="toggle toggle-success" checked={formData.isExecutive} onChange={e => setFormData({ ...formData, isExecutive: e.target.checked })} />
-                                            <span className="label-text font-bold text-green-800">เป็นคณะกรรมการบริหาร/ผู้บริหารระดับสูง (School Executive)</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 3. Education & Expertise */}
-                        <div className="collapse collapse-arrow bg-base-200">
-                            <input type="radio" name="staff_accordion" />
-                            <div className="collapse-title text-xl font-medium">
-                                🎓 ประวัติการศึกษาและความเชี่ยวชาญ
-                            </div>
-                            <div className="collapse-content">
-                                <div className="space-y-6">
-
-                                    {/* Education List */}
-                                    <div>
-                                        <h4 className="font-bold mb-2 text-sm uppercase text-gray-500">ประวัติการศึกษา (Education)</h4>
-                                        <div className="flex gap-2 mb-2">
-                                            <select className="select select-sm select-bordered" value={newEduLevel} onChange={e => setNewEduLevel(e.target.value)}>
-                                                {EDU_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
-                                            </select>
-                                            <input type="text" className="input input-sm input-bordered flex-1" placeholder="ระบุวุฒิ, สาขา, สถาบัน..." value={newEduDetail} onChange={e => setNewEduDetail(e.target.value)} />
-                                            <button type="button" onClick={addEducation} className="btn btn-sm btn-primary">เพิ่ม</button>
-                                        </div>
-                                        <div className="bg-white rounded border border-gray-200 p-2 min-h-[50px] space-y-2">
-                                            {eduList.length === 0 && <p className="text-xs text-gray-400 text-center py-2">ยังไม่มีข้อมูลการศึกษา</p>}
-                                            {eduList.map((edu, idx) => (
-                                                <div key={idx} className="flex justify-between items-center bg-gray-50 px-3 py-2 rounded text-sm group">
-                                                    <div>
-                                                        <span className="font-bold mr-2 text-primary">{EDU_LEVELS.find(l => l.value === edu.level)?.label.split(' ')[0]}</span>
-                                                        <span>{edu.detail}</span>
-                                                    </div>
-                                                    <button type="button" onClick={() => removeEducation(idx)} className="btn btn-xs btn-circle btn-ghost text-red-500 opacity-0 group-hover:opacity-100">✕</button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Expertise Tags */}
-                                    <div>
-                                        <h4 className="font-bold mb-2 text-sm uppercase text-gray-500">ความเชี่ยวชาญ (Expertise)</h4>
-                                        <div className="flex gap-2 mb-2">
-                                            <input
-                                                type="text"
-                                                className="input input-sm input-bordered flex-1"
-                                                placeholder="ระบุความเชี่ยวชาญ (เช่น Sociology, Data Science)..."
-                                                value={newExpertise}
-                                                onChange={e => setNewExpertise(e.target.value)}
-                                                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addExpertise(); } }}
-                                            />
-                                            <button type="button" onClick={addExpertise} className="btn btn-sm btn-secondary">เพิ่ม Tag</button>
-                                        </div>
-                                        <div className="bg-white rounded border border-gray-200 p-3 min-h-[50px] flex flex-wrap gap-2">
-                                            {expertiseList.length === 0 && <p className="text-xs text-gray-400 w-full text-center py-2">ยังไม่มีข้อมูลความเชี่ยวชาญ</p>}
-                                            {expertiseList.map((tag, idx) => (
-                                                <div key={idx} className="badge badge-lg badge-ghost gap-2 pl-3">
-                                                    {tag}
-                                                    <button type="button" onClick={() => removeExpertise(tag)} className="btn btn-xs btn-circle btn-ghost text-gray-500">✕</button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="modal-action mt-6">
-                            <button type="button" onClick={() => (document.getElementById('staff_modal') as HTMLDialogElement).close()} className="btn btn-ghost" disabled={submitting}>ยกเลิก</button>
-                            <button type="submit" className="btn btn-primary" disabled={submitting}>
-                                {submitting ? <span className="loading loading-spinner"></span> : 'บันทึกข้อมูล'}
-                            </button>
-                        </div>
-                    </form>
+                    <StaffForm
+                        initialData={editingStaff}
+                        departments={departments}
+                        users={users}
+                        onSubmit={handleSubmit}
+                        onCancel={handleCloseModal}
+                        isLoading={submitting}
+                    />
                 </div>
                 <form method="dialog" className="modal-backdrop">
-                    <button>close</button>
+                    <button onClick={handleCloseModal}>close</button>
                 </form>
             </dialog>
 
-            {/* Delete Modal (Native Dialog) */}
-            <dialog id="delete_staff_modal" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg text-error">ยืนยันการลบ</h3>
-                    <p className="py-4">ต้องการลบข้อมูลบุคลากร <strong>{staffToDelete ? getFullName(staffToDelete) : ''}</strong> ใช่หรือไม่?</p>
-                    <div className="modal-action">
+            {/* Delete Modal */}
+            <dialog ref={deleteModalRef} className="modal backdrop-blur-sm">
+                <div className="modal-box max-w-sm">
+                    <div className="flex flex-col items-center text-center gap-4">
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                        <h3 className="font-bold text-xl">ยืนยันการลบ?</h3>
+                        <p className="opacity-70">
+                            คุณต้องการลบข้อมูลของ<br />
+                            <strong>{staffToDelete ? getFullName(staffToDelete) : ''}</strong><br />
+                            ใช่หรือไม่? การกระทำนี้ไม่สามารถเรียกคืนได้
+                        </p>
+                    </div>
+                    <div className="modal-action justify-center mt-6">
                         <form method="dialog">
                             <button className="btn btn-ghost" disabled={submitting}>ยกเลิก</button>
                         </form>
-                        <button onClick={handleDelete} className="btn btn-error" disabled={submitting}>
+                        <button onClick={handleDelete} className="btn btn-error text-white px-8" disabled={submitting}>
                             {submitting ? <span className="loading loading-spinner"></span> : 'ยืนยันลบ'}
                         </button>
                     </div>
                 </div>
+                <form method="dialog" className="modal-backdrop">
+                    <button onClick={() => setStaffToDelete(null)}>close</button>
+                </form>
             </dialog>
         </div>
     );

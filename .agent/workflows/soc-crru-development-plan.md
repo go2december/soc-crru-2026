@@ -85,8 +85,9 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
         - [x] Staff Image Upload (PNG Compression)
         - [x] News Management (List/Create/Delete)
         - [x] User Management (Role assignment)
-        - [x] **Sidebar**: จัดกลุ่มเมนูเป็นหมวดหมู่ (ภาพรวม, ข้อมูลองค์กร, เนื้อหา, ระบบ)
-        - [x] **Layout**: Minimal Design (Hidden Main Navbar/Footer)
+        - [x] **Sidebar**: Modern Sidebar with Glassmorphism & Lucide Icons
+        - [x] **Layout**: shadcn/ui Layout with Collapsible Sidebar & Soft Theme
+        - [x] **UI/UX Overhaul**: Refactored to "Soft Professional" theme (Slate Palette) using shadcn/ui components
 - [x] **Integration**: เชื่อมต่อ Frontend กับ API
     - [x] Programs List: `/programs` แสดงรายการทั้งหมด พร้อม filter ตามระดับ
     - [x] Programs Detail: Dynamic route `/programs/[code]` ดึงข้อมูลจาก API

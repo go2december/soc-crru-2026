@@ -3,6 +3,23 @@
 import { useEffect, useState, ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import {
+    LayoutDashboard,
+    Users,
+    Building2,
+    Newspaper,
+    GraduationCap,
+    Settings,
+    UserCircle,
+    LogOut,
+    Menu,
+    ChevronLeft,
+    ExternalLink,
+    ShieldCheck
+} from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface User {
     id: string;
@@ -58,8 +75,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         router.push('/admin/login');
     };
 
-
-
     // กำหนดลำดับขั้นของสิทธิ์ (Hierarchy)
     const ROLE_LEVELS: Record<string, number> = {
         'ADMIN': 3,
@@ -70,7 +85,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     const getUserRoleLevel = (roles: string[] | undefined) => {
         if (!roles || roles.length === 0) return 0;
-        // หา Level สูงสุดจาก Roles ที่ user มี
         return Math.max(...roles.map(r => ROLE_LEVELS[r] || 0));
     };
 
@@ -82,15 +96,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         return 'GUEST';
     };
 
-    const getRoleBadgeClass = (role: string) => {
-        switch (role) {
-            case 'ADMIN': return 'badge-error';
-            case 'EDITOR': return 'badge-warning';
-            case 'STAFF': return 'badge-info';
-            default: return 'badge-ghost';
-        }
-    };
-
     const getRoleLabel = (role: string) => {
         switch (role) {
             case 'ADMIN': return 'ผู้ดูแลระบบ';
@@ -100,164 +105,221 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         }
     };
 
-    // Menu Definitions (Grouped)
+    // Menu Definitions (Grouped with Lucide Icons)
     const menuGroups = [
         {
-            title: 'ภาพรวม',
+            title: 'Overview',
             items: [
-                { href: '/admin/dashboard', label: 'หน้าหลัก', icon: '🏠', minLevel: 1 },
+                { href: '/admin/dashboard', label: 'หน้าหลัก', icon: LayoutDashboard, minLevel: 1 },
             ]
         },
         {
-            title: 'ข้อมูลองค์กร',
+            title: 'Organization',
             items: [
-                { href: '/admin/staff', label: 'บุคลากร', icon: '👥', minLevel: 2 },
-                { href: '/admin/departments', label: 'จัดการสังกัด', icon: '🏢', minLevel: 3 },
+                { href: '/admin/staff', label: 'บุคลากร', icon: Users, minLevel: 2 },
+                { href: '/admin/departments', label: 'จัดการสังกัด', icon: Building2, minLevel: 3 },
             ]
         },
         {
-            title: 'เนื้อหาเว็บไซต์',
+            title: 'Content',
             items: [
-                { href: '/admin/news', label: 'ข่าวสาร/ประชาสัมพันธ์', icon: '📰', minLevel: 2 },
-                { href: '/admin/programs', label: 'หลักสูตร', icon: '📚', minLevel: 2 },
+                { href: '/admin/news', label: 'ข่าวสาร', icon: Newspaper, minLevel: 2 },
+                { href: '/admin/programs', label: 'หลักสูตร', icon: GraduationCap, minLevel: 2 },
             ]
         },
         {
-            title: 'ระบบ',
+            title: 'System',
             items: [
-                { href: '/admin/users', label: 'จัดการผู้ใช้', icon: '⚙️', minLevel: 3 },
-                { href: '/admin/profile', label: 'โปรไฟล์ของฉัน', icon: '👤', minLevel: 1 },
+                { href: '/admin/users', label: 'จัดการผู้ใช้', icon: Settings, minLevel: 3 },
+                { href: '/admin/profile', label: 'โปรไฟล์', icon: UserCircle, minLevel: 1 },
             ]
         }
     ];
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-base-200">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div>
+                    <p className="text-muted-foreground animate-pulse">กำลังโหลดข้อมูล...</p>
+                </div>
             </div>
         );
     }
 
-    if (!user) {
-        return null;
-    }
+    if (!user) return null;
 
     const userLevel = getUserRoleLevel(user.roles);
     const primaryRole = getPrimaryRole(user.roles);
 
     return (
-        <div className="min-h-screen bg-base-200 flex">
+        <div className="min-h-screen bg-background flex text-foreground font-sans">
             {/* Sidebar */}
-            <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-base-100 shadow-xl transition-all duration-300 flex flex-col fixed h-full z-30`}>
-                {/* Logo */}
-                <div className="p-4 border-b border-base-200 bg-base-100 relative z-20">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold flex-shrink-0">
-                            SOC
+            <aside
+                className={cn(
+                    "fixed h-full z-40 bg-card border-r border-border transition-all duration-300 ease-in-out flex flex-col shadow-sm",
+                    sidebarOpen ? "w-64" : "w-[70px]"
+                )}
+            >
+                {/* Logo Section */}
+                <div className="h-16 flex items-center px-4 border-b border-border/50">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0 shadow-sm">
+                            S
                         </div>
-                        {sidebarOpen && (
-                            <div className="overflow-hidden whitespace-nowrap">
-                                <p className="font-bold text-sm">Admin Panel</p>
-                                <p className="text-xs opacity-60">คณะสังคมศาสตร์</p>
-                            </div>
-                        )}
+                        <div className={cn(
+                            "transition-opacity duration-300 whitespace-nowrap",
+                            sidebarOpen ? "opacity-100" : "opacity-0 w-0"
+                        )}>
+                            <p className="font-bold text-sm tracking-tight text-foreground">SOC Admin</p>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Management</p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Menu */}
-                <nav className="flex-1 p-4 overflow-y-auto no-scrollbar">
-                    <ul className="menu gap-4 px-0">
-                        {menuGroups.map((group, groupIdx) => {
-                            // Filter valid items in group
-                            const validItems = group.items.filter(item => userLevel >= item.minLevel);
-                            if (validItems.length === 0) return null;
+                {/* Menu Section */}
+                <nav className="flex-1 py-6 px-3 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                    {menuGroups.map((group, groupIdx) => {
+                        const validItems = group.items.filter(item => userLevel >= item.minLevel);
+                        if (validItems.length === 0) return null;
 
-                            return (
-                                <li key={groupIdx}>
-                                    {sidebarOpen && (
-                                        <h2 className="menu-title px-4 mb-1 text-xs font-bold opacity-50 uppercase tracking-wider">
-                                            {group.title}
-                                        </h2>
-                                    )}
-                                    <ul className="menu gap-1 p-0">
-                                        {validItems.map((item) => (
-                                            <li key={item.href}>
-                                                <Link
-                                                    href={item.href}
-                                                    className={`${pathname === item.href ? 'active text-primary-content bg-primary' : 'text-base-content'} ${!sidebarOpen ? 'justify-center px-0' : ''} rounded-lg`}
-                                                    title={!sidebarOpen ? item.label : ''}
-                                                >
-                                                    <span className="text-lg">{item.icon}</span>
-                                                    {sidebarOpen && <span className="font-medium">{item.label}</span>}
-                                                </Link>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                        return (
+                            <div key={groupIdx} className="space-y-1">
+                                {sidebarOpen && (
+                                    <h3 className="px-3 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                                        {group.title}
+                                    </h3>
+                                )}
+                                {validItems.map((item) => {
+                                    const Icon = item.icon;
+                                    const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            className={cn(
+                                                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 group relative",
+                                                isActive
+                                                    ? "bg-primary/10 text-primary shadow-sm"
+                                                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                                                !sidebarOpen && "justify-center px-0 h-10 w-10 mx-auto"
+                                            )}
+                                            title={!sidebarOpen ? item.label : undefined}
+                                        >
+                                            <Icon className={cn("w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-105", isActive && "text-primary")} />
+
+                                            {sidebarOpen && <span>{item.label}</span>}
+
+                                            {/* Active Indicator for collapsed state */}
+                                            {!sidebarOpen && isActive && (
+                                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-full" />
+                                            )}
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
                 </nav>
 
-                {/* User Info */}
-                <div className="p-4 border-t border-base-200 bg-base-100">
-                    <div className="flex items-center gap-3">
-                        <div className="avatar placeholder">
-                            <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 bg-neutral text-neutral-content">
-                                {user.avatar ? (
-                                    <img src={user.avatar} alt={user.name} />
-                                ) : (
-                                    <span className="text-xl">{user.name?.charAt(0) || 'U'}</span>
-                                )}
-                            </div>
+                {/* User Profile Section */}
+                <div className="p-3 border-t border-border mt-auto mb-20 md:mb-0">
+                    <div className={cn(
+                        "rounded-xl bg-accent/50 border border-border/50 p-2 flex items-center gap-3 transition-all duration-300",
+                        !sidebarOpen && "justify-center p-0 bg-transparent border-0"
+                    )}>
+                        <div className="relative shrink-0">
+                            {user.avatar ? (
+                                <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-background shadow-sm" />
+                            ) : (
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center text-white font-bold ring-2 ring-background shadow-sm">
+                                    {user.name?.charAt(0) || 'U'}
+                                </div>
+                            )}
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
                         </div>
+
                         {sidebarOpen && (
-                            <div className="flex-1 min-w-0 overflow-hidden">
-                                <p className="font-medium text-sm truncate" title={user.name}>{user.name}</p>
-                                <span className={`badge badge-xs mt-1 ${getRoleBadgeClass(primaryRole)}`}>
-                                    {getRoleLabel(primaryRole)}
-                                </span>
+                            <div className="overflow-hidden min-w-0 flex-1">
+                                <p className="text-sm font-medium truncate text-foreground">{user.name}</p>
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <ShieldCheck className="w-3 h-3 text-primary" />
+                                    <span className="truncate">{getRoleLabel(primaryRole)}</span>
+                                </div>
                             </div>
+                        )}
+
+                        {sidebarOpen && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                                onClick={handleLogout}
+                                title="ออกจากระบบ"
+                            >
+                                <LogOut className="w-4 h-4" />
+                            </Button>
                         )}
                     </div>
                 </div>
             </aside>
 
-            {/* Main Content (Push content right when sidebar matches width) */}
-            <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
-                {/* Top Bar */}
-                <header className="h-16 bg-base-100 shadow-sm flex items-center justify-between px-6 sticky top-0 z-20">
-                    <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="btn btn-ghost btn-sm btn-square"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                            <path fillRule="evenodd" d="M3 6.75A.75.75 0 013.75 6h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6.75zM3 12a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm0 5.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z" clipRule="evenodd" />
-                        </svg>
-                    </button>
-
+            {/* Main Content Area */}
+            <div className={cn(
+                "flex-1 flex flex-col min-h-screen transition-[margin] duration-300 ease-in-out",
+                sidebarOpen ? "ml-64" : "ml-[70px]"
+            )}>
+                {/* Top Navbar */}
+                <header className="h-16 sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border/50 px-6 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <a href="/" target="_blank" className="btn btn-ghost btn-sm gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                                <path fillRule="evenodd" d="M15.75 2.25H21a.75.75 0 01.75.75v5.25a.75.75 0 01-1.5 0V4.81l-8.97 8.97a.75.75 0 11-1.06-1.06l8.97-8.97h-3.44a.75.75 0 010-1.5zm-10.5 4.5a1.5 1.5 0 00-1.5 1.5v10.5a1.5 1.5 0 001.5 1.5h10.5a1.5 1.5 0 001.5-1.5V10.5a.75.75 0 011.5 0v8.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V8.25a3 3 0 013-3h8.25a.75.75 0 010 1.5H5.25z" clipRule="evenodd" />
-                            </svg>
-                            ดูเว็บไซต์
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-foreground md:flex hidden"
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
+                            {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                        </Button>
+
+                        {/* Mobile Toggle */}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-foreground md:hidden flex"
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
+                            <Menu className="w-5 h-5" />
+                        </Button>
+
+                        <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                            <span className="opacity-50">Admin Panel</span>
+                            <span>/</span>
+                            <span className="font-medium text-foreground capitalize">
+                                {pathname.split('/').pop() || 'Dashboard'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <a
+                            href="/"
+                            target="_blank"
+                            className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-1.5 rounded-md hover:bg-primary/5"
+                        >
+                            <ExternalLink className="w-4 h-4" />
+                            <span>ดูหน้าเว็บไซต์</span>
                         </a>
-                        <button onClick={handleLogout} className="btn btn-ghost btn-sm text-error gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                                <path fillRule="evenodd" d="M7.5 3.75A1.5 1.5 0 006 5.25v13.5a1.5 1.5 0 001.5 1.5h6a1.5 1.5 0 001.5-1.5V15a.75.75 0 011.5 0v3.75a3 3 0 01-3 3h-6a3 3 0 01-3-3V5.25a3 3 0 013-3h6a3 3 0 013 3V9A.75.75 0 0115 9V5.25a1.5 1.5 0 00-1.5-1.5h-6zm10.72 4.72a.75.75 0 011.06 0l3 3a.75.75 0 010 1.06l-3 3a.75.75 0 11-1.06-1.06l1.72-1.72H9a.75.75 0 010-1.5h10.94l-1.72-1.72a.75.75 0 010-1.06z" clipRule="evenodd" />
-                            </svg>
-                            ออกจากระบบ
-                        </button>
                     </div>
                 </header>
 
-                {/* Page Content */}
-                <main className="flex-1 p-6 overflow-auto">
-                    {children}
+                {/* Content */}
+                <main className="flex-1 p-6 md:p-8 bg-muted/20">
+                    <div className="max-w-7xl mx-auto space-y-6">
+                        {children}
+                    </div>
                 </main>
             </div>
-        </div >
+        </div>
     );
 }

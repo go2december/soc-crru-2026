@@ -56,7 +56,7 @@ description: แผนงานและโครงสร้างข้อม�
     - Serve Static Files จาก `/uploads/staff/`
     - ✅ **Fixed (2026-02-03)**: Dependencies (uuid, sharp), Type imports (Express.Multer.File)
 
-### 2.2 Frontend (Next.js Admin Panel)
+### 2.2 Frontend (Next.js Admin Panel - Modernized with shadcn/ui)
 - [x] **Manage Staff Page** (`/admin/staff`):
     - ตารางรายชื่อพร้อมค้นหาและกรอง
     - แสดงป้ายกำกับ (Badge) สำหรับผู้บริหาร
