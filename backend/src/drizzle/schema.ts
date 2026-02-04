@@ -41,11 +41,22 @@ export const users = pgTable('users', {
 // 2. Organization & Personnel (ตาม Excel Schema)
 // ------------------------------------------
 
+// ------------------------------------------
+// 2. Organization & Personnel (ตาม Excel Schema)
+// ------------------------------------------
+
 export const departments = pgTable('departments', {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     nameTh: varchar('name_th', { length: 255 }).notNull(),
     nameEn: varchar('name_en', { length: 255 }),
     isAcademicUnit: boolean('is_academic_unit').default(true).notNull(), // สาขาวิชา vs หน่วยงานสนับสนุน
+});
+
+export const adminPositions = pgTable('admin_positions', {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    nameTh: varchar('name_th', { length: 255 }).notNull(),
+    nameEn: varchar('name_en', { length: 255 }),
+    level: integer('level').default(0), // For sorting importance e.g. Dean = 1
 });
 
 export const staffProfiles = pgTable('staff_profiles', {
@@ -70,7 +81,8 @@ export const staffProfiles = pgTable('staff_profiles', {
     academicPosition: academicPositionEnum('academic_position'),
 
     // ตำแหน่งบริหาร (ทั้งสายวิชาการและสนับสนุน ถ้ามี)
-    adminPosition: varchar('admin_position', { length: 255 }), // e.g. คณบดี, หัวหน้าสาขา
+    adminPosition: varchar('admin_position', { length: 255 }), // Legacy string field
+    adminPositionId: integer('admin_position_id').references(() => adminPositions.id), // New FK
 
     // วุฒิการศึกษา (รองรับหลายวุฒิ)
     education: jsonb('education').$type<{

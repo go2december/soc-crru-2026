@@ -2,6 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Staff, Department, User } from './hooks/useStaffData';
+import { adminPositionService, AdminPosition } from '@/services/adminPositionService';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Search, X, Upload, Image as ImageIcon, ChevronDown } from "lucide-react";
 
 interface StaffFormProps {
     initialData: Staff | null;
@@ -25,6 +32,27 @@ export const EDU_LEVELS = [
     { value: 'BACHELOR', label: 'ปริญญาตรี (Bachelor)' },
 ];
 
+// Simple Accordion Component for internal use
+const FormSection = ({ title, badge, children, defaultOpen = true }: { title: string, badge: string, children: React.ReactNode, defaultOpen?: boolean }) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+    return (
+        <div className="border rounded-lg overflow-hidden bg-card">
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors"
+            >
+                <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="h-6 w-6 flex items-center justify-center p-0 rounded-full">{badge}</Badge>
+                    <span className="font-medium text-lg">{title}</span>
+                </div>
+                <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isOpen && <div className="p-6 border-t animate-in slide-in-from-top-2 duration-200">{children}</div>}
+        </div>
+    );
+};
+
 export default function StaffForm({ initialData, departments, users, onSubmit, onCancel, isLoading }: StaffFormProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
@@ -46,6 +74,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
     const [formData, setFormData] = useState(getInitialState());
     const [eduList, setEduList] = useState<{ level: string; detail: string }[]>([]);
     const [expertiseList, setExpertiseList] = useState<string[]>([]);
+    const [positions, setPositions] = useState<AdminPosition[]>([]);
 
     // Inputs for adding new items
     const [newEduLevel, setNewEduLevel] = useState('DOCTORAL');
@@ -80,6 +109,11 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
         }
     }, [initialData]);
 
+    // Load admin positions
+    useEffect(() => {
+        adminPositionService.getAll().then(setPositions).catch(err => console.error("Failed to load positions", err));
+    }, []);
+
     const handleUserSelect = (userId: string) => {
         const selectedUser = users.find(u => u.id === userId);
         if (selectedUser) {
@@ -111,8 +145,8 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
             });
             if (res.ok) {
                 const data = await res.json();
-                const fullUrl = data.url.startsWith('http') ? data.url : `${apiUrl}${data.url}`;
-                setFormData(prev => ({ ...prev, imageUrl: fullUrl }));
+                // Store relative URL path to keep DB clean
+                setFormData(prev => ({ ...prev, imageUrl: data.url }));
             } else {
                 alert('Upload failed');
             }
@@ -156,257 +190,276 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
     };
 
     return (
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
             {/* 1. General Info */}
-            <div className="collapse collapse-arrow bg-base-200 border border-base-300">
-                <input type="radio" name="staff_accordion" defaultChecked />
-                <div className="collapse-title text-xl font-medium flex items-center gap-2">
-                    <span className="badge badge-primary badge-lg">1</span> ข้อมูลทั่วไป (General Info)
-                </div>
-                <div className="collapse-content pt-4 bg-base-100">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* User Link Section */}
-                        <div className="md:col-span-2 p-4 rounded-xl border border-blue-100 bg-blue-50/50">
-                            <label className="label pt-0"><span className="label-text font-bold text-blue-900">🔗 เชื่อมโยงบัญชีผู้ใช้ (Login Account)</span></label>
-                            <select className="select select-bordered w-full" value={formData.userId} onChange={(e) => handleUserSelect(e.target.value)}>
-                                <option value="">-- ไม่เชื่อมโยง (ข้อมูลแสดงผลเท่านั้น) --</option>
-                                {users.map(u => (<option key={u.id} value={u.id}>{u.email} ({u.name})</option>))}
-                            </select>
-                            <div className="label pb-0">
-                                <span className="label-text-alt opacity-60">เลือกบัญชีผู้ใช้เพื่อให้เจ้าตัวสามารถ Login เข้ามาแก้ไขข้อมูลตัวเองได้</span>
-                            </div>
-                        </div>
+            <FormSection title="ข้อมูลทั่วไป (General Info)" badge="1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                    {/* User Link Section */}
+                    <div className="md:col-span-2 p-4 rounded-lg border border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-900/50">
+                        <Label className="text-blue-900 dark:text-blue-300 font-bold mb-2 block">🔗 เชื่อมโยงบัญชีผู้ใช้ (Login Account)</Label>
+                        <Select className="w-full bg-background" value={formData.userId} onChange={(e) => handleUserSelect(e.target.value)}>
+                            <option value="">-- ไม่เชื่อมโยง (ข้อมูลแสดงผลเท่านั้น) --</option>
+                            {users.map(u => (<option key={u.id} value={u.id}>{u.email} ({u.name})</option>))}
+                        </Select>
+                        <p className="text-xs text-muted-foreground mt-2">เลือกบัญชีผู้ใช้เพื่อให้เจ้าตัวสามารถ Login เข้ามาแก้ไขข้อมูลตัวเองได้</p>
+                    </div>
 
-                        {/* Name TH */}
-                        <div className="form-control">
-                            <label className="label"><span className="label-text font-medium">คำนำหน้า (ไทย)</span></label>
-                            <input type="text" className="input input-bordered focus:input-primary" value={formData.prefixTh} onChange={e => setFormData({ ...formData, prefixTh: e.target.value })} placeholder="เช่น ผศ., ดร." />
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text font-medium">ชื่อ (ไทย) <span className="text-error">*</span></span></label>
-                            <input type="text" className="input input-bordered focus:input-primary" required value={formData.firstNameTh} onChange={e => setFormData({ ...formData, firstNameTh: e.target.value })} />
-                        </div>
-                        <div className="form-control md:col-span-2">
-                            <label className="label"><span className="label-text font-medium">นามสกุล (ไทย) <span className="text-error">*</span></span></label>
-                            <input type="text" className="input input-bordered focus:input-primary" required value={formData.lastNameTh} onChange={e => setFormData({ ...formData, lastNameTh: e.target.value })} />
-                        </div>
+                    {/* Name TH */}
+                    <div className="space-y-2">
+                        <Label>คำนำหน้า (ไทย)</Label>
+                        <Input value={formData.prefixTh} onChange={e => setFormData({ ...formData, prefixTh: e.target.value })} placeholder="เช่น ผศ., ดร." />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>ชื่อ (ไทย) <span className="text-destructive">*</span></Label>
+                        <Input required value={formData.firstNameTh} onChange={e => setFormData({ ...formData, firstNameTh: e.target.value })} />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                        <Label>นามสกุล (ไทย) <span className="text-destructive">*</span></Label>
+                        <Input required value={formData.lastNameTh} onChange={e => setFormData({ ...formData, lastNameTh: e.target.value })} />
+                    </div>
 
-                        {/* Name EN */}
-                        <div className="divider md:col-span-2 text-xs opacity-50 uppercase tracking-widest">English Name</div>
+                    {/* Name EN */}
+                    <div className="md:col-span-2 relative py-2">
+                        <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">English Name</span></div>
+                    </div>
 
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">Prefix (EN)</span></label>
-                            <input type="text" className="input input-bordered" value={formData.prefixEn} onChange={e => setFormData({ ...formData, prefixEn: e.target.value })} placeholder="e.g. Dr., Asst. Prof." />
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">First Name (EN)</span></label>
-                            <input type="text" className="input input-bordered" value={formData.firstNameEn} onChange={e => setFormData({ ...formData, firstNameEn: e.target.value })} />
-                        </div>
-                        <div className="form-control md:col-span-2">
-                            <label className="label"><span className="label-text">Last Name (EN)</span></label>
-                            <input type="text" className="input input-bordered" value={formData.lastNameEn} onChange={e => setFormData({ ...formData, lastNameEn: e.target.value })} />
-                        </div>
+                    <div className="space-y-2">
+                        <Label>Prefix (EN)</Label>
+                        <Input value={formData.prefixEn} onChange={e => setFormData({ ...formData, prefixEn: e.target.value })} placeholder="e.g. Dr., Asst. Prof." />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>First Name (EN)</Label>
+                        <Input value={formData.firstNameEn} onChange={e => setFormData({ ...formData, firstNameEn: e.target.value })} />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                        <Label>Last Name (EN)</Label>
+                        <Input value={formData.lastNameEn} onChange={e => setFormData({ ...formData, lastNameEn: e.target.value })} />
+                    </div>
 
-                        {/* Image Upload */}
-                        <div className="form-control md:col-span-2 mt-4 p-4 border border-base-200 rounded-xl bg-base-50">
-                            <label className="label pt-0"><span className="label-text font-bold">รูปโปรไฟล์ (Profile Image)</span></label>
-                            <div className="flex flex-col md:flex-row gap-6 items-start">
-                                <div className="relative group">
-                                    <div className={`aspect-[3/4] w-32 bg-base-200 rounded-lg overflow-hidden border-2 border-dashed border-base-300 shadow-sm relative ${uploading ? 'opacity-50' : ''}`}>
-                                        {formData.imageUrl ? (
-                                            <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Error'} />
-                                        ) : (
-                                            <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 text-xs p-2 text-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 mb-1">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                                                </svg>
-                                                <span>No Image</span>
-                                            </div>
-                                        )}
-                                        {uploading && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                                <span className="loading loading-spinner text-white"></span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <button
-                                        type="button"
-                                        className="btn btn-xs btn-circle absolute -top-2 -right-2 bg-base-100 shadow-md border-base-300"
-                                        onClick={() => setFormData({ ...formData, imageUrl: '' })}
-                                        disabled={!formData.imageUrl}
-                                    >✕</button>
-                                </div>
-
-                                <div className="flex-1 w-full space-y-3">
-                                    <div className="flex flex-col gap-2">
-                                        <input
-                                            ref={fileInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            className="file-input file-input-bordered file-input-sm w-full max-w-xs"
-                                            onChange={handleFileUpload}
-                                            disabled={uploading}
+                    {/* Image Upload */}
+                    <div className="md:col-span-2 mt-2 p-6 border rounded-xl bg-muted/20">
+                        <Label className=" font-bold mb-4 block">รูปโปรไฟล์ (Profile Image)</Label>
+                        <div className="flex flex-col md:flex-row gap-6 items-start">
+                            <div className="relative group shrink-0">
+                                <div className={`aspect-[3/4] w-32 bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25 shadow-sm relative flex items-center justify-center ${uploading ? 'opacity-50' : ''}`}>
+                                    {formData.imageUrl ? (
+                                        <img
+                                            src={formData.imageUrl.startsWith('http') ? formData.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'}${formData.imageUrl}`}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Error'}
                                         />
-                                        <p className="text-xs text-gray-500">
-                                            รองรับ JPG, PNG. ขนาดแนะนำ: ไม่เกิน 2MB. ระบบจะปรับขนาดและแปลงเป็น WebP อัตโนมัติ
-                                        </p>
-                                    </div>
-                                    <div className="divider my-1 text-xs text-gray-400">หรือ</div>
-                                    <input
-                                        type="text"
-                                        className="input input-sm input-bordered w-full"
-                                        value={formData.imageUrl}
-                                        placeholder="วาง URL ของรูปภาพโดยตรง..."
-                                        onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                                        disabled={uploading}
-                                    />
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center text-muted-foreground text-xs p-2 text-center">
+                                            <ImageIcon className="w-8 h-8 mb-1 opacity-50" />
+                                            <span>No Image</span>
+                                        </div>
+                                    )}
+                                    {uploading && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                        </div>
+                                    )}
                                 </div>
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full shadow-md"
+                                    onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                                    disabled={!formData.imageUrl}
+                                >
+                                    <X className="h-3 w-3" />
+                                </Button>
                             </div>
-                        </div>
 
-                        <div className="form-control md:col-span-2">
-                            <label className="label"><span className="label-text font-medium">อีเมลสำหรับติดต่อ (Contact Email)</span></label>
-                            <input type="email" className="input input-bordered" value={formData.contactEmail} onChange={e => setFormData({ ...formData, contactEmail: e.target.value })} placeholder="example@crru.ac.th" />
+                            <div className="flex-1 w-full space-y-4">
+                                <div className="space-y-2">
+                                    <Input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileUpload}
+                                        disabled={uploading}
+                                        className="max-w-xs"
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        รองรับ JPG, PNG. ขนาดแนะนำ: ไม่เกิน 2MB. ระบบจะปรับขนาดอัตโนมัติ
+                                    </p>
+                                </div>
+                                <div className="relative py-1">
+                                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                                    <div className="relative flex justify-center text-xs"><span className="bg-muted/20 px-2 text-muted-foreground">หรือใช้ URL</span></div>
+                                </div>
+                                <Input
+                                    value={formData.imageUrl}
+                                    placeholder="วาง URL ของรูปภาพโดยตรง..."
+                                    onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
+                                    disabled={uploading}
+                                />
+                            </div>
                         </div>
                     </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                        <Label>อีเมลสำหรับติดต่อ (Contact Email)</Label>
+                        <Input type="email" value={formData.contactEmail} onChange={e => setFormData({ ...formData, contactEmail: e.target.value })} placeholder="example@crru.ac.th" />
+                    </div>
                 </div>
-            </div>
+            </FormSection>
 
             {/* 2. Position & Status */}
-            <div className="collapse collapse-arrow bg-base-200 border border-base-300">
-                <input type="radio" name="staff_accordion" />
-                <div className="collapse-title text-xl font-medium flex items-center gap-2">
-                    <span className="badge badge-secondary badge-lg">2</span> ตำแหน่งและสังกัด (Position & Dept)
-                </div>
-                <div className="collapse-content pt-4 bg-base-100">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="form-control">
-                            <label className="label"><span className="label-text font-medium">ประเภทบุคลากร <span className="text-error">*</span></span></label>
-                            <select className="select select-bordered" value={formData.staffType} onChange={e => setFormData({ ...formData, staffType: e.target.value as any })}>
-                                <option value="ACADEMIC">👨‍🏫 สายวิชาการ (Academic)</option>
-                                <option value="SUPPORT">🛠️ สายสนับสนุน (Support)</option>
-                            </select>
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text font-medium">สังกัด (Department) <span className="text-error">*</span></span></label>
-                            <select className="select select-bordered" required value={formData.departmentId} onChange={e => setFormData({ ...formData, departmentId: e.target.value })}>
-                                <option value="">-- เลือกสังกัด --</option>
-                                {departments.map(dept => (<option key={dept.id} value={dept.id}>{dept.nameTh}</option>))}
-                            </select>
-                        </div>
+            <FormSection title="ตำแหน่งและสังกัด (Position & Dept)" badge="2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label>ประเภทบุคลากร <span className="text-destructive">*</span></Label>
+                        <Select value={formData.staffType} onChange={e => setFormData({ ...formData, staffType: e.target.value as any })}>
+                            <option value="ACADEMIC">👨‍🏫 สายวิชาการ (Academic)</option>
+                            <option value="SUPPORT">🛠️ สายสนับสนุน (Support)</option>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>สังกัด (Department) <span className="text-destructive">*</span></Label>
+                        <Select required value={formData.departmentId} onChange={e => setFormData({ ...formData, departmentId: e.target.value })}>
+                            <option value="">-- เลือกสังกัด --</option>
+                            {departments.map(dept => (<option key={dept.id} value={dept.id}>{dept.nameTh}</option>))}
+                        </Select>
+                    </div>
 
-                        {formData.staffType === 'ACADEMIC' && (
-                            <div className="form-control">
-                                <label className="label"><span className="label-text font-medium">ตำแหน่งทางวิชาการ</span></label>
-                                <select className="select select-bordered" value={formData.academicPosition} onChange={e => setFormData({ ...formData, academicPosition: e.target.value })}>
-                                    <option value="">-- ไม่มี --</option>
-                                    {ACADEMIC_POSITIONS.map(p => (<option key={p.value} value={p.value}>{p.label}</option>))}
-                                </select>
+                    {formData.staffType === 'ACADEMIC' && (
+                        <div className="space-y-2">
+                            <Label>ตำแหน่งทางวิชาการ</Label>
+                            <Select value={formData.academicPosition} onChange={e => setFormData({ ...formData, academicPosition: e.target.value })}>
+                                <option value="">-- ไม่มี --</option>
+                                {ACADEMIC_POSITIONS.map(p => (<option key={p.value} value={p.value}>{p.label}</option>))}
+                            </Select>
+                        </div>
+                    )}
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                            <Label>ตำแหน่งบริหาร / หน้าที่</Label>
+                            <a href="/admin/positions" target="_blank" className="text-[10px] text-blue-500 hover:underline">จัดการตัวเลือก +</a>
+                        </div>
+                        <Select value={formData.adminPosition} onChange={e => setFormData({ ...formData, adminPosition: e.target.value })}>
+                            <option value="">-- เลือกตำแหน่ง / หน้าที่ --</option>
+                            {positions.sort((a, b) => (a.level || 0) - (b.level || 0)).map(p => (
+                                <option key={p.id} value={p.nameTh}>{p.nameTh}</option>
+                            ))}
+                            {/* Fallback for existing data not in list */}
+                            {formData.adminPosition && !positions.some(p => p.nameTh === formData.adminPosition) && (
+                                <option value={formData.adminPosition}>{formData.adminPosition} (Custom/Legacy)</option>
+                            )}
+                        </Select>
+                    </div>
+
+                    <div className="md:col-span-2 mt-2">
+                        <label className="flex items-start gap-4 p-4 border border-yellow-500/30 bg-yellow-500/5 rounded-xl hover:bg-yellow-500/10 transition-colors cursor-pointer">
+                            <input
+                                type="checkbox"
+                                className="mt-1 h-4 w-4 rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
+                                checked={formData.isExecutive}
+                                onChange={e => setFormData({ ...formData, isExecutive: e.target.checked })}
+                            />
+                            <div>
+                                <span className="font-bold text-foreground block">ผู้บริหารระดับสูง (Executive Committee)</span>
+                                <p className="text-xs text-muted-foreground mt-1">แสดงในหน้าทำเนียบผู้บริหารของคณะ</p>
                             </div>
-                        )}
-                        <div className="form-control">
-                            <label className="label"><span className="label-text font-medium">ตำแหน่งบริหาร / หน้าที่</span></label>
-                            <input type="text" className="input input-bordered" value={formData.adminPosition} onChange={e => setFormData({ ...formData, adminPosition: e.target.value })} placeholder="เช่น คณบดี, หัวหน้าสำนักงาน" />
-                        </div>
-
-                        <div className="form-control md:col-span-2 mt-2">
-                            <label className="cursor-pointer label justify-start gap-4 p-4 border border-warning/30 bg-warning/5 rounded-xl hover:bg-warning/10 transition-colors">
-                                <input type="checkbox" className="checkbox checkbox-warning" checked={formData.isExecutive} onChange={e => setFormData({ ...formData, isExecutive: e.target.checked })} />
-                                <div>
-                                    <span className="label-text font-bold text-gray-800">ผู้บริหารระดับสูง (Executive Committee)</span>
-                                    <p className="text-xs opacity-60 mt-1">แสดงในหน้าทำเนียบผู้บริหารของคณะ</p>
-                                </div>
-                            </label>
-                        </div>
+                        </label>
                     </div>
                 </div>
-            </div>
+            </FormSection>
 
             {/* 3. Education & Expertise */}
-            <div className="collapse collapse-arrow bg-base-200 border border-base-300">
-                <input type="radio" name="staff_accordion" />
-                <div className="collapse-title text-xl font-medium flex items-center gap-2">
-                    <span className="badge badge-accent badge-lg text-white">3</span> การศึกษาและความเชี่ยวชาญ
-                </div>
-                <div className="collapse-content pt-4 bg-base-100">
-                    <div className="space-y-6">
-
-                        {/* Education List */}
-                        <div>
-                            <h4 className="font-bold mb-3 text-sm uppercase text-gray-500 tracking-wider flex items-center gap-2">
-                                🎓 ประวัติการศึกษา (Education)
-                            </h4>
-                            <div className="flex gap-2 mb-3 items-end">
-                                <div className="w-1/3">
-                                    <label className="label py-1 text-xs opacity-50">ระดับ</label>
-                                    <select className="select select-sm select-bordered w-full" value={newEduLevel} onChange={e => setNewEduLevel(e.target.value)}>
-                                        {EDU_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
-                                    </select>
-                                </div>
-                                <div className="flex-1">
-                                    <label className="label py-1 text-xs opacity-50">รายละเอียด</label>
-                                    <input type="text" className="input input-sm input-bordered w-full" placeholder="ระบุวุฒิ, สาขา, สถาบัน..." value={newEduDetail} onChange={e => setNewEduDetail(e.target.value)} />
-                                </div>
-                                <button type="button" onClick={addEducation} className="btn btn-sm btn-primary">เพิ่ม</button>
+            <FormSection title="การศึกษาและความเชี่ยวชาญ" badge="3">
+                <div className="space-y-8">
+                    {/* Education List */}
+                    <div>
+                        <h4 className="font-bold mb-4 text-sm uppercase text-muted-foreground tracking-wider flex items-center gap-2">
+                            🎓 ประวัติการศึกษา (Education)
+                        </h4>
+                        <div className="flex gap-2 mb-4 items-end">
+                            <div className="w-1/3 space-y-2">
+                                <Label className="text-xs">ระดับ</Label>
+                                <Select value={newEduLevel} onChange={e => setNewEduLevel(e.target.value)}>
+                                    {EDU_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+                                </Select>
                             </div>
-                            <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 min-h-[60px] space-y-2">
-                                {eduList.length === 0 && <p className="text-xs text-gray-400 text-center py-4">ยังไม่มีข้อมูลการศึกษา</p>}
-                                {eduList.map((edu, idx) => (
-                                    <div key={idx} className="flex justify-between items-center bg-white px-4 py-3 rounded-lg border border-gray-100 shadow-sm text-sm group hover:shadow-md transition-shadow">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`badge badge-sm ${edu.level === 'DOCTORAL' ? 'badge-error' : edu.level === 'MASTER' ? 'badge-warning' : 'badge-info'} text-white`}>
-                                                {EDU_LEVELS.find(l => l.value === edu.level)?.label.split(' ')[0]}
-                                            </div>
-                                            <span>{edu.detail}</span>
-                                        </div>
-                                        <button type="button" onClick={() => {
+                            <div className="flex-1 space-y-2">
+                                <Label className="text-xs">รายละเอียด</Label>
+                                <Input placeholder="ระบุวุฒิ, สาขา, สถาบัน..." value={newEduDetail} onChange={e => setNewEduDetail(e.target.value)} />
+                            </div>
+                            <Button type="button" onClick={addEducation}>เพิ่ม</Button>
+                        </div>
+                        <div className="bg-muted/30 rounded-xl border p-4 min-h-[60px] space-y-2">
+                            {eduList.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">ยังไม่มีข้อมูลการศึกษา</p>}
+                            {eduList.map((edu, idx) => (
+                                <div key={idx} className="flex justify-between items-center bg-card px-4 py-3 rounded-lg border shadow-sm text-sm group hover:border-primary/50 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <Badge variant={edu.level === 'DOCTORAL' ? 'destructive' : edu.level === 'MASTER' ? 'warning' : edu.level === 'BACHELOR' ? 'info' : 'secondary'}>
+                                            {EDU_LEVELS.find(l => l.value === edu.level)?.label.split(' ')[0]}
+                                        </Badge>
+                                        <span>{edu.detail}</span>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                                        onClick={() => {
                                             const newList = [...eduList];
                                             newList.splice(idx, 1);
                                             setEduList(newList);
-                                        }} className="btn btn-xs btn-circle btn-ghost text-red-500 opacity-20 group-hover:opacity-100 hover:bg-red-50">✕</button>
-                                    </div>
-                                ))}
-                            </div>
+                                        }}
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </div>
+                            ))}
                         </div>
-
-                        {/* Expertise Tags */}
-                        <div>
-                            <h4 className="font-bold mb-3 text-sm uppercase text-gray-500 tracking-wider flex items-center gap-2">
-                                🧠 ความเชี่ยวชาญ (Expertise)
-                            </h4>
-                            <div className="flex gap-2 mb-3">
-                                <input
-                                    type="text"
-                                    className="input input-sm input-bordered flex-1"
-                                    placeholder="เพิ่มความเชี่ยวชาญ (เช่น Sociology, Data Science, การพัฒนาชุมชน)..."
-                                    value={newExpertise}
-                                    onChange={e => setNewExpertise(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addExpertise(); } }}
-                                />
-                                <button type="button" onClick={addExpertise} className="btn btn-sm btn-secondary">เพิ่ม Tag</button>
-                            </div>
-                            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 min-h-[60px] flex flex-wrap gap-2">
-                                {expertiseList.length === 0 && <p className="text-xs text-gray-400 w-full text-center py-2">ยังไม่มีข้อมูลความเชี่ยวชาญ</p>}
-                                {expertiseList.map((tag, idx) => (
-                                    <div key={idx} className="badge badge-lg bg-white border-gray-200 shadow-sm gap-2 pl-3 pr-1 py-4 hover:shadow-md transition-shadow">
-                                        {tag}
-                                        <button type="button" onClick={() => {
-                                            setExpertiseList(expertiseList.filter(t => t !== tag));
-                                        }} className="btn btn-xs btn-circle btn-ghost text-gray-400 hover:text-red-500 hover:bg-red-50">✕</button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
                     </div>
-                </div>
-            </div>
 
-            <div className="modal-action mt-6 flex justify-between items-center border-t border-base-200 pt-4">
-                <button type="button" onClick={onCancel} className="btn btn-ghost" disabled={isLoading}>ยกเลิก</button>
-                <button type="submit" className="btn btn-primary px-8" disabled={isLoading}>
-                    {isLoading ? <span className="loading loading-spinner"></span> : 'บันทึกข้อมูล'}
-                </button>
+                    {/* Expertise Tags */}
+                    <div>
+                        <h4 className="font-bold mb-4 text-sm uppercase text-muted-foreground tracking-wider flex items-center gap-2">
+                            🧠 ความเชี่ยวชาญ (Expertise)
+                        </h4>
+                        <div className="flex gap-2 mb-4">
+                            <Input
+                                className="flex-1"
+                                placeholder="เพิ่มความเชี่ยวชาญ (เช่น Sociology, Data Science)..."
+                                value={newExpertise}
+                                onChange={e => setNewExpertise(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addExpertise(); } }}
+                            />
+                            <Button type="button" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={addExpertise}>เพิ่ม Tag</Button>
+                        </div>
+                        <div className="bg-muted/30 rounded-xl border p-4 min-h-[60px] flex flex-wrap gap-2">
+                            {expertiseList.length === 0 && <p className="text-xs text-muted-foreground w-full text-center py-2">ยังไม่มีข้อมูลความเชี่ยวชาญ</p>}
+                            {expertiseList.map((tag, idx) => (
+                                <Badge key={idx} variant="outline" className="bg-card py-2 pl-3 pr-2 gap-2 text-sm">
+                                    {tag}
+                                    <button
+                                        type="button"
+                                        onClick={() => setExpertiseList(expertiseList.filter(t => t !== tag))}
+                                        className="hover:bg-destructive/10 hover:text-destructive rounded-full p-0.5 transition-colors"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </Badge>
+                            ))}
+                        </div>
+                    </div>
+
+                </div>
+            </FormSection>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>ยกเลิก</Button>
+                <Button type="submit" disabled={isLoading}>
+                    {isLoading ? <span className="animate-spin mr-2">⏳</span> : null}
+                    บันทึกข้อมูล
+                </Button>
             </div>
         </form>
     );

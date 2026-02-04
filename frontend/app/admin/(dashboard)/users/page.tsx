@@ -1,6 +1,38 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select } from "@/components/ui/select";
+import {
+    Search,
+    UserCog,
+    Shield,
+    Pencil,
+    Trash2,
+    Check,
+    X
+} from "lucide-react";
 
 interface User {
     id: string;
@@ -13,12 +45,11 @@ interface User {
     createdAt: string;
 }
 
-// ใช้งานแค่ enum เพื่อแสดงผลและเลือก แต่เก็บจริงเป็น array hierarchy
 const ROLE_OPTIONS = [
-    { value: 'ADMIN', label: 'ผู้ดูแลระบบ (Admin)', desc: 'จัดการทุกอย่างในระบบ', color: 'badge-error' },
-    { value: 'EDITOR', label: 'บรรณาธิการ (Editor)', desc: 'จัดการเนื้อหา ข่าว หลักสูตร บุคลากร', color: 'badge-warning' },
-    { value: 'STAFF', label: 'บุคลากร (Staff)', desc: 'เข้าสู่ระบบและแก้ไขข้อมูลส่วนตัว', color: 'badge-info' },
-    { value: 'GUEST', label: 'ผู้เยี่ยมชม (Guest)', desc: 'ไม่มีสิทธิ์จัดการใดๆ', color: 'badge-ghost' },
+    { value: 'ADMIN', label: 'ผู้ดูแลระบบ (Admin)', desc: 'จัดการทุกอย่างในระบบ', variant: 'purple' as const },
+    { value: 'EDITOR', label: 'บรรณาธิการ (Editor)', desc: 'จัดการเนื้อหา ข่าว หลักสูตร บุคลากร', variant: 'warning' as const },
+    { value: 'STAFF', label: 'บุคลากร (Staff)', desc: 'เข้าสู่ระบบและแก้ไขข้อมูลส่วนตัว', variant: 'info' as const },
+    { value: 'GUEST', label: 'ผู้เยี่ยมชม (Guest)', desc: 'ไม่มีสิทธิ์จัดการใดๆ', variant: 'gray' as const },
 ];
 
 export default function AdminUsersPage() {
@@ -26,13 +57,17 @@ export default function AdminUsersPage() {
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState<string | null>(null);
 
-    // สำหรับ Modal เลือก Role แบบ Single Selection
+    // Modal States
+    const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    // Selected Data
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [selectedRoleLevel, setSelectedRoleLevel] = useState<string>('GUEST');
-
-    // Search & Delete
-    const [searchTerm, setSearchTerm] = useState('');
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
+
+    // Search
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchUsers();
@@ -46,13 +81,9 @@ export default function AdminUsersPage() {
             const res = await fetch(`${apiUrl}/api/auth/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
             if (res.ok) {
                 const data = await res.json();
-                console.log('Fetched Users:', data); // Debug Log
                 setUsers(data);
-            } else {
-                console.error('Fetch Check Failed:', res.status, res.statusText);
             }
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -80,12 +111,8 @@ export default function AdminUsersPage() {
 
     const handleSaveRole = async () => {
         if (!selectedUser) return;
-
         const newRoles = getHierarchicalRoles(selectedRoleLevel);
         const userId = selectedUser.id;
-
-        console.log('Saving Roles:', { userId, newRoles }); // Debug
-
         const token = localStorage.getItem('admin_token');
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
         setUpdating(userId);
@@ -100,23 +127,12 @@ export default function AdminUsersPage() {
                 body: JSON.stringify({ roles: newRoles }),
             });
 
-            console.log('Update Response:', res.status, res.statusText); // Debug
-
             if (res.ok) {
-                const updatedUser = await res.json();
-                console.log('Updated User:', updatedUser); // Debug
                 await fetchUsers();
-
-                // Close Native Dialog
-                const modal = document.getElementById('role_modal') as HTMLDialogElement | null;
-                if (modal) {
-                    modal.close();
-                }
+                setIsRoleModalOpen(false);
                 setSelectedUser(null);
             } else {
-                const errorText = await res.text();
-                console.error('Update Failed:', errorText); // Debug
-                alert(`เกิดข้อผิดพลาด: ${errorText}`);
+                alert(`เกิดข้อผิดพลาด: ${await res.text()}`);
             }
         } catch (error) {
             console.error('Error updating roles:', error);
@@ -130,7 +146,6 @@ export default function AdminUsersPage() {
         const token = localStorage.getItem('admin_token');
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
         setUpdating(userId);
-
         try {
             const res = await fetch(`${apiUrl}/api/auth/users/${userId}/active`, {
                 method: 'PATCH',
@@ -140,21 +155,12 @@ export default function AdminUsersPage() {
                 },
                 body: JSON.stringify({ isActive }),
             });
-
-            if (res.ok) {
-                await fetchUsers();
-            }
+            if (res.ok) await fetchUsers();
         } catch (error) {
             console.error('Error toggling user:', error);
         } finally {
             setUpdating(null);
         }
-    };
-
-    const confirmDeleteUser = (user: User) => {
-        setUserToDelete(user);
-        const modal = document.getElementById('delete_modal') as HTMLDialogElement | null;
-        if (modal) modal.showModal();
     };
 
     const handleDeleteUser = async () => {
@@ -167,256 +173,231 @@ export default function AdminUsersPage() {
         try {
             const res = await fetch(`${apiUrl}/api/auth/users/${userId}`, {
                 method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
             });
-
             if (res.ok) {
                 await fetchUsers();
-                const modal = document.getElementById('delete_modal') as HTMLDialogElement | null;
-                if (modal) modal.close();
+                setIsDeleteModalOpen(false);
                 setUserToDelete(null);
             } else {
                 alert('เกิดข้อผิดพลาดในการลบผู้ใช้');
             }
         } catch (error) {
             console.error('Error deleting user:', error);
-            alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
         } finally {
             setUpdating(null);
         }
     };
 
-    const formatDate = (dateString: string | null) => {
-        if (!dateString) return '-';
-        return new Date(dateString).toLocaleString('th-TH');
-    };
-
     const openEditModal = (user: User) => {
-        console.log('Open Edit Modal:', user.id);
         setSelectedUser(user);
         setSelectedRoleLevel(getPrimaryRole(user.roles));
-
-        // Show Native Dialog
-        const modal = document.getElementById('role_modal') as HTMLDialogElement | null;
-        if (modal) {
-            modal.showModal();
-        }
+        setIsRoleModalOpen(true);
     };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <span className="loading loading-spinner loading-lg"></span>
-            </div>
-        );
-    }
+    const filteredUsers = users.filter(user =>
+        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (loading) return (
+        <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+    );
 
     return (
-        <div className="space-y-6 relative">
-            {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold">⚙️ จัดการผู้ใช้และสิทธิ์</h1>
-                <p className="opacity-70">กำหนดสิทธิ์การเข้าถึงระบบตามลำดับขั้น (Hierarchy)</p>
-            </div>
+        <div className="space-y-6">
+            <div className="flex flex-col gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                        <UserCog className="w-6 h-6 text-primary" />
+                        จัดการผู้ใช้และสิทธิ์
+                    </h1>
+                    <p className="text-muted-foreground mt-1 text-sm">กำหนดสิทธิ์การเข้าถึงระบบตามลำดับขั้น (Hierarchy)</p>
+                </div>
 
-            {/* Role Legend */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                {ROLE_OPTIONS.map(role => (
-                    <div key={role.value} className="bg-base-100 p-3 rounded-lg shadow-sm border border-base-200">
-                        <span className={`badge ${role.color} mb-1`}>{role.value}</span>
-                        <p className="text-xs opacity-70">{role.desc}</p>
-                    </div>
-                ))}
+                {/* Role Legend Summary */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {ROLE_OPTIONS.map(role => (
+                        <Card key={role.value} className="bg-muted/50 border-none shadow-sm">
+                            <CardContent className="p-3">
+                                <Badge variant={role.variant} className="mb-1">{role.value}</Badge>
+                                <p className="text-xs text-muted-foreground">{role.desc}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             </div>
 
             {/* Search Bar */}
-            <div className="flex justify-between items-center bg-base-100 p-4 rounded-lg shadow-sm">
-                <div className="form-control w-full max-w-sm">
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder="ค้นหาชื่อ หรือ อีเมล..."
-                            className="input input-bordered w-full pr-10"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <button className="absolute right-0 top-0 h-full px-3 text-base-content/50">
-                            🔍
-                        </button>
-                    </div>
+            <div className="flex justify-between items-center gap-4 bg-card p-4 rounded-lg border shadow-sm">
+                <div className="relative w-full max-w-sm">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="ค้นหาชื่อ หรือ อีเมล..."
+                        className="pl-9"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
-                <div className="text-sm opacity-60">
-                    ทั้งหมด {users.filter(u => u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase())).length} คน
+                <div className="text-sm text-muted-foreground whitespace-nowrap hidden sm:block">
+                    ทั้งหมด {filteredUsers.length} คน
                 </div>
             </div>
 
             {/* Users Table */}
-            <div className="card bg-base-100 shadow-lg">
-                <div className="card-body">
-                    <div className="overflow-x-auto">
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>ผู้ใช้</th>
-                                    <th>ระดับสิทธิ์</th>
-                                    <th>สถานะ</th>
-                                    <th>เข้าสู่ระบบล่าสุด</th>
-                                    <th>จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users
-                                    .filter(user =>
-                                        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-                                    )
-                                    .map((user) => {
-                                        const primaryRole = getPrimaryRole(user.roles);
-                                        const roleInfo = ROLE_OPTIONS.find(r => r.value === primaryRole);
+            <Card>
+                <CardContent className="p-0">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>ผู้ใช้</TableHead>
+                                <TableHead>ระดับสิทธิ์</TableHead>
+                                <TableHead>สถานะ</TableHead>
+                                <TableHead>เข้าสู่ระบบล่าสุด</TableHead>
+                                <TableHead className="text-right">จัดการ</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredUsers.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="h-48 text-center text-muted-foreground">
+                                        ไม่พบข้อมูลผู้ใช้
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                filteredUsers.map((user) => {
+                                    const primaryRole = getPrimaryRole(user.roles);
+                                    const roleInfo = ROLE_OPTIONS.find(r => r.value === primaryRole);
 
-                                        return (
-                                            <tr key={user.id} className={!user.isActive ? 'opacity-50' : ''}>
-                                                <td>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="avatar">
-                                                            <div className="w-10 rounded-full">
-                                                                {user.avatar ? (
-                                                                    <img src={user.avatar} alt={user.name || ''} />
-                                                                ) : (
-                                                                    <div className="bg-primary/20 w-full h-full flex items-center justify-center text-primary font-bold">
-                                                                        {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-bold">{user.name || '-'}</div>
-                                                            <div className="text-xs opacity-60">{user.email}</div>
-                                                        </div>
+                                    return (
+                                        <TableRow key={user.id} className={!user.isActive ? 'opacity-50 bg-muted/30' : ''}>
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar>
+                                                        <AvatarImage src={user.avatar || ''} />
+                                                        <AvatarFallback>{user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <div className="font-medium text-sm">{user.name || '-'}</div>
+                                                        <div className="text-xs text-muted-foreground">{user.email}</div>
                                                     </div>
-                                                </td>
-                                                <td>
-                                                    <span className={`badge ${roleInfo?.color || 'badge-ghost'}`}>
-                                                        {primaryRole}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <input
-                                                        type="checkbox"
-                                                        className="toggle toggle-success toggle-sm"
-                                                        checked={user.isActive}
-                                                        onChange={(e) => toggleUserActive(user.id, e.target.checked)}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={roleInfo?.variant || 'secondary'}>
+                                                    {primaryRole}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => toggleUserActive(user.id, !user.isActive)}
                                                         disabled={updating === user.id}
-                                                    />
-                                                </td>
-                                                <td className="text-sm">{formatDate(user.lastLoginAt)}</td>
-                                                <td>
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => openEditModal(user)}
-                                                            className="btn btn-ghost btn-xs text-primary tooltip"
-                                                            data-tip="แก้ไขสิทธิ์"
-                                                            disabled={updating === user.id}
-                                                        >
-                                                            ✎
-                                                        </button>
-                                                        <button
-                                                            onClick={() => confirmDeleteUser(user)}
-                                                            className="btn btn-ghost btn-xs text-error tooltip"
-                                                            data-tip="ลบผู้ใช้"
-                                                            disabled={updating === user.id}
-                                                        >
-                                                            🗑️
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                {users.filter(u => u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
-                                    <tr>
-                                        <td colSpan={5} className="text-center py-8 opacity-50">ไม่พบข้อมูลผู้ใช้</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                                        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${user.isActive ? 'bg-green-500' : 'bg-gray-200'}`}
+                                                    >
+                                                        <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${user.isActive ? 'translate-x-4' : 'translate-x-0'}`} />
+                                                    </button>
+                                                    <span className="text-xs text-muted-foreground">{user.isActive ? 'Active' : 'Inactive'}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-sm text-muted-foreground">
+                                                {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString('th-TH') : '-'}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end gap-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => openEditModal(user)}
+                                                        className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                        disabled={updating === user.id}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => {
+                                                            setUserToDelete(user);
+                                                            setIsDeleteModalOpen(true);
+                                                        }}
+                                                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                                        disabled={updating === user.id}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+
+            {/* Role Edit Modal */}
+            <Dialog open={isRoleModalOpen} onOpenChange={setIsRoleModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>ปรับระดับสิทธิ์: {selectedUser?.name}</DialogTitle>
+                        <DialogDescription>
+                            เลือกระดับสิทธิ์ที่เหมาะสมสำหรับผู้ใช้นี้
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                        <div className="space-y-2">
+                            <Label>ระดับสิทธิ์ (Role Hierarchy)</Label>
+                            <Select
+                                value={selectedRoleLevel}
+                                onChange={(e) => setSelectedRoleLevel(e.target.value)}
+                            >
+                                {ROLE_OPTIONS.map(role => (
+                                    <option key={role.value} value={role.value}>
+                                        {role.label}
+                                    </option>
+                                ))}
+                            </Select>
+                        </div>
+                        <div className="p-3 bg-muted rounded-md text-sm text-muted-foreground border">
+                            <Shield className="w-4 h-4 inline mr-2 mb-0.5" />
+                            {ROLE_OPTIONS.find(r => r.value === selectedRoleLevel)?.desc}
+                        </div>
                     </div>
-                </div>
-            </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsRoleModalOpen(false)}>ยกเลิก</Button>
+                        <Button onClick={handleSaveRole} disabled={updating === selectedUser?.id}>
+                            {updating === selectedUser?.id ? 'บันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* Delete Confirmation Modal */}
-            <dialog id="delete_modal" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg text-error">ยืนยันการลบผู้ใช้</h3>
-                    <p className="py-4">คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ <strong>{userToDelete?.name || userToDelete?.email}</strong>? <br />การกระทำนี้ไม่สามารถย้อนกลับได้</p>
-                    <div className="modal-action">
-                        <form method="dialog">
-                            <button className="btn btn-ghost" onClick={() => setUserToDelete(null)}>ยกเลิก</button>
-                        </form>
-                        <button
-                            className="btn btn-error"
+            <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle className="text-destructive">ยืนยันการลบผู้ใช้</DialogTitle>
+                        <DialogDescription>
+                            คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ <strong>{userToDelete?.name || userToDelete?.email}</strong>?
+                            <br />การกระทำนี้ไม่สามารถย้อนกลับได้
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>ยกเลิก</Button>
+                        <Button
+                            variant="destructive"
                             onClick={handleDeleteUser}
                             disabled={updating === userToDelete?.id}
                         >
-                            {updating === userToDelete?.id ? <span className="loading loading-spinner"></span> : 'ยืนยันลบ'}
-                        </button>
-                    </div>
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button onClick={() => setUserToDelete(null)}>close</button>
-                </form>
-            </dialog>
-
-            {/* Standard DaisyUI Modal using <dialog> */}
-            <dialog id="role_modal" className="modal">
-                <div className="modal-box">
-                    <form method="dialog">
-                        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={() => setSelectedUser(null)}>✕</button>
-                    </form>
-
-                    <h3 className="font-bold text-lg mb-4">ปรับระดับสิทธิ์: {selectedUser?.name}</h3>
-
-                    <div className="form-control w-full">
-                        <label className="label">
-                            <span className="label-text">เลือกระดับสิทธิ์ (Hierarchy)</span>
-                        </label>
-                        <select
-                            className="select select-bordered w-full"
-                            value={selectedRoleLevel}
-                            onChange={(e) => setSelectedRoleLevel(e.target.value)}
-                        >
-                            {ROLE_OPTIONS.map(role => (
-                                <option key={role.value} value={role.value}>
-                                    {role.label}
-                                </option>
-                            ))}
-                        </select>
-                        <label className="label">
-                            <span className="label-text-alt text-gray-500">
-                                {ROLE_OPTIONS.find(r => r.value === selectedRoleLevel)?.desc}
-                            </span>
-                        </label>
-                    </div>
-
-                    <div className="modal-action mt-6">
-                        <form method="dialog">
-                            <button className="btn btn-ghost" onClick={() => setSelectedUser(null)}>ยกเลิก</button>
-                        </form>
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleSaveRole}
-                            disabled={updating === selectedUser?.id}
-                        >
-                            {updating === selectedUser?.id ? <span className="loading loading-spinner"></span> : 'บันทึก'}
-                        </button>
-                    </div>
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button onClick={() => setSelectedUser(null)}>close</button>
-                </form>
-            </dialog>
+                            ยืนยันลบ
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

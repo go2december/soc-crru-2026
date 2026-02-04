@@ -5,9 +5,14 @@ import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { eq } from 'drizzle-orm';
 
+import { UploadService } from '../upload/upload.service';
+
 @Injectable()
 export class StaffService {
-    constructor(private readonly drizzle: DrizzleService) { }
+    constructor(
+        private readonly drizzle: DrizzleService,
+        private readonly uploadService: UploadService
+    ) { }
 
     async create(createStaffDto: CreateStaffDto) {
         // Check if staff profile already exists for this user (only if userId is provided)
@@ -102,6 +107,15 @@ export class StaffService {
     }
 
     async update(id: string, updateStaffDto: UpdateStaffDto) {
+        // If image is being updated, check if we need to delete the old one
+        if (updateStaffDto.imageUrl) {
+            const currentStaff = await this.findOne(id);
+            if (currentStaff.imageUrl && currentStaff.imageUrl !== updateStaffDto.imageUrl) {
+                // Delete old image
+                await this.uploadService.deleteImage(currentStaff.imageUrl);
+            }
+        }
+
         const result = await this.drizzle.db
             .update(staffProfiles)
             .set(updateStaffDto)

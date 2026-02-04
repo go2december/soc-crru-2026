@@ -15,11 +15,13 @@ import {
     Menu,
     ChevronLeft,
     ExternalLink,
-    ShieldCheck
+    ShieldCheck,
+    Briefcase
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 interface User {
     id: string;
@@ -118,6 +120,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             items: [
                 { href: '/admin/staff', label: 'บุคลากร', icon: Users, minLevel: 2 },
                 { href: '/admin/departments', label: 'จัดการสังกัด', icon: Building2, minLevel: 3 },
+                { href: '/admin/positions', label: 'ตำแหน่ง/หน้าที่', icon: Briefcase, minLevel: 3 },
             ]
         },
         {
@@ -301,7 +304,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        <ModeToggle />
+                        <div className="w-px h-6 bg-border mx-1 hidden sm:block"></div>
                         <a
                             href="/"
                             target="_blank"

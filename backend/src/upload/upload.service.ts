@@ -44,4 +44,21 @@ export class UploadService {
             throw new BadRequestException('Failed to process image');
         }
     }
+
+    async deleteImage(imageUrl: string): Promise<void> {
+        if (!imageUrl) return;
+
+        // Extract filename from URL (e.g., /uploads/staff/abc.png -> abc.png)
+        const filename = path.basename(imageUrl);
+        const filepath = path.join(this.uploadDir, filename);
+
+        if (fs.existsSync(filepath)) {
+            try {
+                fs.unlinkSync(filepath);
+                console.log(`Deleted file: ${filepath}`);
+            } catch (error) {
+                console.error(`Failed to delete file: ${filepath}`, error);
+            }
+        }
+    }
 }

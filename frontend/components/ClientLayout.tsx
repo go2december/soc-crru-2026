@@ -14,9 +14,9 @@ export default function ClientLayout({
 
     if (isAdmin) {
         return (
-            <main className="flex-grow min-h-screen bg-base-200">
+            <>
                 {children}
-            </main>
+            </>
         );
     }
 
