@@ -11,12 +11,14 @@ export default function ClientLayout({
 }) {
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith('/admin');
+    const isChiangRaiStudies = pathname?.startsWith('/chiang-rai-studies');
 
-    if (isAdmin) {
+    // Exclude Admin and Chiang Rai Studies from main Navbar/Footer
+    if (isAdmin || isChiangRaiStudies) {
         return (
-            <>
+            <main className="flex-grow min-h-screen bg-base-200">
                 {children}
-            </>
+            </main>
         );
     }
 

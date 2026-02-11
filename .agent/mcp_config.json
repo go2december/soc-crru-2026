@@ -1,0 +1,24 @@
+{
+    "mcpServers": {
+        "context7": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@upstash/context7-mcp",
+                "--api-key",
+                "ctx7sk-9eb54f0f-1c9b-4020-868e-a437baa81ab2"
+            ]
+        },
+        "shadcn": {
+            "command": "npx",
+            "args": [
+                "shadcn@latest",
+                "mcp"
+            ]
+        },
+        "notebooklm-mcp": {
+            "command": "C:\\Users\\devil\\AppData\\Local\\Python\\pythoncore-3.14-64\\Scripts\\notebooklm-mcp.exe",
+            "args": []
+        }
+    }
+}

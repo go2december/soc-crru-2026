@@ -8,9 +8,9 @@ import { DepartmentsModule } from './departments/departments.module';
 import { StaffModule } from './staff/staff.module';
 import { AuthModule } from './auth/auth.module';
 import { NewsModule } from './news/news.module';
-import { AdminPositionsModule } from './admin-positions/admin-positions.module';
 
 import { UploadModule } from './upload/upload.module';
+import { ChiangRaiModule } from './chiang-rai/chiang-rai.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -26,10 +26,10 @@ import { join } from 'path';
     AuthModule,
     ProgramsModule,
     DepartmentsModule,
-    AdminPositionsModule,
     StaffModule,
     NewsModule,
     UploadModule,
+    ChiangRaiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

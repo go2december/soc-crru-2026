@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Kanit } from "next/font/google";
 import Link from "next/link";
 import ClientLayout from "@/components/ClientLayout";
-import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 // Google Fonts Setup
@@ -41,16 +40,9 @@ export default function RootLayout({
   return (
     <html lang="th" data-theme="socTheme" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
-        className={`${inter.variable} ${kanit.variable} font-sans antialiased bg-background text-foreground flex flex-col min-h-screen`}
+        className={`${inter.variable} ${kanit.variable} font-sans antialiased bg-white text-scholar-text flex flex-col min-h-screen`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ClientLayout>{children}</ClientLayout>
-        </ThemeProvider>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

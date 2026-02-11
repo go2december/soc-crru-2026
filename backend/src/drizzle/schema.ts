@@ -41,22 +41,11 @@ export const users = pgTable('users', {
 // 2. Organization & Personnel (ตาม Excel Schema)
 // ------------------------------------------
 
-// ------------------------------------------
-// 2. Organization & Personnel (ตาม Excel Schema)
-// ------------------------------------------
-
 export const departments = pgTable('departments', {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     nameTh: varchar('name_th', { length: 255 }).notNull(),
     nameEn: varchar('name_en', { length: 255 }),
     isAcademicUnit: boolean('is_academic_unit').default(true).notNull(), // สาขาวิชา vs หน่วยงานสนับสนุน
-});
-
-export const adminPositions = pgTable('admin_positions', {
-    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-    nameTh: varchar('name_th', { length: 255 }).notNull(),
-    nameEn: varchar('name_en', { length: 255 }),
-    level: integer('level').default(0), // For sorting importance e.g. Dean = 1
 });
 
 export const staffProfiles = pgTable('staff_profiles', {
@@ -81,8 +70,7 @@ export const staffProfiles = pgTable('staff_profiles', {
     academicPosition: academicPositionEnum('academic_position'),
 
     // ตำแหน่งบริหาร (ทั้งสายวิชาการและสนับสนุน ถ้ามี)
-    adminPosition: varchar('admin_position', { length: 255 }), // Legacy string field
-    adminPositionId: integer('admin_position_id').references(() => adminPositions.id), // New FK
+    adminPosition: varchar('admin_position', { length: 255 }), // e.g. คณบดี, หัวหน้าสาขา
 
     // วุฒิการศึกษา (รองรับหลายวุฒิ)
     education: jsonb('education').$type<{
@@ -189,4 +177,84 @@ export const banners = pgTable('banners', {
     imageUrl: varchar('image_url', { length: 500 }).notNull(),
     linkUrl: varchar('link_url', { length: 500 }),
     order: integer('order').default(0).notNull(),
+});
+
+// ------------------------------------------
+// 6. Chiang Rai Studies Center (Microservice)
+// ------------------------------------------
+
+export const chiangRaiIdentityCategoryEnum = pgEnum('cr_identity_category', [
+    'HISTORY',      // ประวัติศาสตร์
+    'ARCHAEOLOGY',  // โบราณคดี
+    'CULTURE',      // วัฒนธรรม ความเชื่อ
+    'ARTS',         // ศิลปะการแสดง
+    'WISDOM'        // ภูมิปัญญาท้องถิ่น
+]);
+
+export const chiangRaiIdentities = pgTable('chiang_rai_identities', {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    code: chiangRaiIdentityCategoryEnum('code').notNull().unique(),
+    nameTh: varchar('name_th', { length: 255 }).notNull(),
+    nameEn: varchar('name_en', { length: 255 }),
+    description: text('description'),
+    imageUrl: varchar('image_url', { length: 500 }),
+});
+
+export const chiangRaiArtifacts = pgTable('chiang_rai_artifacts', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: varchar('title', { length: 500 }).notNull(),
+    description: text('description'), // Short intro
+    content: text('content'), // Full detail or Markdown
+    identityId: integer('identity_id').references(() => chiangRaiIdentities.id),
+    category: chiangRaiIdentityCategoryEnum('category'), // Denormalized for easier query
+
+    // Media support
+    mediaType: varchar('media_type', { length: 50 }).default('IMAGE'), // IMAGE, VIDEO, AUDIO, 3D
+    mediaUrls: text('media_urls').array(), // List of related media
+    thumbnailUrl: varchar('thumbnail_url', { length: 500 }),
+
+    author: varchar('author', { length: 255 }),
+    isPublished: boolean('is_published').default(true),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const chiangRaiArticles = pgTable('chiang_rai_articles', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: varchar('title', { length: 500 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull().unique(),
+    abstract: text('abstract'),
+    content: text('content').notNull(),
+    thumbnailUrl: varchar('thumbnail_url', { length: 500 }),
+
+    tags: text('tags').array(),
+    author: varchar('author', { length: 255 }),
+
+    isPublished: boolean('is_published').default(true),
+    publishedAt: timestamp('published_at').defaultNow(),
+    createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const chiangRaiStaffRoleEnum = pgEnum('cr_staff_role', [
+    'DIRECTOR',      // ผู้อำนวยการ
+    'ACADEMIC',      // ฝ่ายวิชาการ
+    'NETWORK',       // ฝ่ายประสานเครือข่าย
+    'DISSEMINATION', // ฝ่ายเผยแพร่ข้อมูล
+    'SUPPORT'        // เจ้าหน้าที่ช่วยงานทั่วไป
+]);
+
+export const chiangRaiStaff = pgTable('chiang_rai_staff', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: varchar('title', { length: 50 }), // e.g. นาย, นาง, ดร.
+    firstName: varchar('first_name', { length: 255 }).notNull(),
+    lastName: varchar('last_name', { length: 255 }).notNull(),
+    position: varchar('position', { length: 255 }), // ตำแหน่งที่แสดงผล e.g. "หัวหน้าโครงการ"
+    role: chiangRaiStaffRoleEnum('role').notNull(), // หมวดหมู่สำหรับจัดกลุ่ม
+    email: varchar('email', { length: 255 }),
+    imageUrl: varchar('image_url', { length: 500 }),
+    bio: text('bio'),
+    sortOrder: integer('sort_order').default(0),
+    isActive: boolean('is_active').default(true),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
 });

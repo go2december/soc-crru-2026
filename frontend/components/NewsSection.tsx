@@ -48,7 +48,7 @@ const newsList: NewsItem[] = [
 
 export default function NewsSection() {
     return (
-        <section className="py-20 bg-base-100">
+        <section className="py-20 bg-white">
             <div className="container mx-auto px-4">
                 {/* Header */}
                 <div className="flex justify-between items-end mb-12">
@@ -56,70 +56,64 @@ export default function NewsSection() {
                         <span className="text-scholar-accent font-bold tracking-wider uppercase text-sm mb-2 block">Update</span>
                         <h2 className="text-3xl lg:text-4xl font-bold text-scholar-deep">ข่าวสารและกิจกรรม</h2>
                     </div>
-                    <Link href="/news" className="hidden md:flex items-center btn btn-link text-gray-500 hover:text-scholar-accent no-underline hover:no-underline font-medium transition-colors">
+                    <Link href="/news" className="hidden md:flex items-center text-gray-500 hover:text-scholar-accent font-medium transition-colors">
                         ดูข่าวทั้งหมด <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </Link>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Featured News (Left - 2 Columns) - Using DaisyUI Card */}
-                    <Link href={`/news/${featuredNews.id}`} className="lg:col-span-2 group">
-                        <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 border border-base-200 h-full">
-                            <figure className="relative h-[300px] lg:h-[400px]">
-                                <Image
-                                    src={featuredNews.image}
-                                    alt={featuredNews.title}
-                                    fill
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                                <div className="absolute top-4 left-4">
-                                    <div className="badge badge-primary border-none px-3 py-3 font-medium shadow-md">
-                                        {featuredNews.category}
-                                    </div>
-                                </div>
-                            </figure>
-                            <div className="card-body">
-                                <div className="flex items-center text-sm text-gray-400 mb-2 gap-4">
-                                    <span className="flex items-center gap-1">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                        {featuredNews.date}
-                                    </span>
-                                </div>
-                                <h3 className="card-title text-2xl font-bold text-scholar-deep mb-3 group-hover:text-scholar-accent transition-colors leading-tight">
-                                    {featuredNews.title}
-                                </h3>
-                                <p className="text-gray-500 line-clamp-2">{featuredNews.excerpt}</p>
-                                <div className="card-actions justify-end mt-4">
-                                    <button className="btn btn-ghost btn-sm group-hover:text-scholar-accent">อ่านต่อ →</button>
-                                </div>
+                    {/* Featured News (Left - 2 Columns) */}
+                    <div className="lg:col-span-2 group cursor-pointer">
+                        <div className="relative h-[300px] lg:h-[450px] rounded-2xl overflow-hidden shadow-lg mb-6">
+                            <Image
+                                src={featuredNews.image}
+                                alt={featuredNews.title}
+                                fill
+                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute top-4 left-4">
+                                <span className="badge bg-scholar-accent text-white border-none px-3 py-3 font-medium">
+                                    {featuredNews.category}
+                                </span>
                             </div>
                         </div>
-                    </Link>
+                        <div className="pr-4">
+                            <div className="flex items-center text-sm text-gray-400 mb-2 gap-4">
+                                <span className="flex items-center gap-1">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    {featuredNews.date}
+                                </span>
+                            </div>
+                            <h3 className="text-2xl font-bold text-scholar-deep mb-3 group-hover:text-scholar-accent transition-colors leading-tight">
+                                {featuredNews.title}
+                            </h3>
+                            <p className="text-gray-500 line-clamp-2">{featuredNews.excerpt}</p>
+                        </div>
+                    </div>
 
-                    {/* News List (Right - 1 Column) - Using DaisyUI Card Side / Compact */}
+                    {/* News List (Right - 1 Column) */}
                     <div className="flex flex-col gap-6">
                         {newsList.map((news) => (
-                            <Link key={news.id} href={`/news/${news.id}`} className="group">
-                                <div className="card card-side card-compact bg-base-100 shadow-md hover:shadow-xl transition-all duration-300 border border-base-200 overflow-hidden h-32">
-                                    <figure className="relative w-1/3 min-w-[120px] h-full">
-                                        <Image
-                                            src={news.image}
-                                            alt={news.title}
-                                            fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                        />
-                                    </figure>
-                                    <div className="card-body w-2/3 py-3 px-4 justify-center">
-                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                            <span className="badge badge-outline badge-xs text-scholar-accent font-semibold">{news.category}</span>
-                                            <span className="text-[10px] text-gray-400">{news.date}</span>
-                                        </div>
-                                        <h4 className="font-bold text-scholar-deep text-sm leading-snug group-hover:text-scholar-accent transition-colors line-clamp-2">
-                                            {news.title}
-                                        </h4>
-                                    </div>
+                            <div key={news.id} className="flex gap-4 group cursor-pointer border-b border-gray-100 pb-6 last:border-0 last:pb-0">
+                                <div className="relative w-28 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                                    <Image
+                                        src={news.image}
+                                        alt={news.title}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
                                 </div>
-                            </Link>
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-xs font-semibold text-scholar-accent uppercase">{news.category}</span>
+                                        <span className="text-xs text-gray-300">•</span>
+                                        <span className="text-xs text-gray-400">{news.date}</span>
+                                    </div>
+                                    <h4 className="font-bold text-scholar-deep text-sm leading-snug group-hover:text-scholar-accent transition-colors line-clamp-2">
+                                        {news.title}
+                                    </h4>
+                                </div>
+                            </div>
                         ))}
 
                         {/* Mobile View All Button */}

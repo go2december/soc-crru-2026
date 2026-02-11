@@ -182,6 +182,8 @@ export default function Navbar() {
 
                     {/* D. วิจัยและนวัตกรรม */}
                     <DropdownMenu name="research" title="วิจัยและนวัตกรรม">
+                        <NavItem href="/chiang-rai-studies" title="ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)" />
+                        <div className="divider my-1 border-white/10"></div>
                         <NavItem href="/research/database" title="ฐานข้อมูลงานวิจัย" />
                         <NavItem href="/research/startups" title="นวัตกรรมชุมชน (Local Startups)" />
                         <NavItem href="/research/services" title="บริการวิชาการ" />

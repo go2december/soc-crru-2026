@@ -68,13 +68,11 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] CRUD หลักสูตร (Courses/Programs) - *Full data: highlights, careers, structure, concentrations*
     - [x] CRUD บุคลากร (Staff) - *Completed via Drizzle ORM*
     - [x] CRUD ภาควิชา (Departments)
-    - [x] CRUD ตำแหน่งบริหาร (Admin Positions)
     - [x] CRUD ข่าวสาร (News)
 - [x] **File Upload System**:
     - [x] ระบบอัปโหลดรูปภาพ Staff (Sharp Image Processing)
     - [x] บีบอัดและแปลงเป็น PNG (Max 768x1024)
     - [x] Static File Serving จาก `/uploads`
-    - [x] **Auto-Delete**: ระบบลบรูปภาพเดิมอัตโนมัติเมื่อมีการอัปโหลดใหม่
     - [x] **Dependencies Fixed**: uuid, @types/uuid, sharp (Fixed: 2026-02-03)
     - [x] **Type Issues Resolved**: Express.Multer.File namespace, sharp default import
 - [x] **Authentication & Admin Dashboard**:
@@ -84,8 +82,7 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] **Admin Panel**:
         - [x] Dashboard Overview stats
         - [x] Staff Management (List/Edit/Link User Account)
-        - [x] **Position Management**: ระบบจัดการตำแหน่งบริหาร/หน้าที่ (Admin Positions)
-        - [x] Staff Image Upload (PNG Compression + Auto-Delete)
+        - [x] Staff Image Upload (PNG Compression)
         - [x] News Management (List/Create/Delete)
         - [x] User Management (Role assignment)
         - [x] **Sidebar**: Modern Sidebar with Glassmorphism & Lucide Icons
@@ -108,10 +105,7 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
 |------|-------|----------|
 | 2026-02-03 | `/api/auth/dev/login` error | Fixed missing dependencies (uuid, @types/uuid), corrected Multer type imports, fixed sharp default import |
 | 2026-02-03 | TypeScript compilation errors in upload.service.ts | Changed `import * as sharp` to `import sharp`, fixed Express.Multer.File namespace |
-| 2026-02-04 | UI Redesign Rollback | Reverted Stripe-style design attempt back to original "Scholar Palette" theme upon user request |
-| 2026-02-04 | Staff Image Review Bug | Fixed image preview not showing (relative URL issue) and added auto-delete old image logic |
-| 2026-02-04 | Admin Position Input | Upgraded from free-text to Dropdown selection with specialized Management Page |
 
 ---
-*Last Updated: 2026-02-04*
+*Last Updated: 2026-02-03*
 
