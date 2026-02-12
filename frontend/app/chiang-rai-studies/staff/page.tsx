@@ -33,7 +33,7 @@ const roleOrder = ['DIRECTOR', 'ACADEMIC', 'NETWORK', 'DISSEMINATION', 'SUPPORT'
 // Fetch Staff from API
 async function getStaff(): Promise<StaffMember[]> {
     try {
-        const res = await fetch(`${API_URL}/chiang-rai/staff`, {
+        const res = await fetch(`${API_URL}/api/chiang-rai/staff`, {
             next: { revalidate: 60 }
         });
 
@@ -89,7 +89,126 @@ export default async function StaffPage() {
             </div>
 
             <div className="container mx-auto px-4 py-16">
-                {groupedStaff.length > 0 ? (
+
+
+
+                {/* Executive & Committee List (Static from NotebookLM) */}
+                <section className="mb-24">
+                    {/* Executives */}
+                    <div className="mb-20">
+                        <h2 className="text-3xl font-bold text-[#581c87] mb-12 text-center relative z-10">
+                            <span className="bg-[#FAF5FF] px-6 relative z-10">คณะผู้บริหาร (Executive Committee)</span>
+                            <div className="absolute top-1/2 left-0 w-full h-px bg-purple-200 -z-0"></div>
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                            {[
+                                { role: 'ผู้อำนวยการ (Director)', name: 'ผศ. ดร.ณรงค์ เจนใจ', highlight: true, img: 'https://placehold.co/400x500/702963/white?text=Director' },
+                                { role: 'รองผู้อำนวยการ', name: 'ผศ. ดร.เบญจมาศ เมืองเกษม', img: 'https://placehold.co/400x500/581c87/white?text=Deputy' },
+                                { role: 'รองผู้อำนวยการ', name: 'ผศ. ศมล สังคะรัตน์', img: 'https://placehold.co/400x500/581c87/white?text=Deputy' }
+                            ].map((person, i) => (
+                                <div key={i} className={`bg-white p-4 rounded-[2rem] border ${person.highlight ? 'border-orange-400 shadow-xl scale-105' : 'border-purple-100 shadow-md'} text-center group transition-all duration-300 hover:-translate-y-2 flex flex-col items-center`}>
+                                    <div className={`w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden mb-6 border-4 ${person.highlight ? 'border-orange-100' : 'border-purple-50'} shadow-inner`}>
+                                        <img
+                                            src={person.img}
+                                            alt={person.name}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                    </div>
+                                    <div className={`font-bold mb-2 text-xs uppercase tracking-widest ${person.highlight ? 'text-orange-600' : 'text-purple-400'}`}>{person.role}</div>
+                                    <div className="text-xl text-[#2e1065] font-bold">{person.name}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Heads of Departments */}
+                    <div className="mb-20">
+                        <h3 className="text-2xl font-bold text-[#581c87] mb-10 text-center">หัวหน้าฝ่ายงาน (Heads of Departments)</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                            {[
+                                { role: 'หัวหน้าฝ่ายวิชาการ', name: 'รศ. จิราพร มะโนวัง', img: 'https://placehold.co/300x300/e9d5ff/702963?text=Academic' },
+                                { role: 'หัวหน้าฝ่ายเผยแพร่และประชาสัมพันธ์', name: 'ผศ. ดร.ศศิพัชร์ หาญฤทธิ์', img: 'https://placehold.co/300x300/e9d5ff/702963?text=PR' },
+                                { role: 'หัวหน้าฝ่ายประสานงานเครือข่าย', name: 'ผศ. วาสนา เสภา', img: 'https://placehold.co/300x300/e9d5ff/702963?text=Network' }
+                            ].map((person, i) => (
+                                <div key={i} className="bg-white p-6 rounded-[2rem] border border-purple-100 text-center shadow-sm hover:shadow-md transition-shadow flex flex-col items-center">
+                                    <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-purple-100">
+                                        <img
+                                            src={person.img}
+                                            alt={person.name}
+                                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                                        />
+                                    </div>
+                                    <div className="text-purple-400 text-xs font-bold uppercase mb-2">{person.role}</div>
+                                    <div className="text-[#2e1065] font-bold text-lg">{person.name}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Committee & Advisors Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        {/* Committee */}
+                        <div className="bg-white p-8 rounded-[2.5rem] shadow-lg border border-purple-100">
+                            <h3 className="text-xl font-bold text-[#581c87] mb-6 pb-4 border-b border-purple-50 flex items-center gap-3">
+                                <div className="w-2 h-8 bg-orange-500 rounded-full"></div>
+                                คณะกรรมการโครงการ (Project Committee)
+                            </h3>
+                            <ul className="space-y-4">
+                                <li className="flex flex-col sm:flex-row justify-between sm:items-center bg-purple-50 p-4 rounded-xl gap-2">
+                                    <span className="font-bold text-[#581c87] text-lg">ผศ. ดร.ณรงค์ เจนใจ</span>
+                                    <span className="text-base font-bold bg-[#581c87] text-white px-3 py-1.5 rounded-lg shadow-sm w-fit">ประธานกรรมการ</span>
+                                </li>
+                                {[
+                                    'รศ. จิราพร มะโนวัง',
+                                    'ผศ. ดร.ชาญชัย ฤทธิร่วม',
+                                    'ผศ. ดร.ดุจฤดี คงสุวรรณ์',
+                                    'ผศ. ดร.นพชัย ฟองอิสสระ',
+                                    'ผศ. ดร.ศศิพัชร์ หาญฤทธิ์',
+                                    'ผศ. ดร.จามรี พระสุนิล',
+                                    'ผศ. ธนพัทธ์ จันท์พิพัฒน์พงศ์',
+                                    'อ. วรัญญา พรมสาขา ณ สกลนคร'
+                                ].map((name, i) => (
+                                    <li key={i} className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-dashed border-purple-100 pb-3 last:border-0 hover:bg-purple-50/50 p-3 rounded-lg transition-colors gap-1">
+                                        <span className="text-stone-700 font-medium text-lg">{name}</span>
+                                        <span className="text-base font-bold text-purple-600 bg-purple-100 px-3 py-1 rounded-lg w-fit">กรรมการ</span>
+                                    </li>
+                                ))}
+                                <li className="flex flex-col sm:flex-row justify-between sm:items-center bg-orange-50 p-4 rounded-xl mt-2 gap-2">
+                                    <span className="font-bold text-orange-800 text-lg">ผศ. นครินทร์ น้ำใจดี</span>
+                                    <span className="text-base font-bold bg-orange-200 text-orange-800 px-3 py-1.5 rounded-lg shadow-sm w-fit">กรรมการและเลขานุการ</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Advisors */}
+                        <div className="bg-[#581c87] p-8 rounded-[2.5rem] shadow-lg text-white pattern-dots">
+                            <h3 className="text-xl font-bold text-white mb-6 pb-4 border-b border-purple-400/30 flex items-center gap-3">
+                                <div className="w-2 h-8 bg-white rounded-full"></div>
+                                ที่ปรึกษาโครงการ (Advisors)
+                            </h3>
+                            <ul className="space-y-4">
+                                {[
+                                    'วัฒนธรรมจังหวัดเชียงราย',
+                                    'รองอธิการบดี มรภ.เชียงราย (ฝ่ายทำนุบำรุงศิลปวัฒนธรรม)',
+                                    'ประธานสภาวัฒนธรรมจังหวัดเชียงราย',
+                                    'ผู้อำนวยการสำนักศิลปะและวัฒนธรรม มรภ.เชียงราย',
+                                    'คณบดีคณะสังคมศาสตร์',
+                                    'รองคณบดีคณะสังคมศาสตร์ ฝ่ายวิจัยและบริการวิชาการ',
+                                    'รองคณบดีคณะสังคมศาสตร์ ฝ่ายวิชาการ',
+                                    'รศ. มาลี หมวกกุล',
+                                    'ผศ. ดร.รณิดา ปิงเมือง'
+                                ].map((advisor, i) => (
+                                    <li key={i} className="flex items-start gap-4 text-purple-100 hover:text-white transition-colors">
+                                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0 shadow-[0_0_8px_rgba(251,146,60,0.8)]"></div>
+                                        <span className="font-light tracking-wide">{advisor}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                {groupedStaff.length > 0 &&
                     groupedStaff.map((group, index) => (
                         <div key={index} className="mb-24 animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
                             {/* Role Section Header */}
@@ -148,18 +267,7 @@ export default async function StaffPage() {
                             </div>
                         </div>
                     ))
-                ) : (
-                    /* Empty State */
-                    <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-purple-100 max-w-4xl mx-auto px-10">
-                        <div className="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-                            <Users className="text-purple-200" size={48} />
-                        </div>
-                        <h3 className="text-2xl font-bold text-purple-900 mb-4">ยังไม่มีการบันทึกข้อมูลบุคลากร</h3>
-                        <p className="text-purple-400 font-light text-lg mb-8 max-w-md mx-auto italic">
-                            "ข้อมูลทีมงานผู้ขับเคลื่อนจะปรากฏในช่องทางนี้ในเร็วๆ นี้"
-                        </p>
-                    </div>
-                )}
+                }
             </div>
         </div>
     );

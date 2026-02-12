@@ -17,7 +17,7 @@
             ]
         },
         "notebooklm-mcp": {
-            "command": "C:\\Users\\devil\\AppData\\Local\\Python\\pythoncore-3.14-64\\Scripts\\notebooklm-mcp.exe",
+            "command": "C:\\Users\\devil\\AppData\\Roaming\\Python\\Python314\\Scripts\\notebooklm-mcp.exe",
             "args": []
         }
     }

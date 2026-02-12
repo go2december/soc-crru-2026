@@ -32,6 +32,11 @@ export class ChiangRaiController {
         return this.service.getArticles();
     }
 
+    @Get('articles/:slug')
+    async getArticleBySlug(@Param('slug') slug: string) {
+        return this.service.getArticleBySlug(slug);
+    }
+
     @Get('staff')
     async getStaff() {
         return this.service.getStaff();

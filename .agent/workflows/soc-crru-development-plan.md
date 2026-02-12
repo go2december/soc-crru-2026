@@ -61,6 +61,16 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] **Staff Directory**: ระบบค้นหาอาจารย์และบุคลากร
 - [x] **E-Service Portal**: หน้ารวมลิงก์บริการ (นักศึกษา/บุคลากร)
 
+## 🏛️ Phase 5.5: Chiang Rai Studies Center (ศูนย์เชียงรายศึกษา)
+- [x] **Landing Page**: Hero section, introduction.
+- [x] **About Us Section**:
+    - [x] **History**: Historical background and rationale.
+    - [x] **Objectives**: 5 key objectives.
+    - [x] **Goals & Mission**: Strategic goals and main activities (including 5 Identities).
+    - [x] **Organizational Structure**: Visual hierarchy (Director, Committee, Advisory, 3 Departments).
+- [ ] **Digital Archive**: Database for 5 Identities.
+- [ ] **Admin Dashboard**: Specialized login and management.
+
 ## ⚙️ Phase 6: Backend & Database (NestJS + Drizzle ORM)
 - [x] **Database Schema Design**: ออกแบบตาราง Users, Courses, Staff, Research, News (Migrated to Drizzle)
 - [x] **ORM Setup**: ติดตั้งและตั้งค่า Drizzle ORM + Drizzle Kit

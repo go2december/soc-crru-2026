@@ -60,6 +60,19 @@ export class ChiangRaiService {
         return this.drizzle.db.select().from(chiangRaiArticles).orderBy(desc(chiangRaiArticles.publishedAt));
     }
 
+    async getArticleBySlug(slug: string) {
+        const result = await this.drizzle.db
+            .select()
+            .from(chiangRaiArticles)
+            .where(eq(chiangRaiArticles.slug, slug))
+            .limit(1);
+
+        if (!result.length) {
+            throw new NotFoundException(`Article with slug ${slug} not found`);
+        }
+        return result[0];
+    }
+
     // --- Staff Management ---
 
     // 1. Get Chiang Rai Staff (Public & Admin)

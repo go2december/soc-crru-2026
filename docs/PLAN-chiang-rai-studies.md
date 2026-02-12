@@ -25,9 +25,9 @@ The website will consist of the following key sections:
 
 1.  **Home (หน้าแรก):** Highlights, latest news, upcoming activities, and an introduction.
 2.  **About Us (เกี่ยวกับศูนย์ฯ):**
-    -   History & Objectives.
-    -   Organizational Structure (Director, Academic, Network, Dissemination divisions).
-    -   Steering Committee.
+    -   [x] History & Objectives.
+    -   [x] Organizational Structure (Director, Academic, Network, Dissemination divisions).
+    -   [x] Steering Committee.
 3.  **Digital Archive (คลังข้อมูลดิจิทัล):** *Core Feature*. Categorized by the "5 Chiang Rai Identities":
     -   History (ประวัติศาสตร์)
     -   Archaeology (โบราณคดี)
@@ -79,7 +79,7 @@ The website will consist of the following key sections:
 ### Phase 3: Frontend Development
 -   **UI/UX Design:** Create the "Modern Lanna" visual identity.
 -   **Page Implementation:**
-    -   Develop public-facing pages with SEO optimization.
+    -   [x] Develop public-facing pages with SEO optimization (Home, About Us, Structure).
     -   Create specific layouts for the Digital Archive to handle multimedia (images, video, audio).
     -   Create specific layouts for the Digital Archive to handle multimedia (images, video, audio).
     -   **Admin Dashboard:**

@@ -1,191 +1,259 @@
+'use client';
 
 import Link from 'next/link';
-import { ArrowRight, BookOpen, Users, Landmark, MapPin, Feather, Search, Scroll, Palette } from 'lucide-react';
+import {
+    ArrowRight,
+    BookOpen,
+    Landmark,
+    ScrollText,
+    Users,
+    Sparkles,
+    Search,
+    MapPin,
+    Calendar,
+    ChevronRight,
+    PlayCircle
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-export default function ChiangRaiHome() {
-    const identities = [
-        { id: 'HISTORY', title: 'ประวัติศาสตร์', icon: Landmark, desc: 'เรื่องราวความเป็นมาในอดีต', color: 'bg-purple-100 text-purple-700' },
-        { id: 'ARCHAEOLOGY', title: 'โบราณคดี', icon: Scroll, desc: 'หลักฐานทางโบราณคดี', color: 'bg-slate-200 text-slate-700' },
-        { id: 'CULTURE', title: 'ประเพณี/ชาติพันธุ์', icon: Users, desc: 'วิถีชีวิตและกลุ่มชาติพันธุ์', color: 'bg-orange-100 text-orange-700' },
-        { id: 'ARTS', title: 'ศิลปะการแสดง', icon: Palette, desc: 'ดนตรีและการแสดงพื้นบ้าน', color: 'bg-fuchsia-100 text-fuchsia-700' },
-        { id: 'WISDOM', title: 'ภูมิปัญญาท้องถิ่น', icon: Feather, desc: 'องค์ความรู้ฉบับชาวบ้าน', color: 'bg-emerald-100 text-emerald-700' },
-    ];
-
+export default function ChiangRaiHomePage() {
     return (
-        <div className="bg-[#FAF5FF] font-kanit">
+        <div className="min-h-screen bg-[#FAF5FF] font-kanit">
             {/* Hero Section */}
-            <section className="relative min-h-[700px] flex items-center justify-center overflow-hidden bg-[#2e1065]">
-                {/* Background Pattern - Subtle Lanna texture or nodes */}
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:32px_32px]"></div>
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#2e1065] via-transparent to-[#2e1065] opacity-90"></div>
+            <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-[#2e1065]">
+                {/* Background Pattern/Image */}
+                <div className="absolute inset-0">
+                    <div className="absolute inset-0 bg-[url('https://placehold.co/1920x1080/2e1065/FFF?text=Chiang+Rai+Culture')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#2e1065] via-[#581c87]/90 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FAF5FF] to-transparent"></div>
+                </div>
 
-                {/* Content */}
-                <div className="relative z-10 container mx-auto px-4 text-center mt-[-50px]">
-                    <div className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-900/40 border border-purple-500/30 text-orange-400 text-xs font-bold tracking-wider uppercase backdrop-blur-md shadow-xl animate-fade-in-up">
-                        <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_10px_#f97316]"></span>
-                        Faculty of Social Sciences, Chiang Rai Rajabhat University
-                    </div>
+                <div className="container mx-auto px-6 relative z-10 pt-20">
+                    <div className="max-w-4xl animate-fade-in-up">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-600/20 text-orange-400 text-xs font-bold tracking-[0.2em] uppercase mb-8 border border-orange-500/30 backdrop-blur-sm">
+                            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                            The Wisdom of Lanna
+                        </div>
 
-                    <h1 className="text-5xl md:text-8xl font-bold text-white mb-6 leading-tight tracking-tight">
-                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-purple-400 to-orange-400 drop-shadow-sm">ศูนย์เชียงรายศึกษา</span>
-                        <span className="block text-purple-200/60 text-2xl md:text-3xl mt-4 font-light tracking-[0.2em]">
-                            CHIANG RAI STUDIES CENTER
-                        </span>
-                    </h1>
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight drop-shadow-2xl">
+                            ศูนย์เชียงราย<br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-200">
+                                ศึกษา
+                            </span>
+                        </h1>
 
-                    <p className="max-w-2xl mx-auto text-lg md:text-xl text-purple-100/70 mb-12 leading-relaxed font-light">
-                        รวบรวมองค์ความรู้ อัตลักษณ์ ประวัติศาสตร์ และภูมิปัญญาแห่งล้านนา <br className="hidden md:block" />
-                        ภายใต้สีม่วงบัวสายอันสง่างาม เพื่อการสืบสานและต่อยอดสู่สากล
-                    </p>
+                        <p className="text-xl md:text-2xl text-purple-100/90 font-light mb-12 max-w-2xl leading-relaxed">
+                            แหล่งรวบรวม อนุรักษ์ และต่อยอดองค์ความรู้อัตลักษณ์เชียงราย
+                            เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน ผ่าน 5 มิติทางวัฒนธรรม
+                        </p>
 
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                        <Link href="/chiang-rai-studies/archive"
-                            className="group relative px-10 py-4 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-full transition-all duration-500 shadow-[0_0_25px_rgba(249,115,22,0.4)] hover:shadow-[0_0_35px_rgba(249,115,22,0.6)] flex items-center gap-3 overflow-hidden transform hover:-translate-y-1"
-                        >
-                            <Search size={20} className="relative z-10" />
-                            <span className="relative z-10">สืบค้นคลังดิจิทัล</span>
-                            <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        </Link>
-
-                        <Link href="/chiang-rai-studies/about"
-                            className="px-10 py-4 bg-purple-900/50 border border-purple-400/30 text-purple-100 hover:border-orange-400 hover:text-orange-400 font-medium rounded-full transition-all backdrop-blur-sm flex items-center gap-3 transform hover:-translate-y-1"
-                        >
-                            รู้จักศูนย์ฯ <ArrowRight size={20} />
-                        </Link>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <Link href="/chiang-rai-studies/archive">
+                                <Button size="lg" className="h-14 px-8 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-lg shadow-lg hover:shadow-orange-600/30 transition-all w-full sm:w-auto">
+                                    <Search className="mr-2 h-5 w-5" />
+                                    สืบค้นคลังข้อมูล
+                                </Button>
+                            </Link>
+                            <Link href="/chiang-rai-studies/about">
+                                <Button variant="outline" size="lg" className="h-14 px-8 rounded-full border-2 border-purple-400/30 text-purple-100 hover:bg-white/10 hover:text-white hover:border-white font-bold text-lg backdrop-blur-sm w-full sm:w-auto">
+                                    รู้จักศูนย์ฯ
+                                    <ChevronRight className="ml-2 h-5 w-5" />
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
-                {/* Decorative Bottom Wave/Mist */}
-                <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-[#FAF5FF] to-transparent pointer-events-none"></div>
+                {/* Floating Decor */}
+                <div className="absolute right-0 top-1/3 -translate-y-1/2 translate-x-1/4 opacity-10 pointer-events-none hidden lg:block">
+                    <svg width="600" height="600" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#F97316" d="M44.7,-76.4C58.9,-69.2,71.8,-59.1,81.6,-46.6C91.4,-34.1,98.1,-19.2,95.8,-5.3C93.5,8.6,82.2,21.4,70.5,30.6C58.8,39.8,46.7,45.4,35.4,52.6C24.1,59.8,13.6,68.6,-0.4,69.3C-14.4,70,-28,62.6,-40.3,53.4C-52.6,44.2,-63.6,33.2,-69.3,20.1C-75,7,-75.4,-8.2,-69.7,-21.3C-64,-34.4,-52.2,-45.4,-39.9,-53.2C-27.6,-61,-14.8,-65.6,-0.5,-64.7C13.8,-63.9,27.6,-57.6,44.7,-76.4Z" transform="translate(100 100)" />
+                    </svg>
+                </div>
             </section>
 
             {/* 5 Identities Section */}
-            <section className="py-24 relative">
+            <section className="py-24 relative z-20">
                 <div className="container mx-auto px-4">
-                    <div className="text-center mb-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                        <h2 className="text-3xl md:text-5xl font-bold text-[#2e1065] mb-4">5 อัตลักษณ์เชียงราย</h2>
-                        <div className="w-24 h-1.5 bg-gradient-to-r from-purple-800 to-orange-500 mx-auto rounded-full mb-8"></div>
-                        <p className="text-purple-900/60 max-w-2xl mx-auto text-lg font-light">
-                            จำแนกองค์ความรู้เชียงรายผ่าน 5 มิติสำคัญ เพื่อทนุบำรุงศิลปวัฒนธรรมอย่างเป็นระบบ
-                        </p>
+                    <div className="text-center mb-16">
+                        <h2 className="text-sm font-bold text-orange-600 tracking-widest uppercase mb-3">Five Dimensions of Chiang Rai</h2>
+                        <h3 className="text-3xl md:text-5xl font-black text-[#2e1065]">5 อัตลักษณ์เชียงราย</h3>
+                        <div className="w-24 h-1.5 bg-orange-500 mx-auto mt-6 rounded-full"></div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
-                        {identities.map((item, idx) => (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                        {[
+                            { id: 'HISTORY', title: 'ประวัติศาสตร์', icon: Landmark, color: 'bg-rose-50 text-rose-700', border: 'hover:border-rose-200' },
+                            { id: 'ARCHAEOLOGY', title: 'โบราณคดี', icon: ScrollText, color: 'bg-amber-50 text-amber-700', border: 'hover:border-amber-200' },
+                            { id: 'CULTURE', title: 'ชาติพันธุ์', icon: Users, color: 'bg-emerald-50 text-emerald-700', border: 'hover:border-emerald-200' },
+                            { id: 'ARTS', title: 'ศิลปะการแสดง', icon: Sparkles, color: 'bg-purple-50 text-purple-700', border: 'hover:border-purple-200' },
+                            { id: 'WISDOM', title: 'ภูมิปัญญาท้องถิ่น', icon: BookOpen, color: 'bg-blue-50 text-blue-700', border: 'hover:border-blue-200' },
+                        ].map((item, index) => (
                             <Link
-                                key={item.id}
                                 href={`/chiang-rai-studies/archive?category=${item.id}`}
-                                className="group relative p-10 rounded-3xl bg-white border border-purple-100 hover:border-orange-500/50 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 flex flex-col items-center text-center overflow-hidden animate-fade-in-up"
-                                style={{ animationDelay: `${0.3 + idx * 0.1}s` }}
+                                key={index}
+                                className={`group bg-white p-8 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-transparent ${item.border} flex flex-col items-center text-center`}
                             >
-                                <div className={`w-20 h-20 rounded-2xl ${item.color} flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition duration-500 shadow-lg group-hover:shadow-orange-200`}>
-                                    <item.icon size={36} />
+                                <div className={`w-16 h-16 rounded-2xl ${item.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
+                                    <item.icon size={32} />
                                 </div>
-                                <h3 className="font-bold text-xl text-[#2e1065] mb-3 group-hover:text-orange-600 transition">{item.title}</h3>
-                                <p className="text-sm text-purple-900/40 mb-8 font-light leading-relaxed">{item.desc}</p>
-
-                                <span className="mt-auto inline-flex items-center text-xs font-bold text-purple-400 uppercase tracking-[0.2em] group-hover:text-orange-600 transition gap-1">
-                                    Explore <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                <h4 className="text-lg font-bold text-stone-800 mb-2">{item.title}</h4>
+                                <span className="text-xs font-bold text-stone-400 uppercase tracking-wider group-hover:text-orange-500 transition-colors flex items-center gap-1">
+                                    Explore <ArrowRight size={10} />
                                 </span>
-
-                                {/* Subtle Hover Gradient */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-orange-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                             </Link>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Academic & Articles Preview */}
-            <section className="py-24 bg-white/50 backdrop-blur-md border-y border-purple-100">
+            {/* Featured Sections Grid */}
+            <section className="py-24 bg-white relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-100 to-transparent"></div>
+
                 <div className="container mx-auto px-4">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-                        <div className="max-w-xl animate-fade-in-up">
-                            <span className="text-orange-600 font-bold tracking-[0.2em] text-xs uppercase mb-3 block">Knowledge Hub</span>
-                            <h2 className="text-3xl md:text-4xl font-bold text-[#2e1065] mb-4 text-shadow-sm">บทความและงานวิจัยล่าสุด</h2>
-                            <p className="text-purple-900/50 font-light text-lg italic">"รวบรวมภูมิปัญญาแห่งปัญญาชนเชียงราย"</p>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                        <div className="relative">
+                            <div className="aspect-[4/3] rounded-[3rem] overflow-hidden shadow-2xl relative z-10">
+                                <img
+                                    src="https://placehold.co/800x600/581c87/white?text=Digital+Archive"
+                                    alt="Digital Archive"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#2e1065] via-transparent to-transparent opacity-60"></div>
+                                <div className="absolute bottom-8 left-8 right-8 text-white">
+                                    <h3 className="text-2xl font-bold mb-2">Digital Archive</h3>
+                                    <p className="opacity-90 font-light">รวบรวมหลักฐานทางประวัติศาสตร์และวัฒนธรรมในรูปแบบดิจิทัล</p>
+                                </div>
+                            </div>
+                            {/* Decorative Blur */}
+                            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+                            <div className="absolute -top-10 -left-10 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
                         </div>
-                        <Link href="/chiang-rai-studies/articles" className="px-8 py-4 rounded-full border border-purple-200 text-purple-800 hover:bg-[#2e1065] hover:text-white hover:border-[#2e1065] transition-all duration-300 flex items-center gap-2 text-sm font-bold shadow-sm">
-                            สืบค้นบทความทั้งหมด <ArrowRight size={18} />
+
+                        <div className="lg:pl-8">
+                            <span className="text-orange-600 font-bold tracking-widest uppercase text-xs mb-4 block">Knowledge Hub</span>
+                            <h2 className="text-4xl md:text-5xl font-black text-[#2e1065] mb-6 leading-tight">
+                                เชื่อมโยงอดีต<br />สู่ปัจจุบัน
+                            </h2>
+                            <p className="text-stone-600 text-lg mb-8 leading-relaxed">
+                                ศูนย์เชียงรายศึกษา มุ่งเน้นการศึกษาวิจัยและให้บริการทางวิชาการ
+                                เพื่อสร้างความตระหนักรู้ในคุณค่าของมรดกทางวัฒนธรรม
+                                และส่งเสริมให้นำองค์ความรู้ไปใช้ประโยชน์ในการพัฒนาคุณภาพชีวิต
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <Link href="/chiang-rai-studies/articles" className="group flex items-center gap-4 p-4 rounded-2xl bg-purple-50 hover:bg-white border border-transparent hover:border-purple-100 transition-all shadow-sm hover:shadow-md">
+                                    <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:bg-[#581c87] group-hover:text-white transition-colors">
+                                        <BookOpen size={24} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-[#2e1065]">บทความวิชาการ</h4>
+                                        <p className="text-xs text-stone-500">Academic Articles</p>
+                                    </div>
+                                    <ArrowRight size={16} className="text-purple-300 group-hover:text-orange-500 transition-colors" />
+                                </Link>
+
+                                <Link href="/chiang-rai-studies/archive" className="group flex items-center gap-4 p-4 rounded-2xl bg-orange-50 hover:bg-white border border-transparent hover:border-orange-100 transition-all shadow-sm hover:shadow-md">
+                                    <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                                        <Landmark size={24} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-orange-900">วัตถุจัดแสดง</h4>
+                                        <p className="text-xs text-stone-500">Artifacts Gallery</p>
+                                    </div>
+                                    <ArrowRight size={16} className="text-orange-300 group-hover:text-orange-500 transition-colors" />
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Latest Updates / News Teaser */}
+            <section className="py-24 bg-[#f3e8ff]/30">
+                <div className="container mx-auto px-4">
+                    <div className="flex justify-between items-end mb-12">
+                        <div>
+                            <span className="text-purple-600 font-bold tracking-widest uppercase text-xs mb-2 block">Updates</span>
+                            <h2 className="text-3xl font-black text-[#2e1065]">กิจกรรมและข่าวสาร</h2>
+                        </div>
+                        <Link href="/chiang-rai-studies/articles">
+                            <Button variant="ghost" className="hidden sm:flex text-purple-700 hover:text-orange-600 hover:bg-transparent px-0 font-bold">
+                                ดูทั้งหมด <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                        {/* Article 1 */}
-                        <article className="group cursor-pointer animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                            <div className="aspect-[16/10] rounded-3xl bg-purple-50 mb-8 overflow-hidden relative shadow-lg group-hover:shadow-2xl transition-all duration-500">
-                                <div className="absolute top-5 left-5 bg-[#702963] text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest z-10 border border-purple-400/30 shadow-md">
-                                    History
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {/* Placeholder News Cards */}
+                        {[1, 2, 3].map((i) => (
+                            <Link href="/chiang-rai-studies/articles" key={i} className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col">
+                                <div className="h-48 bg-stone-200 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
+                                    <img
+                                        src={`https://placehold.co/600x400/purple/white?text=News+Update+${i}`}
+                                        alt="News"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                    />
+                                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-purple-900 uppercase tracking-wide z-20 shadow-sm">
+                                        Activity
+                                    </div>
                                 </div>
-                                <img src="https://placehold.co/800x500/702963/white?text=History+of+Lanna" alt="Article" className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#2e1065]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            </div>
-                            <div className="flex items-center gap-3 text-xs text-purple-400 mb-4 font-bold uppercase tracking-wider">
-                                <span className="text-orange-600">Article</span>
-                                <span className="w-1 h-1 bg-purple-200 rounded-full"></span>
-                                <span>Feb 09, 2026</span>
-                            </div>
-                            <h3 className="text-2xl font-bold text-[#2e1065] mb-4 leading-snug group-hover:text-orange-600 transition duration-300">
-                                เวียงหนองหล่ม: ร่องรอยอารยธรรมที่จมดิ่งใต้กาลเวลา
-                            </h3>
-                            <p className="text-purple-900/50 text-base leading-relaxed mb-6 line-clamp-2 font-light">
-                                การตีความใหม่ของนักวิชาการศูนย์เชียงรายศึกษาเกี่ยวกับพงศาวดารโยนกและหลักฐานทางภูมิศาสตร์...
-                            </p>
-                            <div className="flex items-center gap-2 text-orange-600 font-bold text-sm group-hover:gap-3 transition-all">
-                                อ่านต่อ <ArrowRight size={16} />
-                            </div>
-                        </article>
-
-                        {/* Article 2 */}
-                        <article className="group cursor-pointer animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-                            <div className="aspect-[16/10] rounded-3xl bg-purple-50 mb-8 overflow-hidden relative shadow-lg group-hover:shadow-2xl transition-all duration-500">
-                                <div className="absolute top-5 left-5 bg-[#702963] text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest z-10 border border-purple-400/30 shadow-md">
-                                    Research
+                                <div className="p-8 flex-1 flex flex-col">
+                                    <div className="flex items-center gap-2 text-stone-400 text-xs font-bold uppercase mb-3">
+                                        <Calendar size={12} />
+                                        <span>12 Feb 2026</span>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-[#2e1065] mb-3 leading-snug group-hover:text-orange-600 transition-colors">
+                                        กิจกรรมส่งเสริมการเรียนรู้ศิลปวัฒนธรรมล้านนา ครั้งที่ {i}
+                                    </h3>
+                                    <p className="text-stone-500 text-sm line-clamp-2 mb-6 font-light">
+                                        รายละเอียดกิจกรรมย่อๆ เพื่อเชิญชวนให้ผู้สนใจเข้ามาอ่านต่อ...
+                                    </p>
+                                    <div className="mt-auto pt-6 border-t border-dashed border-stone-100 text-xs font-bold text-purple-400 group-hover:text-purple-700 uppercase tracking-widest flex items-center gap-2">
+                                        Read More <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                                    </div>
                                 </div>
-                                <img src="https://placehold.co/800x500/702963/white?text=Inscriptions" alt="Article" className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#2e1065]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            </div>
-                            <div className="flex items-center gap-3 text-xs text-purple-400 mb-4 font-bold uppercase tracking-wider">
-                                <span className="text-orange-600">Research</span>
-                                <span className="w-1 h-1 bg-purple-200 rounded-full"></span>
-                                <span>Feb 05, 2026</span>
-                            </div>
-                            <h3 className="text-2xl font-bold text-[#2e1065] mb-4 leading-snug group-hover:text-orange-600 transition duration-300">
-                                อักษรธรรรมล้านนา: จากใบลานสู่โลกดิจิทัลคลังข้อมูล
-                            </h3>
-                            <p className="text-purple-900/50 text-base leading-relaxed mb-6 line-clamp-2 font-light">
-                                วิวัฒนาการและการอนุรักษ์ตัวอักษรโบราณด้วยเทคโนโลยีฐานข้อมูลสมัยใหม่ของศูนย์ฯ...
-                            </p>
-                            <div className="flex items-center gap-2 text-orange-600 font-bold text-sm group-hover:gap-3 transition-all">
-                                อ่านต่อ <ArrowRight size={16} />
-                            </div>
-                        </article>
-
-                        {/* Article 3 */}
-                        <article className="group cursor-pointer animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-                            <div className="aspect-[16/10] rounded-3xl bg-purple-50 mb-8 overflow-hidden relative shadow-lg group-hover:shadow-2xl transition-all duration-500">
-                                <div className="absolute top-5 left-5 bg-[#702963] text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest z-10 border border-purple-400/30 shadow-md">
-                                    Culture
-                                </div>
-                                <img src="https://placehold.co/800x500/702963/white?text=Traditional+Dance" alt="Article" className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#2e1065]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            </div>
-                            <div className="flex items-center gap-3 text-xs text-purple-400 mb-4 font-bold uppercase tracking-wider">
-                                <span className="text-orange-600">Review</span>
-                                <span className="w-1 h-1 bg-purple-200 rounded-full"></span>
-                                <span>Jan 28, 2026</span>
-                            </div>
-                            <h3 className="text-2xl font-bold text-[#2e1065] mb-4 leading-snug group-hover:text-orange-600 transition duration-300">
-                                ฟ้อนเมืองล้านนา: สุนทรียศาสตร์ที่สะท้อนจากจิตวิญญาณ
-                            </h3>
-                            <p className="text-purple-900/50 text-base leading-relaxed mb-6 line-clamp-2 font-light">
-                                เจาะลึกท่าฟ้อนและการแต่งกายที่เป็นอัตลักษณ์เฉพาะของเชียงรายผ่านมุมมองนักมานุษยวิทยา...
-                            </p>
-                            <div className="flex items-center gap-2 text-orange-600 font-bold text-sm group-hover:gap-3 transition-all">
-                                อ่านต่อ <ArrowRight size={16} />
-                            </div>
-                        </article>
+                            </Link>
+                        ))}
                     </div>
+
+                    <div className="mt-8 text-center sm:hidden">
+                        <Link href="/chiang-rai-studies/articles">
+                            <Button variant="outline" className="w-full rounded-full border-purple-200 text-purple-700">
+                                ดูทั้งหมด
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            {/* Stats / Footer CTA */}
+            <section className="py-20 bg-[#581c87] text-white relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                <div className="container mx-auto px-4 text-center relative z-10">
+                    <h2 className="text-3xl md:text-4xl font-black mb-8">ร่วมเป็นส่วนหนึ่งของการอนุรักษ์</h2>
+                    <div className="flex flex-wrap justify-center gap-12 mb-12">
+                        <div className="text-center">
+                            <div className="text-4xl md:text-5xl font-black text-orange-400 mb-2">500+</div>
+                            <div className="text-sm text-purple-200 uppercase tracking-widest">Artifacts</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-4xl md:text-5xl font-black text-amber-400 mb-2">50+</div>
+                            <div className="text-sm text-purple-200 uppercase tracking-widest">Articles</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-4xl md:text-5xl font-black text-emerald-400 mb-2">5</div>
+                            <div className="text-sm text-purple-200 uppercase tracking-widest">Identities</div>
+                        </div>
+                    </div>
+                    <Link href="/chiang-rai-studies/contact">
+                        <div className="inline-flex items-center gap-2 text-purple-200 hover:text-white transition-colors cursor-pointer border-b border-purple-400/30 hover:border-white pb-1">
+                            <span>ติดต่อศูนย์เชียงรายศึกษา</span>
+                            <ArrowRight size={16} />
+                        </div>
+                    </Link>
                 </div>
             </section>
         </div>
