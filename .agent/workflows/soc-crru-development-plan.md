@@ -68,8 +68,26 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] **Objectives**: 5 key objectives.
     - [x] **Goals & Mission**: Strategic goals and main activities (including 5 Identities).
     - [x] **Organizational Structure**: Visual hierarchy (Director, Committee, Advisory, 3 Departments).
-- [ ] **Digital Archive**: Database for 5 Identities.
-- [ ] **Admin Dashboard**: Specialized login and management.
+- [x] **Admin Dashboard**: Specialized login, CRUD management.
+    - [x] **Dashboard Overview**: Stats cards (Artifacts, Staff, Articles, Activities) + Recent Updates + Quick Actions
+    - [x] **Artifacts CRUD**: List (search, category filter), Create, Edit — Quill editor, thumbnail upload, media gallery, image cleanup
+    - [x] **Articles CRUD**: List (search), Create, Edit — Auto-slug, abstract, tags, publish status, Quill editor, thumbnail, media gallery
+    - [x] **Activities CRUD** *(Added 2026-02-13)*: List (search, type filter), Create, Edit
+        - [x] 3 ประเภท: NEWS (ข่าวสาร), EVENT (กิจกรรม), ANNOUNCEMENT (ประกาศ)
+        - [x] Event-specific fields: location, eventDate, eventEndDate (แสดงเฉพาะ type=EVENT)
+        - [x] Featured toggle (ปักหมุดข่าวสำคัญ), Published/Draft status
+        - [x] Auto-slug, auto-author, tags, Quill editor, thumbnail upload, media gallery
+        - [x] DB: `chiang_rai_activities` table + `cr_activity_type` enum
+        - [x] API: GET/POST/PUT/DELETE `/api/chiang-rai/activities`
+    - [x] **Staff Management**: List, Create (manual + import from faculty), Delete
+- [x] **Image Management System** *(Enhanced 2026-02-13)*:
+    - [x] Client-side image resize (max 1024px, WebP) before upload
+    - [x] Server-side resize via Sharp (1024px, WebP quality 80)
+    - [x] Image cleanup on content edit (orphan detection via Quill HTML diff)
+    - [x] Server-side image delete endpoint: `DELETE /api/upload/chiang-rai`
+    - [x] Shared across Artifacts, Articles, and Activities modules
+- [ ] **Digital Archive**: Content population for 5 Identities.
+- [ ] **Full-text Search**: Server-side search optimization.
 
 ## ⚙️ Phase 6: Backend & Database (NestJS + Drizzle ORM)
 - [x] **Database Schema Design**: ออกแบบตาราง Users, Courses, Staff, Research, News (Migrated to Drizzle)
@@ -80,9 +98,10 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
     - [x] CRUD ภาควิชา (Departments)
     - [x] CRUD ข่าวสาร (News)
 - [x] **File Upload System**:
-    - [x] ระบบอัปโหลดรูปภาพ Staff (Sharp Image Processing)
-    - [x] บีบอัดและแปลงเป็น PNG (Max 768x1024)
-    - [x] Static File Serving จาก `/uploads`
+    - [x] ระบบอัปโหลดรูปภาพ Staff (Sharp → PNG, Max 768x1024)
+    - [x] ระบบอัปโหลดรูปภาพ Chiang Rai (Sharp → WebP, Max 1024px)
+    - [x] Static File Serving จาก `/uploads` (staff, chiang-rai)
+    - [x] Delete endpoint สำหรับ Chiang Rai images
     - [x] **Dependencies Fixed**: uuid, @types/uuid, sharp (Fixed: 2026-02-03)
     - [x] **Type Issues Resolved**: Express.Multer.File namespace, sharp default import
 - [x] **Authentication & Admin Dashboard**:
@@ -115,7 +134,8 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
 |------|-------|----------|
 | 2026-02-03 | `/api/auth/dev/login` error | Fixed missing dependencies (uuid, @types/uuid), corrected Multer type imports, fixed sharp default import |
 | 2026-02-03 | TypeScript compilation errors in upload.service.ts | Changed `import * as sharp` to `import sharp`, fixed Express.Multer.File namespace |
+| 2026-02-13 | Drizzle push data-loss warning on unrelated tables | Used direct SQL migration script for `chiang_rai_activities` table creation |
 
 ---
-*Last Updated: 2026-02-03*
+*Last Updated: 2026-02-13*
 

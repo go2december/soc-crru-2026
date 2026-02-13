@@ -12,7 +12,8 @@ import {
     Activity,
     Database,
     Clock,
-    Layout
+    Layout,
+    ScrollText
 } from 'lucide-react';
 import {
     Card,
@@ -28,6 +29,7 @@ interface DashboardStats {
     artifacts: number;
     staff: number;
     articles: number;
+    activities: number;
     recentUpdates: any[];
 }
 
@@ -36,6 +38,7 @@ export default function ChiangRaiAdminDashboard() {
         artifacts: 0,
         staff: 0,
         articles: 0,
+        activities: 0,
         recentUpdates: []
     });
     const [loading, setLoading] = useState(true);
@@ -44,26 +47,43 @@ export default function ChiangRaiAdminDashboard() {
         const fetchStats = async () => {
             try {
                 // Fetch counts in parallel
-                const [artifactsRes, staffRes] = await Promise.all([
-                    fetch(`${API_URL}/chiang-rai/artifacts`),
-                    fetch(`${API_URL}/chiang-rai/staff`)
+                const [artifactsRes, staffRes, articlesRes, activitiesRes] = await Promise.all([
+                    fetch(`${API_URL}/api/chiang-rai/artifacts`),
+                    fetch(`${API_URL}/api/chiang-rai/staff`),
+                    fetch(`${API_URL}/api/chiang-rai/articles`),
+                    fetch(`${API_URL}/api/chiang-rai/activities`)
                 ]);
 
                 const artifactsData = artifactsRes.ok ? await artifactsRes.json() : [];
                 const staffData = staffRes.ok ? await staffRes.json() : [];
+                const articlesData = articlesRes.ok ? await articlesRes.json() : [];
+                const activitiesData = activitiesRes.ok ? await activitiesRes.json() : [];
 
                 setStats({
                     artifacts: artifactsData.length || 0,
                     staff: staffData.length || 0,
-                    articles: 0, // Pending Article API implementation
+                    articles: articlesData.length || 0,
+                    activities: activitiesData.length || 0,
                     recentUpdates: [
-                        ...artifactsData.slice(0, 3).map((a: any) => ({
+                        ...activitiesData.slice(0, 2).map((a: any) => ({
+                            type: 'Activity',
+                            title: a.title,
+                            date: a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : 'Draft',
+                            status: a.isPublished !== false ? 'Published' : 'Draft'
+                        })),
+                        ...artifactsData.slice(0, 2).map((a: any) => ({
                             type: 'Artifact',
                             title: a.title,
                             date: new Date(a.createdAt).toLocaleDateString(),
                             status: 'Published'
                         })),
-                        ...staffData.slice(0, 2).map((s: any) => ({
+                        ...articlesData.slice(0, 2).map((a: any) => ({
+                            type: 'Article',
+                            title: a.title,
+                            date: a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : 'Draft',
+                            status: a.isPublished !== false ? 'Published' : 'Draft'
+                        })),
+                        ...staffData.slice(0, 1).map((s: any) => ({
                             type: 'Staff',
                             title: `${s.firstName} ${s.lastName}`,
                             date: 'Updated recently',
@@ -117,7 +137,7 @@ export default function ChiangRaiAdminDashboard() {
                 </div>
                 <div className="flex gap-3">
                     <Link
-                        href="/chiang-rai-studies/admin/artifacts/new"
+                        href="/chiang-rai-studies/admin/artifacts/create"
                         className="flex items-center gap-2 bg-[#2e1065] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors shadow-sm"
                     >
                         <PlusCircle size={16} />
@@ -153,12 +173,12 @@ export default function ChiangRaiAdminDashboard() {
                     desc="งานวิจัยและบทความที่เผยแพร่"
                 />
                 <StatCard
-                    title="สถานะระบบ (System)"
-                    value="Online"
-                    icon={Database}
+                    title="กิจกรรม/ข่าวสาร (Activities)"
+                    value={stats.activities}
+                    icon={ScrollText}
                     color="from-emerald-500 to-green-400"
-                    link="#"
-                    desc="การเชื่อมต่อ Database ปกติ"
+                    link="/chiang-rai-studies/admin/activities"
+                    desc="ข่าวสาร กิจกรรม ประกาศ"
                 />
             </div>
 
@@ -181,9 +201,9 @@ export default function ChiangRaiAdminDashboard() {
                                     <div key={idx} className="p-4 flex items-center justify-between hover:bg-purple-50 transition-colors group">
                                         <div className="flex items-center gap-4">
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold
-                                                ${item.type === 'Artifact' ? 'bg-purple-100 text-purple-600' : 'bg-orange-100 text-orange-600'}
+                                                    ${item.type === 'Artifact' ? 'bg-purple-100 text-purple-600' : item.type === 'Article' ? 'bg-blue-100 text-blue-600' : item.type === 'Activity' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}
                                             `}>
-                                                {item.type === 'Artifact' ? 'IMG' : 'USER'}
+                                                    {item.type === 'Artifact' ? 'IMG' : item.type === 'Article' ? 'DOC' : item.type === 'Activity' ? 'ACT' : 'USER'}
                                             </div>
                                             <div>
                                                 <p className="font-medium text-stone-800 group-hover:text-[#2e1065] transition-colors line-clamp-1">{item.title}</p>
@@ -216,21 +236,27 @@ export default function ChiangRaiAdminDashboard() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <Link href="/chiang-rai-studies/admin/artifacts/new" className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10 group">
+                        <Link href="/chiang-rai-studies/admin/artifacts/create" className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10 group">
                             <span className="text-sm font-medium">เพิ่มข้อมูลอัตลักษณ์</span>
                             <div className="bg-orange-500 rounded-full p-1 group-hover:scale-110 transition-transform">
                                 <PlusCircle size={16} className="text-white" />
                             </div>
                         </Link>
-                        <Link href="/chiang-rai-studies/admin/staff/new" className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10 group">
+                        <Link href="/chiang-rai-studies/admin/staff" className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10 group">
                             <span className="text-sm font-medium">เพิ่มบุคลากรใหม่</span>
                             <div className="bg-purple-400 rounded-full p-1 group-hover:scale-110 transition-transform">
                                 <PlusCircle size={16} className="text-white" />
                             </div>
                         </Link>
-                        <Link href="/chiang-rai-studies/admin/articles/new" className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10 group">
+                        <Link href="/chiang-rai-studies/admin/articles/create" className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10 group">
                             <span className="text-sm font-medium">เผยแพร่บทความ</span>
                             <div className="bg-blue-400 rounded-full p-1 group-hover:scale-110 transition-transform">
+                                <PlusCircle size={16} className="text-white" />
+                            </div>
+                        </Link>
+                        <Link href="/chiang-rai-studies/admin/activities/create" className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10 group">
+                            <span className="text-sm font-medium">เพิ่มกิจกรรม/ข่าวสาร</span>
+                            <div className="bg-emerald-400 rounded-full p-1 group-hover:scale-110 transition-transform">
                                 <PlusCircle size={16} className="text-white" />
                             </div>
                         </Link>

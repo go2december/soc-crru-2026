@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Kanit } from 'next/font/google';
+import { ChiangRaiAdminContext } from './context';
 
 // Use same font as public site
 const kanit = Kanit({
@@ -45,13 +46,19 @@ export default function ChiangRaiAdminLayout({ children }: { children: ReactNode
     const [loading, setLoading] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
-    // 1. Auth Logic - Same as Main Admin
+    const isLoginPage = pathname === '/chiang-rai-studies/admin/login';
+
+    // 1. Auth Logic - Skip for login page
     useEffect(() => {
+        if (isLoginPage) {
+            setLoading(false);
+            return;
+        }
+
         const checkAuth = async () => {
             const token = localStorage.getItem('admin_token');
 
             if (!token) {
-                // Redirect to Chiang Rai Admin Login
                 router.push('/chiang-rai-studies/admin/login?redirect=/chiang-rai-studies/admin');
                 return;
             }
@@ -80,7 +87,7 @@ export default function ChiangRaiAdminLayout({ children }: { children: ReactNode
         };
 
         checkAuth();
-    }, [router]);
+    }, [router, isLoginPage]);
 
     const handleLogout = () => {
         localStorage.removeItem('admin_token');
@@ -111,6 +118,11 @@ export default function ChiangRaiAdminLayout({ children }: { children: ReactNode
             ]
         }
     ];
+
+    // Login page: render directly without admin shell
+    if (isLoginPage) {
+        return <div className={`${kanit.variable} font-kanit`}>{children}</div>;
+    }
 
     if (loading) {
         return (
@@ -265,9 +277,11 @@ export default function ChiangRaiAdminLayout({ children }: { children: ReactNode
 
                 {/* Content */}
                 <main className="flex-1 p-6 md:p-8 overflow-x-hidden">
-                    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in-up">
-                        {children}
-                    </div>
+                    <ChiangRaiAdminContext.Provider value={{ user }}>
+                        <div className="max-w-6xl mx-auto space-y-6 animate-fade-in-up">
+                            {children}
+                        </div>
+                    </ChiangRaiAdminContext.Provider>
                 </main>
             </div>
         </div>

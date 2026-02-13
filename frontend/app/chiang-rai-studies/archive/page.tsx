@@ -3,7 +3,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { Search, Filter, BookOpen, MapPin, Users, Landmark, Loader2, ScrollText, Sparkles } from 'lucide-react';
+import { Search, Filter, BookOpen, MapPin, Users, Landmark, Loader2, ScrollText, Sparkles, ArrowRight } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';

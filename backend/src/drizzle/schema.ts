@@ -258,3 +258,32 @@ export const chiangRaiStaff = pgTable('chiang_rai_staff', {
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+export const chiangRaiActivityTypeEnum = pgEnum('cr_activity_type', [
+    'NEWS',          // ข่าวสาร
+    'EVENT',         // กิจกรรม
+    'ANNOUNCEMENT'   // ประกาศ
+]);
+
+export const chiangRaiActivities = pgTable('chiang_rai_activities', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: varchar('title', { length: 500 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull().unique(),
+    type: chiangRaiActivityTypeEnum('type').notNull().default('NEWS'),
+    description: text('description'),
+    content: text('content'),
+    thumbnailUrl: varchar('thumbnail_url', { length: 500 }),
+    mediaUrls: text('media_urls').array(),
+
+    location: varchar('location', { length: 500 }),
+    eventDate: timestamp('event_date'),
+    eventEndDate: timestamp('event_end_date'),
+
+    author: varchar('author', { length: 255 }),
+    tags: text('tags').array(),
+    isPublished: boolean('is_published').default(true),
+    isFeatured: boolean('is_featured').default(false),
+    publishedAt: timestamp('published_at').defaultNow(),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+});

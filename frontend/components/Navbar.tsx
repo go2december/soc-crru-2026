@@ -103,6 +103,7 @@ export default function Navbar() {
                     </div>
                     {/* Mobile Menu */}
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[100] p-2 shadow-xl bg-scholar-deep rounded-box w-64 text-white border border-white/10">
+                        <li><Link href="/about">เกี่ยวกับคณะ</Link></li>
                         <li><span className="text-scholar-gold font-bold">การจัดการศึกษา</span>
                             <ul>
                                 <li><Link href="/academics/overview">ภาพรวมวิชาการ</Link></li>
@@ -110,9 +111,8 @@ export default function Navbar() {
                                 <li><Link href="/academics/graduate">บัณฑิตศึกษา</Link></li>
                             </ul>
                         </li>
-                        <li><Link href="/admissions">การรับสมัคร</Link></li>
+                        <li><Link href="/admissions">รับสมัคร</Link></li>
                         <li><Link href="/research">วิจัยและนวัตกรรม</Link></li>
-                        <li><Link href="/about">เกี่ยวกับคณะ</Link></li>
                         <li><Link href="/eservice" className="text-yellow-400">ระบบสารสนเทศ</Link></li>
                     </ul>
                 </div>
@@ -136,6 +136,15 @@ export default function Navbar() {
             <div className="navbar-center hidden lg:flex h-full">
                 <ul className="flex items-center gap-1 h-full">
 
+                    {/* A. เกี่ยวกับคณะ */}
+                    <DropdownMenu name="about" title="เกี่ยวกับคณะ">
+                        <NavItem href="/about" title="ภาพรวมคณะ (Vision & History)" />
+                        <NavItem href="/about/strategy" title="แผนยุทธศาสตร์ (Strategic Plan)" />
+                        <NavItem href="/about/structure" title="โครงสร้างการบริหาร (Org. Structure)" />
+                        <div className="divider my-1 border-white/10"></div>
+                        <NavItem href="/about/staff" title="ทำเนียบบุคลากร (Staff)" />
+                    </DropdownMenu>
+
                     {/* B. การจัดการศึกษา (Academics) - Highlight Menu */}
                     <DropdownMenu name="academics" title="การจัดการศึกษา">
                         <NavItem href="/academics/overview" title="ภาพรวมวิชาการ (Overview)" />
@@ -156,8 +165,8 @@ export default function Navbar() {
                         <NavItem href="/academics/short-courses" title="หลักสูตรระยะสั้น" />
                     </DropdownMenu>
 
-                    {/* C. การรับสมัคร (Admissions) */}
-                    <DropdownMenu name="admissions" title="การรับสมัคร">
+                    {/* C. รับสมัคร (Admissions) */}
+                    <DropdownMenu name="admissions" title="รับสมัคร">
                         <li className="mb-2 pb-2 border-b border-white/10">
                             <Link href="/admissions" className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-scholar-gold hover:text-white hover:bg-scholar-accent rounded-md transition-all" onClick={() => setOpenDropdown(null)}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -187,16 +196,6 @@ export default function Navbar() {
                         <NavItem href="/research/database" title="ฐานข้อมูลงานวิจัย" />
                         <NavItem href="/research/startups" title="นวัตกรรมชุมชน (Local Startups)" />
                         <NavItem href="/research/services" title="บริการวิชาการ" />
-                    </DropdownMenu>
-
-                    {/* E. เกี่ยวกับคณะ */}
-                    {/* E. เกี่ยวกับคณะ */}
-                    <DropdownMenu name="about" title="เกี่ยวกับคณะ">
-                        <NavItem href="/about" title="ภาพรวมคณะ (Vision & History)" />
-                        <NavItem href="/about/strategy" title="แผนยุทธศาสตร์ (Strategic Plan)" />
-                        <NavItem href="/about/structure" title="โครงสร้างการบริหาร (Org. Structure)" />
-                        <div className="divider my-1 border-white/10"></div>
-                        <NavItem href="/about/staff" title="ทำเนียบบุคลากร (Staff)" />
                     </DropdownMenu>
 
                     {/* F. ระบบสารสนเทศ (E-Service) */}

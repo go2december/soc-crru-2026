@@ -1,6 +1,6 @@
 
 import Link from 'next/link';
-import { ArrowLeft, Calendar, User, Share2, Printer, AlertTriangle, ScrollText, Landmark } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Share2, Printer, AlertTriangle, ScrollText, Landmark, ArrowRight } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
 const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
@@ -13,7 +13,7 @@ interface Artifact {
     content: string | null;
     category: string | null;
     thumbnailUrl: string | null;
-    mediaUrl: string | null;
+    mediaUrls: string[] | null;
     author: string | null;
     createdAt: string | null;
 }
@@ -126,7 +126,7 @@ export default async function ArtifactDetailPage({ params }: { params: Promise<{
                 <div className="relative mb-16 rounded-[2.5rem] overflow-hidden shadow-2xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     <div className="absolute inset-0 bg-gradient-to-t from-[#2e1065]/20 to-transparent"></div>
                     <img
-                        src={artifact.thumbnailUrl || artifact.mediaUrl || 'https://placehold.co/1200x700/702963/white?text=Artifact+Display'}
+                        src={artifact.thumbnailUrl || (artifact.mediaUrls && artifact.mediaUrls[0]) || 'https://placehold.co/1200x700/702963/white?text=Artifact+Display'}
                         alt={artifact.title}
                         className="w-full h-auto object-cover max-h-[700px]"
                     />

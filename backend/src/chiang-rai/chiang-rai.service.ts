@@ -1,7 +1,7 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DrizzleService } from '../drizzle/drizzle.service';
-import { chiangRaiIdentities, chiangRaiArtifacts, chiangRaiArticles, chiangRaiStaff, staffProfiles, departments } from '../drizzle/schema';
+import { chiangRaiIdentities, chiangRaiArtifacts, chiangRaiArticles, chiangRaiActivities, chiangRaiStaff, staffProfiles, departments } from '../drizzle/schema';
 import { eq, desc, asc } from 'drizzle-orm';
 
 @Injectable()
@@ -55,6 +55,21 @@ export class ChiangRaiService {
         return this.drizzle.db.insert(chiangRaiArtifacts).values(data).returning();
     }
 
+    async updateArtifact(id: string, data: Partial<typeof chiangRaiArtifacts.$inferInsert>) {
+        return this.drizzle.db
+            .update(chiangRaiArtifacts)
+            .set({ ...data, updatedAt: new Date() })
+            .where(eq(chiangRaiArtifacts.id, id))
+            .returning();
+    }
+
+    async deleteArtifact(id: string) {
+        return this.drizzle.db
+            .delete(chiangRaiArtifacts)
+            .where(eq(chiangRaiArtifacts.id, id))
+            .returning();
+    }
+
     // --- Articles ---
     async getArticles() {
         return this.drizzle.db.select().from(chiangRaiArticles).orderBy(desc(chiangRaiArticles.publishedAt));
@@ -71,6 +86,94 @@ export class ChiangRaiService {
             throw new NotFoundException(`Article with slug ${slug} not found`);
         }
         return result[0];
+    }
+
+    async getArticleById(id: string) {
+        const result = await this.drizzle.db
+            .select()
+            .from(chiangRaiArticles)
+            .where(eq(chiangRaiArticles.id, id))
+            .limit(1);
+
+        if (!result.length) {
+            throw new NotFoundException(`Article ${id} not found`);
+        }
+        return result[0];
+    }
+
+    async createArticle(data: typeof chiangRaiArticles.$inferInsert) {
+        return this.drizzle.db.insert(chiangRaiArticles).values(data).returning();
+    }
+
+    async updateArticle(id: string, data: Partial<typeof chiangRaiArticles.$inferInsert>) {
+        return this.drizzle.db
+            .update(chiangRaiArticles)
+            .set(data)
+            .where(eq(chiangRaiArticles.id, id))
+            .returning();
+    }
+
+    async deleteArticle(id: string) {
+        return this.drizzle.db
+            .delete(chiangRaiArticles)
+            .where(eq(chiangRaiArticles.id, id))
+            .returning();
+    }
+
+    // --- Activities ---
+    async getActivities(type?: 'NEWS' | 'EVENT' | 'ANNOUNCEMENT') {
+        const query = this.drizzle.db.select().from(chiangRaiActivities);
+
+        if (type) {
+            query.where(eq(chiangRaiActivities.type, type));
+        }
+
+        return query.orderBy(desc(chiangRaiActivities.publishedAt));
+    }
+
+    async getActivityById(id: string) {
+        const result = await this.drizzle.db
+            .select()
+            .from(chiangRaiActivities)
+            .where(eq(chiangRaiActivities.id, id))
+            .limit(1);
+
+        if (!result.length) {
+            throw new NotFoundException(`Activity ${id} not found`);
+        }
+        return result[0];
+    }
+
+    async getActivityBySlug(slug: string) {
+        const result = await this.drizzle.db
+            .select()
+            .from(chiangRaiActivities)
+            .where(eq(chiangRaiActivities.slug, slug))
+            .limit(1);
+
+        if (!result.length) {
+            throw new NotFoundException(`Activity with slug ${slug} not found`);
+        }
+        return result[0];
+    }
+
+    async createActivity(data: typeof chiangRaiActivities.$inferInsert) {
+        return this.drizzle.db.insert(chiangRaiActivities).values(data).returning();
+    }
+
+    async updateActivity(id: string, data: Partial<typeof chiangRaiActivities.$inferInsert>) {
+        return this.drizzle.db
+            .update(chiangRaiActivities)
+            .set({ ...data, updatedAt: new Date() })
+            .where(eq(chiangRaiActivities.id, id))
+            .returning();
+    }
+
+    async deleteActivity(id: string) {
+        return this.drizzle.db
+            .delete(chiangRaiActivities)
+            .where(eq(chiangRaiActivities.id, id))
+            .returning();
     }
 
     // --- Staff Management ---

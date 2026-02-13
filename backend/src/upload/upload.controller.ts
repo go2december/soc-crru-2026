@@ -1,4 +1,4 @@
-import { Controller, Post, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common';
+import { Controller, Post, Delete, Body, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -16,5 +16,20 @@ export class UploadController {
     async uploadStaffImage(@UploadedFile() file: Express.Multer.File) {
         const imageUrl = await this.uploadService.saveStaffImage(file);
         return { url: imageUrl };
+    }
+
+    @Post('chiang-rai')
+    @Roles('ADMIN', 'EDITOR', 'STAFF')
+    @UseInterceptors(FileInterceptor('file'))
+    async uploadChiangRaiImage(@UploadedFile() file: Express.Multer.File) {
+        const imageUrl = await this.uploadService.saveChiangRaiImage(file);
+        return { url: imageUrl };
+    }
+
+    @Delete('chiang-rai')
+    @Roles('ADMIN', 'EDITOR', 'STAFF')
+    async deleteChiangRaiImage(@Body('url') url: string) {
+        const deleted = await this.uploadService.deleteChiangRaiImage(url);
+        return { deleted };
     }
 }

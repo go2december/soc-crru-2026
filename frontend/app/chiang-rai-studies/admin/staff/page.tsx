@@ -33,7 +33,7 @@ export default function AdminStaffPage() {
     const fetchStaff = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/chiang-rai/staff`);
+            const res = await fetch(`${API_URL}/api/chiang-rai/staff`);
             if (res.ok) {
                 const data = await res.json();
                 setStaffList(data);
@@ -48,7 +48,7 @@ export default function AdminStaffPage() {
     const fetchFacultyStaff = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/chiang-rai/admin/faculty-staff`);
+            const res = await fetch(`${API_URL}/api/chiang-rai/admin/faculty-staff`);
             if (res.ok) {
                 const data = await res.json();
                 setFacultyStaffList(data);
@@ -63,7 +63,7 @@ export default function AdminStaffPage() {
     const handleDelete = async (id: string) => {
         if (!confirm('ยืนยันการลบ?')) return;
         try {
-            const res = await fetch(`${API_URL}/chiang-rai/staff/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_URL}/api/chiang-rai/staff/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 fetchStaff();
             }
@@ -77,7 +77,7 @@ export default function AdminStaffPage() {
 
         setImportLoading(true);
         try {
-            const res = await fetch(`${API_URL}/chiang-rai/staff/import`, {
+            const res = await fetch(`${API_URL}/api/chiang-rai/staff/import`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
