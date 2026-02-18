@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Res, UseGuards, Param, Patch, Body, Delete as NestDelete } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards, Param, Patch, Body, Delete as NestDelete, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -18,20 +18,31 @@ export class AuthController {
     }
 
     // Dev Login (Bypass Google)
+    // callbackPath: เส้นทาง callback ของ frontend เช่น /admin/callback หรือ /chiang-rai-studies/admin/callback
     @Get('dev/login')
-    async devLogin(@Res() res: Response) {
+    async devLogin(@Res() res: Response, @Query('callbackPath') callbackPath?: string) {
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
+        const cbPath = callbackPath || '/admin/callback';
         try {
             const token = await this.authService.loginAsDevAdmin();
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
-            res.redirect(`${frontendUrl}/admin/callback?token=${token.accessToken}`);
+            res.redirect(`${frontendUrl}${cbPath}?token=${token.accessToken}`);
         } catch (error) {
             console.error('Dev Login Error:', error);
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
-            res.redirect(`${frontendUrl}/admin/login?error=${encodeURIComponent(error.message || 'Unknown error')}`);
+            // Derive login path from callback path (e.g. /chiang-rai-studies/admin/callback -> /chiang-rai-studies/admin/login)
+            const loginPath = cbPath.replace('/callback', '/login');
+            res.redirect(`${frontendUrl}${loginPath}?error=${encodeURIComponent(error.message || 'Unknown error')}`);
         }
     }
 
+    // Dev Login (JSON response - no redirect)
+    @Post('dev/token')
+    async devLoginToken() {
+        const token = await this.authService.loginAsDevAdmin();
+        return { accessToken: token.accessToken };
+    }
+
     // Callback หลังจาก Google OAuth สำเร็จ
+    // ใช้ localStorage redirect_after_login ที่ frontend ตั้งไว้ก่อนเรียก Google OAuth
     @Get('google/callback')
     @UseGuards(GoogleAuthGuard)
     async googleAuthCallback(@Req() req: any, @Res() res: Response) {
@@ -40,6 +51,8 @@ export class AuthController {
             const token = await this.authService.generateToken(user);
 
             // Redirect ไป Frontend พร้อม token
+            // Google OAuth ไม่สามารถส่ง custom state ได้ง่าย จึงใช้ /admin/callback เป็น default
+            // Frontend callback page จะอ่าน localStorage.redirect_after_login เพื่อ redirect ต่อ
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
             res.redirect(`${frontendUrl}/admin/callback?token=${token.accessToken}`);
         } catch (error) {

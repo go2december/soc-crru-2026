@@ -1,7 +1,8 @@
 
 import Link from 'next/link';
-import { ArrowLeft, Calendar, User, Share2, Printer, AlertTriangle, ScrollText, Landmark, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Share2, Printer, AlertTriangle, ScrollText, Landmark, ArrowRight, ImageIcon, Film, ExternalLink, Images, Play } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import ImageLightbox from './ImageLightbox';
 
 const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
 
@@ -14,8 +15,23 @@ interface Artifact {
     category: string | null;
     thumbnailUrl: string | null;
     mediaUrls: string[] | null;
+    mediaType: string | null;
     author: string | null;
     createdAt: string | null;
+}
+
+// Helper: detect media type from URL
+function getMediaType(url: string): 'image' | 'video' | 'link' {
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'video';
+    if (/\.(jpg|jpeg|png|gif|webp|svg|bmp|avif)(\?.*)?$/i.test(url)) return 'image';
+    if (url.startsWith('http') && !url.includes('unsplash.com')) return 'link';
+    return 'image'; // default for unsplash etc.
+}
+
+// Helper: extract YouTube video ID
+function getYouTubeId(url: string): string | null {
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+    return match ? match[1] : null;
 }
 
 // Categories for label mapping
@@ -30,7 +46,7 @@ const categoryLabels: Record<string, string> = {
 // Fetch artifact data (Server-side)
 async function getArtifact(id: string): Promise<Artifact | null> {
     try {
-        const res = await fetch(`${API_URL}/chiang-rai/artifacts/${id}`, {
+        const res = await fetch(`${API_URL}/api/chiang-rai/artifacts/${id}`, {
             next: { revalidate: 60 } // Cache for 60 seconds
         });
 
@@ -124,7 +140,7 @@ export default async function ArtifactDetailPage({ params }: { params: Promise<{
 
                 {/* Cover Image / Media Section */}
                 <div className="relative mb-16 rounded-[2.5rem] overflow-hidden shadow-2xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#2e1065]/20 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#2e1065]/20 to-transparent z-10 pointer-events-none"></div>
                     <img
                         src={artifact.thumbnailUrl || (artifact.mediaUrls && artifact.mediaUrls[0]) || 'https://placehold.co/1200x700/702963/white?text=Artifact+Display'}
                         alt={artifact.title}
@@ -182,6 +198,39 @@ export default async function ArtifactDetailPage({ params }: { params: Promise<{
                             </ul>
                         </div>
 
+                        {/* Media Summary Card */}
+                        {artifact.mediaUrls && artifact.mediaUrls.length > 0 && (
+                            <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-purple-50">
+                                <h4 className="text-lg font-bold text-[#2e1065] mb-6 border-b border-purple-50 pb-4">Galleries</h4>
+                                <div className="space-y-3">
+                                    {artifact.mediaUrls.filter(u => getMediaType(u) === 'image').length > 0 && (
+                                        <div className="flex items-center gap-3 text-sm text-purple-700">
+                                            <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+                                                <ImageIcon size={16} className="text-purple-500" />
+                                            </div>
+                                            <span className="font-medium">{artifact.mediaUrls.filter(u => getMediaType(u) === 'image').length} รูปภาพ</span>
+                                        </div>
+                                    )}
+                                    {artifact.mediaUrls.filter(u => getMediaType(u) === 'video').length > 0 && (
+                                        <div className="flex items-center gap-3 text-sm text-rose-600">
+                                            <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+                                                <Film size={16} className="text-rose-500" />
+                                            </div>
+                                            <span className="font-medium">{artifact.mediaUrls.filter(u => getMediaType(u) === 'video').length} วิดีโอ</span>
+                                        </div>
+                                    )}
+                                    {artifact.mediaUrls.filter(u => getMediaType(u) === 'link').length > 0 && (
+                                        <div className="flex items-center gap-3 text-sm text-blue-600">
+                                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                                                <ExternalLink size={16} className="text-blue-500" />
+                                            </div>
+                                            <span className="font-medium">{artifact.mediaUrls.filter(u => getMediaType(u) === 'link').length} ลิงก์</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="bg-[#2e1065] p-8 rounded-[2rem] text-white shadow-xl relative overflow-hidden group">
                             <div className="absolute -right-8 -bottom-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
                                 <Landmark size={150} />
@@ -194,6 +243,111 @@ export default async function ArtifactDetailPage({ params }: { params: Promise<{
                         </div>
                     </div>
                 </div>
+
+                {/* ===== Galleries Section (after article content) ===== */}
+                {artifact.mediaUrls && artifact.mediaUrls.length > 0 && (() => {
+                    const imageUrls = artifact.mediaUrls!.filter(u => getMediaType(u) === 'image');
+                    const videoUrls = artifact.mediaUrls!.filter(u => getMediaType(u) === 'video');
+                    const linkUrls = artifact.mediaUrls!.filter(u => getMediaType(u) === 'link');
+
+                    return (
+                        <div className="mt-20 pt-16 border-t border-purple-100 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+                            {/* Section Header */}
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                                    <Images size={22} className="text-white" />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-black text-[#2e1065]">Galleries</h2>
+                                    <p className="text-purple-400 text-sm font-light">
+                                        {artifact.mediaUrls!.length} รายการ
+                                        {imageUrls.length > 0 && ` · ${imageUrls.length} รูปภาพ`}
+                                        {videoUrls.length > 0 && ` · ${videoUrls.length} วิดีโอ`}
+                                        {linkUrls.length > 0 && ` · ${linkUrls.length} ลิงก์`}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Image Gallery Grid with Lightbox */}
+                            {imageUrls.length > 0 && (
+                                <div className="mb-12">
+                                    <div className="flex items-center gap-2 mb-5">
+                                        <ImageIcon size={16} className="text-purple-400" />
+                                        <h3 className="text-sm font-bold text-purple-600 uppercase tracking-widest">รูปภาพ</h3>
+                                    </div>
+                                    <ImageLightbox images={imageUrls} />
+                                </div>
+                            )}
+
+                            {/* Video Section */}
+                            {videoUrls.length > 0 && (
+                                <div className="mb-12">
+                                    <div className="flex items-center gap-2 mb-5">
+                                        <Film size={16} className="text-rose-500" />
+                                        <h3 className="text-sm font-bold text-rose-600 uppercase tracking-widest">วิดีโอ</h3>
+                                    </div>
+                                    <div className={`grid gap-6 ${videoUrls.length > 1 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-3xl'}`}>
+                                        {videoUrls.map((url, i) => {
+                                            const ytId = getYouTubeId(url);
+                                            if (ytId) {
+                                                return (
+                                                    <div key={i} className="rounded-2xl overflow-hidden shadow-lg border border-purple-50 bg-black">
+                                                        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                                                            <iframe
+                                                                src={`https://www.youtube.com/embed/${ytId}`}
+                                                                title={`วิดีโอ ${i + 1}`}
+                                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                allowFullScreen
+                                                                className="absolute inset-0 w-full h-full"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return (
+                                                <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                                                    className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-purple-50 shadow-sm hover:shadow-lg hover:border-rose-200 transition-all group">
+                                                    <div className="w-14 h-14 rounded-xl bg-rose-50 flex items-center justify-center shrink-0 group-hover:bg-rose-100 transition-colors">
+                                                        <Play size={24} className="text-rose-500" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-bold text-[#2e1065] group-hover:text-rose-600 transition-colors">วิดีโอ {i + 1}</p>
+                                                        <p className="text-xs text-purple-400 truncate">{url}</p>
+                                                    </div>
+                                                    <ExternalLink size={16} className="text-purple-300 shrink-0 ml-auto group-hover:text-rose-500 transition-colors" />
+                                                </a>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* External Links Section */}
+                            {linkUrls.length > 0 && (
+                                <div className="mb-10">
+                                    <div className="flex items-center gap-2 mb-5">
+                                        <ExternalLink size={16} className="text-blue-500" />
+                                        <h3 className="text-sm font-bold text-blue-600 uppercase tracking-widest">ลิงก์ที่เกี่ยวข้อง</h3>
+                                    </div>
+                                    <div className="space-y-3 max-w-3xl">
+                                        {linkUrls.map((url, i) => (
+                                            <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                                                className="flex items-center gap-4 p-4 bg-white rounded-xl border border-purple-50 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group">
+                                                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
+                                                    <ExternalLink size={18} className="text-blue-500" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-bold text-[#2e1065] group-hover:text-blue-600 transition-colors truncate">{url}</p>
+                                                </div>
+                                                <ArrowRight size={14} className="text-purple-300 shrink-0 ml-auto group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
 
                 {/* Footer Back Link */}
                 <div className="mt-24 pt-10 border-t border-purple-100 flex justify-center">

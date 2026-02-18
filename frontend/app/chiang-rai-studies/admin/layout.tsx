@@ -47,10 +47,12 @@ export default function ChiangRaiAdminLayout({ children }: { children: ReactNode
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const isLoginPage = pathname === '/chiang-rai-studies/admin/login';
+    const isCallbackPage = pathname === '/chiang-rai-studies/admin/callback';
+    const isPublicPage = isLoginPage || isCallbackPage;
 
     // 1. Auth Logic - Skip for login page
     useEffect(() => {
-        if (isLoginPage) {
+        if (isPublicPage) {
             setLoading(false);
             return;
         }
@@ -59,7 +61,7 @@ export default function ChiangRaiAdminLayout({ children }: { children: ReactNode
             const token = localStorage.getItem('admin_token');
 
             if (!token) {
-                router.push('/chiang-rai-studies/admin/login?redirect=/chiang-rai-studies/admin');
+                router.push(`/chiang-rai-studies/admin/login?redirect=${encodeURIComponent(pathname)}`);
                 return;
             }
 
@@ -87,7 +89,7 @@ export default function ChiangRaiAdminLayout({ children }: { children: ReactNode
         };
 
         checkAuth();
-    }, [router, isLoginPage]);
+    }, [router, isPublicPage]);
 
     const handleLogout = () => {
         localStorage.removeItem('admin_token');
@@ -119,8 +121,8 @@ export default function ChiangRaiAdminLayout({ children }: { children: ReactNode
         }
     ];
 
-    // Login page: render directly without admin shell
-    if (isLoginPage) {
+    // Login/Callback pages: render directly without admin shell
+    if (isPublicPage) {
         return <div className={`${kanit.variable} font-kanit`}>{children}</div>;
     }
 

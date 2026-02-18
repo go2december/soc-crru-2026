@@ -3,7 +3,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { Search, Filter, BookOpen, MapPin, Users, Landmark, Loader2, ScrollText, Sparkles, ArrowRight } from 'lucide-react';
+import { Search, Filter, BookOpen, MapPin, Users, Landmark, Loader2, ScrollText, Sparkles, ArrowRight, ImageIcon, Film, Link2, Images } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
@@ -25,6 +25,8 @@ interface Artifact {
     description: string | null;
     category: string | null;
     thumbnailUrl: string | null;
+    mediaUrls: string[] | null;
+    mediaType: string | null;
     createdAt: string | null;
 }
 
@@ -47,8 +49,8 @@ function ArchiveContent() {
             try {
                 // Build URL with optional category filter
                 const url = selectedCategory === 'ALL'
-                    ? `${API_URL}/chiang-rai/artifacts`
-                    : `${API_URL}/chiang-rai/artifacts?category=${selectedCategory}`;
+                    ? `${API_URL}/api/chiang-rai/artifacts`
+                    : `${API_URL}/api/chiang-rai/artifacts?category=${selectedCategory}`;
 
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Failed to fetch artifacts');
@@ -193,6 +195,28 @@ function ArchiveContent() {
                                     <div className="absolute top-4 right-4 bg-white/95 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-purple-900 shadow-sm z-20 uppercase tracking-widest border border-purple-100">
                                         {categories.find(c => c.id === item.category)?.title || 'ทั่วไป'}
                                     </div>
+                                    {/* Media count badge */}
+                                    {item.mediaUrls && item.mediaUrls.length > 0 && (
+                                        <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-bold z-20">
+                                            <Images size={14} />
+                                            <span>{item.mediaUrls.length} Galleries</span>
+                                        </div>
+                                    )}
+                                    {/* Media preview strip */}
+                                    {item.mediaUrls && item.mediaUrls.filter(u => !u.includes('youtube.com')).length > 1 && (
+                                        <div className="absolute bottom-4 right-4 flex -space-x-2 z-20">
+                                            {item.mediaUrls.filter(u => !u.includes('youtube.com')).slice(0, 3).map((url, i) => (
+                                                <div key={i} className="w-8 h-8 rounded-lg border-2 border-white overflow-hidden shadow-md">
+                                                    <img src={url} alt="" className="w-full h-full object-cover" />
+                                                </div>
+                                            ))}
+                                            {item.mediaUrls.filter(u => !u.includes('youtube.com')).length > 3 && (
+                                                <div className="w-8 h-8 rounded-lg border-2 border-white bg-purple-900/80 text-white flex items-center justify-center text-[10px] font-bold shadow-md">
+                                                    +{item.mediaUrls.filter(u => !u.includes('youtube.com')).length - 3}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Card Content */}
@@ -204,9 +228,25 @@ function ArchiveContent() {
                                         <div className="w-12 h-0.5 bg-orange-100 group-hover:w-24 group-hover:bg-orange-500 transition-all duration-500"></div>
                                     </div>
 
-                                    <p className="text-purple-900/40 text-sm line-clamp-3 mb-8 font-light leading-relaxed flex-grow">
+                                    <p className="text-purple-900/40 text-sm line-clamp-3 mb-6 font-light leading-relaxed flex-grow">
                                         {item.description || 'ไม่มีรายละเอียดเพิ่มเติมสำหรับรายการนี้'}
                                     </p>
+
+                                    {/* Media type indicators */}
+                                    {item.mediaUrls && item.mediaUrls.length > 0 && (
+                                        <div className="flex items-center gap-2 mb-6">
+                                            {item.mediaUrls.some(u => !u.includes('youtube.com')) && (
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-500 bg-purple-50 px-2.5 py-1 rounded-full">
+                                                    <ImageIcon size={11} /> รูปภาพ
+                                                </span>
+                                            )}
+                                            {item.mediaUrls.some(u => u.includes('youtube.com')) && (
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full">
+                                                    <Film size={11} /> วิดีโอ
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
 
                                     <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-purple-300 border-t border-purple-50 pt-6 mt-auto">
                                         <div className="flex items-center gap-1.5">

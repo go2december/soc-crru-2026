@@ -48,6 +48,26 @@ This workflow guides the development of the Chiang Rai Studies Center website as
     - [x] Fetch Staff (Directory) from Backend API.
     - [x] **Implement API calls for Articles page.**
     - [ ] Implement full-text search (Server-side optimization).
+- [x] **Admin Authentication Fix** *(2026-02-18)*
+    - [x] Add `POST /api/auth/dev/token` endpoint (returns JWT as JSON, no redirect chain).
+    - [x] Chiang Rai login page uses `fetch` for Dev Login → saves token client-side → `router.push` directly.
+    - [x] Layout skips auth for login + callback pages; passes `redirect` query param.
+    - [x] Google OAuth stores `redirect_after_login` in localStorage for cross-callback redirect.
+- [x] **Archive Media Galleries** *(2026-02-18)*
+    - [x] Update sample artifacts with rich `mediaUrls` (images + YouTube videos).
+    - [x] Archive list page: media count badge, preview strip, media type indicators (รูปภาพ/วิดีโอ).
+    - [x] Archive detail page: Galleries section below article content with image grid, YouTube embeds, external links.
+    - [x] Sidebar media summary card showing counts by type.
+    - [x] Cinematic `ImageLightbox` client component:
+        - Ambient blur background from current image.
+        - Slide transitions (fade + translate) with directional animation.
+        - Progress bar (orange gradient) showing position.
+        - Monospaced counter (`01 / 03`) editorial style.
+        - Filmstrip thumbnails with active ring glow, grayscale inactive, auto-scroll.
+        - Swipe gesture support for touch devices.
+        - Keyboard navigation (← → Escape).
+        - Responsive: mobile/tablet/desktop breakpoints, safe-area support.
+    - [x] Fix YouTube video embeds (replaced placeholder IDs with real video IDs).
 - [ ] **Content Population**
     - [ ] Input initial sample data for 5 Identities.
 

@@ -1,25 +1,22 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Shield, ArrowLeft, Info, AlertCircle, Lock } from 'lucide-react';
+import { Shield, ArrowLeft, Info, AlertCircle, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function ChiangRaiAdminLogin() {
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+
+function ChiangRaiAdminLoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [error, setError] = useState<string | null>(null);
-    const [apiUrl, setApiUrl] = useState<string>('');
 
     useEffect(() => {
-        // Set API URL from environment
-        const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
-        setApiUrl(url);
-
         const errorParam = searchParams.get('error');
         if (errorParam) {
             setError(decodeURIComponent(errorParam));
@@ -32,16 +29,25 @@ export default function ChiangRaiAdminLogin() {
         }
     }, [searchParams, router]);
 
+    // Get redirect destination from URL query param (set by layout.tsx when auth fails)
+    const redirectTarget = searchParams.get('redirect') || '/chiang-rai-studies/admin';
+
     const handleGoogleLogin = () => {
-        // Set redirect target for callback page
-        localStorage.setItem('redirect_after_login', '/chiang-rai-studies/admin');
-        window.location.href = `${apiUrl}/api/auth/google`;
+        // Google OAuth always redirects to /admin/callback, so we store the final destination
+        localStorage.setItem('redirect_after_login', redirectTarget);
+        window.location.href = `${API_URL}/api/auth/google`;
     };
 
-    const handleDevLogin = () => {
-        // Set redirect target for callback page
-        localStorage.setItem('redirect_after_login', '/chiang-rai-studies/admin');
-        window.location.href = `${apiUrl}/api/auth/dev/login`;
+    const handleDevLogin = async () => {
+        try {
+            const res = await fetch(`${API_URL}/api/auth/dev/token`, { method: 'POST' });
+            if (!res.ok) throw new Error('Dev login failed');
+            const data = await res.json();
+            localStorage.setItem('admin_token', data.accessToken);
+            router.push(redirectTarget);
+        } catch (err: any) {
+            setError(err.message || 'Dev login failed');
+        }
     };
 
     return (
@@ -142,5 +148,17 @@ export default function ChiangRaiAdminLogin() {
                 }
             `}</style>
         </div>
+    );
+}
+
+export default function ChiangRaiAdminLogin() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#faf5ff] flex items-center justify-center">
+                <Loader2 className="animate-spin text-purple-600" size={48} />
+            </div>
+        }>
+            <ChiangRaiAdminLoginContent />
+        </Suspense>
     );
 }
