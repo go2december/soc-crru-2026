@@ -6,14 +6,20 @@ import { ChiangRaiService } from './chiang-rai.service';
 export class ChiangRaiController {
     constructor(private readonly service: ChiangRaiService) { }
 
+
     @Get('identities')
     async getIdentities() {
         return this.service.getAllIdentities();
     }
 
+    @Get('search')
+    async search(@Query('q') q: string) {
+        return this.service.search(q);
+    }
+
     @Get('artifacts')
-    async getArtifacts(@Query('category') category?: any) {
-        return this.service.getArtifacts(category);
+    async getArtifacts(@Query('category') category?: any, @Query('q') q?: string) {
+        return this.service.getArtifacts(category, q);
     }
 
     @Get('artifacts/:id')
@@ -67,9 +73,14 @@ export class ChiangRaiController {
         return this.service.deleteArticle(id);
     }
 
+
     @Get('activities')
-    async getActivities(@Query('type') type?: any) {
-        return this.service.getActivities(type);
+    async getActivities(
+        @Query('type') type?: 'NEWS' | 'EVENT' | 'ANNOUNCEMENT',
+        @Query('page') page: string = '1',
+        @Query('limit') limit: string = '10'
+    ) {
+        return this.service.getActivities(type, Number(page), Number(limit));
     }
 
     @Get('activities/by-id/:id')

@@ -9,7 +9,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+// Use relative path for Docker environment (Next.js Rewrites will proxy to backend)
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 function ChiangRaiAdminLoginContent() {
     const router = useRouter();

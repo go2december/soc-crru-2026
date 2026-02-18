@@ -6,7 +6,9 @@ import Link from 'next/link';
 import { Search, Filter, BookOpen, MapPin, Users, Landmark, Loader2, ScrollText, Sparkles, ArrowRight, ImageIcon, Film, Link2, Images } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+// Use relative path — Next.js Rewrites will proxy /api/* → backend container
+// NEXT_PUBLIC_API_URL is set to '' in .env so fetch('/api/...') works correctly
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Categories (Identities) - Static
 const categories = [
@@ -36,6 +38,16 @@ function ArchiveContent() {
     const [selectedCategory, setSelectedCategory] = useState(initialCategory.toUpperCase());
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Debounce search query
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     // API State
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
     const [loading, setLoading] = useState(true);
@@ -47,10 +59,13 @@ function ArchiveContent() {
             setLoading(true);
             setError(null);
             try {
-                // Build URL with optional category filter
-                const url = selectedCategory === 'ALL'
-                    ? `${API_URL}/api/chiang-rai/artifacts`
-                    : `${API_URL}/api/chiang-rai/artifacts?category=${selectedCategory}`;
+                // Build URL with optional category filter AND search query
+                const params = new URLSearchParams();
+                if (selectedCategory !== 'ALL') params.append('category', selectedCategory);
+                if (debouncedSearchQuery) params.append('q', debouncedSearchQuery);
+
+                const queryString = params.toString();
+                const url = `${API_URL}/api/chiang-rai/artifacts${queryString ? `?${queryString}` : ''}`;
 
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Failed to fetch artifacts');
@@ -66,17 +81,10 @@ function ArchiveContent() {
         };
 
         fetchArtifacts();
-    }, [selectedCategory]); // Re-fetch when category changes
+    }, [selectedCategory, debouncedSearchQuery]); // Re-fetch when category or query changes
 
-    // Client-side Search Filter
-    const filteredArtifacts = artifacts.filter((item) => {
-        if (!searchQuery) return true;
-        const query = searchQuery.toLowerCase();
-        return (
-            item.title.toLowerCase().includes(query) ||
-            (item.description && item.description.toLowerCase().includes(query))
-        );
-    });
+    // No client-side filtering needed anymore
+    const filteredArtifacts = artifacts;
 
     // Format Date
     const formatDate = (dateString: string | null) => {

@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-soc_secure_pass}
       POSTGRES_DB: ${DB_NAME:-soc_db}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT:-5433}:5432"
     volumes:
       - ./database/pgdata:/var/lib/postgresql/data
     networks:
@@ -96,7 +96,8 @@ services:
       # Dynamic API URL based on Port Configuration
       NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-4001}
       INTERNAL_API_URL: http://backend:3000
-      WATCHPACK_POLLING: "true"
+      # WATCHPACK_POLLING: "true"  <-- Removed to improve performance
+
     networks:
       - soc-network
     depends_on:

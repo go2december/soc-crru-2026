@@ -19,7 +19,7 @@ import { join } from 'path';
     ConfigModule.forRoot({ isGlobal: true }),
     // Serve static files from /uploads
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
     }),
     DrizzleModule,

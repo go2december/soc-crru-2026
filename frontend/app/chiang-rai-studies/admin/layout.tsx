@@ -51,45 +51,66 @@ export default function ChiangRaiAdminLayout({ children }: { children: ReactNode
     const isPublicPage = isLoginPage || isCallbackPage;
 
     // 1. Auth Logic - Skip for login page
+    // 1. Auth Logic - Skip for login page
     useEffect(() => {
-        if (isPublicPage) {
+        // Strong guard clause against public pages to prevent unnecessary fetches
+        if (pathname?.includes('/login') || pathname?.includes('/callback')) {
             setLoading(false);
             return;
         }
 
-        const checkAuth = async () => {
+        const checkAuth = async (retries = 3) => {
             const token = localStorage.getItem('admin_token');
 
             if (!token) {
+                // Redirect if no token found on protected route
                 router.push(`/chiang-rai-studies/admin/login?redirect=${encodeURIComponent(pathname)}`);
+                setLoading(false);
                 return;
             }
 
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
-                const res = await fetch(`${apiUrl}/api/auth/profile`, {
+                // Use relative path '/api/auth/profile' to prevent localhost/container network issues
+                // Add AbortSignal for timeout safety
+                const res = await fetch('/api/auth/profile', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
+                    signal: AbortSignal.timeout(5000)
                 });
 
                 if (!res.ok) {
-                    throw new Error('Invalid token');
+                    if (res.status === 401 || res.status === 403) {
+                        // Invalid token -> Logout
+                        console.warn('Token expired or invalid');
+                        localStorage.removeItem('admin_token');
+                        router.push('/chiang-rai-studies/admin/login');
+                        setLoading(false);
+                        return;
+                    }
+                    // Server error -> Retry
+                    throw new Error(`Server error: ${res.status}`);
                 }
 
                 const userData = await res.json();
                 setUser(userData);
-            } catch (error) {
-                console.error("Auth Error:", error);
-                localStorage.removeItem('admin_token');
-                router.push('/chiang-rai-studies/admin/login');
-            } finally {
                 setLoading(false);
+            } catch (error: any) {
+                // Silent retry logic
+                if (retries > 0 && error.name !== 'AbortError' && error.message !== 'Invalid token') {
+                    console.log(`Auth retry ${(3 - retries) + 1}...`);
+                    setTimeout(() => checkAuth(retries - 1), 2000);
+                } else {
+                    console.error("Auth Final Error:", error);
+                    localStorage.removeItem('admin_token');
+                    router.push('/chiang-rai-studies/admin/login');
+                    setLoading(false);
+                }
             }
         };
 
         checkAuth();
-    }, [router, isPublicPage]);
+    }, [pathname, router]);
 
     const handleLogout = () => {
         localStorage.removeItem('admin_token');

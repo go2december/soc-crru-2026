@@ -209,17 +209,20 @@ export default function ImageLightbox({ images }: ImageLightboxProps) {
 
                     {/* ── Main image ── */}
                     <div
-                        className="absolute inset-0 flex items-center justify-center px-4 pt-16 pb-4 md:px-20 md:pt-20 md:pb-6 lg:px-28"
-                        style={{ paddingBottom: images.length > 1 ? 'calc(env(safe-area-inset-bottom, 0px) + 88px)' : 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}
+                        className="absolute inset-0 flex items-center justify-center px-2 pt-12 pb-2 md:px-8 md:pt-14 md:pb-4 lg:px-12 z-[110]"
+                        style={{ paddingBottom: images.length > 1 ? 'calc(env(safe-area-inset-bottom, 0px) + 90px)' : 'calc(env(safe-area-inset-bottom, 0px) + 20px)' }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className={`relative max-w-full max-h-full flex items-center justify-center lb-image-wrapper ${slideDir === 'left' ? 'lb-slide-left' : slideDir === 'right' ? 'lb-slide-right' : 'lb-slide-in'}`}>
+                        <div className={`relative w-full h-full flex items-center justify-center lb-image-wrapper ${slideDir === 'left' ? 'lb-slide-left' : slideDir === 'right' ? 'lb-slide-right' : 'lb-slide-in'}`}>
                             <img
                                 key={currentIndex}
                                 src={images[currentIndex]}
                                 alt={`Gallery ${currentIndex + 1}`}
-                                className="max-w-full max-h-full object-contain select-none rounded-sm md:rounded"
-                                style={{ filter: 'drop-shadow(0 20px 60px rgba(0,0,0,0.5))' }}
+                                className="max-w-full max-h-[95vh] w-auto h-auto object-contain select-none rounded-sm md:rounded shadow-2xl"
+                                style={{
+                                    filter: 'drop-shadow(0 20px 60px rgba(0,0,0,0.5))',
+                                    maxHeight: '95%' // Enforce 95% height of container (which accounts for thumbnails)
+                                }}
                                 draggable={false}
                             />
                         </div>

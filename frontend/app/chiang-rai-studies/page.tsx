@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import {
     ArrowRight,
@@ -9,19 +7,38 @@ import {
     Users,
     Sparkles,
     Search,
-    MapPin,
-    Calendar,
     ChevronRight,
-    PlayCircle
+    Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export default function ChiangRaiHomePage() {
+export const dynamic = 'force-dynamic';
+
+async function getLatestActivities() {
+    try {
+        // Use service name in Docker network if available, fallback to localhost for local dev
+        const baseUrl = process.env.INTERNAL_API_URL || 'http://soc_backend:4000';
+        const res = await fetch(`${baseUrl}/api/chiang-rai/activities?limit=3`, {
+            cache: 'no-store', // Always fresh data
+        });
+
+        if (!res.ok) return [];
+
+        const json = await res.json();
+        return json.data || [];
+    } catch (error) {
+        console.error('Failed to fetch activities:', error);
+        return [];
+    }
+}
+
+export default async function ChiangRaiHomePage() {
+    const activities = await getLatestActivities();
+
     return (
         <div className="min-h-screen bg-[#FAF5FF] font-kanit">
-            {/* Hero Section */}
+            {/* Hero Section - unchanged */}
             <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-[#2e1065]">
-                {/* Background Pattern/Image */}
                 <div className="absolute inset-0">
                     <div className="absolute inset-0 bg-[url('https://placehold.co/1920x1080/2e1065/FFF?text=Chiang+Rai+Culture')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-[#2e1065] via-[#581c87]/90 to-transparent"></div>
@@ -63,13 +80,6 @@ export default function ChiangRaiHomePage() {
                         </div>
                     </div>
                 </div>
-
-                {/* Floating Decor */}
-                <div className="absolute right-0 top-1/3 -translate-y-1/2 translate-x-1/4 opacity-10 pointer-events-none hidden lg:block">
-                    <svg width="600" height="600" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                        <path fill="#F97316" d="M44.7,-76.4C58.9,-69.2,71.8,-59.1,81.6,-46.6C91.4,-34.1,98.1,-19.2,95.8,-5.3C93.5,8.6,82.2,21.4,70.5,30.6C58.8,39.8,46.7,45.4,35.4,52.6C24.1,59.8,13.6,68.6,-0.4,69.3C-14.4,70,-28,62.6,-40.3,53.4C-52.6,44.2,-63.6,33.2,-69.3,20.1C-75,7,-75.4,-8.2,-69.7,-21.3C-64,-34.4,-52.2,-45.4,-39.9,-53.2C-27.6,-61,-14.8,-65.6,-0.5,-64.7C13.8,-63.9,27.6,-57.6,44.7,-76.4Z" transform="translate(100 100)" />
-                    </svg>
-                </div>
             </section>
 
             {/* 5 Identities Section */}
@@ -109,8 +119,6 @@ export default function ChiangRaiHomePage() {
 
             {/* Featured Sections Grid */}
             <section className="py-24 bg-white relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-100 to-transparent"></div>
-
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                         <div className="relative">
@@ -126,7 +134,6 @@ export default function ChiangRaiHomePage() {
                                     <p className="opacity-90 font-light">รวบรวมหลักฐานทางประวัติศาสตร์และวัฒนธรรมในรูปแบบดิจิทัล</p>
                                 </div>
                             </div>
-                            {/* Decorative Blur */}
                             <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
                             <div className="absolute -top-10 -left-10 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
                         </div>
@@ -178,49 +185,60 @@ export default function ChiangRaiHomePage() {
                             <span className="text-purple-600 font-bold tracking-widest uppercase text-xs mb-2 block">Updates</span>
                             <h2 className="text-3xl font-black text-[#2e1065]">กิจกรรมและข่าวสาร</h2>
                         </div>
-                        <Link href="/chiang-rai-studies/articles">
+                        <Link href="/chiang-rai-studies/activities">
                             <Button variant="ghost" className="hidden sm:flex text-purple-700 hover:text-orange-600 hover:bg-transparent px-0 font-bold">
                                 ดูทั้งหมด <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* Placeholder News Cards */}
-                        {[1, 2, 3].map((i) => (
-                            <Link href="/chiang-rai-studies/articles" key={i} className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col">
-                                <div className="h-48 bg-stone-200 relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
-                                    <img
-                                        src={`https://placehold.co/600x400/purple/white?text=News+Update+${i}`}
-                                        alt="News"
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                                    />
-                                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-purple-900 uppercase tracking-wide z-20 shadow-sm">
-                                        Activity
+                    {activities.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {activities.map((item: any) => (
+                                <Link href={`/chiang-rai-studies/activities/${item.slug}`} key={item.id} className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+                                    <div className="h-48 bg-stone-200 relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
+                                        <img
+                                            src={item.thumbnailUrl || `https://placehold.co/600x400/purple/white?text=No+Image`}
+                                            alt={item.title}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                        />
+                                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-purple-900 uppercase tracking-wide z-20 shadow-sm">
+                                            {item.type}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="p-8 flex-1 flex flex-col">
-                                    <div className="flex items-center gap-2 text-stone-400 text-xs font-bold uppercase mb-3">
-                                        <Calendar size={12} />
-                                        <span>12 Feb 2026</span>
+                                    <div className="p-8 flex-1 flex flex-col">
+                                        <div className="flex items-center gap-2 text-stone-400 text-xs font-bold uppercase mb-3">
+                                            <Calendar size={12} />
+                                            <span>
+                                                {new Date(item.publishedAt).toLocaleDateString('th-TH', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                })}
+                                            </span>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-[#2e1065] mb-3 leading-snug group-hover:text-orange-600 transition-colors line-clamp-2">
+                                            {item.title}
+                                        </h3>
+                                        <p className="text-stone-500 text-sm line-clamp-2 mb-6 font-light">
+                                            {item.description || item.content?.replace(/<[^>]*>/g, '').substring(0, 100)}...
+                                        </p>
+                                        <div className="mt-auto pt-6 border-t border-dashed border-stone-100 text-xs font-bold text-purple-400 group-hover:text-purple-700 uppercase tracking-widest flex items-center gap-2">
+                                            Read More <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                                        </div>
                                     </div>
-                                    <h3 className="text-xl font-bold text-[#2e1065] mb-3 leading-snug group-hover:text-orange-600 transition-colors">
-                                        กิจกรรมส่งเสริมการเรียนรู้ศิลปวัฒนธรรมล้านนา ครั้งที่ {i}
-                                    </h3>
-                                    <p className="text-stone-500 text-sm line-clamp-2 mb-6 font-light">
-                                        รายละเอียดกิจกรรมย่อๆ เพื่อเชิญชวนให้ผู้สนใจเข้ามาอ่านต่อ...
-                                    </p>
-                                    <div className="mt-auto pt-6 border-t border-dashed border-stone-100 text-xs font-bold text-purple-400 group-hover:text-purple-700 uppercase tracking-widest flex items-center gap-2">
-                                        Read More <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 text-stone-400">
+                            ยังไม่มีกิจกรรมหรือข่าวสารในขณะนี้
+                        </div>
+                    )}
 
                     <div className="mt-8 text-center sm:hidden">
-                        <Link href="/chiang-rai-studies/articles">
+                        <Link href="/chiang-rai-studies/activities">
                             <Button variant="outline" className="w-full rounded-full border-purple-200 text-purple-700">
                                 ดูทั้งหมด
                             </Button>

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft, Calendar, User, Share2, Printer, AlertTriangle, ScrollText, Landmark, ArrowRight, ImageIcon, Film, ExternalLink, Images, Play } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import ImageLightbox from './ImageLightbox';
+import SharePrintButton from '@/components/chiang-rai/SharePrintButton';
 
 const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
 
@@ -128,12 +129,7 @@ export default async function ArtifactDetailPage({ params }: { params: Promise<{
                             </div>
                         )}
                         <div className="md:ml-auto flex items-center gap-6">
-                            <button className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold group">
-                                <Share2 size={18} className="group-hover:rotate-12 transition-transform" /> Share
-                            </button>
-                            <button className="flex items-center gap-2 hover:text-orange-600 transition-all font-bold group">
-                                <Printer size={18} className="group-hover:-translate-y-0.5 transition-transform" /> Print
-                            </button>
+                            <SharePrintButton title={artifact.title} description={artifact.description || undefined} />
                         </div>
                     </div>
                 </div>

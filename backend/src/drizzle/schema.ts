@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, integer, boolean, decimal, timestamp, pgEnum, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, integer, boolean, decimal, timestamp, pgEnum, jsonb, index } from 'drizzle-orm/pg-core';
 
 // ------------------------------------------
 // Enums
@@ -217,15 +217,31 @@ export const chiangRaiArtifacts = pgTable('chiang_rai_artifacts', {
     isPublished: boolean('is_published').default(true),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => {
+    return {
+        titleIdx: index('cr_artifacts_title_idx').on(table.title),
+        categoryIdx: index('cr_artifacts_category_idx').on(table.category),
+        createdAtIdx: index('cr_artifacts_created_at_idx').on(table.createdAt),
+    };
 });
+
+export const chiangRaiArticleCategoryEnum = pgEnum('cr_article_category', [
+    'ACADEMIC', // บทความวิชาการ
+    'RESEARCH'  // งานวิจัย
+]);
 
 export const chiangRaiArticles = pgTable('chiang_rai_articles', {
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 500 }).notNull(),
     slug: varchar('slug', { length: 255 }).notNull().unique(),
+    category: chiangRaiArticleCategoryEnum('category').notNull().default('ACADEMIC'),
     abstract: text('abstract'),
     content: text('content').notNull(),
     thumbnailUrl: varchar('thumbnail_url', { length: 500 }),
+
+    // Media support
+    mediaType: varchar('media_type', { length: 50 }).default('IMAGE'), // IMAGE, PDF
+    mediaUrls: text('media_urls').array(), // List of related media
 
     tags: text('tags').array(),
     author: varchar('author', { length: 255 }),
@@ -233,6 +249,12 @@ export const chiangRaiArticles = pgTable('chiang_rai_articles', {
     isPublished: boolean('is_published').default(true),
     publishedAt: timestamp('published_at').defaultNow(),
     createdAt: timestamp('created_at').defaultNow(),
+}, (table) => {
+    return {
+        titleIdx: index('cr_articles_title_idx').on(table.title),
+        publishedAtIdx: index('cr_articles_published_at_idx').on(table.publishedAt),
+        categoryIdx: index('cr_articles_category_idx').on(table.category),
+    };
 });
 
 export const chiangRaiStaffRoleEnum = pgEnum('cr_staff_role', [
@@ -286,4 +308,10 @@ export const chiangRaiActivities = pgTable('chiang_rai_activities', {
     publishedAt: timestamp('published_at').defaultNow(),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => {
+    return {
+        titleIdx: index('cr_activities_title_idx').on(table.title),
+        typeIdx: index('cr_activities_type_idx').on(table.type),
+        publishedAtIdx: index('cr_activities_published_at_idx').on(table.publishedAt),
+    };
 });

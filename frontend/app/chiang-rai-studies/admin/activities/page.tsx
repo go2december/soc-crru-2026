@@ -41,10 +41,10 @@ export default function AdminActivitiesPage() {
 
     const fetchActivities = async () => {
         try {
-            const res = await fetch(`${API_URL}/api/chiang-rai/activities`);
+            const res = await fetch(`${API_URL}/api/chiang-rai/activities?limit=100`);
             if (res.ok) {
-                const data = await res.json();
-                setActivities(data);
+                const json = await res.json();
+                setActivities(json.data || []);
             }
         } catch (error) {
             console.error('Error fetching activities:', error);
@@ -122,11 +122,10 @@ export default function AdminActivitiesPage() {
                         <button
                             key={type}
                             onClick={() => setFilterType(type)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition ${
-                                filterType === type
+                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition ${filterType === type
                                     ? 'bg-purple-600 text-white shadow-sm'
                                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                            }`}
+                                }`}
                         >
                             {type === 'ALL' ? 'ทั้งหมด' : TYPE_CONFIG[type]?.label || type}
                         </button>
