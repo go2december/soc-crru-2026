@@ -257,24 +257,24 @@ export const chiangRaiArticles = pgTable('chiang_rai_articles', {
     };
 });
 
-export const chiangRaiStaffRoleEnum = pgEnum('cr_staff_role', [
-    'DIRECTOR',      // ผู้อำนวยการ
-    'ACADEMIC',      // ฝ่ายวิชาการ
-    'NETWORK',       // ฝ่ายประสานเครือข่าย
-    'DISSEMINATION', // ฝ่ายเผยแพร่ข้อมูล
-    'SUPPORT'        // เจ้าหน้าที่ช่วยงานทั่วไป
+export const chiangRaiStaffGroupEnum = pgEnum('cr_staff_group', [
+    'ADVISOR',      // ที่ปรึกษาโครงการ
+    'EXECUTIVE',    // ฝ่ายบริหารโครงการ
+    'COMMITTEE'     // คณะกรรมการโครงการ
 ]);
 
 export const chiangRaiStaff = pgTable('chiang_rai_staff', {
     id: uuid('id').primaryKey().defaultRandom(),
-    title: varchar('title', { length: 50 }), // e.g. นาย, นาง, ดร.
+    staffGroup: chiangRaiStaffGroupEnum('staff_group').notNull(),
+    title: varchar('title', { length: 50 }),           // คำนำหน้า e.g. นาย, นาง
     firstName: varchar('first_name', { length: 255 }).notNull(),
     lastName: varchar('last_name', { length: 255 }).notNull(),
-    position: varchar('position', { length: 255 }), // ตำแหน่งที่แสดงผล e.g. "หัวหน้าโครงการ"
-    role: chiangRaiStaffRoleEnum('role').notNull(), // หมวดหมู่สำหรับจัดกลุ่ม
+    position: varchar('position', { length: 255 }),     // ตำแหน่งในศูนย์ฯ e.g. ผู้อำนวยการ, ประธานกรรมการ
+    academicTitle: varchar('academic_title', { length: 100 }), // ตำแหน่งทางวิชาการ e.g. ผศ., รศ.
     email: varchar('email', { length: 255 }),
     imageUrl: varchar('image_url', { length: 500 }),
     bio: text('bio'),
+    facultyStaffId: uuid('faculty_staff_id'),           // อ้างอิงบุคลากรคณะ (nullable)
     sortOrder: integer('sort_order').default(0),
     isActive: boolean('is_active').default(true),
     createdAt: timestamp('created_at').defaultNow(),
@@ -314,4 +314,12 @@ export const chiangRaiActivities = pgTable('chiang_rai_activities', {
         typeIdx: index('cr_activities_type_idx').on(table.type),
         publishedAtIdx: index('cr_activities_published_at_idx').on(table.publishedAt),
     };
+});
+
+export const chiangRaiConfig = pgTable('chiang_rai_config', {
+    id: integer('id').primaryKey().default(1),
+    heroBgUrl: varchar('hero_bg_url', { length: 500 }),
+    heroTitle: varchar('hero_title', { length: 255 }).default('ศูนย์เชียงรายศึกษา'),
+    heroSubtitle: varchar('hero_subtitle', { length: 500 }).default('แหล่งรวบรวม อนุรักษ์ และต่อยอดองค์ความรู้อัตลักษณ์เชียงราย เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน ผ่าน 5 มิติทางวัฒนธรรม'),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

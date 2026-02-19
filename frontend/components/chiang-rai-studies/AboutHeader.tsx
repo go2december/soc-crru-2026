@@ -9,7 +9,7 @@ export default function AboutHeader({
     subtitle?: string
 }) {
     return (
-        <div className="bg-[#581c87] text-white py-24 relative overflow-hidden">
+        <div className="bg-[#2e1065] text-white py-24 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:24px_24px]"></div>
             <div className="container mx-auto px-4 relative z-10 text-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-600/20 text-orange-400 text-[10px] font-bold tracking-widest uppercase mb-4 border border-orange-500/30 shadow-lg">

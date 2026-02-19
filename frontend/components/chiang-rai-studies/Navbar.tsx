@@ -58,7 +58,7 @@ export default function ChiangRaiNavbar() {
     };
 
     return (
-        <nav className="bg-[#581c87] border-b border-purple-800 text-purple-100 relative z-50 font-kanit" ref={dropdownRef}>
+        <nav className="bg-[#2e1065] border-b border-purple-900 text-purple-100 relative z-50 font-kanit" ref={dropdownRef}>
             <div className="container mx-auto px-4 h-20 flex justify-between items-center">
                 {/* Logo Section */}
                 <Link href="/chiang-rai-studies" className="flex items-center gap-3 group">
@@ -107,7 +107,7 @@ export default function ChiangRaiNavbar() {
                                             <Link
                                                 key={subItem.href}
                                                 href={subItem.href}
-                                                className="block px-6 py-3 text-sm text-stone-600 hover:bg-purple-50 hover:text-[#581c87] transition-colors font-medium border-l-4 border-transparent hover:border-orange-500"
+                                                className="block px-6 py-3 text-sm text-stone-600 hover:bg-purple-50 hover:text-[#2e1065] transition-colors font-medium border-l-4 border-transparent hover:border-orange-500"
                                                 onClick={() => setOpenSubmenu(null)}
                                             >
                                                 {subItem.title}
@@ -140,7 +140,7 @@ export default function ChiangRaiNavbar() {
 
             {/* Mobile Menu Dropdown */}
             {isOpen && (
-                <div className="absolute top-full left-0 w-full bg-[#581c87] border-b border-purple-800 lg:hidden shadow-2xl animate-fade-in max-h-[80vh] overflow-y-auto">
+                <div className="absolute top-full left-0 w-full bg-[#2e1065] border-b border-purple-800 lg:hidden shadow-2xl animate-fade-in max-h-[80vh] overflow-y-auto">
                     <div className="flex flex-col py-4">
                         {MENU_ITEMS.map((item) => (
                             <div key={item.title}>

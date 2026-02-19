@@ -1,5 +1,6 @@
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, Calendar, User, Share2, Printer, AlertTriangle, ScrollText, Landmark, ArrowRight, ImageIcon, Film, ExternalLink, Images, Play } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import ImageLightbox from './ImageLightbox';
@@ -73,6 +74,45 @@ function formatDate(dateString: string | null) {
     });
 }
 
+// Generate Metadata for SEO
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const artifact = await getArtifact(id);
+
+    if (!artifact) {
+        return {
+            title: 'ไม่พบข้อมูล | คลังข้อมูลดิจิทัล',
+            description: 'ไม่พบข้อมูลอัตลักษณ์ที่คุณค้นหา'
+        };
+    }
+
+    const title = `${artifact.title} | คลังข้อมูลดิจิทัล ศูนย์เชียงรายศึกษา`;
+    const description = artifact.description
+        ? artifact.description.slice(0, 160) + (artifact.description.length > 160 ? '...' : '')
+        : 'คลังข้อมูลดิจิทัล รวบรวมองค์ความรู้ ประวัติศาสตร์ ศิลปวัฒนธรรม และภูมิปัญญาท้องถิ่นเชียงราย';
+    const ogImage = artifact.thumbnailUrl || (artifact.mediaUrls && artifact.mediaUrls.length > 0 ? artifact.mediaUrls[0] : null);
+
+    return {
+        title: title,
+        description: description,
+        openGraph: {
+            title: title,
+            description: description,
+            url: `/chiang-rai-studies/archive/${id}`,
+            siteName: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
+            images: ogImage ? [{ url: ogImage, width: 1200, height: 630, alt: artifact.title }] : [],
+            locale: 'th_TH',
+            type: 'article',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: title,
+            description: description,
+            images: ogImage ? [ogImage] : [],
+        },
+    };
+}
+
 export default async function ArtifactDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const artifact = await getArtifact(id);
@@ -135,12 +175,15 @@ export default async function ArtifactDetailPage({ params }: { params: Promise<{
                 </div>
 
                 {/* Cover Image / Media Section */}
-                <div className="relative mb-16 rounded-[2.5rem] overflow-hidden shadow-2xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                <div className="relative mb-16 rounded-[2.5rem] overflow-hidden shadow-2xl animate-fade-in-up w-full aspect-video max-h-[600px]" style={{ animationDelay: '0.2s' }}>
                     <div className="absolute inset-0 bg-gradient-to-t from-[#2e1065]/20 to-transparent z-10 pointer-events-none"></div>
-                    <img
-                        src={artifact.thumbnailUrl || (artifact.mediaUrls && artifact.mediaUrls[0]) || 'https://placehold.co/1200x700/702963/white?text=Artifact+Display'}
+                    <Image
+                        src={artifact.thumbnailUrl || (artifact.mediaUrls && artifact.mediaUrls[0]) || 'https://placehold.co/1200x700/2e1065/white?text=Artifact+Display'}
                         alt={artifact.title}
-                        className="w-full h-auto object-cover max-h-[700px]"
+                        fill
+                        priority
+                        className="object-cover transition-transform duration-700 hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
                     />
                 </div>
 

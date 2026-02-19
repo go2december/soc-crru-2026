@@ -1,6 +1,7 @@
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import {
     Calendar,
     ArrowLeft,
@@ -29,6 +30,46 @@ async function getActivity(slug: string) {
     }
 }
 
+// Generate Metadata for SEO
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const activity = await getActivity(slug);
+
+    if (!activity) {
+        return {
+            title: 'ไม่พบกิจกรรม | ศูนย์เชียงรายศึกษา',
+            description: 'ไม่พบข้อมูลกิจกรรมที่คุณค้นหา'
+        };
+    }
+
+    const title = `${activity.title} | กิจกรรมศูนย์เชียงรายศึกษา`;
+    const description = activity.content
+        ? activity.content.replace(/<[^>]*>?/gm, '').slice(0, 160) + '...'
+        : 'ติดตามข่าวสารและกิจกรรมที่น่าสนใจจากศูนย์เชียงรายศึกษา มหาวิทยาลัยราชภัฏเชียงราย';
+    const ogImage = activity.thumbnailUrl || 'https://placehold.co/1200x630/2e1065/white?text=Chiang+Rai+Studies';
+
+    return {
+        title: title,
+        description: description,
+        openGraph: {
+            title: title,
+            description: description,
+            url: `/chiang-rai-studies/activities/${slug}`,
+            siteName: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
+            images: [{ url: ogImage, width: 1200, height: 630 }],
+            locale: 'th_TH',
+            type: 'article',
+            publishedTime: activity.publishedAt,
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: title,
+            description: description,
+            images: [ogImage],
+        },
+    };
+}
+
 export default async function ActivityDetailPage(props: { params: Promise<{ slug: string }> }) {
     const params = await props.params;
     const activity = await getActivity(params.slug);
@@ -42,10 +83,13 @@ export default async function ActivityDetailPage(props: { params: Promise<{ slug
             {/* Hero / Header Image */}
             <div className="relative h-[50vh] min-h-[400px]">
                 <div className="absolute inset-0">
-                    <img
+                    <Image
                         src={activity.thumbnailUrl || 'https://placehold.co/1920x600/2e1065/FFF?text=Activity'}
                         alt={activity.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        priority
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 100vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#2e1065] via-[#2e1065]/60 to-transparent"></div>
                 </div>
@@ -139,7 +183,7 @@ export default async function ActivityDetailPage(props: { params: Promise<{ slug
 
                             <div className="mt-8 pt-6 border-t border-purple-50">
                                 <Link href="/chiang-rai-studies/activities">
-                                    <Button className="w-full rounded-full font-bold bg-[#581c87] hover:bg-[#2e1065]">
+                                    <Button className="w-full rounded-full font-bold bg-[#2e1065] hover:bg-[#1e0b4b]">
                                         ดูทั้งหมด
                                     </Button>
                                 </Link>

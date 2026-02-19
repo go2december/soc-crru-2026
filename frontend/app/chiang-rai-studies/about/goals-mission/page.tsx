@@ -16,7 +16,7 @@ export default function GoalsMissionPage() {
                 <section className="mb-24">
                     <div className="flex flex-col lg:flex-row gap-12 items-stretch">
                         {/* Core Goal Highlight */}
-                        <div className="w-full lg:w-4/12 bg-[#581c87] text-white p-10 rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col justify-between group">
+                        <div className="w-full lg:w-4/12 bg-[#2e1065] text-white p-10 rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col justify-between group">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-colors duration-500"></div>
 
                             <div className="relative z-10">
@@ -49,7 +49,7 @@ export default function GoalsMissionPage() {
                             {/* Goal 2: 5 Identities Highlight */}
                             <div className="bg-white p-8 rounded-[2.5rem] shadow-lg border border-purple-50 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 bg-orange-50 w-32 h-32 rounded-bl-[5rem] -mr-8 -mt-8"></div>
-                                <h3 className="text-xl font-bold text-[#581c87] mb-6 relative z-10">เผยแพร่องค์ความรู้ 5 อัตลักษณ์นครเชียงราย</h3>
+                                <h3 className="text-xl font-bold text-[#2e1065] mb-6 relative z-10">เผยแพร่องค์ความรู้ 5 อัตลักษณ์นครเชียงราย</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 relative z-10">
                                     {[
                                         "ประวัติศาสตร์",
@@ -91,7 +91,7 @@ export default function GoalsMissionPage() {
                     <div className="bg-gradient-to-br from-stone-100 to-white rounded-[4rem] p-8 md:p-12 relative overflow-hidden border border-stone-100">
                         <div className="text-center mb-16">
                             <span className="text-orange-500 font-bold tracking-widest uppercase mb-2 block text-xs">Core Actions</span>
-                            <h2 className="text-3xl md:text-4xl font-black text-[#581c87]">กิจกรรมหลัก (Main Activities)</h2>
+                            <h2 className="text-3xl md:text-4xl font-black text-[#2e1065]">กิจกรรมหลัก (Main Activities)</h2>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -121,7 +121,7 @@ export default function GoalsMissionPage() {
                                     <div className="w-16 h-16 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-orange-50 group-hover:text-orange-600 transition-all duration-300">
                                         {item.icon}
                                     </div>
-                                    <h3 className="text-lg font-bold text-stone-800 mb-2 group-hover:text-[#581c87] transition-colors">{item.title}</h3>
+                                    <h3 className="text-lg font-bold text-stone-800 mb-2 group-hover:text-[#2e1065] transition-colors">{item.title}</h3>
                                     <p className="text-sm text-stone-500 font-light leading-relaxed">{item.desc}</p>
                                 </div>
                             ))}

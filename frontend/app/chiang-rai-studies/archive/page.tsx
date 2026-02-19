@@ -3,14 +3,12 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { Search, Filter, BookOpen, MapPin, Users, Landmark, Loader2, ScrollText, Sparkles, ArrowRight, ImageIcon, Film, Link2, Images } from 'lucide-react';
+import { Search, Filter, BookOpen, Users, Landmark, Loader2, ScrollText, Sparkles, ArrowRight, ImageIcon, Film, Images } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import ChiangRaiPagination from '@/components/chiang-rai/ChiangRaiPagination';
 
-// Use relative path — Next.js Rewrites will proxy /api/* → backend container
-// NEXT_PUBLIC_API_URL is set to '' in .env so fetch('/api/...') works correctly
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-// Categories (Identities) - Static
 const categories = [
     { id: 'ALL', title: 'ทั้งหมด', icon: BookOpen },
     { id: 'HISTORY', title: 'ประวัติศาสตร์', icon: Landmark },
@@ -20,7 +18,6 @@ const categories = [
     { id: 'WISDOM', title: 'ภูมิปัญญาท้องถิ่น', icon: BookOpen },
 ];
 
-// Type Definition
 interface Artifact {
     id: string;
     title: string;
@@ -38,15 +35,26 @@ function ArchiveContent() {
     const [selectedCategory, setSelectedCategory] = useState(initialCategory.toUpperCase());
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const ITEMS_PER_PAGE = 12;
+
     // Debounce search query
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearchQuery(searchQuery);
+            setCurrentPage(1);
         }, 500);
         return () => clearTimeout(timer);
     }, [searchQuery]);
+
+    // Reset pagination when category changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedCategory]);
 
     // API State
     const [artifacts, setArtifacts] = useState<Artifact[]>([]);
@@ -59,10 +67,11 @@ function ArchiveContent() {
             setLoading(true);
             setError(null);
             try {
-                // Build URL with optional category filter AND search query
                 const params = new URLSearchParams();
                 if (selectedCategory !== 'ALL') params.append('category', selectedCategory);
                 if (debouncedSearchQuery) params.append('q', debouncedSearchQuery);
+                params.append('page', currentPage.toString());
+                params.append('limit', ITEMS_PER_PAGE.toString());
 
                 const queryString = params.toString();
                 const url = `${API_URL}/api/chiang-rai/artifacts${queryString ? `?${queryString}` : ''}`;
@@ -70,8 +79,17 @@ function ArchiveContent() {
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Failed to fetch artifacts');
 
-                const data = await res.json();
-                setArtifacts(data);
+                const json = await res.json();
+
+                if (json.data && Array.isArray(json.data)) {
+                    setArtifacts(json.data);
+                    setTotalPages(json.meta?.totalPages || 1);
+                } else if (Array.isArray(json)) {
+                    setArtifacts(json);
+                    setTotalPages(1);
+                } else {
+                    setArtifacts([]);
+                }
             } catch (err: any) {
                 console.error('Fetch error:', err);
                 setError(err.message || 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
@@ -81,12 +99,10 @@ function ArchiveContent() {
         };
 
         fetchArtifacts();
-    }, [selectedCategory, debouncedSearchQuery]); // Re-fetch when category or query changes
+    }, [selectedCategory, debouncedSearchQuery, currentPage]);
 
-    // No client-side filtering needed anymore
     const filteredArtifacts = artifacts;
 
-    // Format Date
     const formatDate = (dateString: string | null) => {
         if (!dateString) return '';
         return new Date(dateString).toLocaleDateString('th-TH', {
@@ -98,8 +114,8 @@ function ArchiveContent() {
 
     return (
         <div className="min-h-screen bg-[#FAF5FF] pb-20 font-kanit">
-            {/* Page Header - Chiang Rai Purple */}
-            <div className="bg-[#581c87] text-white py-16 relative overflow-hidden">
+            {/* Page Header */}
+            <div className="bg-[#2e1065] text-white py-16 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:20px_20px]"></div>
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="flex items-center gap-3 text-orange-400 mb-4 font-bold tracking-widest uppercase text-xs">
@@ -113,12 +129,10 @@ function ArchiveContent() {
                 </div>
             </div>
 
-            {/* Filter & Search Bar - Sticky with blur */}
+            {/* Filter & Search Bar */}
             <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-purple-100 shadow-sm">
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex flex-col lg:flex-row gap-6 justify-between items-center">
-
-                        {/* Category Tabs */}
                         <div className="flex gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 no-scrollbar">
                             {categories.map((cat) => (
                                 <button
@@ -136,7 +150,6 @@ function ArchiveContent() {
                             ))}
                         </div>
 
-                        {/* Search Input */}
                         <div className="relative w-full lg:w-80">
                             <input
                                 type="text"
@@ -184,91 +197,99 @@ function ArchiveContent() {
 
                 {/* Data Grid */}
                 {!loading && !error && filteredArtifacts.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                        {filteredArtifacts.map((item, idx) => (
-                            <Link
-                                key={item.id}
-                                href={`/chiang-rai-studies/archive/${item.id}`}
-                                className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-purple-50 flex flex-col h-full animate-fade-in-up"
-                                style={{ animationDelay: `${idx * 0.05}s` }}
-                            >
-                                {/* Thumbnail */}
-                                <div className="h-60 overflow-hidden relative bg-purple-50">
-                                    <div className="absolute inset-0 bg-[#2e1065]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
-                                    <img
-                                        src={item.thumbnailUrl || 'https://placehold.co/800x600/702963/white?text=Chiang+Rai+Identity'}
-                                        alt={item.title}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
-                                    />
-                                    <div className="absolute top-4 right-4 bg-white/95 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-purple-900 shadow-sm z-20 uppercase tracking-widest border border-purple-100">
-                                        {categories.find(c => c.id === item.category)?.title || 'ทั่วไป'}
-                                    </div>
-                                    {/* Media count badge */}
-                                    {item.mediaUrls && item.mediaUrls.length > 0 && (
-                                        <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-bold z-20">
-                                            <Images size={14} />
-                                            <span>{item.mediaUrls.length} Galleries</span>
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
+                            {filteredArtifacts.map((item, idx) => (
+                                <Link
+                                    key={item.id}
+                                    href={`/chiang-rai-studies/archive/${item.id}`}
+                                    className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-purple-50 flex flex-col h-full animate-fade-in-up"
+                                    style={{ animationDelay: `${idx * 0.05}s` }}
+                                >
+                                    {/* Thumbnail */}
+                                    <div className="h-60 overflow-hidden relative bg-purple-50">
+                                        <div className="absolute inset-0 bg-[#2e1065]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
+                                        <img
+                                            src={item.thumbnailUrl || 'https://placehold.co/800x600/702963/white?text=Chiang+Rai+Identity'}
+                                            alt={item.title}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
+                                        />
+                                        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-purple-900 shadow-sm z-20 uppercase tracking-widest border border-purple-100">
+                                            {categories.find(c => c.id === item.category)?.title || 'ทั่วไป'}
                                         </div>
-                                    )}
-                                    {/* Media preview strip */}
-                                    {item.mediaUrls && item.mediaUrls.filter(u => !u.includes('youtube.com')).length > 1 && (
-                                        <div className="absolute bottom-4 right-4 flex -space-x-2 z-20">
-                                            {item.mediaUrls.filter(u => !u.includes('youtube.com')).slice(0, 3).map((url, i) => (
-                                                <div key={i} className="w-8 h-8 rounded-lg border-2 border-white overflow-hidden shadow-md">
-                                                    <img src={url} alt="" className="w-full h-full object-cover" />
-                                                </div>
-                                            ))}
-                                            {item.mediaUrls.filter(u => !u.includes('youtube.com')).length > 3 && (
-                                                <div className="w-8 h-8 rounded-lg border-2 border-white bg-purple-900/80 text-white flex items-center justify-center text-[10px] font-bold shadow-md">
-                                                    +{item.mediaUrls.filter(u => !u.includes('youtube.com')).length - 3}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Card Content */}
-                                <div className="p-8 flex flex-col flex-grow relative">
-                                    <div className="mb-4">
-                                        <h3 className="text-xl font-bold text-[#2e1065] mb-3 group-hover:text-orange-600 transition duration-300 line-clamp-2 leading-snug">
-                                            {item.title}
-                                        </h3>
-                                        <div className="w-12 h-0.5 bg-orange-100 group-hover:w-24 group-hover:bg-orange-500 transition-all duration-500"></div>
+                                        {item.mediaUrls && item.mediaUrls.length > 0 && (
+                                            <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-bold z-20">
+                                                <Images size={14} />
+                                                <span>{item.mediaUrls.length} Galleries</span>
+                                            </div>
+                                        )}
+                                        {item.mediaUrls && item.mediaUrls.filter(u => !u.includes('youtube.com')).length > 1 && (
+                                            <div className="absolute bottom-4 right-4 flex -space-x-2 z-20">
+                                                {item.mediaUrls.filter(u => !u.includes('youtube.com')).slice(0, 3).map((url, i) => (
+                                                    <div key={i} className="w-8 h-8 rounded-lg border-2 border-white overflow-hidden shadow-md">
+                                                        <img src={url} alt="" className="w-full h-full object-cover" />
+                                                    </div>
+                                                ))}
+                                                {item.mediaUrls.filter(u => !u.includes('youtube.com')).length > 3 && (
+                                                    <div className="w-8 h-8 rounded-lg border-2 border-white bg-purple-900/80 text-white flex items-center justify-center text-[10px] font-bold shadow-md">
+                                                        +{item.mediaUrls.filter(u => !u.includes('youtube.com')).length - 3}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <p className="text-purple-900/40 text-sm line-clamp-3 mb-6 font-light leading-relaxed flex-grow">
-                                        {item.description || 'ไม่มีรายละเอียดเพิ่มเติมสำหรับรายการนี้'}
-                                    </p>
-
-                                    {/* Media type indicators */}
-                                    {item.mediaUrls && item.mediaUrls.length > 0 && (
-                                        <div className="flex items-center gap-2 mb-6">
-                                            {item.mediaUrls.some(u => !u.includes('youtube.com')) && (
-                                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-500 bg-purple-50 px-2.5 py-1 rounded-full">
-                                                    <ImageIcon size={11} /> รูปภาพ
-                                                </span>
-                                            )}
-                                            {item.mediaUrls.some(u => u.includes('youtube.com')) && (
-                                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full">
-                                                    <Film size={11} /> วิดีโอ
-                                                </span>
-                                            )}
+                                    {/* Card Content */}
+                                    <div className="p-8 flex flex-col flex-grow relative">
+                                        <div className="mb-4">
+                                            <h3 className="text-xl font-bold text-[#2e1065] mb-3 group-hover:text-orange-600 transition duration-300 line-clamp-2 leading-snug">
+                                                {item.title}
+                                            </h3>
+                                            <div className="w-12 h-0.5 bg-orange-100 group-hover:w-24 group-hover:bg-orange-500 transition-all duration-500"></div>
                                         </div>
-                                    )}
 
-                                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-purple-300 border-t border-purple-50 pt-6 mt-auto">
-                                        <div className="flex items-center gap-1.5">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-purple-100"></div>
-                                            {formatDate(item.createdAt)}
-                                        </div>
-                                        <div className="flex items-center gap-1 text-orange-600 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
-                                            VIEW DETAILS <ArrowRight size={14} />
+                                        <p className="text-purple-900/40 text-sm line-clamp-3 mb-6 font-light leading-relaxed flex-grow">
+                                            {item.description || 'ไม่มีรายละเอียดเพิ่มเติมสำหรับรายการนี้'}
+                                        </p>
+
+                                        {item.mediaUrls && item.mediaUrls.length > 0 && (
+                                            <div className="flex items-center gap-2 mb-6">
+                                                {item.mediaUrls.some(u => !u.includes('youtube.com')) && (
+                                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-500 bg-purple-50 px-2.5 py-1 rounded-full">
+                                                        <ImageIcon size={11} /> รูปภาพ
+                                                    </span>
+                                                )}
+                                                {item.mediaUrls.some(u => u.includes('youtube.com')) && (
+                                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full">
+                                                        <Film size={11} /> วิดีโอ
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-purple-300 border-t border-purple-50 pt-6 mt-auto">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-purple-100"></div>
+                                                {formatDate(item.createdAt)}
+                                            </div>
+                                            <div className="flex items-center gap-1 text-orange-600 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                                                VIEW DETAILS <ArrowRight size={14} />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                                </Link>
+                            ))}
+                        </div>
+
+                        <ChiangRaiPagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(page) => {
+                                setCurrentPage(page);
+                                window.scrollTo({ top: 300, behavior: 'smooth' });
+                            }}
+                        />
+                    </>
                 )}
 
                 {/* Empty State */}

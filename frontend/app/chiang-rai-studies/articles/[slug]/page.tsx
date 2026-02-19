@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Calendar, User, Tag, Clock, Share2, Printer, ImageIcon, Film, Link2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -42,9 +43,30 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const article = await getArticle(slug);
     if (!article) return { title: 'บทความไม่พบ' };
 
+    const title = `${article.title} | ศูนย์เชียงรายศึกษา`;
+    const description = article.abstract || article.title;
+    const ogImage = article.thumbnailUrl || (article.mediaUrls && article.mediaUrls.length > 0 ? article.mediaUrls[0] : null);
+
     return {
-        title: `${article.title} | ศูนย์เชียงรายศึกษา`,
-        description: article.abstract || article.title,
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            url: `/chiang-rai-studies/articles/${slug}`,
+            siteName: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
+            images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : [],
+            locale: 'th_TH',
+            type: 'article',
+            authors: article.author ? [article.author] : [],
+            publishedTime: article.publishedAt,
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: ogImage ? [ogImage] : [],
+        },
     };
 }
 
@@ -68,15 +90,18 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
     return (
         <div className="min-h-screen bg-[#FAF5FF] pb-20 font-kanit">
             {/* Header Image / Pattern */}
-            <div className="h-64 md:h-80 bg-[#581c87] relative overflow-hidden">
+            <div className="h-64 md:h-80 bg-[#2e1065] relative overflow-hidden">
                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-repeat"></div>
                 {processedThumbnail && (
                     <>
                         <div className="absolute inset-0 bg-black/40 z-10"></div>
-                        <img
+                        <Image
                             src={processedThumbnail}
                             alt={article.title}
-                            className="w-full h-full object-cover absolute inset-0 z-0"
+                            fill
+                            priority
+                            className="object-cover z-0"
+                            sizes="100vw"
                         />
                     </>
                 )}
@@ -171,10 +196,12 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
                                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                                 {images.map((img, idx) => (
                                                     <div key={idx} className="relative group overflow-hidden rounded-xl aspect-[4/3] bg-stone-100 cursor-zoom-in">
-                                                        <img
+                                                        <Image
                                                             src={img}
                                                             alt={`Gallery ${idx + 1}`}
-                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                            fill
+                                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
                                                         />
                                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                                                     </div>

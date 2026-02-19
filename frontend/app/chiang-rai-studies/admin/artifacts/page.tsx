@@ -33,10 +33,10 @@ export default function AdminArtifactsPage() {
 
     const fetchArtifacts = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'}/api/chiang-rai/artifacts`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'}/api/chiang-rai/artifacts?limit=100`);
             if (res.ok) {
-                const data = await res.json();
-                setArtifacts(data);
+                const result = await res.json();
+                setArtifacts(Array.isArray(result) ? result : result.data || []);
             }
         } catch (error) {
             console.error('Error fetching artifacts:', error);

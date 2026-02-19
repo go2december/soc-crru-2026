@@ -4,8 +4,9 @@ import { Facebook, Mail, MapPin, Phone, ExternalLink, Globe } from 'lucide-react
 
 export default function ChiangRaiFooter() {
     return (
-        <footer className="bg-[#2e1065] text-purple-200 pt-16 pb-8 border-t border-purple-900 font-kanit">
-            <div className="container mx-auto px-4">
+        <footer className="bg-[#2e1065] text-purple-200 pt-16 pb-8 border-t border-purple-900 font-kanit relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"></div>
+            <div className="container mx-auto px-4 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
                     {/* Column 1: Info */}
                     <div>

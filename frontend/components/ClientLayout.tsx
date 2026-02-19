@@ -4,6 +4,8 @@ import { usePathname } from 'next/navigation';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+import { Toaster } from 'sonner';
+
 export default function ClientLayout({
     children,
 }: {
@@ -13,22 +15,23 @@ export default function ClientLayout({
     const isAdmin = pathname?.startsWith('/admin');
     const isChiangRaiStudies = pathname?.startsWith('/chiang-rai-studies');
 
-    // Exclude Admin and Chiang Rai Studies from main Navbar/Footer
-    if (isAdmin || isChiangRaiStudies) {
-        return (
-            <main className="flex-grow min-h-screen bg-base-200">
-                {children}
-            </main>
-        );
-    }
-
     return (
         <>
-            <Navbar />
-            <main className="flex-grow">
-                {children}
-            </main>
-            <Footer />
+            {/* Exclude Admin and Chiang Rai Studies from main Navbar/Footer */}
+            {(isAdmin || isChiangRaiStudies) ? (
+                <main className="flex-grow min-h-screen bg-base-200">
+                    {children}
+                </main>
+            ) : (
+                <>
+                    <Navbar />
+                    <main className="flex-grow">
+                        {children}
+                    </main>
+                    <Footer />
+                </>
+            )}
+            <Toaster richColors position="top-right" />
         </>
     );
 }

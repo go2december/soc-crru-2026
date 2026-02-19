@@ -1,5 +1,6 @@
 
 import Link from 'next/link';
+import Image from 'next/image';
 import {
     ChevronLeft,
     ChevronRight,
@@ -15,7 +16,7 @@ async function getActivities(page = 1, limit = 9) {
     try {
         const baseUrl = process.env.INTERNAL_API_URL || 'http://soc_backend:4000';
         const res = await fetch(`${baseUrl}/api/chiang-rai/activities?page=${page}&limit=${limit}`, {
-            cache: 'no-store',
+            next: { revalidate: 60 }
         });
 
         if (!res.ok) return { data: [], meta: { page: 1, totalPages: 1 } };
@@ -56,10 +57,12 @@ export default async function ActivitiesPage(props: {
                                 <Link href={`/chiang-rai-studies/activities/${item.slug}`} key={item.id} className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full border border-purple-50 hover:border-purple-100">
                                     <div className="h-56 bg-stone-200 relative overflow-hidden">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
-                                        <img
+                                        <Image
                                             src={item.thumbnailUrl || `https://placehold.co/600x400/purple/white?text=No+Image`}
                                             alt={item.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         />
                                         <div className="absolute top-4 left-4 bg-white/95 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-purple-900 uppercase tracking-wide z-20 shadow-sm">
                                             {item.type}
@@ -118,8 +121,8 @@ export default async function ActivitiesPage(props: {
                                                 <Button
                                                     variant={p === page ? 'default' : 'outline'}
                                                     className={`w-10 h-10 p-0 rounded-full transition-all ${p === page
-                                                            ? 'bg-[#581c87] hover:bg-[#2e1065] text-white shadow-lg shadow-purple-200'
-                                                            : 'border-purple-200 text-purple-700 hover:bg-purple-50'
+                                                        ? 'bg-[#2e1065] hover:bg-[#1a0b3b] text-white shadow-lg shadow-purple-200'
+                                                        : 'border-purple-200 text-purple-700 hover:bg-purple-50'
                                                         }`}
                                                 >
                                                     {p}

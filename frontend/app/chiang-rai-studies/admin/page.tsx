@@ -13,7 +13,8 @@ import {
     Database,
     Clock,
     Layout,
-    ScrollText
+    ScrollText,
+    Settings
 } from 'lucide-react';
 import {
     Card,
@@ -45,83 +46,87 @@ export default function ChiangRaiAdminDashboard() {
 
     useEffect(() => {
         const fetchStats = async () => {
-            try {
-                // Fetch counts in parallel
-                const [artifactsRes, staffRes, articlesRes, activitiesRes] = await Promise.all([
-                    fetch(`${API_URL}/api/chiang-rai/artifacts`),
-                    fetch(`${API_URL}/api/chiang-rai/staff`),
-                    fetch(`${API_URL}/api/chiang-rai/articles`),
-                    fetch(`${API_URL}/api/chiang-rai/activities`)
-                ]);
+            const fetchData = async (url: string) => {
+                try {
+                    const res = await fetch(url);
+                    return res.ok ? await res.json() : [];
+                } catch (e) {
+                    console.error(`Error fetching ${url}:`, e);
+                    return [];
+                }
+            };
 
-                const artifactsData = artifactsRes.ok ? await artifactsRes.json() : [];
-                const staffData = staffRes.ok ? await staffRes.json() : [];
-                const articlesData = articlesRes.ok ? await articlesRes.json() : [];
-                const activitiesData = activitiesRes.ok ? await activitiesRes.json() : [];
+            const [artifactsData, staffData, articlesData, activitiesData] = await Promise.all([
+                fetchData(`${API_URL}/api/chiang-rai/artifacts?limit=100`), // Fetch more for accuratest count
+                fetchData(`${API_URL}/api/chiang-rai/staff`),
+                fetchData(`${API_URL}/api/chiang-rai/articles`),
+                fetchData(`${API_URL}/api/chiang-rai/activities`)
+            ]);
 
-                setStats({
-                    artifacts: artifactsData.length || 0,
-                    staff: staffData.length || 0,
-                    articles: articlesData.length || 0,
-                    activities: activitiesData.length || 0,
-                    recentUpdates: [
-                        ...activitiesData.slice(0, 2).map((a: any) => ({
-                            type: 'Activity',
-                            title: a.title,
-                            date: a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : 'Draft',
-                            status: a.isPublished !== false ? 'Published' : 'Draft'
-                        })),
-                        ...artifactsData.slice(0, 2).map((a: any) => ({
-                            type: 'Artifact',
-                            title: a.title,
-                            date: new Date(a.createdAt).toLocaleDateString(),
-                            status: 'Published'
-                        })),
-                        ...articlesData.slice(0, 2).map((a: any) => ({
-                            type: 'Article',
-                            title: a.title,
-                            date: a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : 'Draft',
-                            status: a.isPublished !== false ? 'Published' : 'Draft'
-                        })),
-                        ...staffData.slice(0, 1).map((s: any) => ({
-                            type: 'Staff',
-                            title: `${s.firstName} ${s.lastName}`,
-                            date: 'Updated recently',
-                            status: 'Active'
-                        }))
-                    ].slice(0, 5)
-                });
-            } catch (error) {
-                console.error("Failed to load dashboard stats:", error);
-            } finally {
-                setLoading(false);
-            }
+            // Handle pagination wrappers if necessary
+            const artifacts = Array.isArray(artifactsData) ? artifactsData : (artifactsData.data || []);
+            const staff = Array.isArray(staffData) ? staffData : (staffData.data || []);
+            const articles = Array.isArray(articlesData) ? articlesData : (articlesData.data || []);
+            const activities = Array.isArray(activitiesData) ? activitiesData : (activitiesData.data || []);
+
+            setStats({
+                artifacts: artifactsData.total || artifacts.length || 0, // Prefer meta total if avail
+                staff: staff.length || 0,
+                articles: articles.length || 0,
+                activities: activities.length || 0,
+                recentUpdates: [
+                    ...activities.slice(0, 3).map((a: any) => ({
+                        type: 'News',
+                        title: a.title,
+                        date: a.publishedAt ? new Date(a.publishedAt).toLocaleDateString('th-TH') : 'Draft',
+                        status: a.isPublished !== false ? 'Published' : 'Draft',
+                        color: 'bg-emerald-100 text-emerald-700'
+                    })),
+                    ...artifacts.slice(0, 3).map((a: any) => ({
+                        type: 'Data',
+                        title: a.title,
+                        date: new Date(a.createdAt).toLocaleDateString('th-TH'),
+                        status: 'Published',
+                        color: 'bg-purple-100 text-purple-700'
+                    })),
+                    ...articles.slice(0, 2).map((a: any) => ({
+                        type: 'Article',
+                        title: a.title,
+                        date: a.publishedAt ? new Date(a.publishedAt).toLocaleDateString('th-TH') : 'Draft',
+                        status: a.isPublished !== false ? 'Published' : 'Draft',
+                        color: 'bg-blue-100 text-blue-700'
+                    }))
+                ].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6)
+            });
+            setLoading(false);
         };
 
         fetchStats();
     }, []);
 
     const StatCard = ({ title, value, icon: Icon, color, link, desc }: any) => (
-        <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-all duration-300 group">
-            <div className={`h-1.5 w-full bg-gradient-to-r ${color}`}></div>
-            <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                    <div className={`p-3 rounded-xl bg-opacity-10 ${color.replace('from-', 'bg-').split(' ')[0]} bg-opacity-10`}>
-                        <Icon className={`w-6 h-6 ${color.replace('from-', 'text-').split(' ')[0]}`} />
+        <Link href={link || '#'}>
+            <Card className="overflow-hidden border-none shadow-sm hover:shadow-xl transition-all duration-300 group bg-white relative">
+                <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${color} opacity-10 rounded-bl-[100px] -mr-4 -mt-4 transition-transform group-hover:scale-110`}></div>
+                <CardContent className="p-6 relative">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className={`p-3 rounded-2xl bg-gradient-to-br ${color} bg-opacity-10 shadow-inner`}>
+                            <Icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="bg-stone-50 rounded-full p-2 group-hover:bg-orange-50 transition-colors">
+                            <ArrowRight size={16} className="text-stone-300 group-hover:text-orange-500 transition-colors" />
+                        </div>
                     </div>
-                    {link && (
-                        <Link href={link} className="text-stone-400 hover:text-purple-600 transition-colors">
-                            <ArrowRight size={18} />
-                        </Link>
-                    )}
-                </div>
-                <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-stone-500">{title}</h3>
-                    <div className="text-3xl font-bold text-stone-800">{loading ? '...' : value}</div>
-                    <p className="text-xs text-stone-400">{desc}</p>
-                </div>
-            </CardContent>
-        </Card>
+                    <div>
+                        <div className="text-3xl font-extrabold text-stone-800 mb-1 tracking-tight">
+                            {loading ? <span className="animate-pulse bg-stone-200 h-8 w-12 rounded inline-block"></span> : value}
+                        </div>
+                        <h3 className="text-sm font-semibold text-stone-500 uppercase tracking-wide">{title}</h3>
+                        <p className="text-xs text-stone-400 mt-1 font-light">{desc}</p>
+                    </div>
+                </CardContent>
+            </Card>
+        </Link>
     );
 
     return (
@@ -203,7 +208,7 @@ export default function ChiangRaiAdminDashboard() {
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold
                                                     ${item.type === 'Artifact' ? 'bg-purple-100 text-purple-600' : item.type === 'Article' ? 'bg-blue-100 text-blue-600' : item.type === 'Activity' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}
                                             `}>
-                                                    {item.type === 'Artifact' ? 'IMG' : item.type === 'Article' ? 'DOC' : item.type === 'Activity' ? 'ACT' : 'USER'}
+                                                {item.type === 'Artifact' ? 'IMG' : item.type === 'Article' ? 'DOC' : item.type === 'Activity' ? 'ACT' : 'USER'}
                                             </div>
                                             <div>
                                                 <p className="font-medium text-stone-800 group-hover:text-[#2e1065] transition-colors line-clamp-1">{item.title}</p>
@@ -260,9 +265,15 @@ export default function ChiangRaiAdminDashboard() {
                                 <PlusCircle size={16} className="text-white" />
                             </div>
                         </Link>
+                        <Link href="/chiang-rai-studies/admin/settings" className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10 group">
+                            <span className="text-sm font-medium">ตั้งค่าหน้าแรก (Hero)</span>
+                            <div className="bg-pink-400 rounded-full p-1 group-hover:scale-110 transition-transform">
+                                <Settings size={16} className="text-white" />
+                            </div>
+                        </Link>
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </div >
     );
 }

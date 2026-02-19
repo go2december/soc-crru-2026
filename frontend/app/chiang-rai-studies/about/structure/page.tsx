@@ -33,12 +33,12 @@ export default function StructurePage() {
 
                         {/* Center: Director (Executive) */}
                         <div className="flex flex-col items-center relative z-20 scale-110">
-                            <div className="bg-white p-8 rounded-[2rem] shadow-xl border-t-8 border-[#581c87] text-center w-80 relative group hover:-translate-y-1 transition-transform">
-                                <div className="w-20 h-20 bg-purple-100 rounded-full mx-auto mb-4 flex items-center justify-center text-[#581c87] shadow-inner">
+                            <div className="bg-white p-8 rounded-[2rem] shadow-xl border-t-8 border-[#2e1065] text-center w-80 relative group hover:-translate-y-1 transition-transform">
+                                <div className="w-20 h-20 bg-purple-100 rounded-full mx-auto mb-4 flex items-center justify-center text-[#2e1065] shadow-inner">
                                     <Crown size={36} />
                                 </div>
                                 <h3 className="text-2xl font-bold text-stone-800 mb-1">ผู้อำนวยการ</h3>
-                                <p className="text-[#581c87] text-sm font-medium">Director</p>
+                                <p className="text-[#2e1065] text-sm font-medium">Director</p>
 
                                 {/* Bottom Solid Connector */}
                                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-0.5 h-10 bg-stone-800"></div>
@@ -93,7 +93,7 @@ export default function StructurePage() {
                                             <BookOpen size={24} />
                                         </div>
                                         <div className="text-left">
-                                            <h5 className="font-bold text-[#581c87] text-lg">ฝ่ายวิชาการ</h5>
+                                            <h5 className="font-bold text-[#2e1065] text-lg">ฝ่ายวิชาการ</h5>
                                             <span className="text-xs text-stone-400">Academic Affairs</span>
                                         </div>
                                     </div>
@@ -123,7 +123,7 @@ export default function StructurePage() {
                                             <Network size={24} />
                                         </div>
                                         <div className="text-left">
-                                            <h5 className="font-bold text-[#581c87] text-lg">ฝ่ายประสานเครือข่าย</h5>
+                                            <h5 className="font-bold text-[#2e1065] text-lg">ฝ่ายประสานเครือข่าย</h5>
                                             <span className="text-xs text-stone-400">Network Coordination</span>
                                         </div>
                                     </div>
@@ -151,7 +151,7 @@ export default function StructurePage() {
                                             <Monitor size={24} />
                                         </div>
                                         <div className="text-left">
-                                            <h5 className="font-bold text-[#581c87] text-lg">ฝ่ายเผยแพร่ข้อมูล</h5>
+                                            <h5 className="font-bold text-[#2e1065] text-lg">ฝ่ายเผยแพร่ข้อมูล</h5>
                                             <span className="text-xs text-stone-400">Information Dissemination</span>
                                         </div>
                                     </div>

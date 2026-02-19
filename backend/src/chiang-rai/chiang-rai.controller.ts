@@ -12,14 +12,24 @@ export class ChiangRaiController {
         return this.service.getAllIdentities();
     }
 
+    @Get('stats')
+    async getStats() {
+        return this.service.getStats();
+    }
+
     @Get('search')
     async search(@Query('q') q: string) {
         return this.service.search(q);
     }
 
     @Get('artifacts')
-    async getArtifacts(@Query('category') category?: any, @Query('q') q?: string) {
-        return this.service.getArtifacts(category, q);
+    async getArtifacts(
+        @Query('category') category?: any,
+        @Query('q') q?: string,
+        @Query('page') page: string = '1',
+        @Query('limit') limit: string = '12'
+    ) {
+        return this.service.getArtifacts(category, q, Number(page), Number(limit));
     }
 
     @Get('artifacts/:id')
@@ -113,9 +123,19 @@ export class ChiangRaiController {
         return this.service.getStaff();
     }
 
+    @Get('staff/:group')
+    async getStaffByGroup(@Param('group') group: 'ADVISOR' | 'EXECUTIVE' | 'COMMITTEE') {
+        return this.service.getStaffByGroup(group);
+    }
+
     @Post('staff')
     async createStaff(@Body() body: any) {
         return this.service.createStaff(body);
+    }
+
+    @Put('staff/:id')
+    async updateStaff(@Param('id') id: string, @Body() body: any) {
+        return this.service.updateStaff(id, body);
     }
 
     @Delete('staff/:id')
@@ -129,7 +149,21 @@ export class ChiangRaiController {
     }
 
     @Post('staff/import')
-    async importStaff(@Body() body: { facultyStaffId: string, role: 'DIRECTOR' | 'ACADEMIC' | 'NETWORK' | 'DISSEMINATION' | 'SUPPORT' }) {
-        return this.service.importStaffFromFaculty(body.facultyStaffId, body.role);
+    async importStaff(@Body() body: {
+        facultyStaffId: string,
+        staffGroup: 'EXECUTIVE' | 'COMMITTEE',
+        position: string
+    }) {
+        return this.service.importStaffFromFaculty(body.facultyStaffId, body.staffGroup, body.position);
+    }
+
+    @Get('config')
+    async getConfig() {
+        return this.service.getConfig();
+    }
+
+    @Put('config')
+    async updateConfig(@Body() body: any) {
+        return this.service.updateConfig(body);
     }
 }

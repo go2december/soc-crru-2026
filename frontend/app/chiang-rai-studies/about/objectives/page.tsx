@@ -19,7 +19,7 @@ export default function ObjectivesPage() {
                             <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform">
                                 <Database size={28} />
                             </div>
-                            <h3 className="text-xl font-bold text-[#581c87] mb-3">1. ศูนย์กลางข้อมูลองค์ความรู้</h3>
+                            <h3 className="text-xl font-bold text-[#2e1065] mb-3">1. ศูนย์กลางข้อมูลองค์ความรู้</h3>
                             <p className="text-stone-500 font-light leading-relaxed">
                                 เพื่อเป็นแหล่งข้อมูลและองค์ความรู้เกี่ยวกับประวัติศาสตร์ ประเพณีความเชื่อ ศิลปะการแสดง และภูมิปัญญาท้องถิ่นของจังหวัดเชียงราย ที่รวบรวมไว้ในที่เดียวอย่างเป็นระบบ
                             </p>
@@ -30,7 +30,7 @@ export default function ObjectivesPage() {
                             <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 mb-6 group-hover:scale-110 transition-transform">
                                 <Search size={28} />
                             </div>
-                            <h3 className="text-xl font-bold text-[#581c87] mb-3">2. รวบรวม อนุรักษ์ และเผยแพร่</h3>
+                            <h3 className="text-xl font-bold text-[#2e1065] mb-3">2. รวบรวม อนุรักษ์ และเผยแพร่</h3>
                             <p className="text-stone-500 font-light leading-relaxed">
                                 เพื่อรวบรวม อนุรักษ์ และเผยแพร่ข้อมูลเกี่ยวกับมรดกทางวัฒนธรรมของเชียงรายในรูปแบบต่างๆ เช่น นิทรรศการ สื่อสิ่งพิมพ์ และสื่อดิจิทัล ให้เข้าถึงได้ง่าย
                             </p>
@@ -41,7 +41,7 @@ export default function ObjectivesPage() {
                             <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform">
                                 <BookOpenCheck size={28} />
                             </div>
-                            <h3 className="text-xl font-bold text-[#581c87] mb-3">3. ส่งเสริมการวิจัยและการศึกษา</h3>
+                            <h3 className="text-xl font-bold text-[#2e1065] mb-3">3. ส่งเสริมการวิจัยและการศึกษา</h3>
                             <p className="text-stone-500 font-light leading-relaxed">
                                 สร้างโอกาสให้นักวิชาการและนักศึกษาได้ทำวิจัยเชิงลึก พัฒนาวิทยานิพนธ์ และบทความวิชาการ เพื่อเสริมสร้างองค์ความรู้ใหม่เกี่ยวกับวัฒนธรรมท้องถิ่น
                             </p>
@@ -52,7 +52,7 @@ export default function ObjectivesPage() {
                             <div className="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:scale-110 transition-transform">
                                 <Heart size={28} />
                             </div>
-                            <h3 className="text-xl font-bold text-[#581c87] mb-3">4. สร้างความตระหนักและภาคภูมิใจ</h3>
+                            <h3 className="text-xl font-bold text-[#2e1065] mb-3">4. สร้างความตระหนักและภาคภูมิใจ</h3>
                             <p className="text-stone-500 font-light leading-relaxed">
                                 สนับสนุนกิจกรรมหรือเวทีแลกเปลี่ยนความคิดเห็นระหว่างคนรุ่นใหม่และผู้รู้ท้องถิ่น เพื่อสร้างความตระหนักและความภาคภูมิใจในมรดกทางวัฒนธรรมของชุมชน
                             </p>
@@ -63,7 +63,7 @@ export default function ObjectivesPage() {
                             <div className="w-14 h-14 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-600 mb-6 group-hover:scale-110 transition-transform">
                                 <Network size={28} />
                             </div>
-                            <h3 className="text-xl font-bold text-[#581c87] mb-3">5. ศูนย์กลางประสานงานเครือข่าย</h3>
+                            <h3 className="text-xl font-bold text-[#2e1065] mb-3">5. ศูนย์กลางประสานงานเครือข่าย</h3>
                             <p className="text-stone-500 font-light leading-relaxed">
                                 เป็นศูนย์กลางในการประสานงานแลกเปลี่ยนความรู้ระหว่างนักวิชาการ หน่วยงานราชการ และชุมชน เพื่อการอนุรักษ์และพัฒนาท้องถิ่นร่วมกัน
                             </p>

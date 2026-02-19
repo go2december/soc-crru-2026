@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight, X, ZoomIn, Expand } from 'lucide-react';
 
 interface ImageLightboxProps {
@@ -78,8 +79,14 @@ export default function ImageLightbox({ images }: ImageLightboxProps) {
         <>
             {/* ─── Gallery Grid ─── */}
             {images.length === 1 ? (
-                <div className="lb-card rounded-2xl overflow-hidden cursor-pointer group relative" onClick={() => open(0)}>
-                    <img src={images[0]} alt="Gallery" className="w-full h-auto max-h-[500px] object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" />
+                <div className="lb-card rounded-2xl overflow-hidden cursor-pointer group relative w-full h-[500px]" onClick={() => open(0)}>
+                    <Image
+                        src={images[0]}
+                        alt="Gallery"
+                        fill
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                        sizes="(max-width: 768px) 100vw, 800px"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-14 h-14 rounded-full border-2 border-white/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-100 scale-75 backdrop-blur-sm bg-white/5">
@@ -91,7 +98,13 @@ export default function ImageLightbox({ images }: ImageLightboxProps) {
                 <div className="grid grid-cols-2 gap-4 md:gap-5">
                     {images.map((url, i) => (
                         <div key={i} className="lb-card rounded-2xl overflow-hidden group relative aspect-[4/3] cursor-pointer" onClick={() => open(i)}>
-                            <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]" />
+                            <Image
+                                src={url}
+                                alt={`Gallery ${i + 1}`}
+                                fill
+                                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                                sizes="(max-width: 768px) 50vw, 400px"
+                            />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
                                 <span className="text-white/90 text-[11px] font-mono tracking-wider">{String(i + 1).padStart(2, '0')}</span>
@@ -107,13 +120,15 @@ export default function ImageLightbox({ images }: ImageLightboxProps) {
                     {images.map((url, i) => (
                         <div
                             key={i}
-                            className={`lb-card rounded-2xl overflow-hidden group relative cursor-pointer ${i === 0 && images.length >= 3 ? 'md:col-span-2 md:row-span-2' : ''}`}
+                            className={`lb-card rounded-2xl overflow-hidden group relative cursor-pointer ${i === 0 && images.length >= 3 ? 'md:col-span-2 md:row-span-2 min-h-[280px] md:min-h-[360px]' : 'h-44 md:h-56'}`}
                             onClick={() => open(i)}
                         >
-                            <img
+                            <Image
                                 src={url}
                                 alt={`Gallery ${i + 1}`}
-                                className={`w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05] ${i === 0 && images.length >= 3 ? 'h-full min-h-[280px] md:min-h-[360px]' : 'h-44 md:h-56'}`}
+                                fill
+                                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                                sizes={i === 0 && images.length >= 3 ? "(max-width: 768px) 100vw, 600px" : "(max-width: 768px) 50vw, 300px"}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4 flex items-end justify-between opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
@@ -129,139 +144,147 @@ export default function ImageLightbox({ images }: ImageLightboxProps) {
             )}
 
             {/* ─── Lightbox Overlay ─── */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 z-[100] lb-overlay"
-                    onClick={close}
-                    onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
-                    onTouchEnd={(e) => {
-                        if (touchStartX.current === null) return;
-                        const diff = e.changedTouches[0].clientX - touchStartX.current;
-                        if (Math.abs(diff) > 50) { diff > 0 ? prev() : next(); }
-                        touchStartX.current = null;
-                    }}
-                >
-                    {/* Ambient background blur from current image */}
-                    <div className="absolute inset-0 overflow-hidden">
-                        <img
-                            src={images[currentIndex]}
-                            alt=""
-                            className="w-full h-full object-cover blur-[80px] scale-125 opacity-[0.15]"
-                        />
-                        <div className="absolute inset-0 bg-[#0a0a0f]/90" />
-                    </div>
+            {
+                isOpen && (
+                    <div
+                        className="fixed inset-0 z-[100] lb-overlay"
+                        onClick={close}
+                        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+                        onTouchEnd={(e) => {
+                            if (touchStartX.current === null) return;
+                            const diff = e.changedTouches[0].clientX - touchStartX.current;
+                            if (Math.abs(diff) > 50) { diff > 0 ? prev() : next(); }
+                            touchStartX.current = null;
+                        }}
+                    >
+                        {/* Ambient background blur from current image */}
+                        <div className="absolute inset-0 overflow-hidden">
+                            <img
+                                src={images[currentIndex]}
+                                alt=""
+                                className="w-full h-full object-cover blur-[80px] scale-125 opacity-[0.15]"
+                            />
+                            <div className="absolute inset-0 bg-[#0a0a0f]/90" />
+                        </div>
 
-                    {/* ── Top chrome ── */}
-                    <div className="absolute top-0 left-0 right-0 z-[120] safe-top">
-                        {/* Progress bar */}
+                        {/* ── Top chrome ── */}
+                        <div className="absolute top-0 left-0 right-0 z-[120] safe-top">
+                            {/* Progress bar */}
+                            {images.length > 1 && (
+                                <div className="h-[2px] bg-white/[0.06]">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-orange-500 to-amber-400 transition-all duration-500 ease-out"
+                                        style={{ width: `${progress}%` }}
+                                    />
+                                </div>
+                            )}
+                            <div className="flex items-center justify-between px-4 py-3 md:px-8 md:py-5">
+                                {/* Counter */}
+                                <div className="flex items-baseline gap-1.5">
+                                    <span className="text-white font-mono text-sm md:text-base font-semibold tracking-tight">
+                                        {String(currentIndex + 1).padStart(2, '0')}
+                                    </span>
+                                    <span className="text-white/20 font-mono text-xs">/</span>
+                                    <span className="text-white/40 font-mono text-xs md:text-sm">
+                                        {String(images.length).padStart(2, '0')}
+                                    </span>
+                                </div>
+                                {/* Close */}
+                                <button
+                                    onClick={close}
+                                    className="group/close w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/10 hover:border-white/30 bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-white/60 hover:text-white transition-all duration-300"
+                                >
+                                    <X size={18} className="group-hover/close:rotate-90 transition-transform duration-300" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* ── Navigation arrows ── */}
                         {images.length > 1 && (
-                            <div className="h-[2px] bg-white/[0.06]">
-                                <div
-                                    className="h-full bg-gradient-to-r from-orange-500 to-amber-400 transition-all duration-500 ease-out"
-                                    style={{ width: `${progress}%` }}
+                            <>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); prev(); }}
+                                    className="absolute left-2 md:left-5 lg:left-8 top-1/2 -translate-y-1/2 z-[120] group/nav"
+                                >
+                                    <div className="w-11 h-11 md:w-14 md:h-14 rounded-full border border-white/[0.08] hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.08] flex items-center justify-center text-white/40 hover:text-white transition-all duration-300 backdrop-blur-sm">
+                                        <ChevronLeft size={20} className="md:hidden group-hover/nav:-translate-x-0.5 transition-transform" />
+                                        <ChevronLeft size={24} className="hidden md:block group-hover/nav:-translate-x-0.5 transition-transform" />
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); next(); }}
+                                    className="absolute right-2 md:right-5 lg:right-8 top-1/2 -translate-y-1/2 z-[120] group/nav"
+                                >
+                                    <div className="w-11 h-11 md:w-14 md:h-14 rounded-full border border-white/[0.08] hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.08] flex items-center justify-center text-white/40 hover:text-white transition-all duration-300 backdrop-blur-sm">
+                                        <ChevronRight size={20} className="md:hidden group-hover/nav:translate-x-0.5 transition-transform" />
+                                        <ChevronRight size={24} className="hidden md:block group-hover/nav:translate-x-0.5 transition-transform" />
+                                    </div>
+                                </button>
+                            </>
+                        )}
+
+                        {/* ── Main image ── */}
+                        <div
+                            className="absolute inset-0 flex items-center justify-center px-2 pt-12 pb-2 md:px-8 md:pt-14 md:pb-4 lg:px-12 z-[110]"
+                            style={{ paddingBottom: images.length > 1 ? 'calc(env(safe-area-inset-bottom, 0px) + 90px)' : 'calc(env(safe-area-inset-bottom, 0px) + 20px)' }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className={`relative w-full h-full flex items-center justify-center lb-image-wrapper ${slideDir === 'left' ? 'lb-slide-left' : slideDir === 'right' ? 'lb-slide-right' : 'lb-slide-in'}`}>
+                                <img
+                                    key={currentIndex}
+                                    src={images[currentIndex]}
+                                    alt={`Gallery ${currentIndex + 1}`}
+                                    className="max-w-full max-h-[95vh] w-auto h-auto object-contain select-none rounded-sm md:rounded shadow-2xl"
+                                    style={{
+                                        filter: 'drop-shadow(0 20px 60px rgba(0,0,0,0.5))',
+                                        maxHeight: '95%' // Enforce 95% height of container (which accounts for thumbnails)
+                                    }}
+                                    draggable={false}
                                 />
                             </div>
-                        )}
-                        <div className="flex items-center justify-between px-4 py-3 md:px-8 md:py-5">
-                            {/* Counter */}
-                            <div className="flex items-baseline gap-1.5">
-                                <span className="text-white font-mono text-sm md:text-base font-semibold tracking-tight">
-                                    {String(currentIndex + 1).padStart(2, '0')}
-                                </span>
-                                <span className="text-white/20 font-mono text-xs">/</span>
-                                <span className="text-white/40 font-mono text-xs md:text-sm">
-                                    {String(images.length).padStart(2, '0')}
-                                </span>
-                            </div>
-                            {/* Close */}
-                            <button
-                                onClick={close}
-                                className="group/close w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/10 hover:border-white/30 bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-white/60 hover:text-white transition-all duration-300"
-                            >
-                                <X size={18} className="group-hover/close:rotate-90 transition-transform duration-300" />
-                            </button>
                         </div>
-                    </div>
 
-                    {/* ── Navigation arrows ── */}
-                    {images.length > 1 && (
-                        <>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); prev(); }}
-                                className="absolute left-2 md:left-5 lg:left-8 top-1/2 -translate-y-1/2 z-[120] group/nav"
-                            >
-                                <div className="w-11 h-11 md:w-14 md:h-14 rounded-full border border-white/[0.08] hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.08] flex items-center justify-center text-white/40 hover:text-white transition-all duration-300 backdrop-blur-sm">
-                                    <ChevronLeft size={20} className="md:hidden group-hover/nav:-translate-x-0.5 transition-transform" />
-                                    <ChevronLeft size={24} className="hidden md:block group-hover/nav:-translate-x-0.5 transition-transform" />
-                                </div>
-                            </button>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); next(); }}
-                                className="absolute right-2 md:right-5 lg:right-8 top-1/2 -translate-y-1/2 z-[120] group/nav"
-                            >
-                                <div className="w-11 h-11 md:w-14 md:h-14 rounded-full border border-white/[0.08] hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.08] flex items-center justify-center text-white/40 hover:text-white transition-all duration-300 backdrop-blur-sm">
-                                    <ChevronRight size={20} className="md:hidden group-hover/nav:translate-x-0.5 transition-transform" />
-                                    <ChevronRight size={24} className="hidden md:block group-hover/nav:translate-x-0.5 transition-transform" />
-                                </div>
-                            </button>
-                        </>
-                    )}
-
-                    {/* ── Main image ── */}
-                    <div
-                        className="absolute inset-0 flex items-center justify-center px-2 pt-12 pb-2 md:px-8 md:pt-14 md:pb-4 lg:px-12 z-[110]"
-                        style={{ paddingBottom: images.length > 1 ? 'calc(env(safe-area-inset-bottom, 0px) + 90px)' : 'calc(env(safe-area-inset-bottom, 0px) + 20px)' }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className={`relative w-full h-full flex items-center justify-center lb-image-wrapper ${slideDir === 'left' ? 'lb-slide-left' : slideDir === 'right' ? 'lb-slide-right' : 'lb-slide-in'}`}>
-                            <img
-                                key={currentIndex}
-                                src={images[currentIndex]}
-                                alt={`Gallery ${currentIndex + 1}`}
-                                className="max-w-full max-h-[95vh] w-auto h-auto object-contain select-none rounded-sm md:rounded shadow-2xl"
-                                style={{
-                                    filter: 'drop-shadow(0 20px 60px rgba(0,0,0,0.5))',
-                                    maxHeight: '95%' // Enforce 95% height of container (which accounts for thumbnails)
-                                }}
-                                draggable={false}
-                            />
-                        </div>
-                    </div>
-
-                    {/* ── Filmstrip thumbnails ── */}
-                    {images.length > 1 && (
-                        <div className="absolute bottom-0 left-0 right-0 z-[120] safe-bottom">
-                            <div className="flex justify-center px-4 pb-3 md:pb-5">
-                                <div
-                                    ref={thumbStripRef}
-                                    className="flex gap-1.5 md:gap-2 p-1.5 md:p-2 rounded-xl md:rounded-2xl bg-black/40 backdrop-blur-xl border border-white/[0.06] max-w-[94vw] md:max-w-[80vw] overflow-x-auto lb-no-scrollbar"
-                                >
-                                    {images.map((url, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (i === currentIndex) return;
-                                                goTo(i, i > currentIndex ? 'left' : 'right');
-                                            }}
-                                            className={`shrink-0 rounded-md md:rounded-lg overflow-hidden transition-all duration-300 relative
+                        {/* ── Filmstrip thumbnails ── */}
+                        {images.length > 1 && (
+                            <div className="absolute bottom-0 left-0 right-0 z-[120] safe-bottom">
+                                <div className="flex justify-center px-4 pb-3 md:pb-5">
+                                    <div
+                                        ref={thumbStripRef}
+                                        className="flex gap-1.5 md:gap-2 p-1.5 md:p-2 rounded-xl md:rounded-2xl bg-black/40 backdrop-blur-xl border border-white/[0.06] max-w-[94vw] md:max-w-[80vw] overflow-x-auto lb-no-scrollbar"
+                                    >
+                                        {images.map((url, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (i === currentIndex) return;
+                                                    goTo(i, i > currentIndex ? 'left' : 'right');
+                                                }}
+                                                className={`shrink-0 rounded-md md:rounded-lg overflow-hidden transition-all duration-300 relative
                                                 ${i === currentIndex
-                                                    ? 'w-14 h-10 md:w-[72px] md:h-[52px] ring-2 ring-orange-400/80 ring-offset-1 ring-offset-black/50 scale-105 md:scale-110'
-                                                    : 'w-11 h-8 md:w-14 md:h-10 opacity-40 hover:opacity-70 grayscale hover:grayscale-0'
-                                                }`}
-                                        >
-                                            <img src={url} alt="" className="w-full h-full object-cover" />
-                                            {i === currentIndex && (
-                                                <div className="absolute inset-0 border border-white/20 rounded-md md:rounded-lg" />
-                                            )}
-                                        </button>
-                                    ))}
+                                                        ? 'w-14 h-10 md:w-[72px] md:h-[52px] ring-2 ring-orange-400/80 ring-offset-1 ring-offset-black/50 scale-105 md:scale-110'
+                                                        : 'w-11 h-8 md:w-14 md:h-10 opacity-40 hover:opacity-70 grayscale hover:grayscale-0'
+                                                    }`}
+                                            >
+                                                <Image
+                                                    src={url}
+                                                    alt=""
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="100px"
+                                                />
+                                                {i === currentIndex && (
+                                                    <div className="absolute inset-0 border border-white/20 rounded-md md:rounded-lg" />
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
-                </div>
-            )}
+                        )}
+                    </div>
+                )
+            }
 
             <style jsx global>{`
                 /* Grid card shadow */

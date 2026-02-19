@@ -79,15 +79,27 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
         - [x] Auto-slug, auto-author, tags, Quill editor, thumbnail upload, media gallery
         - [x] DB: `chiang_rai_activities` table + `cr_activity_type` enum
         - [x] API: GET/POST/PUT/DELETE `/api/chiang-rai/activities`
-    - [x] **Staff Management**: List, Create (manual + import from faculty), Delete
+    - [x] **Staff Management** *(Overhauled 2026-02-19)*: 
+        - [x] 3-Group Structure: Advisor (Manual), Executive & Committee (Faculty Import).
+        - [x] Hierarchical Public Directory (Director > Deputy > Heads > Committee).
+        - [x] Inline Edit (Sort Order, Position).
+    - [x] **General Settings & Hero Management** *(2026-02-19)*:
+        - [x] Admin Page `/settings` for global config.
+        - [x] Hero Image Upload (Client validation + Server resize/WebP).
+        - [x] Dynamic Title/Subtitle configuration.
 - [x] **Image Management System** *(Enhanced 2026-02-13)*:
     - [x] Client-side image resize (max 1024px, WebP) before upload
     - [x] Server-side resize via Sharp (1024px, WebP quality 80)
     - [x] Image cleanup on content edit (orphan detection via Quill HTML diff)
     - [x] Server-side image delete endpoint: `DELETE /api/upload/chiang-rai`
     - [x] Shared across Artifacts, Articles, and Activities modules
+- [x] **Archive Pagination** *(2026-02-19)*: Server-side pagination for artifacts (page/limit params, meta response, reusable `ChiangRaiPagination` component, 12 items/page).
+- [x] **SEO & Metadata** *(2026-02-19)*: Server-side `generateMetadata` for dynamic pages (Archive/Articles/Activities) + Custom OpenGraph cards + Sitemap.xml.
+- [x] **Performance Optimization** *(2026-02-19)*: 
+    - [x] `next/image` integration with `remotePatterns` (Unsplash, Wikimedia).
+    - [x] `revalidate: 60` for high-traffic pages (Home, Activities).
 - [ ] **Digital Archive**: Content population for 5 Identities.
-- [ ] **Full-text Search**: Server-side search optimization.
+- [x] **Full-text Search**: Server-side search optimization.
 
 ## ⚙️ Phase 6: Backend & Database (NestJS + Drizzle ORM)
 - [x] **Database Schema Design**: ออกแบบตาราง Users, Courses, Staff, Research, News (Migrated to Drizzle)
@@ -135,7 +147,9 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
 | 2026-02-03 | `/api/auth/dev/login` error | Fixed missing dependencies (uuid, @types/uuid), corrected Multer type imports, fixed sharp default import |
 | 2026-02-03 | TypeScript compilation errors in upload.service.ts | Changed `import * as sharp` to `import sharp`, fixed Express.Multer.File namespace |
 | 2026-02-13 | Drizzle push data-loss warning on unrelated tables | Used direct SQL migration script for `chiang_rai_activities` table creation |
+| 2026-02-19 | Staff Public Page 500 Error | Added `INTERNAL_API_URL` to `.env` for Docker internal networking + Frontend Error Handling |
+| 2026-02-19 | SEO & Performance Update | Implemented Dynamic Metadata, OpenGraph, Sitemap, and Next.js Image Optimization for Chiang Rai Studies Center |
 
 ---
-*Last Updated: 2026-02-13*
+*Last Updated: 2026-02-19*
 
