@@ -5,8 +5,8 @@ import { DrizzleModule } from '../drizzle/drizzle.module';
 import { AuthModule } from '../auth/auth.module'; // Import AuthModule for JwtAuthGuard
 
 @Module({
-    imports: [DrizzleModule, AuthModule],
-    controllers: [NewsController],
-    providers: [NewsService],
+  imports: [DrizzleModule, AuthModule],
+  controllers: [NewsController],
+  providers: [NewsService],
 })
-export class NewsModule { }
+export class NewsModule {}

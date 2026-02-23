@@ -7,54 +7,54 @@ import { eq } from 'drizzle-orm';
 
 @Injectable()
 export class DepartmentsService {
-    constructor(private readonly drizzle: DrizzleService) { }
+  constructor(private readonly drizzle: DrizzleService) {}
 
-    async create(createDepartmentDto: CreateDepartmentDto) {
-        const result = await this.drizzle.db
-            .insert(departments)
-            .values(createDepartmentDto)
-            .returning();
-        return result[0];
+  async create(createDepartmentDto: CreateDepartmentDto) {
+    const result = await this.drizzle.db
+      .insert(departments)
+      .values(createDepartmentDto)
+      .returning();
+    return result[0];
+  }
+
+  async findAll() {
+    return await this.drizzle.db.select().from(departments);
+  }
+
+  async findOne(id: number) {
+    const result = await this.drizzle.db
+      .select()
+      .from(departments)
+      .where(eq(departments.id, id));
+
+    if (result.length === 0) {
+      throw new NotFoundException(`Department with ID ${id} not found`);
     }
+    return result[0];
+  }
 
-    async findAll() {
-        return await this.drizzle.db.select().from(departments);
+  async update(id: number, updateDepartmentDto: UpdateDepartmentDto) {
+    const result = await this.drizzle.db
+      .update(departments)
+      .set(updateDepartmentDto)
+      .where(eq(departments.id, id))
+      .returning();
+
+    if (result.length === 0) {
+      throw new NotFoundException(`Department with ID ${id} not found`);
     }
+    return result[0];
+  }
 
-    async findOne(id: number) {
-        const result = await this.drizzle.db
-            .select()
-            .from(departments)
-            .where(eq(departments.id, id));
+  async remove(id: number) {
+    const result = await this.drizzle.db
+      .delete(departments)
+      .where(eq(departments.id, id))
+      .returning();
 
-        if (result.length === 0) {
-            throw new NotFoundException(`Department with ID ${id} not found`);
-        }
-        return result[0];
+    if (result.length === 0) {
+      throw new NotFoundException(`Department with ID ${id} not found`);
     }
-
-    async update(id: number, updateDepartmentDto: UpdateDepartmentDto) {
-        const result = await this.drizzle.db
-            .update(departments)
-            .set(updateDepartmentDto)
-            .where(eq(departments.id, id))
-            .returning();
-
-        if (result.length === 0) {
-            throw new NotFoundException(`Department with ID ${id} not found`);
-        }
-        return result[0];
-    }
-
-    async remove(id: number) {
-        const result = await this.drizzle.db
-            .delete(departments)
-            .where(eq(departments.id, id))
-            .returning();
-
-        if (result.length === 0) {
-            throw new NotFoundException(`Department with ID ${id} not found`);
-        }
-        return result[0];
-    }
+    return result[0];
+  }
 }

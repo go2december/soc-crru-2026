@@ -8,16 +8,16 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { DrizzleModule } from '../drizzle/drizzle.module';
 
 @Module({
-    imports: [
-        DrizzleModule,
-        PassportModule.register({ defaultStrategy: 'jwt' }),
-        JwtModule.register({
-            secret: process.env.JWT_SECRET || 'soc-crru-secret-key-2026',
-            signOptions: { expiresIn: '7d' }, // Token หมดอายุใน 7 วัน
-        }),
-    ],
-    controllers: [AuthController],
-    providers: [AuthService, GoogleStrategy, JwtStrategy],
-    exports: [AuthService, JwtModule],
+  imports: [
+    DrizzleModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'soc-crru-secret-key-2026',
+      signOptions: { expiresIn: '7d' }, // Token หมดอายุใน 7 วัน
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, GoogleStrategy, JwtStrategy],
+  exports: [AuthService, JwtModule],
 })
-export class AuthModule { }
+export class AuthModule {}
