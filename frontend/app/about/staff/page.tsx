@@ -2,6 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Breadcrumb from '@/components/Breadcrumb';
+import {
+    Search, UserX, Crown, GraduationCap, Users,
+    ChevronRight, Mail, Building2, UserCircle2
+} from 'lucide-react';
 
 // Types ตาม Backend Schema ใหม่
 interface Staff {
@@ -143,13 +147,22 @@ export default function StaffPage() {
     });
 
     return (
-        <main className="min-h-screen bg-white pb-20">
-            {/* Header */}
-            <section className="bg-scholar-deep text-white py-16 px-4 text-center relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[url('/images/pattern.png')] bg-repeat"></div>
-                <div className="relative z-10">
-                    <h1 className="text-4xl lg:text-5xl font-bold mb-4 font-heading">บุคลากรคณะสังคมศาสตร์</h1>
-                    <p className="text-xl opacity-80">Faculty of Social Sciences Staff Directory</p>
+        <main className="min-h-screen bg-gray-50 pb-20 font-sans">
+            {/* Hero Header */}
+            <section className="bg-gradient-to-br from-scholar-deep via-blue-900 to-scholar-accent text-white py-20 px-4 text-center relative overflow-hidden shadow-xl shadow-scholar-deep/20">
+                <div className="absolute inset-0 opacity-10 bg-[url('/images/pattern.png')] bg-repeat animate-pulse-slow"></div>
+                <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl"></div>
+                <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
+                    <div className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium mb-6 flex items-center gap-2 shadow-sm">
+                        <Users className="w-4 h-4 text-blue-200" /> ทำเนียบบุคลากร
+                    </div>
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 tracking-tight font-heading leading-tight drop-shadow-md">
+                        บุคลากรคณะสังคมศาสตร์
+                    </h1>
+                    <p className="text-lg md:text-xl opacity-90 font-light max-w-2xl mx-auto drop-shadow">
+                        Faculty of Social Sciences Staff Directory
+                    </p>
                 </div>
             </section>
 
@@ -161,49 +174,49 @@ export default function StaffPage() {
             </div>
 
             {/* Controls */}
-            <section className="container mx-auto px-4 mb-8 sticky top-20 z-20">
-                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-gray-100 p-4">
-                    <div className="flex flex-col gap-6">
+            <section className="container mx-auto px-4 mb-10 sticky top-20 z-30">
+                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 p-2 md:p-3 transition-all duration-300">
+                    <div className="flex flex-col gap-4">
                         {/* Main Tabs */}
-                        <div className="flex flex-wrap justify-center gap-2 border-b border-gray-100 pb-4">
+                        <div className="flex flex-wrap justify-center sm:justify-start gap-2 bg-gray-50/50 p-1.5 rounded-2xl">
                             <button
                                 onClick={() => { setActiveTab('EXECUTIVES'); setActiveDept('ทั้งหมด'); }}
-                                className={`btn btn-lg rounded-full px-8 ${activeTab === 'EXECUTIVES'
-                                    ? 'btn-primary bg-scholar-accent border-none text-white shadow-lg shadow-scholar-accent/30'
-                                    : 'btn-ghost text-gray-500'}`}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'EXECUTIVES'
+                                    ? 'bg-white text-scholar-deep shadow-sm border border-gray-200/60 scale-[1.02]'
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/50'}`}
                             >
-                                👑 คณะผู้บริหาร
+                                <Crown className={`w-5 h-5 ${activeTab === 'EXECUTIVES' ? 'text-amber-500' : ''}`} /> คณะผู้บริหาร
                             </button>
                             <button
                                 onClick={() => setActiveTab('DEPARTMENTS')}
-                                className={`btn btn-lg rounded-full px-8 ${activeTab === 'DEPARTMENTS'
-                                    ? 'btn-primary bg-scholar-deep border-none text-white shadow-lg'
-                                    : 'btn-ghost text-gray-500'}`}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'DEPARTMENTS'
+                                    ? 'bg-white text-scholar-deep shadow-sm border border-gray-200/60 scale-[1.02]'
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/50'}`}
                             >
-                                🎓 สาขาวิชา
+                                <GraduationCap className={`w-5 h-5 ${activeTab === 'DEPARTMENTS' ? 'text-scholar-accent' : ''}`} /> สาขาวิชา
                             </button>
                             <button
                                 onClick={() => { setActiveTab('SUPPORT'); setActiveDept('ทั้งหมด'); }}
-                                className={`btn btn-lg rounded-full px-8 ${activeTab === 'SUPPORT'
-                                    ? 'btn-primary bg-teal-600 border-none text-white shadow-lg'
-                                    : 'btn-ghost text-gray-500'}`}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'SUPPORT'
+                                    ? 'bg-white text-scholar-deep shadow-sm border border-gray-200/60 scale-[1.02]'
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/50'}`}
                             >
-                                🛠️ สายสนับสนุน
+                                <Building2 className={`w-5 h-5 ${activeTab === 'SUPPORT' ? 'text-teal-500' : ''}`} /> สายสนับสนุน
                             </button>
                         </div>
 
-                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 px-2 pb-1">
                             {/* Department Filters (Show Only when 'DEPARTMENTS' tab is active) */}
-                            <div className="w-full md:w-auto overflow-x-auto no-scrollbar min-h-[40px]">
+                            <div className="w-full lg:w-auto overflow-x-auto no-scrollbar scroll-smooth">
                                 {activeTab === 'DEPARTMENTS' && (
-                                    <div className="flex gap-2 animate-fade-in">
+                                    <div className="flex gap-2 animate-fade-in p-1">
                                         {departments.map(dept => (
                                             <button
                                                 key={dept}
                                                 onClick={() => setActiveDept(dept)}
-                                                className={`btn btn-sm rounded-full whitespace-nowrap px-4 font-normal transition-all duration-300 ${activeDept === dept
-                                                    ? 'bg-scholar-deep text-white border-none scale-105 shadow'
-                                                    : 'bg-gray-100 text-gray-600 border-none hover:bg-gray-200'}`}
+                                                className={`px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition-colors duration-200 border ${activeDept === dept
+                                                    ? 'bg-scholar-deep border-scholar-deep text-white shadow-md'
+                                                    : 'bg-white border-gray-200 text-gray-600 hover:border-scholar-accent hover:text-scholar-accent'}`}
                                             >
                                                 {dept}
                                             </button>
@@ -211,29 +224,27 @@ export default function StaffPage() {
                                     </div>
                                 )}
                                 {activeTab === 'EXECUTIVES' && (
-                                    <div className="text-sm text-gray-500 italic animate-fade-in pl-2">
-                                        แสดงรายชื่อคณะผู้บริหารประจำคณะ
+                                    <div className="text-sm font-medium text-gray-500 flex items-center gap-2 animate-fade-in py-2">
+                                        <Crown className="w-4 h-4 text-amber-500" /> แสดงรายชื่อคณะผู้บริหารประจำคณะ
                                     </div>
                                 )}
                                 {activeTab === 'SUPPORT' && (
-                                    <div className="text-sm text-gray-500 italic animate-fade-in pl-2">
-                                        สำนักงานคณบดีและเจ้าหน้าที่ปฏิบัติการ
+                                    <div className="text-sm font-medium text-gray-500 flex items-center gap-2 animate-fade-in py-2">
+                                        <Building2 className="w-4 h-4 text-teal-500" /> สำนักงานคณบดีและเจ้าหน้าที่ปฏิบัติการ
                                     </div>
                                 )}
                             </div>
 
                             {/* Search */}
-                            <div className="w-full md:w-auto relative">
+                            <div className="w-full lg:w-auto relative group">
                                 <input
                                     type="text"
-                                    placeholder="🔍 ค้นหาชื่อ หรือตำแหน่ง..."
-                                    className="input input-bordered w-full md:w-72 pl-10 rounded-full bg-gray-50 border-gray-200 focus:border-scholar-accent focus:ring-1 focus:ring-scholar-accent"
+                                    placeholder="ค้นหาชื่อ หรือตำแหน่ง..."
+                                    className="input input-bordered w-full lg:w-80 pl-11 h-12 rounded-xl bg-white border-gray-200 focus:border-scholar-accent focus:ring-2 focus:ring-scholar-accent/20 transition-all shadow-sm placeholder-gray-400"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
-                                <svg className="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
+                                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-scholar-accent transition-colors" />
                             </div>
                         </div>
                     </div>
@@ -254,84 +265,94 @@ export default function StaffPage() {
                 ) : filteredStaff.length > 0 ? (
                     <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6 ${activeTab === 'EXECUTIVES' ? 'justify-items-center' : ''}`}>
                         {filteredStaff.map(staff => (
-                            <div key={staff.id} className={`card bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group overflow-hidden w-full ${activeTab === 'EXECUTIVES' ? 'max-w-xs border-scholar-accent/20' : ''}`}>
-                                <figure className="aspect-[4/5] bg-gray-100 relative overflow-hidden">
+                            <div key={staff.id} className={`bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden w-full flex flex-col ${activeTab === 'EXECUTIVES' ? 'max-w-[300px] border-scholar-accent/20' : ''}`}>
+                                <figure className="aspect-[3/4] bg-gray-50 relative overflow-hidden flex-shrink-0">
                                     {staff.imageUrl ? (
-                                        <img src={staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl} alt={getFullName(staff)} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                        <img src={staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl} alt={getFullName(staff)} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-24 h-24">
-                                                <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
-                                            </svg>
+                                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-100/50">
+                                            <UserCircle2 className="w-24 h-24 mb-2 text-gray-300" strokeWidth={1} />
                                         </div>
                                     )}
 
                                     {/* Executive Badge (Show even in Department view if they are executive) */}
                                     {staff.isExecutive && (
-                                        <div className="absolute top-0 right-0 p-2">
-                                            <div className="w-8 h-8 rounded-full bg-scholar-accent text-white flex items-center justify-center shadow-lg" title="ผู้บริหาร">
-                                                👑
+                                        <div className="absolute top-3 right-3">
+                                            <div className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-sm text-amber-500 flex items-center justify-center shadow-lg border border-amber-100">
+                                                <Crown className="w-5 h-5" />
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Gradient overlay base for uncropped images to ensure text readability if needed later */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                                 </figure>
 
-                                <div className="p-5">
+                                <div className="p-5 flex flex-col flex-grow relative border-t border-gray-50">
                                     <div className="mb-3">
-                                        <span className={`inline-block px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase ${staff.staffType === 'ACADEMIC'
-                                            ? 'bg-blue-50 text-blue-600'
-                                            : 'bg-teal-50 text-teal-600'
+                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wider uppercase border ${staff.staffType === 'ACADEMIC'
+                                            ? 'bg-blue-50/50 text-blue-700 border-blue-100'
+                                            : 'bg-teal-50/50 text-teal-700 border-teal-100'
                                             }`}>
                                             {staff.department || 'ไม่ระบุสังกัด'}
                                         </span>
                                     </div>
 
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1 leading-tight group-hover:text-scholar-deep transition-colors">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-1.5 leading-snug group-hover:text-scholar-deep transition-colors line-clamp-2">
                                         {getFullName(staff)}
                                     </h3>
 
-                                    <p className={`text-sm mb-3 font-medium ${activeTab === 'EXECUTIVES' ? 'text-scholar-accent' : 'text-gray-500'}`}>
+                                    <p className={`text-sm mb-4 font-medium leading-relaxed line-clamp-2 ${activeTab === 'EXECUTIVES' ? 'text-scholar-accent' : 'text-gray-600'}`}>
                                         {getPositionDisplay(staff, activeTab === 'EXECUTIVES')}
                                     </p>
 
                                     {/* Expertise Tags */}
-                                    {staff.expertise && staff.expertise.length > 0 && (
-                                        <div className="flex flex-wrap gap-1.5 mb-4 min-h-[24px]">
-                                            {staff.expertise.map((exp, i) => (
-                                                <span key={i} className="px-2 py-0.5 rounded text-[10px] bg-gray-100 text-gray-600 font-medium">
-                                                    {exp}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
-                                        {staff.contactEmail ? (
-                                            <a href={`mailto:${staff.contactEmail}`} className="text-xs font-semibold text-scholar-deep hover:text-scholar-accent flex items-center gap-1 transition-colors">
-                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                                ติดต่ออีเมล
-                                            </a>
+                                    <div className="mt-auto">
+                                        {staff.expertise && staff.expertise.length > 0 ? (
+                                            <div className="flex flex-wrap gap-1.5 mb-5 min-h-[48px] content-start">
+                                                {staff.expertise.slice(0, 3).map((exp, i) => (
+                                                    <span key={i} className="px-2 py-0.5 rounded text-[11px] bg-gray-100/80 hover:bg-gray-200/80 transition-colors text-gray-600 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]" title={exp}>
+                                                        {exp}
+                                                    </span>
+                                                ))}
+                                                {staff.expertise.length > 3 && (
+                                                    <span className="px-2 py-0.5 rounded text-[11px] bg-gray-50 text-gray-400 font-medium">
+                                                        +{staff.expertise.length - 3}
+                                                    </span>
+                                                )}
+                                            </div>
                                         ) : (
-                                            <span className="text-xs text-gray-300 cursor-not-allowed">ไม่มีอีเมล</span>
+                                            <div className="mb-5 min-h-[48px]"></div> // Space preservation
                                         )}
 
-                                        <button className="text-gray-400 hover:text-scholar-deep transition-colors">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
-                                        </button>
+                                        <div className="pt-4 border-t border-gray-100 flex justify-between items-center group/action">
+                                            {staff.contactEmail ? (
+                                                <a href={`mailto:${staff.contactEmail}`} className="text-[13px] font-semibold text-gray-500 hover:text-scholar-accent flex items-center gap-1.5 transition-colors">
+                                                    <Mail className="w-4 h-4" />
+                                                    ติดต่อ
+                                                </a>
+                                            ) : (
+                                                <span className="text-[13px] text-gray-300 cursor-not-allowed flex items-center gap-1.5">
+                                                    <Mail className="w-4 h-4 opacity-50" />ไม่มีอีเมล
+                                                </span>
+                                            )}
+
+                                            <button className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-scholar-deep group-hover:text-white transition-all duration-300">
+                                                <ChevronRight className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-32 opacity-50">
-                        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                    <div className="text-center py-24 bg-gray-50/50 rounded-3xl border border-gray-100/50 backdrop-blur-sm">
+                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-gray-100">
+                            <UserX className="w-10 h-10 text-gray-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-500 mb-2">ไม่พบข้อมูลบุคลากร</h3>
-                        <p className="text-gray-400">ในหมวดนี้ หรือลองปรับเงื่อนไขการค้นหา</p>
+                        <h3 className="text-xl font-bold text-gray-700 mb-2">ไม่พบข้อมูลบุคลากร</h3>
+                        <p className="text-gray-500">ในหมวดนี้ หรือลองปรับเงื่อนไขการค้นหาใหม่</p>
                     </div>
                 )}
             </section>
