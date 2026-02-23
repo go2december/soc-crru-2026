@@ -5,7 +5,7 @@ import Breadcrumb from '@/components/Breadcrumb';
 import Image from 'next/image';
 import {
     Search, UserX, Crown, GraduationCap, Users,
-    ChevronRight, Mail, Building2, UserCircle2
+    Building2, UserCircle2
 } from 'lucide-react';
 
 // Types ตาม Backend Schema ใหม่
@@ -270,7 +270,7 @@ export default function StaffPage() {
                                 <figure className="aspect-[3/4] bg-gray-50 relative overflow-hidden flex-shrink-0">
                                     {staff.imageUrl ? (
                                         <Image
-                                            src={staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl}
+                                            src={staff.imageUrl}
                                             alt={getFullName(staff)}
                                             fill
                                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
@@ -309,46 +309,9 @@ export default function StaffPage() {
                                         {getFullName(staff)}
                                     </h3>
 
-                                    <p className={`text-sm mb-4 font-medium leading-relaxed line-clamp-2 ${activeTab === 'EXECUTIVES' ? 'text-scholar-accent' : 'text-gray-600'}`}>
+                                    <p className={`text-sm font-medium leading-relaxed line-clamp-2 ${activeTab === 'EXECUTIVES' ? 'text-scholar-accent' : 'text-gray-600'}`}>
                                         {getPositionDisplay(staff, activeTab === 'EXECUTIVES')}
                                     </p>
-
-                                    {/* Expertise Tags */}
-                                    <div className="mt-auto">
-                                        {staff.expertise && staff.expertise.length > 0 ? (
-                                            <div className="flex flex-wrap gap-1.5 mb-5 min-h-[48px] content-start">
-                                                {staff.expertise.slice(0, 3).map((exp, i) => (
-                                                    <span key={i} className="px-2 py-0.5 rounded text-[11px] bg-gray-100/80 hover:bg-gray-200/80 transition-colors text-gray-600 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]" title={exp}>
-                                                        {exp}
-                                                    </span>
-                                                ))}
-                                                {staff.expertise.length > 3 && (
-                                                    <span className="px-2 py-0.5 rounded text-[11px] bg-gray-50 text-gray-400 font-medium">
-                                                        +{staff.expertise.length - 3}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className="mb-5 min-h-[48px]"></div> // Space preservation
-                                        )}
-
-                                        <div className="pt-4 border-t border-gray-100 flex justify-between items-center group/action">
-                                            {staff.contactEmail ? (
-                                                <a href={`mailto:${staff.contactEmail}`} className="text-[13px] font-semibold text-gray-500 hover:text-scholar-accent flex items-center gap-1.5 transition-colors">
-                                                    <Mail className="w-4 h-4" />
-                                                    ติดต่อ
-                                                </a>
-                                            ) : (
-                                                <span className="text-[13px] text-gray-300 cursor-not-allowed flex items-center gap-1.5">
-                                                    <Mail className="w-4 h-4 opacity-50" />ไม่มีอีเมล
-                                                </span>
-                                            )}
-
-                                            <button className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-scholar-deep group-hover:text-white transition-all duration-300">
-                                                <ChevronRight className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         ))}
