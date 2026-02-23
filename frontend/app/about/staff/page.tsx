@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Breadcrumb from '@/components/Breadcrumb';
+import Image from 'next/image';
 import {
     Search, UserX, Crown, GraduationCap, Users,
     ChevronRight, Mail, Building2, UserCircle2
@@ -268,7 +269,13 @@ export default function StaffPage() {
                             <div key={staff.id} className={`bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden w-full flex flex-col ${activeTab === 'EXECUTIVES' ? 'max-w-[300px] border-scholar-accent/20' : ''}`}>
                                 <figure className="aspect-[3/4] bg-gray-50 relative overflow-hidden flex-shrink-0">
                                     {staff.imageUrl ? (
-                                        <img src={staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl} alt={getFullName(staff)} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                        <Image
+                                            src={staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl}
+                                            alt={getFullName(staff)}
+                                            fill
+                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                        />
                                     ) : (
                                         <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-100/50">
                                             <UserCircle2 className="w-24 h-24 mb-2 text-gray-300" strokeWidth={1} />
