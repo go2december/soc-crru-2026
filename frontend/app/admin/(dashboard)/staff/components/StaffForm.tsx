@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Staff, Department, User } from './hooks/useStaffData';
+import { Link2, GraduationCap, Lightbulb, X } from 'lucide-react';
 
 interface StaffFormProps {
     initialData: Staff | null;
@@ -182,7 +183,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* User Link Section */}
                         <div className="md:col-span-2 p-4 rounded-xl border border-blue-100 bg-blue-50/50">
-                            <label className="label pt-0"><span className="label-text font-bold text-blue-900">🔗 เชื่อมโยงบัญชีผู้ใช้ (Login Account)</span></label>
+                            <label className="label pt-0"><span className="label-text font-bold text-blue-900 flex items-center gap-1.5"><Link2 className="w-4 h-4 text-blue-700" /> เชื่อมโยงบัญชีผู้ใช้ (Login Account)</span></label>
                             <select className="select select-bordered w-full" value={formData.userId} onChange={(e) => handleUserSelect(e.target.value)}>
                                 <option value="">-- ไม่เชื่อมโยง (ข้อมูลแสดงผลเท่านั้น) --</option>
                                 {users.map(u => (<option key={u.id} value={u.id}>{u.email} ({u.name})</option>))}
@@ -249,7 +250,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                                         className="btn btn-xs btn-circle absolute -top-2 -right-2 bg-base-100 shadow-md border-base-300"
                                         onClick={() => setFormData({ ...formData, imageUrl: '' })}
                                         disabled={!formData.imageUrl}
-                                    >✕</button>
+                                    ><X className="w-4 h-4" /></button>
                                 </div>
 
                                 <div className="flex-1 w-full space-y-3">
@@ -298,8 +299,8 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                         <div className="form-control">
                             <label className="label"><span className="label-text font-medium">ประเภทบุคลากร <span className="text-error">*</span></span></label>
                             <select className="select select-bordered" value={formData.staffType} onChange={e => setFormData({ ...formData, staffType: e.target.value as any })}>
-                                <option value="ACADEMIC">👨‍🏫 สายวิชาการ (Academic)</option>
-                                <option value="SUPPORT">🛠️ สายสนับสนุน (Support)</option>
+                                <option value="ACADEMIC">สายวิชาการ (Academic)</option>
+                                <option value="SUPPORT">สายสนับสนุน (Support)</option>
                             </select>
                         </div>
                         <div className="form-control">
@@ -349,7 +350,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                         {/* Education List */}
                         <div>
                             <h4 className="font-bold mb-3 text-sm uppercase text-gray-500 tracking-wider flex items-center gap-2">
-                                🎓 ประวัติการศึกษา (Education)
+                                <GraduationCap className="w-5 h-5 text-gray-400" /> ประวัติการศึกษา (Education)
                             </h4>
                             <div className="flex gap-2 mb-3 items-end">
                                 <div className="w-1/3">
@@ -378,7 +379,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                                             const newList = [...eduList];
                                             newList.splice(idx, 1);
                                             setEduList(newList);
-                                        }} className="btn btn-xs btn-circle btn-ghost text-red-500 opacity-20 group-hover:opacity-100 hover:bg-red-50">✕</button>
+                                        }} className="btn btn-xs btn-circle btn-ghost text-red-500 opacity-20 group-hover:opacity-100 hover:bg-red-50"><X className="w-3 h-3" /></button>
                                     </div>
                                 ))}
                             </div>
@@ -387,7 +388,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                         {/* Expertise Tags */}
                         <div>
                             <h4 className="font-bold mb-3 text-sm uppercase text-gray-500 tracking-wider flex items-center gap-2">
-                                🧠 ความเชี่ยวชาญ (Expertise)
+                                <Lightbulb className="w-5 h-5 text-gray-400" /> ความเชี่ยวชาญ (Expertise)
                             </h4>
                             <div className="flex gap-2 mb-3">
                                 <input
@@ -407,7 +408,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                                         {tag}
                                         <button type="button" onClick={() => {
                                             setExpertiseList(expertiseList.filter(t => t !== tag));
-                                        }} className="btn btn-xs btn-circle btn-ghost text-gray-400 hover:text-red-500 hover:bg-red-50">✕</button>
+                                        }} className="btn btn-xs btn-circle btn-ghost text-gray-400 hover:text-red-500 hover:bg-red-50"><X className="w-3 h-3" /></button>
                                     </div>
                                 ))}
                             </div>
@@ -415,7 +416,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
 
                     </div>
                 </div>
-            </div>
+            </div >
 
             <div className="modal-action mt-6 flex justify-between items-center border-t border-base-200 pt-4">
                 <button type="button" onClick={onCancel} className="btn btn-ghost" disabled={isLoading}>ยกเลิก</button>
@@ -423,6 +424,6 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                     {isLoading ? <span className="loading loading-spinner"></span> : 'บันทึกข้อมูล'}
                 </button>
             </div>
-        </form>
+        </form >
     );
 }
