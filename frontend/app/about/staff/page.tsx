@@ -257,7 +257,7 @@ export default function StaffPage() {
                             <div key={staff.id} className={`card bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group overflow-hidden w-full ${activeTab === 'EXECUTIVES' ? 'max-w-xs border-scholar-accent/20' : ''}`}>
                                 <figure className="aspect-[4/5] bg-gray-100 relative overflow-hidden">
                                     {staff.imageUrl ? (
-                                        <img src={staff.imageUrl} alt={getFullName(staff)} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                        <img src={staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl} alt={getFullName(staff)} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-24 h-24">

@@ -4,6 +4,8 @@ import { useState, useMemo, useRef } from 'react';
 import { useStaffData, Staff } from './hooks/useStaffData';
 import StaffForm, { ACADEMIC_POSITIONS } from './components/StaffForm';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+
 export default function AdminStaffPage() {
     const { staffList, departments, users, loading, refetch } = useStaffData();
     const [searchTerm, setSearchTerm] = useState('');
@@ -181,7 +183,7 @@ export default function AdminStaffPage() {
                                                     <div className="avatar">
                                                         <div className="mask mask-squircle w-12 h-12 bg-gray-100 ring-1 ring-base-300 ring-offset-2">
                                                             {staff.imageUrl ? (
-                                                                <img src={staff.imageUrl} alt={staff.firstNameTh} className="object-cover" />
+                                                                <img src={staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl} alt={staff.firstNameTh} className="object-cover" />
                                                             ) : (
                                                                 <div className="flex items-center justify-center w-full h-full text-xs text-gray-400 font-bold">No Img</div>
                                                             )}

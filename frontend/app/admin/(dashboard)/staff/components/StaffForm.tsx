@@ -25,6 +25,8 @@ export const EDU_LEVELS = [
     { value: 'BACHELOR', label: 'ปริญญาตรี (Bachelor)' },
 ];
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+
 export default function StaffForm({ initialData, departments, users, onSubmit, onCancel, isLoading }: StaffFormProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
@@ -101,17 +103,16 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
         const uploadData = new FormData();
         uploadData.append('file', file);
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
         try {
-            const res = await fetch(`${apiUrl}/api/upload/staff`, {
+            const res = await fetch(`${API_URL}/api/upload/staff`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },
                 body: uploadData
             });
             if (res.ok) {
                 const data = await res.json();
-                const fullUrl = data.url.startsWith('http') ? data.url : `${apiUrl}${data.url}`;
+                const fullUrl = data.url.startsWith('http') ? data.url : `${API_URL}${data.url}`;
                 setFormData(prev => ({ ...prev, imageUrl: fullUrl }));
             } else {
                 alert('Upload failed');
@@ -214,7 +215,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                                 <div className="relative group">
                                     <div className={`aspect-[3/4] w-32 bg-base-200 rounded-lg overflow-hidden border-2 border-dashed border-base-300 shadow-sm relative ${uploading ? 'opacity-50' : ''}`}>
                                         {formData.imageUrl ? (
-                                            <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Error'} />
+                                            <img src={formData.imageUrl.startsWith('/') ? `${API_URL}${formData.imageUrl}` : formData.imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Error'} />
                                         ) : (
                                             <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 text-xs p-2 text-center">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 mb-1">
