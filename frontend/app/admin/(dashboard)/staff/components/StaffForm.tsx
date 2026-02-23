@@ -128,12 +128,26 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        const cleanString = (val: string | null | undefined) => {
+            if (!val || val.trim() === '') return undefined;
+            return val.trim();
+        };
+
         // Prepare payload
         const payload = {
             ...formData,
             departmentId: parseInt(formData.departmentId || '0'),
             academicPosition: formData.staffType === 'ACADEMIC' && formData.academicPosition ? formData.academicPosition : undefined,
-            userId: formData.userId || undefined,
+            userId: cleanString(formData.userId),
+            prefixTh: cleanString(formData.prefixTh),
+            firstNameTh: formData.firstNameTh.trim(),
+            lastNameTh: formData.lastNameTh.trim(),
+            prefixEn: cleanString(formData.prefixEn),
+            firstNameEn: cleanString(formData.firstNameEn),
+            lastNameEn: cleanString(formData.lastNameEn),
+            adminPosition: cleanString(formData.adminPosition),
+            contactEmail: cleanString(formData.contactEmail),
+            imageUrl: cleanString(formData.imageUrl),
             education: eduList,
             expertise: expertiseList,
         };
