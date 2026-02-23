@@ -30,12 +30,30 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
+        port: '4001',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
         port: '',
         pathname: '/**',
       },
       {
         protocol: 'http',
         hostname: 'soc_backend',
+        port: '4001',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'soc_backend',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'sos.crru.ac.th',
         port: '',
         pathname: '/**',
       },
