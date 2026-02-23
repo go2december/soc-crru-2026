@@ -87,8 +87,36 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
         ? `${process.env.NEXT_PUBLIC_API_URL ?? ''}${article.thumbnailUrl}`
         : article.thumbnailUrl;
 
+    // JSON-LD Structured Data
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: article.title,
+        description: article.abstract || article.title,
+        image: processedThumbnail || (processedMediaUrls.length > 0 ? processedMediaUrls[0] : ''),
+        datePublished: article.publishedAt || article.createdAt,
+        author: {
+            '@type': 'Person',
+            name: article.author || 'ศูนย์เชียงรายศึกษา',
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
+            logo: {
+                '@type': 'ImageObject',
+                url: 'https://soc.crru.ac.th/images/soc-logo.png',
+            },
+        },
+    };
+
     return (
         <div className="min-h-screen bg-[#FAF5FF] pb-20 font-kanit">
+            {/* JSON-LD Script */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+
             {/* Header Image / Pattern */}
             <div className="h-64 md:h-80 bg-[#2e1065] relative overflow-hidden">
                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-repeat"></div>

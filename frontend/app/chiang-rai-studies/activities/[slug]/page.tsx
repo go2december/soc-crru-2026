@@ -78,8 +78,38 @@ export default async function ActivityDetailPage(props: { params: Promise<{ slug
         notFound();
     }
 
+    // JSON-LD Structured Data for Event/Article
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Event', // Using Event since it's an Activity
+        name: activity.title,
+        description: activity.description || activity.content?.replace(/<[^>]*>?/gm, '') || '',
+        image: activity.thumbnailUrl || 'https://placehold.co/1200x630/2e1065/white?text=Chiang+Rai+Studies',
+        startDate: activity.publishedAt || new Date().toISOString(),
+        location: {
+            '@type': 'Place',
+            name: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
+            address: {
+                '@type': 'PostalAddress',
+                addressLocality: 'Chiang Rai',
+                addressCountry: 'TH'
+            }
+        },
+        organizer: {
+            '@type': 'Organization',
+            name: 'ศูนย์เชียงรายศึกษา มหาวิทยาลัยราชภัฏเชียงราย',
+            url: 'https://soc.crru.ac.th/chiang-rai-studies'
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#FAF5FF] font-kanit">
+            {/* JSON-LD Script */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+
             {/* Hero / Header Image */}
             <div className="relative h-[50vh] min-h-[400px]">
                 <div className="absolute inset-0">

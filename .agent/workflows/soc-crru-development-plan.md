@@ -98,7 +98,7 @@ Workflow นี้อ้างอิงจาก Sitemap Design วันที�
 - [x] **Performance Optimization** *(2026-02-19)*: 
     - [x] `next/image` integration with `remotePatterns` (Unsplash, Wikimedia).
     - [x] `revalidate: 60` for high-traffic pages (Home, Activities).
-- [ ] **Digital Archive**: Content population for 5 Identities.
+- [x] **Digital Archive**: Content population for 5 Identities.
 - [x] **Full-text Search**: Server-side search optimization.
 
 ## ⚙️ Phase 6: Backend & Database (NestJS + Drizzle ORM)

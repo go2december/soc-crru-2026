@@ -121,8 +121,38 @@ export default async function ArtifactDetailPage({ params }: { params: Promise<{
         notFound();
     }
 
+    const { id } = await params;
+
+    // JSON-LD Structured Data
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: artifact.title,
+        description: artifact.description || '',
+        image: artifact.thumbnailUrl || (artifact.mediaUrls && artifact.mediaUrls.length > 0 ? artifact.mediaUrls[0] : ''),
+        datePublished: artifact.createdAt || new Date().toISOString(),
+        author: {
+            '@type': 'Person',
+            name: artifact.author || 'ศูนย์เชียงรายศึกษา',
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
+            logo: {
+                '@type': 'ImageObject',
+                url: 'https://soc.crru.ac.th/images/soc-logo.png',
+            },
+        },
+    };
+
     return (
         <div className="min-h-screen bg-[#FAF5FF] pb-32 font-kanit">
+            {/* JSON-LD Script */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+
             {/* Breadcrumb / Navigation Banner */}
             <div className="bg-[#2e1065] text-purple-200 py-6 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:24px_24px]"></div>

@@ -115,7 +115,7 @@ This workflow guides the development of the Chiang Rai Studies Center website as
         - `articles/[slug]/page.tsx`: Uses Article title/abstract/thumbnail.
         - `activities/[slug]/page.tsx`: Uses Activity title/content snippet/thumbnail as OG Image.
     - [x] **Open Graph (OG) Tags:** Configured `openGraph` and `twitter` cards (summary_large_image) for all detail pages.
-    - [ ] **JSON-LD Schema:** Add Structured Data (Article, Organization, BreadcrumbList) for rich results.
+    - [x] **JSON-LD Schema:** Add Structured Data (Article, Organization, BreadcrumbList) for rich results.
     - [x] **Sitemap.xml:** Created `sitemap.ts` to dynamically generate XML for all static and dynamic routes (activities/articles).
 
 - [x] **Performance Optimization** *(2026-02-19)*
