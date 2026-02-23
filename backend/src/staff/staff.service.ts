@@ -58,6 +58,8 @@ export class StaffService {
                 contactEmail: staffProfiles.contactEmail,
                 sortOrder: staffProfiles.sortOrder,
                 isExecutive: staffProfiles.isExecutive,
+                departmentId: staffProfiles.departmentId,
+                userId: staffProfiles.userId,
                 department: departments.nameTh,
                 departmentEn: departments.nameEn,
             })
