@@ -78,6 +78,24 @@ const getPositionDisplay = (staff: Staff, isExecutiveContext: boolean): string =
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
+// Helper: Format image URL to work with next/image inside Docker
+const getImageUrl = (url: string | null): string => {
+    if (!url) return '';
+    // Convert absolute localhost URLs to relative to utilize Next.js rewrites
+    if (url.startsWith('http://localhost') || url.startsWith('http://soc_backend')) {
+        try {
+            return new URL(url).pathname;
+        } catch {
+            return url;
+        }
+    }
+    // If API_URL is set and the url starts with it, strip it
+    if (API_URL && url.startsWith(API_URL)) {
+        return url.replace(API_URL, '');
+    }
+    return url;
+};
+
 export default function StaffPage() {
     const [staffList, setStaffList] = useState<Staff[]>([]);
     const [departments, setDepartments] = useState<string[]>(['ทั้งหมด']);
@@ -270,7 +288,7 @@ export default function StaffPage() {
                                 <figure className="aspect-[3/4] bg-gray-50 relative overflow-hidden flex-shrink-0">
                                     {staff.imageUrl ? (
                                         <Image
-                                            src={staff.imageUrl}
+                                            src={getImageUrl(staff.imageUrl)}
                                             alt={getFullName(staff)}
                                             fill
                                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
