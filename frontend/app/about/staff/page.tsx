@@ -168,18 +168,19 @@ export default function StaffPage() {
     return (
         <main className="min-h-screen bg-gray-50 pb-20 font-sans">
             {/* Hero Header */}
-            <section className="bg-gradient-to-br from-scholar-deep via-blue-900 to-scholar-accent text-white py-20 px-4 text-center relative overflow-hidden shadow-xl shadow-scholar-deep/20">
-                <div className="absolute inset-0 opacity-10 bg-[url('/images/pattern.png')] bg-repeat animate-pulse-slow"></div>
-                <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-                <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl"></div>
-                <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
-                    <div className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium mb-6 flex items-center gap-2 shadow-sm">
-                        <Users className="w-4 h-4 text-blue-200" /> ทำเนียบบุคลากร
+            <section className="bg-scholar-deep text-white pt-20 pb-24 px-4 relative overflow-hidden border-b border-scholar-deep/10">
+                {/* Subtle structural background instead of mesh/glow blobs */}
+                <div className="absolute inset-0 opacity-5 bg-[url('/images/pattern.png')] bg-repeat"></div>
+
+                {/* Asymmetric Left-Aligned Layout (Fitts's Law + Typography scale) */}
+                <div className="relative z-10 container mx-auto flex flex-col items-start text-left">
+                    <div className="px-3 py-1 bg-white/10 backdrop-blur-sm border-l-4 border-scholar-accent text-sm font-semibold mb-8 flex items-center gap-2 text-white">
+                        <Users className="w-4 h-4" /> ทำเนียบบุคลากร
                     </div>
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 tracking-tight font-heading leading-tight drop-shadow-md">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight font-heading leading-[1.1] max-w-4xl">
                         บุคลากรคณะสังคมศาสตร์
                     </h1>
-                    <p className="text-lg md:text-xl opacity-90 font-light max-w-2xl mx-auto drop-shadow">
+                    <p className="text-lg md:text-2xl text-blue-100/80 font-normal max-w-2xl leading-relaxed">
                         Faculty of Social Sciences Staff Directory
                     </p>
                 </div>
