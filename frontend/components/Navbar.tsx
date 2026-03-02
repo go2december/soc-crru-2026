@@ -142,6 +142,7 @@ export default function Navbar() {
                         <NavItem href="/about/strategy" title="แผนยุทธศาสตร์ (Strategic Plan)" />
                         <NavItem href="/about/structure" title="โครงสร้างการบริหาร (Org. Structure)" />
                         <div className="divider my-1 border-white/10"></div>
+                        <NavItem href="/about/executive" title="คณะผู้บริหาร (Executive Board)" />
                         <NavItem href="/about/staff" title="ทำเนียบบุคลากร (Staff)" />
                     </DropdownMenu>
 

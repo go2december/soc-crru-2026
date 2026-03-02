@@ -8,13 +8,14 @@ import {
   chiangRaiStaff,
   staffProfiles,
   departments,
+  academicPositions,
   chiangRaiConfig,
 } from '../drizzle/schema';
 import { eq, desc, asc, ilike, or, and, count, SQL } from 'drizzle-orm';
 
 @Injectable()
 export class ChiangRaiService {
-  constructor(private readonly drizzle: DrizzleService) {}
+  constructor(private readonly drizzle: DrizzleService) { }
 
   // --- Identities ---
   async getAllIdentities() {
@@ -1067,13 +1068,14 @@ export class ChiangRaiService {
         prefixTh: staffProfiles.prefixTh,
         firstNameTh: staffProfiles.firstNameTh,
         lastNameTh: staffProfiles.lastNameTh,
-        academicPosition: staffProfiles.academicPosition,
+        academicPosition: academicPositions.nameTh,
         department: departments.nameTh,
         imageUrl: staffProfiles.imageUrl,
         email: staffProfiles.contactEmail,
       })
       .from(staffProfiles)
-      .leftJoin(departments, eq(staffProfiles.departmentId, departments.id));
+      .leftJoin(departments, eq(staffProfiles.departmentId, departments.id))
+      .leftJoin(academicPositions, eq(staffProfiles.academicPositionId, academicPositions.id));
   }
 
   // Import a Faculty Staff member into Chiang Rai Staff
@@ -1083,8 +1085,12 @@ export class ChiangRaiService {
     position: string,
   ) {
     const facultyStaff = await this.drizzle.db
-      .select()
+      .select({
+        staff: staffProfiles,
+        academicPosition: academicPositions.nameTh,
+      })
       .from(staffProfiles)
+      .leftJoin(academicPositions, eq(staffProfiles.academicPositionId, academicPositions.id))
       .where(eq(staffProfiles.id, facultyStaffId))
       .limit(1);
 
@@ -1092,15 +1098,7 @@ export class ChiangRaiService {
       throw new NotFoundException('Faculty staff not found');
     }
 
-    const staff = facultyStaff[0];
-
-    // Map academic position enum to Thai label
-    const academicTitleMap: Record<string, string> = {
-      LECTURER: 'อ.',
-      ASSISTANT_PROF: 'ผศ.',
-      ASSOCIATE_PROF: 'รศ.',
-      PROFESSOR: 'ศ.',
-    };
+    const { staff, academicPosition } = facultyStaff[0];
 
     const newStaffData: typeof chiangRaiStaff.$inferInsert = {
       staffGroup,
@@ -1108,9 +1106,7 @@ export class ChiangRaiService {
       firstName: staff.firstNameTh,
       lastName: staff.lastNameTh,
       position,
-      academicTitle: staff.academicPosition
-        ? academicTitleMap[staff.academicPosition] || ''
-        : '',
+      academicTitle: academicPosition || '',
       email: staff.contactEmail,
       imageUrl: staff.imageUrl,
       bio: staff.bio,

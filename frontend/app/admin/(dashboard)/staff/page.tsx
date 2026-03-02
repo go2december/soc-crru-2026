@@ -2,13 +2,13 @@
 
 import { useState, useMemo, useRef } from 'react';
 import { useStaffData, Staff } from './hooks/useStaffData';
-import StaffForm, { ACADEMIC_POSITIONS } from './components/StaffForm';
+import StaffForm from './components/StaffForm';
 import { Users, Edit3, Plus, Search, Trash2, Link2, Crown, UserX, AlertTriangle } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
 export default function AdminStaffPage() {
-    const { staffList, departments, users, loading, refetch } = useStaffData();
+    const { staffList, departments, users, academicPositions, adminPositions, loading, refetch } = useStaffData();
     const [searchTerm, setSearchTerm] = useState('');
     const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
     const [staffToDelete, setStaffToDelete] = useState<Staff | null>(null);
@@ -17,11 +17,6 @@ export default function AdminStaffPage() {
     // Dialog Refs
     const formModalRef = useRef<HTMLDialogElement>(null);
     const deleteModalRef = useRef<HTMLDialogElement>(null);
-
-    const getAcademicPositionLabel = (position: string | null) => {
-        const found = ACADEMIC_POSITIONS.find(p => p.value === position);
-        return found ? found.label : position || '-';
-    };
 
     const getFullName = (staff: Staff) => {
         return `${staff.prefixTh || ''}${staff.firstNameTh} ${staff.lastNameTh}`;
@@ -209,7 +204,7 @@ export default function AdminStaffPage() {
                                             <td>
                                                 <div className="flex flex-col gap-1">
                                                     <span className="font-semibold text-sm text-primary-content/80 text-primary">
-                                                        {staff.adminPosition || getAcademicPositionLabel(staff.academicPosition)}
+                                                        {staff.adminPosition || staff.academicPosition || '-'}
                                                     </span>
                                                     <div className="flex items-center gap-2 text-xs opacity-70">
                                                         <span className="badge badge-ghost badge-sm">{staff.department || '-'}</span>
@@ -287,6 +282,8 @@ export default function AdminStaffPage() {
                         initialData={editingStaff}
                         departments={departments}
                         users={users}
+                        academicPositions={academicPositions}
+                        adminPositions={adminPositions}
                         onSubmit={handleSubmit}
                         onCancel={handleCloseModal}
                         isLoading={submitting}

@@ -51,18 +51,14 @@ export class CreateStaffDto {
   staffType?: 'ACADEMIC' | 'SUPPORT';
 
   // ตำแหน่งวิชาการ (สำหรับสายวิชาการ)
-  @IsIn(['LECTURER', 'ASSISTANT_PROF', 'ASSOCIATE_PROF', 'PROFESSOR'])
+  @IsNumber()
   @IsOptional()
-  academicPosition?:
-    | 'LECTURER'
-    | 'ASSISTANT_PROF'
-    | 'ASSOCIATE_PROF'
-    | 'PROFESSOR';
+  academicPositionId?: number;
 
   // ตำแหน่งบริหาร
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  adminPosition?: string;
+  adminPositionId?: number;
 
   // วุฒิการศึกษา (รองรับหลายวุฒิ)
   @IsArray()
@@ -79,6 +75,11 @@ export class CreateStaffDto {
   @IsString({ each: true })
   @IsOptional()
   expertise?: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  shortBios?: string[];
 
   @IsString()
   @IsOptional()

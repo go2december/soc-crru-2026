@@ -38,14 +38,8 @@ export const newsCategoryEnum = pgEnum('news_category', [
   'ANNOUNCE',
 ]);
 
-// Staff-related Enums (ตาม Excel Schema)
+// Staff-related Constants
 export const staffTypeEnum = pgEnum('staff_type', ['ACADEMIC', 'SUPPORT']);
-export const academicPositionEnum = pgEnum('academic_position', [
-  'LECTURER', // อาจารย์
-  'ASSISTANT_PROF', // ผู้ช่วยศาสตราจารย์ (ผศ.)
-  'ASSOCIATE_PROF', // รองศาสตราจารย์ (รศ.)
-  'PROFESSOR', // ศาสตราจารย์ (ศ.)
-]);
 
 // ------------------------------------------
 // 1. Users & IAM (Google OAuth for @crru.ac.th)
@@ -77,6 +71,20 @@ export const departments = pgTable('departments', {
   isAcademicUnit: boolean('is_academic_unit').default(true).notNull(), // สาขาวิชา vs หน่วยงานสนับสนุน
 });
 
+export const academicPositions = pgTable('academic_positions', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  nameTh: varchar('name_th', { length: 255 }).notNull(),
+  nameEn: varchar('name_en', { length: 255 }),
+  sortOrder: integer('sort_order').default(0).notNull(),
+});
+
+export const adminPositions = pgTable('admin_positions', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  nameTh: varchar('name_th', { length: 255 }).notNull(),
+  nameEn: varchar('name_en', { length: 255 }),
+  sortOrder: integer('sort_order').default(0).notNull(),
+});
+
 export const staffProfiles = pgTable('staff_profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').references(() => users.id), // Optional: ไม่บังคับเชื่อมโยง user account
@@ -98,10 +106,10 @@ export const staffProfiles = pgTable('staff_profiles', {
   staffType: staffTypeEnum('staff_type').default('ACADEMIC').notNull(),
 
   // ตำแหน่งวิชาการ (สำหรับสายวิชาการเท่านั้น)
-  academicPosition: academicPositionEnum('academic_position'),
+  academicPositionId: integer('academic_position_id').references(() => academicPositions.id),
 
   // ตำแหน่งบริหาร (ทั้งสายวิชาการและสนับสนุน ถ้ามี)
-  adminPosition: varchar('admin_position', { length: 255 }), // e.g. คณบดี, หัวหน้าสาขา
+  adminPositionId: integer('admin_position_id').references(() => adminPositions.id),
 
   // วุฒิการศึกษา (รองรับหลายวุฒิ)
   education: jsonb('education').$type<
@@ -118,6 +126,7 @@ export const staffProfiles = pgTable('staff_profiles', {
   expertise: text('expertise').array(),
   imageUrl: varchar('image_url', { length: 500 }),
   bio: text('bio'),
+  shortBios: text('short_bios').array(),
   sortOrder: integer('sort_order').default(0).notNull(), // สำหรับเรียงลำดับการแสดงผล
   isExecutive: boolean('is_executive').default(false).notNull(), // สถานะผู้บริหาร (แยกจากประเภทบุคลากร)
 });

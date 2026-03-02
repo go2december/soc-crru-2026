@@ -131,6 +131,10 @@
 - **Problem**: `date-fns` ไม่อยู่ใน container
 - **Fixed**: npm install + rebuild container
 
+### 4. Image/Media Data Storage (Best Practice)
+- **Problem**: การเก็บรูปภาพเป็น Absolute URL (เช่น `http://localhost:4001/uploads/...`) ทำให้ระบบพังเมื่อนำขึ้น Production (Server ติดต่อ localhost ไม่ได้)
+- **Fixed**: ในระดับ Frontend ควรกำหนดให้การบันทึกภาพลงฐานข้อมูลเก็บเฉพาะ **Relative Path** เท่านั้น (ตัวอย่าง: `/uploads/chiang-rai/image.png`) และให้ส่วนแสดงผล (View) เป็นผู้เติม `API_URL` หรือ Domain ด้วยตัวเองตอน Render เสมอ เพื่อให้การทำ Migration ข้อมูลไป Server จริงไม่มีปัญหา
+
 ---
 
 ## 🔄 API Calls Summary

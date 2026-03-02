@@ -121,7 +121,7 @@ export default async function ArtifactDetailPage({ params }: { params: Promise<{
         notFound();
     }
 
-    const { id } = await params;
+
 
     // JSON-LD Structured Data
     const jsonLd = {

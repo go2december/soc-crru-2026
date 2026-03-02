@@ -114,12 +114,9 @@ export default function SettingsPage() {
 
             if (res.ok) {
                 const data = await res.json();
-                // Add API_URL prefix if needed for displaying, but store relative path usually
-                // The API returns relative path like /uploads/chiang-rai/filename.webp
-                // We need to prepend API URL for display if served from backend
-                const fullUrl = `${API_URL}${data.url}`;
 
-                setConfig({ ...config, heroBgUrl: fullUrl });
+                // Store only relative path so that it doesn't break on deployment
+                setConfig({ ...config, heroBgUrl: data.url });
                 toast.success('อัปโหลดรูปภาพสำเร็จ');
             } else {
                 const error = await res.text();

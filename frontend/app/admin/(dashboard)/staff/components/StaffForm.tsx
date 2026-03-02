@@ -1,24 +1,19 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Staff, Department, User } from './hooks/useStaffData';
+import { Staff, Department, User, Position } from './hooks/useStaffData';
 import { Link2, GraduationCap, Lightbulb, X } from 'lucide-react';
 
 interface StaffFormProps {
     initialData: Staff | null;
     departments: Department[];
     users: User[];
+    academicPositions: Position[];
+    adminPositions: Position[];
     onSubmit: (data: any) => Promise<void>;
     onCancel: () => void;
     isLoading: boolean;
 }
-
-export const ACADEMIC_POSITIONS = [
-    { value: 'LECTURER', label: 'อาจารย์' },
-    { value: 'ASSISTANT_PROF', label: 'ผู้ช่วยศาสตราจารย์ (ผศ.)' },
-    { value: 'ASSOCIATE_PROF', label: 'รองศาสตราจารย์ (รศ.)' },
-    { value: 'PROFESSOR', label: 'ศาสตราจารย์ (ศ.)' },
-];
 
 export const EDU_LEVELS = [
     { value: 'DOCTORAL', label: 'ปริญญาเอก (Doctoral)' },
@@ -28,7 +23,7 @@ export const EDU_LEVELS = [
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
-export default function StaffForm({ initialData, departments, users, onSubmit, onCancel, isLoading }: StaffFormProps) {
+export default function StaffForm({ initialData, departments, users, academicPositions, adminPositions, onSubmit, onCancel, isLoading }: StaffFormProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
 
@@ -37,8 +32,8 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
         prefixTh: '', firstNameTh: '', lastNameTh: '',
         prefixEn: '', firstNameEn: '', lastNameEn: '',
         staffType: 'ACADEMIC',
-        academicPosition: '',
-        adminPosition: '',
+        academicPositionId: '',
+        adminPositionId: '',
         contactEmail: '',
         departmentId: '',
         userId: '',
@@ -49,11 +44,13 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
     const [formData, setFormData] = useState(getInitialState());
     const [eduList, setEduList] = useState<{ level: string; detail: string }[]>([]);
     const [expertiseList, setExpertiseList] = useState<string[]>([]);
+    const [shortBiosList, setShortBiosList] = useState<string[]>([]);
 
     // Inputs for adding new items
     const [newEduLevel, setNewEduLevel] = useState('DOCTORAL');
     const [newEduDetail, setNewEduDetail] = useState('');
     const [newExpertise, setNewExpertise] = useState('');
+    const [newShortBio, setNewShortBio] = useState('');
 
     // Load initial data
     useEffect(() => {
@@ -66,8 +63,8 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                 firstNameEn: initialData.firstNameEn || '',
                 lastNameEn: initialData.lastNameEn || '',
                 staffType: initialData.staffType,
-                academicPosition: initialData.academicPosition || '',
-                adminPosition: initialData.adminPosition || '',
+                academicPositionId: initialData.academicPositionId?.toString() || '',
+                adminPositionId: initialData.adminPositionId?.toString() || '',
                 contactEmail: initialData.contactEmail || '',
                 departmentId: initialData.departmentId ? initialData.departmentId.toString() : '',
                 userId: initialData.userId || '',
@@ -76,10 +73,12 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
             });
             setEduList(initialData.education || []);
             setExpertiseList(initialData.expertise || []);
+            setShortBiosList(initialData.shortBios || []);
         } else {
             setFormData(getInitialState());
             setEduList([]);
             setExpertiseList([]);
+            setShortBiosList([]);
         }
     }, [initialData]);
 
@@ -113,8 +112,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
             });
             if (res.ok) {
                 const data = await res.json();
-                const fullUrl = data.url.startsWith('http') ? data.url : `${API_URL}${data.url}`;
-                setFormData(prev => ({ ...prev, imageUrl: fullUrl }));
+                setFormData(prev => ({ ...prev, imageUrl: data.url }));
             } else {
                 alert('Upload failed');
             }
@@ -138,7 +136,7 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
         const payload = {
             ...formData,
             departmentId: parseInt(formData.departmentId || '0'),
-            academicPosition: formData.staffType === 'ACADEMIC' && formData.academicPosition ? formData.academicPosition : undefined,
+            academicPositionId: formData.staffType === 'ACADEMIC' && formData.academicPositionId ? parseInt(formData.academicPositionId) : undefined,
             userId: cleanString(formData.userId),
             prefixTh: cleanString(formData.prefixTh),
             firstNameTh: formData.firstNameTh.trim(),
@@ -146,11 +144,12 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
             prefixEn: cleanString(formData.prefixEn),
             firstNameEn: cleanString(formData.firstNameEn),
             lastNameEn: cleanString(formData.lastNameEn),
-            adminPosition: cleanString(formData.adminPosition),
+            adminPositionId: formData.adminPositionId ? parseInt(formData.adminPositionId) : undefined,
             contactEmail: cleanString(formData.contactEmail),
             imageUrl: cleanString(formData.imageUrl),
             education: eduList,
             expertise: expertiseList,
+            shortBios: shortBiosList,
         };
 
         onSubmit(payload);
@@ -169,6 +168,14 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
             setExpertiseList([...expertiseList, newExpertise.trim()]);
         }
         setNewExpertise('');
+    };
+
+    const addShortBio = () => {
+        if (!newShortBio.trim()) return;
+        if (!shortBiosList.includes(newShortBio.trim())) {
+            setShortBiosList([...shortBiosList, newShortBio.trim()]);
+        }
+        setNewShortBio('');
     };
 
     return (
@@ -314,15 +321,18 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                         {formData.staffType === 'ACADEMIC' && (
                             <div className="form-control">
                                 <label className="label"><span className="label-text font-medium">ตำแหน่งทางวิชาการ</span></label>
-                                <select className="select select-bordered" value={formData.academicPosition} onChange={e => setFormData({ ...formData, academicPosition: e.target.value })}>
+                                <select className="select select-bordered" value={formData.academicPositionId} onChange={e => setFormData({ ...formData, academicPositionId: e.target.value })}>
                                     <option value="">-- ไม่มี --</option>
-                                    {ACADEMIC_POSITIONS.map(p => (<option key={p.value} value={p.value}>{p.label}</option>))}
+                                    {academicPositions.map(p => (<option key={p.id} value={p.id}>{p.nameTh}</option>))}
                                 </select>
                             </div>
                         )}
                         <div className="form-control">
                             <label className="label"><span className="label-text font-medium">ตำแหน่งบริหาร / หน้าที่</span></label>
-                            <input type="text" className="input input-bordered" value={formData.adminPosition} onChange={e => setFormData({ ...formData, adminPosition: e.target.value })} placeholder="เช่น คณบดี, หัวหน้าสำนักงาน" />
+                            <select className="select select-bordered" value={formData.adminPositionId} onChange={e => setFormData({ ...formData, adminPositionId: e.target.value })}>
+                                <option value="">-- ไม่มี --</option>
+                                {adminPositions.map(p => (<option key={p.id} value={p.id}>{p.nameTh}</option>))}
+                            </select>
                         </div>
 
                         <div className="form-control md:col-span-2 mt-2">
@@ -409,6 +419,37 @@ export default function StaffForm({ initialData, departments, users, onSubmit, o
                                         <button type="button" onClick={() => {
                                             setExpertiseList(expertiseList.filter(t => t !== tag));
                                         }} className="btn btn-xs btn-circle btn-ghost text-gray-400 hover:text-red-500 hover:bg-red-50"><X className="w-3 h-3" /></button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Short Bios */}
+                        <div>
+                            <h4 className="font-bold mb-3 text-sm uppercase text-gray-500 tracking-wider flex items-center gap-2">
+                                <Lightbulb className="w-5 h-5 text-gray-400" /> รายละเอียดความเชี่ยวชาญสั้น ๆ (Short Bio)
+                            </h4>
+                            <div className="flex gap-2 mb-3">
+                                <input
+                                    type="text"
+                                    className="input input-sm input-bordered flex-1"
+                                    placeholder="เพิ่มรายละเอียด (เช่น ผู้เชี่ยวชาญด้านการพัฒนาสังคม...)"
+                                    value={newShortBio}
+                                    onChange={e => setNewShortBio(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addShortBio(); } }}
+                                />
+                                <button type="button" onClick={addShortBio} className="btn btn-sm btn-accent">เพิ่ม</button>
+                            </div>
+                            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 min-h-[60px] flex flex-col gap-2">
+                                {shortBiosList.length === 0 && <p className="text-xs text-gray-400 w-full text-center py-2">ยังไม่มีข้อมูล Short Bio</p>}
+                                {shortBiosList.map((bio, idx) => (
+                                    <div key={idx} className="flex justify-between items-center bg-white px-4 py-3 rounded-lg border border-gray-100 shadow-sm text-sm group hover:shadow-md transition-shadow">
+                                        <div className="flex items-center gap-3">
+                                            <span>{bio}</span>
+                                        </div>
+                                        <button type="button" onClick={() => {
+                                            setShortBiosList(shortBiosList.filter(b => b !== bio));
+                                        }} className="btn btn-xs btn-circle btn-ghost text-red-500 opacity-20 group-hover:opacity-100 hover:bg-red-50"><X className="w-3 h-3" /></button>
                                     </div>
                                 ))}
                             </div>

@@ -11,10 +11,13 @@ export interface Staff {
     firstNameEn: string | null;
     lastNameEn: string | null;
     staffType: 'ACADEMIC' | 'SUPPORT';
+    academicPositionId: number | null;
     academicPosition: string | null;
+    adminPositionId: number | null;
     adminPosition: string | null;
     education: { level: string; detail: string }[] | null;
     expertise: string[] | null;
+    shortBios: string[] | null;
     imageUrl: string | null;
     contactEmail: string | null;
     department: string | null;
@@ -22,6 +25,13 @@ export interface Staff {
     sortOrder: number;
     userId: string | null;
     isExecutive: boolean;
+}
+
+export interface Position {
+    id: number;
+    nameTh: string;
+    nameEn: string | null;
+    sortOrder: number;
 }
 
 export interface Department {
@@ -41,6 +51,8 @@ export function useStaffData() {
     const [staffList, setStaffList] = useState<Staff[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [users, setUsers] = useState<User[]>([]);
+    const [academicPositions, setAcademicPositions] = useState<Position[]>([]);
+    const [adminPositions, setAdminPositions] = useState<Position[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -51,12 +63,14 @@ export function useStaffData() {
             const token = localStorage.getItem('admin_token');
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
-            const [staffRes, deptRes, usersRes] = await Promise.all([
+            const [staffRes, deptRes, usersRes, academicRes, adminRes] = await Promise.all([
                 fetch(`${apiUrl}/api/staff`),
                 fetch(`${apiUrl}/api/departments`),
                 fetch(`${apiUrl}/api/auth/users`, {
                     headers: { Authorization: `Bearer ${token}` }
-                })
+                }),
+                fetch(`${apiUrl}/api/staff/academic-positions`),
+                fetch(`${apiUrl}/api/staff/admin-positions`)
             ]);
 
             if (!staffRes.ok) throw new Error('Failed to fetch staff data');
@@ -66,10 +80,14 @@ export function useStaffData() {
             const staffData = await staffRes.json();
             const deptData = await deptRes.json();
             const usersData = usersRes.ok ? await usersRes.json() : [];
+            const academicData = academicRes.ok ? await academicRes.json() : [];
+            const adminData = adminRes.ok ? await adminRes.json() : [];
 
             setStaffList(staffData);
             setDepartments(deptData);
             setUsers(usersData);
+            setAcademicPositions(academicData);
+            setAdminPositions(adminData);
 
         } catch (err: any) {
             console.error('Error fetching data:', err);
@@ -87,6 +105,8 @@ export function useStaffData() {
         staffList,
         departments,
         users,
+        academicPositions,
+        adminPositions,
         loading,
         error,
         refetch: fetchData,

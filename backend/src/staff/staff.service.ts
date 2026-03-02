@@ -4,9 +4,15 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { DrizzleService } from '../drizzle/drizzle.service';
-import { staffProfiles, departments } from '../drizzle/schema';
+import {
+  staffProfiles,
+  departments,
+  academicPositions,
+  adminPositions,
+} from '../drizzle/schema';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
+import { CreatePositionDto, UpdatePositionDto } from './dto/position.dto';
 import { UploadService } from '../upload/upload.service';
 import { eq } from 'drizzle-orm';
 
@@ -15,7 +21,7 @@ export class StaffService {
   constructor(
     private readonly drizzle: DrizzleService,
     private readonly uploadService: UploadService,
-  ) {}
+  ) { }
 
   async create(createStaffDto: CreateStaffDto) {
     // Check if staff profile already exists for this user (only if userId is provided)
@@ -60,10 +66,13 @@ export class StaffService {
         firstNameEn: staffProfiles.firstNameEn,
         lastNameEn: staffProfiles.lastNameEn,
         staffType: staffProfiles.staffType,
-        academicPosition: staffProfiles.academicPosition,
-        adminPosition: staffProfiles.adminPosition,
+        academicPositionId: staffProfiles.academicPositionId,
+        academicPosition: academicPositions.nameTh,
+        adminPositionId: staffProfiles.adminPositionId,
+        adminPosition: adminPositions.nameTh,
         education: staffProfiles.education,
         expertise: staffProfiles.expertise,
+        shortBios: staffProfiles.shortBios,
         imageUrl: staffProfiles.imageUrl,
         contactEmail: staffProfiles.contactEmail,
         sortOrder: staffProfiles.sortOrder,
@@ -75,6 +84,14 @@ export class StaffService {
       })
       .from(staffProfiles)
       .leftJoin(departments, eq(staffProfiles.departmentId, departments.id))
+      .leftJoin(
+        academicPositions,
+        eq(staffProfiles.academicPositionId, academicPositions.id),
+      )
+      .leftJoin(
+        adminPositions,
+        eq(staffProfiles.adminPositionId, adminPositions.id),
+      )
       .orderBy(staffProfiles.sortOrder);
   }
 
@@ -89,10 +106,13 @@ export class StaffService {
         firstNameEn: staffProfiles.firstNameEn,
         lastNameEn: staffProfiles.lastNameEn,
         staffType: staffProfiles.staffType,
-        academicPosition: staffProfiles.academicPosition,
-        adminPosition: staffProfiles.adminPosition,
+        academicPositionId: staffProfiles.academicPositionId,
+        academicPosition: academicPositions.nameTh,
+        adminPositionId: staffProfiles.adminPositionId,
+        adminPosition: adminPositions.nameTh,
         education: staffProfiles.education,
         expertise: staffProfiles.expertise,
+        shortBios: staffProfiles.shortBios,
         imageUrl: staffProfiles.imageUrl,
         bio: staffProfiles.bio,
         contactEmail: staffProfiles.contactEmail,
@@ -105,6 +125,14 @@ export class StaffService {
       })
       .from(staffProfiles)
       .leftJoin(departments, eq(staffProfiles.departmentId, departments.id))
+      .leftJoin(
+        academicPositions,
+        eq(staffProfiles.academicPositionId, academicPositions.id),
+      )
+      .leftJoin(
+        adminPositions,
+        eq(staffProfiles.adminPositionId, adminPositions.id),
+      )
       .where(eq(staffProfiles.id, id));
 
     if (result.length === 0) {
@@ -153,6 +181,60 @@ export class StaffService {
       await this.uploadService.deleteStaffImage(result[0].imageUrl);
     }
 
+    return result[0];
+  }
+
+  // --- Academic Positions CRUD ---
+
+  async findAllAcademicPositions() {
+    return await this.drizzle.db.select().from(academicPositions).orderBy(academicPositions.sortOrder);
+  }
+
+  async createAcademicPosition(dto: CreatePositionDto) {
+    const result = await this.drizzle.db.insert(academicPositions).values(dto).returning();
+    return result[0];
+  }
+
+  async updateAcademicPosition(id: number, dto: UpdatePositionDto) {
+    const result = await this.drizzle.db.update(academicPositions).set(dto).where(eq(academicPositions.id, id)).returning();
+    if (!result.length) throw new NotFoundException(`Academic Position with ID ${id} not found`);
+    return result[0];
+  }
+
+  async removeAcademicPosition(id: number) {
+    // Check if in use
+    const inUse = await this.drizzle.db.select().from(staffProfiles).where(eq(staffProfiles.academicPositionId, id));
+    if (inUse.length > 0) throw new BadRequestException('Cannot delete position as it is in use by staff profile(s)');
+
+    const result = await this.drizzle.db.delete(academicPositions).where(eq(academicPositions.id, id)).returning();
+    if (!result.length) throw new NotFoundException(`Academic Position with ID ${id} not found`);
+    return result[0];
+  }
+
+  // --- Admin Positions CRUD ---
+
+  async findAllAdminPositions() {
+    return await this.drizzle.db.select().from(adminPositions).orderBy(adminPositions.sortOrder);
+  }
+
+  async createAdminPosition(dto: CreatePositionDto) {
+    const result = await this.drizzle.db.insert(adminPositions).values(dto).returning();
+    return result[0];
+  }
+
+  async updateAdminPosition(id: number, dto: UpdatePositionDto) {
+    const result = await this.drizzle.db.update(adminPositions).set(dto).where(eq(adminPositions.id, id)).returning();
+    if (!result.length) throw new NotFoundException(`Admin Position with ID ${id} not found`);
+    return result[0];
+  }
+
+  async removeAdminPosition(id: number) {
+    // Check if in use
+    const inUse = await this.drizzle.db.select().from(staffProfiles).where(eq(staffProfiles.adminPositionId, id));
+    if (inUse.length > 0) throw new BadRequestException('Cannot delete position as it is in use by staff profile(s)');
+
+    const result = await this.drizzle.db.delete(adminPositions).where(eq(adminPositions.id, id)).returning();
+    if (!result.length) throw new NotFoundException(`Admin Position with ID ${id} not found`);
     return result[0];
   }
 }

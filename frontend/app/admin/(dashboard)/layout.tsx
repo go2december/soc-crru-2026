@@ -15,7 +15,8 @@ import {
     Menu,
     ChevronLeft,
     ExternalLink,
-    ShieldCheck
+    ShieldCheck,
+    Briefcase
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -117,6 +118,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             title: 'Organization',
             items: [
                 { href: '/admin/staff', label: 'บุคลากร', icon: Users, minLevel: 2 },
+                { href: '/admin/positions', label: 'จัดการตำแหน่ง', icon: Briefcase, minLevel: 2 },
                 { href: '/admin/departments', label: 'จัดการสังกัด', icon: Building2, minLevel: 3 },
             ]
         },
