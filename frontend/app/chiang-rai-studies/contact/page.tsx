@@ -67,11 +67,10 @@ export default function ContactPage() {
 
                         {/* Quick Contacts Grid */}
                         <div className="grid grid-cols-2 gap-4">
-                            <a href="tel:053776000" className="bg-white p-5 rounded-3xl shadow-sm border border-purple-50 hover:shadow-md hover:border-orange-200 transition-all group">
+                            <a href="tel:053702870" className="bg-white p-5 rounded-3xl shadow-sm border border-purple-50 hover:shadow-md hover:border-orange-200 transition-all group">
                                 <Phone size={20} className="text-orange-500 mb-3 group-hover:scale-110 transition-transform" />
                                 <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1">Telephone</p>
-                                <p className="font-bold text-base text-[#2e1065]">053-776-000</p>
-                                <p className="text-[10px] text-stone-400">ต่อ 1234</p>
+                                <p className="font-bold text-base text-[#2e1065]">053-702870</p>
                             </a>
 
                             <a href="mailto:social@crru.ac.th" className="bg-white p-5 rounded-3xl shadow-sm border border-purple-50 hover:shadow-md hover:border-blue-200 transition-all group">

@@ -75,7 +75,7 @@ async function getConfig() {
     try {
         const baseUrl = process.env.INTERNAL_API_URL || 'http://soc_backend:4000';
         const res = await fetch(`${baseUrl}/api/chiang-rai/config`, {
-            next: { revalidate: 300 } // Config changes less often
+            next: { revalidate: 0 } // Disable cache to reflect admin changes immediately
         });
         if (!res.ok) return null;
         return await res.json();
@@ -190,9 +190,9 @@ export default async function ChiangRaiHomePage() {
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                         <div className="relative group">
-                            <div className="aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl relative z-10">
+                            <div className="aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl relative z-10 bg-slate-200">
                                 <Image
-                                    src="https://images.unsplash.com/photo-1528181304800-259b08848526?q=80&w=800&auto=format&fit=crop"
+                                    src={config?.digitalArchiveBgUrl || "https://images.unsplash.com/photo-1528181304800-259b08848526?q=80&w=800&auto=format&fit=crop"}
                                     alt="Digital Archive"
                                     fill
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"

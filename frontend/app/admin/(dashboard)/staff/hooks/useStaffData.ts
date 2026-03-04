@@ -61,7 +61,7 @@ export function useStaffData() {
         setError(null);
         try {
             const token = localStorage.getItem('admin_token');
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
             const [staffRes, deptRes, usersRes, academicRes, adminRes] = await Promise.all([
                 fetch(`${apiUrl}/api/staff`),

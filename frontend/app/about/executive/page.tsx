@@ -56,7 +56,7 @@ const getFullName = (staff: Staff): string => {
     return name;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Helper: Format image URL to work with next/image inside Docker
 const getImageUrl = (url: string | null): string => {

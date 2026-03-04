@@ -26,7 +26,7 @@ const TYPE_CONFIG: Record<string, { label: string; color: string; icon: any }> =
     ANNOUNCEMENT: { label: 'ประกาศ', color: 'bg-amber-100 text-amber-700', icon: Megaphone },
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export default function AdminActivitiesPage() {
     const [activities, setActivities] = useState<Activity[]>([]);

@@ -21,7 +21,7 @@ export const EDU_LEVELS = [
     { value: 'BACHELOR', label: 'ปริญญาตรี (Bachelor)' },
 ];
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export default function StaffForm({ initialData, departments, users, academicPositions, adminPositions, onSubmit, onCancel, isLoading }: StaffFormProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);

@@ -26,7 +26,7 @@ export default function AdminArticlesPage() {
 
     const fetchArticles = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'}/api/chiang-rai/articles`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/chiang-rai/articles`);
             if (res.ok) {
                 const data = await res.json();
                 setArticles(data);
@@ -42,7 +42,7 @@ export default function AdminArticlesPage() {
         if (!confirm('คุณต้องการลบบทความนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถเรียกคืนได้')) return;
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'}/api/chiang-rai/articles/${id}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/chiang-rai/articles/${id}`, {
                 method: 'DELETE',
             });
 

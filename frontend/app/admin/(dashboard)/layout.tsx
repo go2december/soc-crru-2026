@@ -47,7 +47,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             }
 
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
                 const res = await fetch(`${apiUrl}/api/auth/profile`, {
                     headers: {
                         Authorization: `Bearer ${token}`,

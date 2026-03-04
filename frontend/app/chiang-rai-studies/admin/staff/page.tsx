@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { UserPlus, Trash2, Loader2, Save, Edit3, X, Users, Crown, Shield, ChevronDown, Plus, Search } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 type StaffGroup = 'ADVISOR' | 'EXECUTIVE' | 'COMMITTEE';
 

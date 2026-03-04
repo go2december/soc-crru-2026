@@ -39,7 +39,7 @@ export default function AdminDashboardPage() {
     useEffect(() => {
         const fetchData = async () => {
             const token = localStorage.getItem('admin_token');
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
             try {
                 // Fetch user profile

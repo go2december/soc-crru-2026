@@ -5,7 +5,7 @@ import { useStaffData, Staff } from './hooks/useStaffData';
 import StaffForm from './components/StaffForm';
 import { Users, Edit3, Plus, Search, Trash2, Link2, Crown, UserX, AlertTriangle } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export default function AdminStaffPage() {
     const { staffList, departments, users, academicPositions, adminPositions, loading, refetch } = useStaffData();
@@ -35,7 +35,7 @@ export default function AdminStaffPage() {
     const handleSubmit = async (payload: any) => {
         setSubmitting(true);
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
         try {
             let res;
@@ -83,7 +83,7 @@ export default function AdminStaffPage() {
         setSubmitting(true);
 
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
         try {
             const res = await fetch(`${apiUrl}/api/staff/${staffToDelete.id}`, {

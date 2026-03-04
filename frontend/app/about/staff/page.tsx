@@ -64,7 +64,7 @@ const getSearchPositionString = (staff: Staff): string => {
     return `${staff.academicPosition || ''} ${staff.adminPosition || ''} ${staff.staffType === 'SUPPORT' ? 'บุคลากรสายสนับสนุน' : 'อาจารย์'}`;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Helper: Format image URL to work with next/image inside Docker
 const getImageUrl = (url: string | null): string => {

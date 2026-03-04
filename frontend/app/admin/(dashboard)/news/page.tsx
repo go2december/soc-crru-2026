@@ -19,7 +19,7 @@ export default function AdminNewsPage() {
     }, []);
 
     const fetchNews = async () => {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
         try {
             const res = await fetch(`${apiUrl}/api/news`);
             if (res.ok) {
@@ -36,7 +36,7 @@ export default function AdminNewsPage() {
     const deleteNews = async (id: string) => {
         if (!confirm('ยืนยันลบข่าวนี้?')) return;
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
         try {
             const res = await fetch(`${apiUrl}/api/news/${id}`, {

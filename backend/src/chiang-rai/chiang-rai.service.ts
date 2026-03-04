@@ -1133,6 +1133,7 @@ export class ChiangRaiService {
         heroTitle: 'ศูนย์เชียงรายศึกษา',
         heroSubtitle:
           'แหล่งรวบรวม อนุรักษ์ และต่อยอดองค์ความรู้อัตลักษณ์เชียงราย เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน ผ่าน 5 มิติทางวัฒนธรรม',
+        digitalArchiveBgUrl: null,
       };
     }
     return result[0];

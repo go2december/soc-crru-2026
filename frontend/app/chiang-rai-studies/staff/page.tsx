@@ -46,8 +46,31 @@ async function getStaff(): Promise<StaffData> {
 // Helper: Build full display name
 function displayName(s: StaffMember): string {
     if (s.staffGroup === 'ADVISOR') return s.firstName;
-    const parts = [s.academicTitle, s.title, s.firstName, s.lastName].filter(Boolean);
-    return parts.join('');
+
+    let academicTitle = s.academicTitle;
+    if (academicTitle) {
+        if (academicTitle.includes('ผู้ช่วยศาสตราจารย์')) {
+            academicTitle = 'ผศ.';
+        } else if (academicTitle.includes('รองศาสตราจารย์')) {
+            academicTitle = 'รศ.';
+        } else if (academicTitle.includes('ศาสตราจารย์') && !academicTitle.includes('ผู้ช่วย') && !academicTitle.includes('รอง')) {
+            academicTitle = 'ศ.';
+        } else if (academicTitle.includes('อาจารย์')) {
+            academicTitle = 'อาจารย์';
+        } else {
+            // Extract abbreviation inside parentheses if available, else fallback
+            const match = academicTitle.match(/\((.*?)\)/);
+            if (match && match[1]) {
+                academicTitle = match[1];
+            }
+        }
+    }
+
+    let name = '';
+    if (academicTitle) name += academicTitle;
+    if (s.title && s.title !== academicTitle) name += s.title;
+    name += s.firstName + ' ' + s.lastName;
+    return name;
 }
 
 // Position highlight styling
@@ -124,7 +147,9 @@ export default async function StaffPage() {
                                             />
                                         </div>
                                         <div className="font-bold mb-2 text-xs uppercase tracking-widest text-orange-600">{director.position}</div>
-                                        <div className="text-xl text-[#2e1065] font-bold">{displayName(director)}</div>
+                                        <div className="text-base md:text-lg lg:text-xl text-[#2e1065] font-bold whitespace-nowrap">
+                                            {displayName(director)}
+                                        </div>
                                         {director.email && (
                                             <a href={`mailto:${director.email}`} className="mt-3 inline-flex items-center gap-1.5 text-xs text-purple-400 hover:text-orange-600 transition">
                                                 <Mail size={12} /> {director.email}
@@ -146,7 +171,9 @@ export default async function StaffPage() {
                                             />
                                         </div>
                                         <div className="font-bold mb-2 text-xs uppercase tracking-widest text-purple-400">{dep.position}</div>
-                                        <div className="text-xl text-[#2e1065] font-bold">{displayName(dep)}</div>
+                                        <div className="text-[15px] md:text-lg text-[#2e1065] font-bold whitespace-nowrap">
+                                            {displayName(dep)}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -169,7 +196,9 @@ export default async function StaffPage() {
                                                 />
                                             </div>
                                             <div className="text-purple-400 text-xs font-bold uppercase mb-2">{head.position}</div>
-                                            <div className="text-[#2e1065] font-bold text-lg">{displayName(head)}</div>
+                                            <div className="text-[#2e1065] font-bold text-[15px] md:text-lg whitespace-nowrap">
+                                                {displayName(head)}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -194,7 +223,7 @@ export default async function StaffPage() {
                                         {/* Chair */}
                                         {chairPerson && (
                                             <li className="flex flex-col sm:flex-row justify-between sm:items-center bg-purple-50 p-4 rounded-xl gap-2">
-                                                <span className="font-bold text-[#2e1065] text-lg">{displayName(chairPerson)}</span>
+                                                <span className="font-bold text-[#2e1065] text-base md:text-lg whitespace-nowrap">{displayName(chairPerson)}</span>
                                                 <span className="text-base font-bold bg-[#2e1065] text-white px-3 py-1.5 rounded-lg shadow-sm w-fit">{chairPerson.position}</span>
                                             </li>
                                         )}
@@ -202,7 +231,7 @@ export default async function StaffPage() {
                                         {/* Members */}
                                         {members.map((m) => (
                                             <li key={m.id} className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-dashed border-purple-100 pb-3 last:border-0 hover:bg-purple-50/50 p-3 rounded-lg transition-colors gap-1">
-                                                <span className="text-stone-700 font-medium text-lg">{displayName(m)}</span>
+                                                <span className="text-stone-700 font-medium text-[15px] md:text-lg whitespace-nowrap">{displayName(m)}</span>
                                                 <span className="text-base font-bold text-purple-600 bg-purple-100 px-3 py-1 rounded-lg w-fit">{m.position}</span>
                                             </li>
                                         ))}
@@ -210,7 +239,7 @@ export default async function StaffPage() {
                                         {/* Secretary */}
                                         {secretary && (
                                             <li className="flex flex-col sm:flex-row justify-between sm:items-center bg-orange-50 p-4 rounded-xl mt-2 gap-2">
-                                                <span className="font-bold text-orange-800 text-lg">{displayName(secretary)}</span>
+                                                <span className="font-bold text-orange-800 text-[15px] md:text-lg whitespace-nowrap">{displayName(secretary)}</span>
                                                 <span className="text-base font-bold bg-orange-200 text-orange-800 px-3 py-1.5 rounded-lg shadow-sm w-fit">{secretary.position}</span>
                                             </li>
                                         )}

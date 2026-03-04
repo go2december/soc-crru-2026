@@ -24,7 +24,7 @@ export default function ChiangRaiFooter() {
                             </div>
                             <div className="flex items-center gap-3">
                                 <Phone size={18} className="text-orange-400 flex-shrink-0" />
-                                <span>053-776-000 ต่อ 1234</span>
+                                <span>053-702870</span>
                             </div>
                             <div className="flex items-center gap-3">
                                 <Mail size={18} className="text-orange-400 flex-shrink-0" />

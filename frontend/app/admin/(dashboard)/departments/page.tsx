@@ -29,7 +29,7 @@ export default function AdminDepartmentsPage() {
 
     const fetchDepartments = async () => {
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
             const res = await fetch(`${apiUrl}/api/departments`);
             if (res.ok) {
                 const data = await res.json();
@@ -65,7 +65,7 @@ export default function AdminDepartmentsPage() {
         e.preventDefault();
         setSubmitting(true);
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
         try {
             let res;
@@ -107,7 +107,7 @@ export default function AdminDepartmentsPage() {
         if (!deleteTarget) return;
         setSubmitting(true);
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
         try {
             const res = await fetch(`${apiUrl}/api/departments/${deleteTarget.id}`, {

@@ -94,7 +94,7 @@ services:
       - "${FRONTEND_PORT:-4000}:3000"
     environment:
       # Dynamic API URL based on Port Configuration
-      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-4001}
+      NEXT_PUBLIC_API_URL: ""
       INTERNAL_API_URL: http://backend:3000
       # WATCHPACK_POLLING: "true"  <-- Removed to improve performance
 

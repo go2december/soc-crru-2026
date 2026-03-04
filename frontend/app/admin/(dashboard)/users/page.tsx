@@ -40,7 +40,7 @@ export default function AdminUsersPage() {
 
     const fetchUsers = async () => {
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
         try {
             const res = await fetch(`${apiUrl}/api/auth/users`, {
@@ -87,7 +87,7 @@ export default function AdminUsersPage() {
         console.log('Saving Roles:', { userId, newRoles }); // Debug
 
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
         setUpdating(userId);
 
         try {
@@ -128,7 +128,7 @@ export default function AdminUsersPage() {
 
     const toggleUserActive = async (userId: string, isActive: boolean) => {
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
         setUpdating(userId);
 
         try {
@@ -161,7 +161,7 @@ export default function AdminUsersPage() {
         if (!userToDelete) return;
         const userId = userToDelete.id;
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
         setUpdating(userId);
 
         try {

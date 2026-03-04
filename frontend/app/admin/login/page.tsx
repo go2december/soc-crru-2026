@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
 
     useEffect(() => {
         // Set API URL from environment
-        const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const url = process.env.NEXT_PUBLIC_API_URL || '';
         setApiUrl(url);
 
         const errorParam = searchParams.get('error');

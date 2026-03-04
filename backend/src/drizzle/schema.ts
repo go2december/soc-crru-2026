@@ -393,5 +393,6 @@ export const chiangRaiConfig = pgTable('chiang_rai_config', {
   heroSubtitle: varchar('hero_subtitle', { length: 500 }).default(
     'แหล่งรวบรวม อนุรักษ์ และต่อยอดองค์ความรู้อัตลักษณ์เชียงราย เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน ผ่าน 5 มิติทางวัฒนธรรม',
   ),
+  digitalArchiveBgUrl: varchar('digital_archive_bg_url', { length: 500 }),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

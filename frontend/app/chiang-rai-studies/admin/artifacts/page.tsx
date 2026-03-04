@@ -33,7 +33,7 @@ export default function AdminArtifactsPage() {
 
     const fetchArtifacts = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'}/api/chiang-rai/artifacts?limit=100`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/chiang-rai/artifacts?limit=100`);
             if (res.ok) {
                 const result = await res.json();
                 setArtifacts(Array.isArray(result) ? result : result.data || []);
@@ -49,7 +49,7 @@ export default function AdminArtifactsPage() {
         if (!confirm('คุณต้องการลบข้อมูลนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถเรียกคืนได้')) return;
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'}/api/chiang-rai/artifacts/${id}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/chiang-rai/artifacts/${id}`, {
                 method: 'DELETE',
             });
 

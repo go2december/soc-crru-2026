@@ -17,7 +17,7 @@ export default function CreateNewsPage() {
         e.preventDefault();
         setLoading(true);
         const token = localStorage.getItem('admin_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
         try {
             const res = await fetch(`${apiUrl}/api/news`, {

@@ -23,7 +23,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Mock stats for now (until dedicated stats API exists)
 interface DashboardStats {

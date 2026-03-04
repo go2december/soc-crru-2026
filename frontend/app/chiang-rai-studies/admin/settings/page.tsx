@@ -13,17 +13,19 @@ export default function SettingsPage() {
     const [config, setConfig] = useState({
         heroBgUrl: '',
         heroTitle: '',
-        heroSubtitle: ''
+        heroSubtitle: '',
+        digitalArchiveBgUrl: ''
     });
     const [loading, setLoading] = useState(true);
-    const [uploading, setUploading] = useState(false);
+    const [uploadingArea, setUploadingArea] = useState<'hero' | 'digitalArchive' | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const digitalArchiveFileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         // Fetch config
         const fetchConfig = async () => {
             try {
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
                 const res = await fetch(`${API_URL}/api/chiang-rai/config`);
                 if (res.ok) {
                     const data = await res.json();
@@ -46,7 +48,7 @@ export default function SettingsPage() {
 
     const handleSave = async () => {
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
             const adminToken = localStorage.getItem('admin_token');
 
             if (!adminToken) {
@@ -72,7 +74,7 @@ export default function SettingsPage() {
         }
     };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'heroBgUrl' | 'digitalArchiveBgUrl') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -87,17 +89,17 @@ export default function SettingsPage() {
             return;
         }
 
-        setUploading(true);
+        setUploadingArea(fieldName === 'heroBgUrl' ? 'hero' : 'digitalArchive');
         const formData = new FormData();
         formData.append('file', file);
 
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
             const adminToken = localStorage.getItem('admin_token');
 
             if (!adminToken) {
                 toast.error('กรุณาเข้าสู่ระบบก่อนอัปโหลด');
-                setUploading(false);
+                setUploadingArea(null);
                 return;
             }
 
@@ -115,8 +117,8 @@ export default function SettingsPage() {
             if (res.ok) {
                 const data = await res.json();
 
-                // Store only relative path so that it doesn't break on deployment
-                setConfig({ ...config, heroBgUrl: data.url });
+                // Store relative path 
+                setConfig({ ...config, [fieldName]: data.url });
                 toast.success('อัปโหลดรูปภาพสำเร็จ');
             } else {
                 const error = await res.text();
@@ -130,10 +132,12 @@ export default function SettingsPage() {
                 toast.error('เกิดข้อผิดพลาดในการอัปโหลด (Unknown Error)');
             }
         } finally {
-            setUploading(false);
+            setUploadingArea(null);
             // Reset input
-            if (fileInputRef.current) {
+            if (fieldName === 'heroBgUrl' && fileInputRef.current) {
                 fileInputRef.current.value = '';
+            } else if (fieldName === 'digitalArchiveBgUrl' && digitalArchiveFileInputRef.current) {
+                digitalArchiveFileInputRef.current.value = '';
             }
         }
     };
@@ -142,8 +146,12 @@ export default function SettingsPage() {
         fileInputRef.current?.click();
     };
 
-    const clearImage = () => {
-        setConfig({ ...config, heroBgUrl: '' });
+    const triggerDigitalArchiveFileInput = () => {
+        digitalArchiveFileInputRef.current?.click();
+    };
+
+    const clearImage = (fieldName: 'heroBgUrl' | 'digitalArchiveBgUrl') => {
+        setConfig({ ...config, [fieldName]: '' });
     };
 
     if (loading) return (
@@ -190,7 +198,7 @@ export default function SettingsPage() {
                                                 <Button
                                                     variant="destructive"
                                                     size="sm"
-                                                    onClick={clearImage}
+                                                    onClick={() => clearImage('heroBgUrl')}
                                                     className="bg-red-500 hover:bg-red-600"
                                                 >
                                                     <X className="w-4 h-4 mr-1" /> ลบรูปภาพ
@@ -216,15 +224,15 @@ export default function SettingsPage() {
                                     ref={fileInputRef}
                                     className="hidden"
                                     accept="image/jpeg,image/png,image/webp"
-                                    onChange={handleFileUpload}
+                                    onChange={(e) => handleFileUpload(e, 'heroBgUrl')}
                                 />
 
                                 <Button
                                     onClick={triggerFileInput}
-                                    disabled={uploading}
+                                    disabled={uploadingArea === 'hero'}
                                     className="w-full bg-[#2e1065] hover:bg-[#4c1d95] text-white h-12 text-base shadow-sm"
                                 >
-                                    {uploading ? (
+                                    {uploadingArea === 'hero' ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" /> กำลังอัปโหลด...
                                         </>
@@ -256,6 +264,103 @@ export default function SettingsPage() {
                                     <p className="font-semibold text-stone-700 mb-1">คำแนะนำ:</p>
                                     <ul className="list-disc pl-4 space-y-1">
                                         <li>ขนาดแนะนำ: 1920x1080 px</li>
+                                        <li>ไฟล์ที่รองรับ: JPG, PNG, WebP</li>
+                                        <li>ขนาดไฟล์สูงสุด: 5MB</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="h-px bg-stone-100 my-8" />
+
+                    {/* Digital Archive Image Upload Section */}
+                    <div>
+                        <label className="block text-sm font-bold mb-4 text-stone-700">
+                            รูปภาพพื้นหลัง Digital Archive (Digital Archive Background Image)
+                        </label>
+
+                        <div className="flex flex-col md:flex-row gap-6 items-start">
+                            {/* Preview Area */}
+                            <div className="w-full md:w-2/3">
+                                <div className="relative group rounded-xl overflow-hidden border-2 border-dashed border-stone-200 bg-stone-50 h-64 flex items-center justify-center transition-all hover:border-purple-300">
+                                    {config.digitalArchiveBgUrl ? (
+                                        <>
+                                            <div
+                                                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                                                style={{ backgroundImage: `url(${config.digitalArchiveBgUrl})` }}
+                                            ></div>
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
+                                                <p className="font-medium mb-2">ตัวอย่างการแสดงผล</p>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() => clearImage('digitalArchiveBgUrl')}
+                                                    className="bg-red-500 hover:bg-red-600"
+                                                >
+                                                    <X className="w-4 h-4 mr-1" /> ลบรูปภาพ
+                                                </Button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="text-center p-6 text-stone-400">
+                                            <div className="mx-auto w-12 h-12 rounded-full bg-stone-200 flex items-center justify-center mb-3">
+                                                <Upload className="w-6 h-6 text-stone-400" />
+                                            </div>
+                                            <p className="text-sm font-medium">ยังไม่มีรูปภาพ</p>
+                                            <p className="text-xs mt-1">อัปโหลดรูปภาพเพื่อแสดงแทนภาพเริ่มต้น (Digital Archive)</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Controls */}
+                            <div className="w-full md:w-1/3 space-y-4">
+                                <input
+                                    type="file"
+                                    ref={digitalArchiveFileInputRef}
+                                    className="hidden"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={(e) => handleFileUpload(e, 'digitalArchiveBgUrl')}
+                                />
+
+                                <Button
+                                    onClick={triggerDigitalArchiveFileInput}
+                                    disabled={uploadingArea === 'digitalArchive'}
+                                    className="w-full bg-[#2e1065] hover:bg-[#4c1d95] text-white h-12 text-base shadow-sm"
+                                >
+                                    {uploadingArea === 'digitalArchive' ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> กำลังอัปโหลด...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload className="mr-2 h-4 w-4" /> อัปโหลดรูปภาพใหม่
+                                        </>
+                                    )}
+                                </Button>
+
+                                <div className="relative">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <span className="w-full border-t border-stone-200" />
+                                    </div>
+                                    <div className="relative flex justify-center text-xs uppercase">
+                                        <span className="bg-white px-2 text-stone-500 font-medium">หรือระบุ URL</span>
+                                    </div>
+                                </div>
+
+                                <Input
+                                    name="digitalArchiveBgUrl"
+                                    value={config.digitalArchiveBgUrl || ''}
+                                    onChange={handleChange}
+                                    placeholder="https://example.com/image.jpg"
+                                    className="border-stone-200 focus:border-purple-500 focus:ring-purple-500"
+                                />
+
+                                <div className="text-xs text-stone-500 bg-stone-50 p-3 rounded-lg border border-stone-100">
+                                    <p className="font-semibold text-stone-700 mb-1">คำแนะนำ:</p>
+                                    <ul className="list-disc pl-4 space-y-1">
+                                        <li>ขนาดแนะนำ: 800x600 px หรือสัดส่วน 4:3</li>
                                         <li>ไฟล์ที่รองรับ: JPG, PNG, WebP</li>
                                         <li>ขนาดไฟล์สูงสุด: 5MB</li>
                                     </ul>
