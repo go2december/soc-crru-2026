@@ -1,6 +1,7 @@
 
 import Link from 'next/link';
 import { Facebook, Mail, MapPin, Phone, ExternalLink, Globe } from 'lucide-react';
+import Image from 'next/image';
 
 export default function ChiangRaiFooter() {
     return (
@@ -11,7 +12,14 @@ export default function ChiangRaiFooter() {
                     {/* Column 1: Info */}
                     <div>
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg">CR</div>
+                            <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-lg border-2 border-orange-500/50 bg-white">
+                                <Image 
+                                    src="/images/cr-studies-logo.png" 
+                                    alt="Chiang Rai Studies Center Logo" 
+                                    fill
+                                    className="object-contain"
+                                />
+                            </div>
                             <span className="text-xl font-bold text-white">ศูนย์เชียงรายศึกษา</span>
                         </div>
                         <p className="text-sm leading-relaxed mb-6 text-purple-300 font-light">

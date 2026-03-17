@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Menu, X, Landmark, Search, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 const MENU_ITEMS = [
     { title: 'หน้าแรก', href: '/chiang-rai-studies' },
@@ -62,8 +63,13 @@ export default function ChiangRaiNavbar() {
             <div className="container mx-auto px-4 h-20 flex justify-between items-center">
                 {/* Logo Section */}
                 <Link href="/chiang-rai-studies" className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300 border border-orange-400/30">
-                        <Landmark size={20} />
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-300 border-2 border-orange-400/30 bg-white">
+                        <Image 
+                            src="/images/cr-studies-logo.png" 
+                            alt="Chiang Rai Studies Center Logo" 
+                            fill
+                            className="object-contain"
+                        />
                     </div>
                     <div>
                         <h1 className="font-bold text-lg text-white leading-tight tracking-wide drop-shadow-sm">
