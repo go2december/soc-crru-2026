@@ -319,6 +319,50 @@ export const chiangRaiArticles = pgTable(
   },
 );
 
+// Learning Sites Blog (แหล่งเรียนรู้ทางวัฒนธรรม) - Same structure as Articles
+export const chiangRaiLearningSiteCategoryEnum = pgEnum('cr_learning_site_category', [
+  'CULTURAL_SITE', // แหล่งเรียนรู้ทางวัฒนธรรม
+  'MUSEUM', // พิพิธภัณฑ์
+  'TEMPLE', // วัด
+  'HISTORICAL_SITE', // โบราณสถาน
+  'COMMUNITY', // ชุมชน
+  'WISDOM_CENTER', // ศูนย์ภูมิปัญญา
+  'ART_SPACE', // พื้นที่ศิลปะ
+]);
+
+export const chiangRaiLearningSites = pgTable(
+  'chiang_rai_learning_sites',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: varchar('title', { length: 500 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull().unique(),
+    category: chiangRaiLearningSiteCategoryEnum('category')
+      .notNull()
+      .default('CULTURAL_SITE'),
+    description: text('description'), // คำอธิบายสั้น (เหมือน abstract)
+    content: text('content').notNull(), // เนื้อหาเต็ม
+
+    // Media support (เหมือน articles)
+    thumbnailUrl: varchar('thumbnail_url', { length: 500 }),
+    mediaType: varchar('media_type', { length: 50 }).default('IMAGE'),
+    mediaUrls: text('media_urls').array(),
+
+    tags: text('tags').array(),
+    author: varchar('author', { length: 255 }),
+
+    isPublished: boolean('is_published').default(true),
+    publishedAt: timestamp('published_at').defaultNow(),
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  (table) => {
+    return {
+      titleIdx: index('cr_learning_sites_title_idx').on(table.title),
+      publishedAtIdx: index('cr_learning_sites_published_at_idx').on(table.publishedAt),
+      categoryIdx: index('cr_learning_sites_category_idx').on(table.category),
+    };
+  },
+);
+
 export const chiangRaiStaffGroupEnum = pgEnum('cr_staff_group', [
   'ADVISOR', // ที่ปรึกษาโครงการ
   'EXECUTIVE', // ฝ่ายบริหารโครงการ
@@ -396,3 +440,16 @@ export const chiangRaiConfig = pgTable('chiang_rai_config', {
   digitalArchiveBgUrl: varchar('digital_archive_bg_url', { length: 500 }),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+// ------------------------------------------
+// 7. Chiang Rai Learning Sites (แหล่งเรียนรู้ทางวัฒนธรรม)
+// ------------------------------------------
+// Blog-style academic articles by experts
+
+export const chiangRaiMediaTypeEnum = pgEnum('cr_media_type', [
+  'IMAGE',
+  'VIDEO',
+  'PDF',
+  'AUDIO',
+  'DOCUMENT',
+]);

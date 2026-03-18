@@ -222,14 +222,14 @@ export default async function ChiangRaiHomePage() {
 
                             <div className="flex flex-col gap-4">
                                 <Link href="/chiang-rai-studies/articles" className="group flex items-center gap-4 p-4 rounded-xl bg-white border border-slate-100 hover:border-purple-200 transition-all shadow-sm hover:shadow-md">
-                                    <div className="w-12 h-12 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                                    <div className="w-12 h-12 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
                                         <BookOpen size={24} />
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="font-bold text-slate-800 group-hover:text-purple-700 transition-colors">บทความวิชาการ</h4>
+                                        <h4 className="font-bold text-slate-800 group-hover:text-orange-700 transition-colors">บทความวิชาการ</h4>
                                         <p className="text-xs text-slate-500">Academic Articles & Research</p>
                                     </div>
-                                    <ChevronRight className="text-slate-300 group-hover:text-purple-500 transform group-hover:translate-x-1 transition-all" />
+                                    <ChevronRight className="text-slate-300 group-hover:text-orange-500 transform group-hover:translate-x-1 transition-all" />
                                 </Link>
 
                                 <Link href="/chiang-rai-studies/archive" className="group flex items-center gap-4 p-4 rounded-xl bg-white border border-slate-100 hover:border-orange-200 transition-all shadow-sm hover:shadow-md">

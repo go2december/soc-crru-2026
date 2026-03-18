@@ -181,4 +181,51 @@ export class ChiangRaiController {
   async updateConfig(@Body() body: any) {
     return this.service.updateConfig(body);
   }
+
+  // --- Learning Sites (แหล่งเรียนรู้ทางวัฒนธรรม - Blog) ---
+  @Get('learning-sites')
+  async getLearningSites(
+    @Query('category') category?: string,
+    @Query('district') district?: string,
+    @Query('q') q?: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '12',
+  ) {
+    return this.service.getLearningSites(category, district, q, Number(page), Number(limit));
+  }
+
+  @Get('learning-sites/by-id/:id')
+  async getLearningSiteById(@Param('id') id: string) {
+    return this.service.getLearningSiteById(id);
+  }
+
+  @Get('learning-sites/:slug')
+  async getLearningSiteBySlug(@Param('slug') slug: string) {
+    return this.service.getLearningSiteBySlug(slug);
+  }
+
+  @Post('learning-sites')
+  async createLearningSite(@Body() body: any) {
+    return this.service.createLearningSite(body);
+  }
+
+  @Put('learning-sites/:id')
+  async updateLearningSite(@Param('id') id: string, @Body() body: any) {
+    return this.service.updateLearningSite(id, body);
+  }
+
+  @Delete('learning-sites/:id')
+  async deleteLearningSite(@Param('id') id: string) {
+    return this.service.deleteLearningSite(id);
+  }
+
+  @Get('learning-site-categories')
+  async getLearningSiteCategories() {
+    return this.service.getLearningSiteCategories();
+  }
+
+  @Get('tags')
+  async getAllTags() {
+    return this.service.getAllTags();
+  }
 }

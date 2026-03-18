@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DrizzleService } from '../drizzle/drizzle.service';
-import { users, staffProfiles, news, researchAuthors } from '../drizzle/schema';
+import { users, staffProfiles, news, researchAuthors, chiangRaiMediaTypeEnum } from '../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
 interface GoogleUser {

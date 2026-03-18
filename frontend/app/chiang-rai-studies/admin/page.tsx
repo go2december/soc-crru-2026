@@ -14,7 +14,8 @@ import {
     Clock,
     Layout,
     ScrollText,
-    Settings
+    Settings,
+    MapPin
 } from 'lucide-react';
 import {
     Card,
@@ -31,6 +32,7 @@ interface DashboardStats {
     staff: number;
     articles: number;
     activities: number;
+    learningSites: number;
     recentUpdates: any[];
 }
 
@@ -40,6 +42,7 @@ export default function ChiangRaiAdminDashboard() {
         staff: 0,
         articles: 0,
         activities: 0,
+        learningSites: 0,
         recentUpdates: []
     });
     const [loading, setLoading] = useState(true);
@@ -56,11 +59,12 @@ export default function ChiangRaiAdminDashboard() {
                 }
             };
 
-            const [artifactsData, staffData, articlesData, activitiesData] = await Promise.all([
-                fetchData(`${API_URL}/api/chiang-rai/artifacts?limit=100`), // Fetch more for accuratest count
+            const [artifactsData, staffData, articlesData, activitiesData, learningSitesData] = await Promise.all([
+                fetchData(`${API_URL}/api/chiang-rai/artifacts?limit=100`),
                 fetchData(`${API_URL}/api/chiang-rai/staff`),
                 fetchData(`${API_URL}/api/chiang-rai/articles`),
-                fetchData(`${API_URL}/api/chiang-rai/activities`)
+                fetchData(`${API_URL}/api/chiang-rai/activities`),
+                fetchData(`${API_URL}/api/chiang-rai/learning-sites?limit=100`)
             ]);
 
             // Handle pagination wrappers if necessary
@@ -68,12 +72,14 @@ export default function ChiangRaiAdminDashboard() {
             const staff = Array.isArray(staffData) ? staffData : (staffData.data || []);
             const articles = Array.isArray(articlesData) ? articlesData : (articlesData.data || []);
             const activities = Array.isArray(activitiesData) ? activitiesData : (activitiesData.data || []);
+            const learningSites = Array.isArray(learningSitesData) ? learningSitesData : (learningSitesData.data || []);
 
             setStats({
-                artifacts: artifactsData.total || artifacts.length || 0, // Prefer meta total if avail
+                artifacts: artifactsData.total || artifacts.length || 0,
                 staff: staff.length || 0,
                 articles: articles.length || 0,
                 activities: activities.length || 0,
+                learningSites: learningSites.length || 0,
                 recentUpdates: [
                     ...activities.slice(0, 3).map((a: any) => ({
                         type: 'News',
@@ -152,7 +158,7 @@ export default function ChiangRaiAdminDashboard() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                 <StatCard
                     title="จำนวนอัตลักษณ์ (Artifacts)"
                     value={stats.artifacts}
@@ -184,6 +190,14 @@ export default function ChiangRaiAdminDashboard() {
                     color="from-emerald-500 to-green-400"
                     link="/chiang-rai-studies/admin/activities"
                     desc="ข่าวสาร กิจกรรม ประกาศ"
+                />
+                <StatCard
+                    title="แหล่งเรียนรู้ (Sites)"
+                    value={stats.learningSites}
+                    icon={MapPin}
+                    color="from-pink-500 to-rose-400"
+                    link="/chiang-rai-studies/admin/learning-sites"
+                    desc="แหล่งเรียนรู้ทางวัฒนธรรม"
                 />
             </div>
 
@@ -262,6 +276,12 @@ export default function ChiangRaiAdminDashboard() {
                         <Link href="/chiang-rai-studies/admin/activities/create" className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10 group">
                             <span className="text-sm font-medium">เพิ่มกิจกรรม/ข่าวสาร</span>
                             <div className="bg-emerald-400 rounded-full p-1 group-hover:scale-110 transition-transform">
+                                <PlusCircle size={16} className="text-white" />
+                            </div>
+                        </Link>
+                        <Link href="/chiang-rai-studies/admin/learning-sites/create" className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/10 group">
+                            <span className="text-sm font-medium">เพิ่มแหล่งเรียนรู้</span>
+                            <div className="bg-pink-400 rounded-full p-1 group-hover:scale-110 transition-transform">
                                 <PlusCircle size={16} className="text-white" />
                             </div>
                         </Link>

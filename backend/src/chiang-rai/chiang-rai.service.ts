@@ -10,6 +10,8 @@ import {
   departments,
   academicPositions,
   chiangRaiConfig,
+  chiangRaiLearningSites,
+  chiangRaiLearningSiteCategoryEnum,
 } from '../drizzle/schema';
 import { eq, desc, asc, ilike, or, and, count, SQL } from 'drizzle-orm';
 
@@ -898,7 +900,7 @@ export class ChiangRaiService {
           slug: 'article-selection-result',
           type: 'ANNOUNCEMENT',
           description:
-            'รายชื่อบทความที่ผ่านการคัดเลือกตีพิมพ์ในวารสารฉบับล่าสุด',
+            'ร�����ยชื่อบทความที่ผ่านการคัดเลือกตีพิมพ์ในวารสารฉบับล่าสุด',
           content: '<p>ตรวจสอบรายชื่อ...</p>',
           thumbnailUrl:
             'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23',
@@ -1147,4 +1149,95 @@ export class ChiangRaiService {
       .where(eq(chiangRaiConfig.id, 1))
       .returning();
   }
+
+  // --- Learning Sites (แหล่งเรียนรู้ทางวัฒนธรรม) - Same as Articles ---
+  async getLearningSites(
+    category?: string,
+    _district?: string,
+    searchQuery?: string,
+    page: number = 1,
+    limit: number = 12,
+  ) {
+    // Lazy Seeding
+    const countResult = await this.drizzle.db.select({ count: count() }).from(chiangRaiLearningSites);
+
+    if (countResult[0].count === 0) {
+      const sampleSites: (typeof chiangRaiLearningSites.$inferInsert)[] = [
+        {
+          title: 'วัดร่องขุ่น ศิลปะแห่งศรัทธา',
+          slug: 'wat-rong-khun-temple',
+          category: 'TEMPLE',
+          description: 'วัดศิลปะร่วมสมัยที่สร้างโดยอาจารย์เฉลิมชัย โฆษิตพิพัฒน์',
+          content: '<p>เนื้อหาฉบับเต็ม...</p>',
+          thumbnailUrl: 'https://example.com/wat-rong-khun.jpg',
+          mediaType: 'IMAGE',
+          mediaUrls: [],
+          tags: ['วัด', 'ศิลปะ', 'เฉลิมชัย'],
+          author: 'ศูนย์เชียงรายศึกษา',
+          isPublished: true,
+        },
+        {
+          title: 'หอฝิ่น อุทยานสามเหลี่ยมทองคำ',
+          slug: 'hall-of-opium-golden-triangle',
+          category: 'MUSEUM',
+          description: 'พิพิธภัณฑ์ที่บอกเล่าประวัติศาสตร์ของฝิ่น',
+          content: '<p>เนื้อหาฉบับเต็ม...</p>',
+          thumbnailUrl: 'https://example.com/hall-of-opium.jpg',
+          mediaType: 'IMAGE',
+          mediaUrls: [],
+          tags: ['พิพิธภัณฑ์', 'สามเหลี่ยมทองคำ'],
+          author: 'ศูนย์เชียงรายศึกษา',
+          isPublished: true,
+        },
+      ];
+      await this.drizzle.db.insert(chiangRaiLearningSites).values(sampleSites);
+    }
+
+    const conditions: SQL[] = [];
+    if (category && category !== 'ALL') conditions.push(eq(chiangRaiLearningSites.category, category as any));
+    if (searchQuery && searchQuery.trim().length > 0) {
+      const term = `%${searchQuery.trim()}%`;
+      conditions.push(or(ilike(chiangRaiLearningSites.title, term), ilike(chiangRaiLearningSites.description, term), ilike(chiangRaiLearningSites.content, term))!);
+    }
+
+    const offset = (page - 1) * limit;
+    const query = this.drizzle.db.select().from(chiangRaiLearningSites);
+    const countQuery = this.drizzle.db.select({ count: count() }).from(chiangRaiLearningSites);
+    if (conditions.length > 0) { query.where(and(...conditions)); countQuery.where(and(...conditions)); }
+
+    const data = await query.orderBy(desc(chiangRaiLearningSites.publishedAt)).limit(limit).offset(offset);
+    const total = await countQuery;
+
+    return { data, meta: { page, limit, total: total[0].count, totalPages: Math.ceil(total[0].count / limit) } };
+  }
+
+  async getLearningSiteById(id: string) {
+    const result = await this.drizzle.db.select().from(chiangRaiLearningSites).where(eq(chiangRaiLearningSites.id, id)).limit(1);
+    if (!result.length) throw new NotFoundException(`Learning site ${id} not found`);
+    return result[0];
+  }
+
+  async getLearningSiteBySlug(slug: string) {
+    const result = await this.drizzle.db.select().from(chiangRaiLearningSites).where(eq(chiangRaiLearningSites.slug, slug)).limit(1);
+    if (!result.length) throw new NotFoundException(`Learning site ${slug} not found`);
+    return result[0];
+  }
+
+  async createLearningSite(data: typeof chiangRaiLearningSites.$inferInsert) {
+    return this.drizzle.db.insert(chiangRaiLearningSites).values(data).returning();
+  }
+
+  async updateLearningSite(id: string, data: Partial<typeof chiangRaiLearningSites.$inferInsert>) {
+    return this.drizzle.db.update(chiangRaiLearningSites).set({ ...data }).where(eq(chiangRaiLearningSites.id, id)).returning();
+  }
+
+  async deleteLearningSite(id: string) {
+    return this.drizzle.db.delete(chiangRaiLearningSites).where(eq(chiangRaiLearningSites.id, id)).returning();
+  }
+
+  async getLearningSiteCategories() {
+    return chiangRaiLearningSiteCategoryEnum.enumValues;
+  }
+
+  async getAllTags() { return []; }
 }

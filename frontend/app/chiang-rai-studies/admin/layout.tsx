@@ -15,7 +15,8 @@ import {
     ExternalLink,
     ShieldCheck,
     ScrollText,
-    Settings
+    Settings,
+    MapPin
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -132,6 +133,7 @@ export default function ChiangRaiAdminLayout({ children }: { children: ReactNode
                 { href: '/chiang-rai-studies/admin/artifacts', label: 'คลังข้อมูล 5 อัตลักษณ์', icon: Image },
                 { href: '/chiang-rai-studies/admin/articles', label: 'บทความวิชาการ', icon: BookOpen },
                 { href: '/chiang-rai-studies/admin/activities', label: 'กิจกรรม/ข่าวสาร', icon: ScrollText },
+                { href: '/chiang-rai-studies/admin/learning-sites', label: 'แหล่งเรียนรู้ทางวัฒนธรรม', icon: MapPin },
                 { href: '/chiang-rai-studies/admin/settings', label: 'ตั้งค่าหน้าแรก', icon: Settings },
             ]
         },

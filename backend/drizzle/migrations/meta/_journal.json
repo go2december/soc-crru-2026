@@ -15,6 +15,13 @@
       "when": 1771480674077,
       "tag": "0001_typical_cerise",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773817618179,
+      "tag": "0002_magical_dreaming_celestial",
+      "breakpoints": true
     }
   ]
 }
