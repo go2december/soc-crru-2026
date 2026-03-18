@@ -11,7 +11,6 @@ import {
   academicPositions,
   chiangRaiConfig,
   chiangRaiLearningSites,
-  chiangRaiLearningSiteCategoryEnum,
 } from '../drizzle/schema';
 import { eq, desc, asc, ilike, or, and, count, SQL } from 'drizzle-orm';
 
@@ -900,7 +899,7 @@ export class ChiangRaiService {
           slug: 'article-selection-result',
           type: 'ANNOUNCEMENT',
           description:
-            'ร�����ยชื่อบทความที่ผ่านการคัดเลือกตีพิมพ์ในวารสารฉบับล่าสุด',
+            'ร�����ยชื่อบทความที่ผ่านการคัด��ลือกตีพิมพ์ในวารสารฉบับล่าสุด',
           content: '<p>ตรวจสอบรายชื่อ...</p>',
           thumbnailUrl:
             'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23',
@@ -1150,10 +1149,8 @@ export class ChiangRaiService {
       .returning();
   }
 
-  // --- Learning Sites (แหล่งเรียนรู้ทางวัฒนธรรม) - Same as Articles ---
+  // --- Learning Sites (แหล่งเรียนรู้ทางวัฒนธรรม) - Same as Articles (without category) ---
   async getLearningSites(
-    category?: string,
-    _district?: string,
     searchQuery?: string,
     page: number = 1,
     limit: number = 12,
@@ -1166,7 +1163,6 @@ export class ChiangRaiService {
         {
           title: 'วัดร่องขุ่น ศิลปะแห่งศรัทธา',
           slug: 'wat-rong-khun-temple',
-          category: 'TEMPLE',
           description: 'วัดศิลปะร่วมสมัยที่สร้างโดยอาจารย์เฉลิมชัย โฆษิตพิพัฒน์',
           content: '<p>เนื้อหาฉบับเต็ม...</p>',
           thumbnailUrl: 'https://example.com/wat-rong-khun.jpg',
@@ -1179,7 +1175,6 @@ export class ChiangRaiService {
         {
           title: 'หอฝิ่น อุทยานสามเหลี่ยมทองคำ',
           slug: 'hall-of-opium-golden-triangle',
-          category: 'MUSEUM',
           description: 'พิพิธภัณฑ์ที่บอกเล่าประวัติศาสตร์ของฝิ่น',
           content: '<p>เนื้อหาฉบับเต็ม...</p>',
           thumbnailUrl: 'https://example.com/hall-of-opium.jpg',
@@ -1194,7 +1189,6 @@ export class ChiangRaiService {
     }
 
     const conditions: SQL[] = [];
-    if (category && category !== 'ALL') conditions.push(eq(chiangRaiLearningSites.category, category as any));
     if (searchQuery && searchQuery.trim().length > 0) {
       const term = `%${searchQuery.trim()}%`;
       conditions.push(or(ilike(chiangRaiLearningSites.title, term), ilike(chiangRaiLearningSites.description, term), ilike(chiangRaiLearningSites.content, term))!);

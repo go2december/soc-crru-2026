@@ -185,13 +185,11 @@ export class ChiangRaiController {
   // --- Learning Sites (แหล่งเรียนรู้ทางวัฒนธรรม - Blog) ---
   @Get('learning-sites')
   async getLearningSites(
-    @Query('category') category?: string,
-    @Query('district') district?: string,
     @Query('q') q?: string,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '12',
   ) {
-    return this.service.getLearningSites(category, district, q, Number(page), Number(limit));
+    return this.service.getLearningSites(q, Number(page), Number(limit));
   }
 
   @Get('learning-sites/by-id/:id')

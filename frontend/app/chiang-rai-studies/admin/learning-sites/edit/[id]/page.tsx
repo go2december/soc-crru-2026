@@ -36,7 +36,6 @@ export default function EditLearningSitePage() {
     const [formData, setFormData] = useState({
         title: '',
         slug: '',
-        category: 'CULTURAL_SITE',
         description: '',
         content: '',
         author: '',
@@ -211,12 +210,6 @@ export default function EditLearningSitePage() {
                             <label className="block text-sm font-medium text-stone-700 mb-1">Slug *</label>
                             <input type="text" required value={formData.slug} onChange={(e) => { setFormData(prev => ({ ...prev, slug: e.target.value })); setAutoSlug(false); }} className="w-full px-4 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-purple-500" />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-stone-700 mb-1">ประเภท (Category)</label>
-                            <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                                {categoryOptions.map(opt => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
-                            </select>
-                        </div>
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-stone-700 mb-1">บทคัดย่อ (Description)</label>
                             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} className="w-full px-4 py-2.5 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-purple-500" />
@@ -257,7 +250,7 @@ export default function EditLearningSitePage() {
                 {/* Section 4: Content */}
                 <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6 space-y-4">
                     <h2 className="text-sm font-bold text-purple-700 uppercase tracking-wider border-b border-purple-100 pb-2">เนื้อหา (Content)</h2>
-                    <ReactQuill theme="snow" value={formData.content} onChange={(content) => setFormData(prev => ({ ...prev, content }))} modules={quillModules} formats={quillFormats} className="bg-white" />
+                    <ReactQuill theme="snow" value={formData.content} onChange={(content) => setFormData(prev => ({ ...prev, content }))} modules={quillModules} formats={quillFormats} className="bg-white" style={{ minHeight: '200px' }} />
                 </div>
 
                 {/* Section 5: Media Gallery */}
