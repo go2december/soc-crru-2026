@@ -113,18 +113,7 @@ export default function Navbar() {
                         </li>
                         <li><Link href="/admissions">รับสมัคร</Link></li>
                         <li><Link href="/research">วิจัยและนวัตกรรม</Link></li>
-                        <li>
-                            <details>
-                                <summary className="text-scholar-gold">ศูนย์เชียงรายศึกษา</summary>
-                                <ul className="pl-4">
-                                    <li><Link href="/chiang-rai-studies">หน้าแรก</Link></li>
-                                    <li><Link href="/chiang-rai-studies/archive">คลังข้อมูลดิจิทัล</Link></li>
-                                    <li><Link href="/chiang-rai-studies/learning-sites">แหล่งเรียนรู้ทางวัฒนธรรม</Link></li>
-                                    <li><Link href="/chiang-rai-studies/articles">บทความวิชาการ</Link></li>
-                                    <li><Link href="/chiang-rai-studies/activities">กิจกรรม/ข่าวสาร</Link></li>
-                                </ul>
-                            </details>
-                        </li>
+                        <li><Link href="/chiang-rai-studies" className="text-scholar-gold">ศูนย์เชียงรายศึกษา</Link></li>
                         <li><Link href="/eservice" className="text-yellow-400">ระบบสารสนเทศ</Link></li>
                     </ul>
                 </div>
@@ -210,18 +199,14 @@ export default function Navbar() {
                     </DropdownMenu>
 
                     {/* E. ศูนย์เชียงรายศึกษา */}
-                    <DropdownMenu name="chiang-rai" title="ศูนย์เชียงรายศึกษา">
-                        <NavItem href="/chiang-rai-studies" title="หน้าแรก (Home)" />
-                        <NavItem href="/chiang-rai-studies/about/history" title="เกี่ยวกับศูนย์ฯ" />
-                        <div className="divider my-1 border-white/10"></div>
-                        <NavItem href="/chiang-rai-studies/archive" title="คลังข้อมูลดิจิทัล (Digital Archive)" />
-                        <NavItem href="/chiang-rai-studies/learning-sites" title="แหล่งเรียนรู้ทางวัฒนธรรม" />
-                        <NavItem href="/chiang-rai-studies/articles" title="บทความวิชาการ (Articles)" />
-                        <NavItem href="/chiang-rai-studies/activities" title="กิจกรรม/ข่าวสาร (Activities)" />
-                        <div className="divider my-1 border-white/10"></div>
-                        <NavItem href="/chiang-rai-studies/staff" title="บุคลากร (Staff)" />
-                        <NavItem href="/chiang-rai-studies/contact" title="ติดต่อเรา (Contact)" />
-                    </DropdownMenu>
+                    <li className="relative h-full flex items-center">
+                        <Link
+                            href="/chiang-rai-studies"
+                            className="flex items-center gap-1 px-3 py-2 rounded-lg transition-all text-sm font-medium h-9 text-scholar-gold hover:bg-white/10 hover:text-scholar-accent"
+                        >
+                            ศูนย์เชียงรายศึกษา
+                        </Link>
+                    </li>
 
                     {/* F. ระบบสารสนเทศ (E-Service) */}
                     <DropdownMenu name="eservice" title="ระบบสารสนเทศ" highlight>
