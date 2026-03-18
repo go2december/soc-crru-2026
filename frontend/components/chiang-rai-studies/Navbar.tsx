@@ -20,6 +20,7 @@ const MENU_ITEMS = [
         ]
     },
     { title: 'คลังข้อมูล 5 อัตลักษณ์', href: '/chiang-rai-studies/archive' },
+    { title: 'แหล่งเรียนรู้ทางวัฒนธรรม', href: '/chiang-rai-studies/learning-sites' },
     { title: 'งานวิจัยและบทความ', href: '/chiang-rai-studies/articles' },
     { title: 'ทำเนียบบุคลากร', href: '/chiang-rai-studies/staff' },
     { title: 'ติดต่อเรา', href: '/chiang-rai-studies/contact' },
