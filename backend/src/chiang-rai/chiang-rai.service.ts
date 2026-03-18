@@ -899,7 +899,7 @@ export class ChiangRaiService {
           slug: 'article-selection-result',
           type: 'ANNOUNCEMENT',
           description:
-            'ร�����ยชื่อบทความที่ผ่านการคัด��ลือกตีพิมพ์ในวารสารฉบับล่าสุด',
+            'ร�����ยชื่อบทความที่ผ่านการคัด���ลือกตีพิมพ์ในวารสารฉบับล่าสุด',
           content: '<p>ตรวจสอบรายชื่อ...</p>',
           thumbnailUrl:
             'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23',
@@ -1230,7 +1230,8 @@ export class ChiangRaiService {
   }
 
   async getLearningSiteCategories() {
-    return chiangRaiLearningSiteCategoryEnum.enumValues;
+    // Deprecated: Category removed
+    return [];
   }
 
   async getAllTags() { return []; }
