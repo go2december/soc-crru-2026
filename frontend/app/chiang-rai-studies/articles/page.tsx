@@ -1,9 +1,15 @@
-
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BookOpen, Calendar, User, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
+
+export const metadata: Metadata = {
+    title: 'บทความวิชาการ | ศูนย์เชียงรายศึกษา',
+    description: 'รวมบทความวิชาการ งานวิจัย และสิ่งพิมพ์จากศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    openGraph: { title: 'บทความวิชาการ | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/articles' },
+};
 
 const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
 
@@ -27,7 +33,14 @@ async function getArticles(): Promise<Article[]> {
         });
 
         if (!res.ok) throw new Error('Failed to fetch articles');
-        return res.json();
+        const articles = await res.json();
+        // Convert relative thumbnail URLs to absolute URLs
+        return articles.map((article: Article) => ({
+            ...article,
+            thumbnailUrl: article.thumbnailUrl && !article.thumbnailUrl.startsWith('http')
+                ? `${API_URL}${article.thumbnailUrl}`
+                : article.thumbnailUrl,
+        }));
     } catch (error) {
         console.error('Error fetching articles:', error);
         return [];
@@ -68,7 +81,7 @@ export default async function ArticlesPage() {
                                 <div className="w-full md:w-48 h-48 bg-purple-100 rounded-2xl overflow-hidden flex-shrink-0 relative">
                                     {article.thumbnailUrl ? (
                                         <Image
-                                            src={article.thumbnailUrl}
+                                            src={article.thumbnailUrl.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL || ''}${article.thumbnailUrl}` : article.thumbnailUrl}
                                             alt={article.title}
                                             fill
                                             className="object-cover group-hover:scale-110 transition-transform duration-700"

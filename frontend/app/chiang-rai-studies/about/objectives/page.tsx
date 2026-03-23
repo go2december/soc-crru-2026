@@ -1,6 +1,12 @@
-
+import type { Metadata } from 'next';
 import AboutHeader from '@/components/chiang-rai-studies/AboutHeader';
 import { Target, Search, Database, BookOpenCheck, Network, Heart } from 'lucide-react';
+
+export const metadata: Metadata = {
+    title: 'วัตถุประสงค์ | ศูนย์เชียงรายศึกษา',
+    description: 'พันธกิจ 5 ประการ เพื่อการอนุรักษ์และพัฒนาเชียงรายศึกษา ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    openGraph: { title: 'วัตถุประสงค์ | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/about/objectives' },
+};
 
 export default function ObjectivesPage() {
     return (

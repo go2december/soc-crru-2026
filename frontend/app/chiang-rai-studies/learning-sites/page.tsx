@@ -1,46 +1,50 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BookOpen, Calendar, ArrowRight } from 'lucide-react';
+import { BookOpen, Calendar, ArrowRight, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 
+export const metadata: Metadata = {
+    title: 'แหล่งเรียนรู้ทางวัฒนธรรม | ศูนย์เชียงรายศึกษา',
+    description: 'รวมแหล่งเรียนรู้ทางวัฒนธรรมในเชียงราย พิพิธภัณฑ์ วัด โบราณสถาน ชุมชนท่องเที่ยว ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    openGraph: { title: 'แหล่งเรียนรู้ทางวัฒนธรรม | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/learning-sites' },
+};
+
 const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
+const PUBLIC_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 interface LearningSite {
     id: string;
     title: string;
     slug: string;
-    category: string;
     description: string | null;
+    content?: string;
     thumbnailUrl: string | null;
     author: string | null;
     publishedAt: string | null;
+    tags: string[];
 }
 
 async function getLearningSites(): Promise<LearningSite[]> {
     try {
-        const res = await fetch(`${API_URL}/api/chiang-rai/learning-sites`, { next: { revalidate: 60 } });
+        const res = await fetch(`${API_URL}/api/chiang-rai/learning-sites`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
-        return data.data || [];
+        const sites = data.data || [];
+        return sites;
     } catch (error) {
         console.error('Error fetching learning sites:', error);
         return [];
     }
 }
 
-const categoryLabels: Record<string, string> = {
-    CULTURAL_SITE: 'แหล่งเรียนรู้ทางวัฒนธรรม',
-    MUSEUM: 'พิพิธภัณฑ์',
-    TEMPLE: 'วัด',
-    HISTORICAL_SITE: 'โบราณสถาน',
-    COMMUNITY: 'ชุมชน',
-    WISDOM_CENTER: 'ศูนย์ภูมิปัญญา',
-    ART_SPACE: 'พื้นที่ศิลปะ',
-};
-
-export default async function LearningSitesPage() {
-    const learningSites = await getLearningSites();
+export default async function LearningSitesPage({ searchParams }: { searchParams: Promise<{ tag?: string }> }) {
+    const { tag: activeTag } = await searchParams;
+    const allSites = await getLearningSites();
+    const learningSites = activeTag
+        ? allSites.filter(s => s.tags?.some(t => t.toLowerCase() === activeTag.toLowerCase()))
+        : allSites;
 
     return (
         <div className="min-h-screen bg-[#FAF5FF] pb-20 font-kanit">
@@ -62,6 +66,20 @@ export default async function LearningSitesPage() {
             </div>
 
             <div className="container mx-auto px-4 py-16">
+                {/* Active tag filter */}
+                {activeTag && (
+                    <div className="flex items-center justify-center gap-3 mb-10">
+                        <span className="text-sm text-stone-500">กรองตามคำสำคัญ:</span>
+                        <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-800 px-4 py-1.5 rounded-full text-sm font-semibold border border-purple-200">
+                            #{activeTag}
+                            <Link href="/chiang-rai-studies/learning-sites" className="ml-1 p-0.5 rounded-full hover:bg-purple-200 transition">
+                                <X size={14} />
+                            </Link>
+                        </span>
+                        <span className="text-xs text-stone-400">({learningSites.length} รายการ)</span>
+                    </div>
+                )}
+
                 {learningSites.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
                         {learningSites.map((site, index) => (
@@ -74,9 +92,10 @@ export default async function LearningSitesPage() {
                                 <div className="w-full md:w-48 h-48 bg-purple-100 rounded-2xl overflow-hidden flex-shrink-0 relative">
                                     {site.thumbnailUrl ? (
                                         <Image
-                                            src={site.thumbnailUrl.startsWith('/') ? `${API_URL}${site.thumbnailUrl}` : site.thumbnailUrl}
+                                            src={site.thumbnailUrl!.startsWith('/') ? `${PUBLIC_URL}${site.thumbnailUrl}` : site.thumbnailUrl!}
                                             alt={site.title}
                                             fill
+                                            unoptimized
                                             className="object-cover group-hover:scale-110 transition-transform duration-700"
                                             sizes="(max-width: 768px) 100vw, 200px"
                                         />
@@ -85,11 +104,14 @@ export default async function LearningSitesPage() {
                                             <BookOpen size={40} />
                                         </div>
                                     )}
-                                    <div className="absolute top-3 left-3">
-                                        <span className="bg-white/90 backdrop-blur-sm text-purple-800 text-[10px] font-bold px-3 py-1 rounded-lg uppercase tracking-wide border border-purple-100 shadow-sm">
-                                            {categoryLabels[site.category] || site.category}
-                                        </span>
-                                    </div>
+                                    {site.tags && site.tags.length > 0 && (
+                                        <div className="absolute top-3 left-3">
+                                            <Link href={`/chiang-rai-studies/learning-sites?tag=${encodeURIComponent(site.tags[0])}`}
+                                                className="bg-white/90 backdrop-blur-sm text-purple-800 text-[10px] font-bold px-3 py-1 rounded-lg uppercase tracking-wide border border-purple-100 shadow-sm hover:bg-white transition">
+                                                {site.tags[0]}
+                                            </Link>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Content */}

@@ -28,6 +28,24 @@ const TYPE_CONFIG: Record<string, { label: string; color: string; icon: any }> =
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
+const deleteImageFromServer = async (imageUrl: string) => {
+    if (!imageUrl || !imageUrl.startsWith('/uploads/chiang-rai/')) return;
+    const token = localStorage.getItem('admin_token');
+    try {
+        await fetch(`${API_URL}/api/upload/chiang-rai`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ url: imageUrl }),
+        });
+    } catch (err) { console.error('Failed to delete image:', err); }
+};
+
+const extractImageUrls = (html: string): string[] => {
+    const matches = html.match(/src=["'](\/uploads\/chiang-rai\/[^"']+)["']/g);
+    if (!matches) return [];
+    return matches.map(m => m.replace(/src=["']/, '').replace(/["']$/, ''));
+};
+
 export default function AdminActivitiesPage() {
     const [activities, setActivities] = useState<Activity[]>([]);
     const [loading, setLoading] = useState(true);
@@ -55,14 +73,27 @@ export default function AdminActivitiesPage() {
 
     const handleDelete = async (id: string) => {
         if (!confirm('คุณต้องการลบรายการนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถเรียกคืนได้')) return;
-
+        const token = localStorage.getItem('admin_token');
         try {
+            const imagesToDelete: string[] = [];
+            const dataRes = await fetch(`${API_URL}/api/chiang-rai/activities/by-id/${id}`);
+            if (dataRes.ok) {
+                const data = await dataRes.json();
+                if (data.thumbnailUrl?.startsWith('/uploads/chiang-rai/')) imagesToDelete.push(data.thumbnailUrl);
+                (data.mediaUrls || []).forEach((url: string) => {
+                    if (url.startsWith('/uploads/chiang-rai/')) imagesToDelete.push(url);
+                });
+                extractImageUrls(data.content || '').forEach(url => imagesToDelete.push(url));
+            }
+
             const res = await fetch(`${API_URL}/api/chiang-rai/activities/${id}`, {
                 method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
             });
 
             if (res.ok) {
                 setActivities(prev => prev.filter(item => item.id !== id));
+                await Promise.all(imagesToDelete.map(url => deleteImageFromServer(url)));
             } else {
                 alert('เกิดข้อผิดพลาดในการลบข้อมูล');
             }

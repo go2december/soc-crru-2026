@@ -1,6 +1,12 @@
-
+import type { Metadata } from 'next';
 import AboutHeader from '@/components/chiang-rai-studies/AboutHeader';
 import { Flag, CheckCircle, Globe, Users, BookOpen, Layers, PenTool, Radio } from 'lucide-react';
+
+export const metadata: Metadata = {
+    title: 'เป้าหมายและกิจกรรมหลัก | ศูนย์เชียงรายศึกษา',
+    description: 'เป้าหมายและกิจกรรมหลักของศูนย์เชียงรายศึกษา ขับเคลื่อนการอนุรักษ์และพัฒนาที่ยั่งยืน คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    openGraph: { title: 'เป้าหมายและกิจกรรมหลัก | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/about/goals-mission' },
+};
 
 export default function GoalsMissionPage() {
     return (

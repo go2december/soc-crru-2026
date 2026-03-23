@@ -1,6 +1,12 @@
-
+import type { Metadata } from 'next';
 import AboutHeader from '@/components/chiang-rai-studies/AboutHeader';
 import { User, Users, Shield, Crown, Network, BookOpen, Share2, FileText, Monitor, Lightbulb, Landmark, Theater, Globe } from 'lucide-react';
+
+export const metadata: Metadata = {
+    title: 'โครงสร้างองค์กร | ศูนย์เชียงรายศึกษา',
+    description: 'แผนผังโครงสร้างการบริหารงานศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    openGraph: { title: 'โครงสร้างองค์กร | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/about/structure' },
+};
 
 export default function StructurePage() {
     return (

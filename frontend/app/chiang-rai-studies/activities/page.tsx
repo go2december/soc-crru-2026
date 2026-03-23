@@ -1,4 +1,4 @@
-
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -6,22 +6,35 @@ import {
     ChevronRight,
     Calendar,
     ArrowRight,
-    Search
+    Search,
+    BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+export const metadata: Metadata = {
+    title: 'กิจกรรมและข่าวสาร | ศูนย์เชียงรายศึกษา',
+    description: 'ติดตามความเคลื่อนไหว กิจกรรม สัมมนา อบรม และข่าวสารจากศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    openGraph: { title: 'กิจกรรมและข่าวสาร | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/activities' },
+};
+
+const PUBLIC_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export const dynamic = 'force-dynamic';
 
 async function getActivities(page = 1, limit = 9) {
     try {
-        const baseUrl = process.env.INTERNAL_API_URL || 'http://soc_backend:4000';
+        const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:4001';
         const res = await fetch(`${baseUrl}/api/chiang-rai/activities?page=${page}&limit=${limit}`, {
-            next: { revalidate: 60 }
+            cache: 'no-store'
         });
 
         if (!res.ok) return { data: [], meta: { page: 1, totalPages: 1 } };
 
-        return await res.json();
+        const json = await res.json();
+        return {
+            data: json.data || [],
+            meta: json.meta || { page: 1, totalPages: 1 },
+        };
     } catch (error) {
         console.error('Failed to fetch activities:', error);
         return { data: [], meta: { page: 1, totalPages: 1 } };
@@ -58,9 +71,10 @@ export default async function ActivitiesPage(props: {
                                     <div className="h-56 bg-stone-200 relative overflow-hidden">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
                                         <Image
-                                            src={item.thumbnailUrl || `https://placehold.co/600x400/purple/white?text=No+Image`}
+                                            src={item.thumbnailUrl ? (item.thumbnailUrl.startsWith('/') ? `${PUBLIC_URL}${item.thumbnailUrl}` : item.thumbnailUrl) : `https://placehold.co/600x400/purple/white?text=No+Image`}
                                             alt={item.title}
                                             fill
+                                            unoptimized
                                             className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         />

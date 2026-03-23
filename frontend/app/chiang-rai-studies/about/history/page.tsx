@@ -1,5 +1,15 @@
-
+import type { Metadata } from 'next';
 import AboutHeader from '@/components/chiang-rai-studies/AboutHeader';
+
+export const metadata: Metadata = {
+    title: 'ความเป็นมา | ศูนย์เชียงรายศึกษา',
+    description: 'ประวัติความเป็นมาของศูนย์เชียงรายศึกษา จากรากฐานทางวัฒนธรรม สู่ศูนย์กลางการเรียนรู้ระดับภูมิภาค คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    openGraph: {
+        title: 'ความเป็นมา | ศูนย์เชียงรายศึกษา',
+        description: 'ประวัติความเป็นมาของศูนย์เชียงรายศึกษา จากรากฐานทางวัฒนธรรม สู่ศูนย์กลางการเรียนรู้ระดับภูมิภาค',
+        url: '/chiang-rai-studies/about/history',
+    },
+};
 import { BookOpen, Calendar, Award, Landmark } from 'lucide-react';
 
 export default function HistoryPage() {
