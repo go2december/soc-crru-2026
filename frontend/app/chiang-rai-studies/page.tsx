@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -15,32 +16,32 @@ import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = {
+export const metadata: Metadata = {
     title: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center) | คณะสังคมศาสตร์ มรภ.เชียงราย',
     description: 'แหล่งรวบรวม อนุรักษ์ และต่อยอดองค์ความรู้อัตลักษณ์เชียงราย เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน ผ่าน 5 มิติทางวัฒนธรรม: ประวัติศาสตร์, โบราณคดี, ชาติพันธุ์, ศิลปะการแสดง, และภูมิปัญญาท้องถิ่น',
     keywords: ['เชียงรายศึกษา', 'Chiang Rai Studies', 'ล้านนา', 'Lanna', 'ประวัติศาสตร์เชียงราย', 'ชาติพันธุ์เชียงราย', 'ศิลปวัฒนธรรม', 'Social Sciences CRRU'],
+    alternates: {
+        canonical: '/chiang-rai-studies',
+    },
     openGraph: {
         title: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
         description: 'แหล่งเรียนรู้อัตลักษณ์เชียงรายและการพัฒนาท้องถิ่นอย่างยั่งยืน',
-        url: 'https://soc.crru.ac.th/chiang-rai-studies',
+        url: '/chiang-rai-studies',
         siteName: 'Faculty of Social Sciences, CRRU',
-        images: [
-            {
-                url: '/images/chiang-rai-cover.jpg', // Placeholder, should be updated with real semantic image
-                width: 1200,
-                height: 630,
-                alt: 'Chiang Rai Studies Center',
-            },
-        ],
         locale: 'th_TH',
         type: 'website',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
+        description: 'แหล่งเรียนรู้อัตลักษณ์เชียงรายและการพัฒนาท้องถิ่นอย่างยั่งยืน',
     },
 };
 
 async function getLatestActivities() {
     try {
         // Use service name in Docker network if available, fallback to localhost for local dev
-        const baseUrl = process.env.INTERNAL_API_URL || 'http://soc_backend:4000';
+        const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:4001';
         const res = await fetch(`${baseUrl}/api/chiang-rai/activities?limit=3`, {
             next: { revalidate: 60 }
         });
@@ -48,7 +49,14 @@ async function getLatestActivities() {
         if (!res.ok) return [];
 
         const json = await res.json();
-        return json.data || [];
+        const activities = json.data || [];
+        // Convert relative thumbnail URLs to absolute URLs
+        return activities.map((item: any) => ({
+            ...item,
+            thumbnailUrl: item.thumbnailUrl && !item.thumbnailUrl.startsWith('http')
+                ? `${baseUrl}${item.thumbnailUrl}`
+                : item.thumbnailUrl,
+        }));
     } catch (error) {
         console.error('Failed to fetch activities:', error);
         return [];
@@ -95,52 +103,53 @@ export default async function ChiangRaiHomePage() {
     return (
         <div className="min-h-screen bg-white font-kanit text-slate-800">
             {/* Hero Section */}
-            <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-[#2e1065]">
+            <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-sky-50 via-white to-blue-50">
                 {/* Background Image & Overlay */}
                 <div className="absolute inset-0">
                     <div
-                        className="absolute inset-0 bg-cover bg-center opacity-50 mix-blend-overlay"
+                        className="absolute inset-0 bg-cover bg-center opacity-80"
                         style={{ backgroundImage: `url('${heroBg}')` }}
                     ></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#2e1065] via-[#4c1d95]/90 to-[#3b0764]/10"></div>
-                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-sky-50/80 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-sky-50/30"></div>
+                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent"></div>
                 </div>
 
-                <div className="container mx-auto px-6 relative z-10 pb-16">
+                <div className="container mx-auto px-4 sm:px-6 relative z-10 pb-16">
                     <div className="max-w-4xl animate-fade-in-up">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-orange-300 text-xs font-bold tracking-widest uppercase mb-8 border border-white/10 backdrop-blur-sm">
-                            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-sky-100/80 text-sky-700 text-xs font-bold tracking-widest uppercase mb-8 border border-sky-200/60 backdrop-blur-sm shadow-sm">
+                            <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
                             The Wisdom of Lanna
                         </div>
 
-                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight drop-shadow-2xl tracking-tight">
+                        <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight tracking-tight">
                             {config?.heroTitle ? (
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-orange-100">
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1e3a5f] to-sky-700">
                                     {config.heroTitle}
                                 </span>
                             ) : (
                                 <>
-                                    ศูนย์เชียงราย<br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-200 filter drop-shadow-lg">
+                                    <span className="text-[#1e3a5f]">ศูนย์เชียงราย</span><br />
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-blue-600">
                                         ศึกษา
                                     </span>
                                 </>
                             )}
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-purple-200 font-light mb-12 max-w-2xl leading-relaxed drop-shadow-md border-l-4 border-orange-500 pl-6">
+                        <p className="text-lg sm:text-xl md:text-2xl text-slate-600 font-light mb-12 max-w-2xl leading-relaxed border-l-4 border-sky-400 pl-4 sm:pl-6">
                             {config?.heroSubtitle || "แหล่งรวบรวม อนุรักษ์ และต่อยอดองค์ความรู้อัตลักษณ์เชียงราย เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน ผ่าน 5 มิติทางวัฒนธรรม"}
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4">
                             <Link href="/chiang-rai-studies/archive">
-                                <Button size="lg" className="h-14 px-8 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-lg shadow-lg hover:shadow-orange-600/40 transition-all w-full sm:w-auto transform hover:-translate-y-1">
+                                <Button size="lg" className="h-14 px-8 rounded-full bg-sky-600 hover:bg-sky-700 text-white font-bold text-lg shadow-lg hover:shadow-sky-600/30 transition-all w-full sm:w-auto transform hover:-translate-y-1">
                                     <Search className="mr-2 h-5 w-5" />
                                     สืบค้นคลังข้อมูล
                                 </Button>
                             </Link>
                             <Link href="/chiang-rai-studies/about/history">
-                                <Button variant="outline" size="lg" className="h-14 px-8 rounded-full bg-white text-[#2e1065] hover:bg-purple-50 border-transparent font-bold text-lg shadow-lg hover:shadow-purple-500/20 w-full sm:w-auto transform hover:-translate-y-1 transition-all">
+                                <Button variant="outline" size="lg" className="h-14 px-8 rounded-full bg-white text-[#1e3a5f] hover:bg-sky-50 border border-sky-200 font-bold text-lg shadow-lg hover:shadow-sky-200/40 w-full sm:w-auto transform hover:-translate-y-1 transition-all">
                                     รู้จักศูนย์ฯ
                                     <ChevronRight className="ml-2 h-5 w-5" />
                                 </Button>
@@ -251,7 +260,7 @@ export default async function ChiangRaiHomePage() {
             {/* Latest Updates / News Teaser */}
             <section className="py-24 bg-white">
                 <div className="container mx-auto px-4">
-                    <div className="flex justify-between items-end mb-12">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-end mb-12">
                         <div>
                             <span className="text-purple-600 font-bold tracking-widest uppercase text-xs mb-2 block">Updates</span>
                             <h2 className="text-3xl md:text-4xl font-black text-slate-800">กิจกรรมและข่าวสาร</h2>

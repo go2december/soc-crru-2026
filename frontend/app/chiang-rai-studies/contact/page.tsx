@@ -5,6 +5,9 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
     title: 'ติดต่อเรา | ศูนย์เชียงรายศึกษา',
     description: 'ติดต่อสอบถามข้อมูล เยี่ยมชม หรือประสานงานความร่วมมือกับศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    alternates: {
+        canonical: '/chiang-rai-studies/contact',
+    },
     openGraph: {
         title: 'ติดต่อเรา | ศูนย์เชียงรายศึกษา',
         description: 'ติดต่อสอบถามข้อมูล เยี่ยมชม หรือประสานงานความร่วมมือกับศูนย์เชียงรายศึกษา',
@@ -12,6 +15,11 @@ export const metadata: Metadata = {
         siteName: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
         locale: 'th_TH',
         type: 'website',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'ติดต่อเรา | ศูนย์เชียงรายศึกษา',
+        description: 'ติดต่อสอบถามข้อมูล เยี่ยมชม หรือประสานงานความร่วมมือกับศูนย์เชียงรายศึกษา',
     },
 };
 

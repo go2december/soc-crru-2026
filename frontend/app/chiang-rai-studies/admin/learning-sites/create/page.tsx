@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Save, Loader2, ImagePlus, Video, Link2, X, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -12,15 +12,7 @@ import 'react-quill-new/dist/quill.snow.css';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-const categoryOptions = [
-    { value: 'CULTURAL_SITE', label: 'แหล่งเรียนรู้ทางวัฒนธรรม' },
-    { value: 'MUSEUM', label: 'พิพิธภัณฑ์' },
-    { value: 'TEMPLE', label: 'วัด' },
-    { value: 'HISTORICAL_SITE', label: 'โบราณสถาน' },
-    { value: 'COMMUNITY', label: 'ชุมชน' },
-    { value: 'WISDOM_CENTER', label: 'ศูนย์ภูมิปัญญา' },
-    { value: 'ART_SPACE', label: 'พื้นที่ศิลปะ' },
-];
+
 
 function generateSlug(text: string) {
     return text.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F\s-]/g, '').replace(/\s+/g, '-').trim();
@@ -74,10 +66,15 @@ export default function CreateLearningSitePage() {
     }, [user]);
 
     const uploadImage = async (file: File): Promise<string | null> => {
+        const token = localStorage.getItem('admin_token');
         const uploadForm = new FormData();
         uploadForm.append('file', file);
         try {
-            const res = await fetch(`${API_URL}/api/upload/chiang-rai`, { method: 'POST', body: uploadForm });
+            const res = await fetch(`${API_URL}/api/upload/chiang-rai`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: uploadForm,
+            });
             if (res.ok) {
                 const data = await res.json();
                 return data.url || data.path;
@@ -140,20 +137,27 @@ export default function CreateLearningSitePage() {
         }
         setLoading(true);
         try {
+            const token = localStorage.getItem('admin_token');
             const allMediaUrls = [...formData.mediaUrls, ...formData.externalLinks];
             const payload = {
-                ...formData,
-                tags: formData.tags.length > 0 ? formData.tags : null,
-                thumbnailUrl: formData.thumbnailUrl || null,
+                title: formData.title,
+                slug: formData.slug,
                 description: formData.description || null,
+                content: formData.content,
+                thumbnailUrl: formData.thumbnailUrl || null,
+                tags: formData.tags.length > 0 ? formData.tags : null,
                 author: formData.author || user?.name || 'ศูนย์เชียงรายศึกษา',
+                isPublished: formData.isPublished,
                 publishedAt: formData.isPublished ? new Date().toISOString() : null,
                 mediaUrls: allMediaUrls.length > 0 ? allMediaUrls : [],
-                mediaType: allMediaUrls.length > 0 ? 'IMAGE' : 'IMAGE',
+                mediaType: 'IMAGE',
             };
             const res = await fetch(`${API_URL}/api/chiang-rai/learning-sites`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : '',
+                },
                 body: JSON.stringify(payload),
             });
             if (res.ok) {
@@ -161,7 +165,8 @@ export default function CreateLearningSitePage() {
                 router.push('/chiang-rai-studies/admin/learning-sites');
             } else {
                 const error = await res.json();
-                alert(`เกิดข้อผิดพลาด: ${error.message}`);
+                console.error('API Error:', error);
+                alert(`เกิดข้อผิดพลาด: ${error.message || JSON.stringify(error)}`);
             }
         } catch (error) {
             console.error('Submit error:', error);
@@ -171,18 +176,57 @@ export default function CreateLearningSitePage() {
         }
     };
 
-    const quillModules = {
-        toolbar: [
-            [{ header: [1, 2, 3, false] }],
-            ['bold', 'italic', 'underline'],
-            [{ list: 'ordered' }, { list: 'bullet' }],
-            [{ color: [] }, { background: [] }],
-            ['link', 'image', 'video'],
-            ['clean'],
-        ],
-    };
+    const quillModules = useMemo(() => {
+        const uploadUrl = `${API_URL}/api/upload/chiang-rai`;
+        return {
+            toolbar: {
+                container: [
+                    [{ header: [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline'],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    [{ color: [] }, { background: [] }],
+                    ['link', 'image'],
+                    ['clean'],
+                ],
+                handlers: {
+                    image: function(this: any) {
+                        const quill = this.quill;
+                        const input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        input.click();
+                        input.onchange = async () => {
+                            const file = input.files?.[0];
+                            if (!file) return;
+                            const token = localStorage.getItem('admin_token');
+                            const fd = new FormData();
+                            fd.append('file', file);
+                            try {
+                                const res = await fetch(uploadUrl, {
+                                    method: 'POST',
+                                    headers: { Authorization: `Bearer ${token}` },
+                                    body: fd,
+                                });
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    const url = data.url || data.path;
+                                    if (url) {
+                                        const range = quill.getSelection(true);
+                                        quill.insertEmbed(range.index, 'image', url);
+                                        quill.setSelection(range.index + 1);
+                                    }
+                                }
+                            } catch (err) {
+                                console.error('Image upload error:', err);
+                            }
+                        };
+                    }
+                },
+            },
+        };
+    }, []);
 
-    const quillFormats = ['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'color', 'background', 'link', 'image', 'video'];
+    const quillFormats = ['header', 'bold', 'italic', 'underline', 'list', 'color', 'background', 'link', 'image'];
 
     return (
         <div className="space-y-6 font-kanit">

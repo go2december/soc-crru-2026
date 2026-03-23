@@ -1,0 +1,209 @@
+# SOC-CRRU Antigravity Rules
+
+## Project Context
+- This repository is a full-stack web application for the Faculty of Social Sciences, Chiang Rai Rajabhat University.
+- Frontend lives in `frontend/` using Next.js 16.1.1 App Router, React 19.2.3, TypeScript, Tailwind CSS v4, and DaisyUI v5.5.14.
+- Backend lives in `backend/` using NestJS on Node.js v25, TypeScript, Drizzle ORM, and PostgreSQL 18.
+- Local development is primarily based on `docker-compose.yml` with 4 services.
+
+## Source of Truth
+Before making medium or large changes, review these files first in this order:
+1. `docs/WORKFLOW-project-status.md`
+2. `docs/PLAN-soc-crru-baseline.md`
+3. `docs/PLAN-chiang-rai-studies.md`
+4. `docs/WORKFLOW-chiang-rai-admin.md`
+5. `docs/WORKFLOW-faculty-admin.md`
+6. `.agent/workflows/*.md`
+
+If there is a conflict between current implementation notes and older documentation, update the outdated documentation as part of the task when appropriate.
+
+## Working Rules
+- Prefer minimal, targeted changes over broad refactors.
+- Preserve the current project structure and naming patterns.
+- Do not introduce new architectural patterns unless the task requires them.
+- Keep frontend and backend changes aligned when modifying shared behaviors.
+- When changing a central API contract, inspect likely consumers in `frontend/` and update them together.
+- Do not hardcode secrets or environment-specific credentials.
+
+## Frontend Rules
+- Use App Router conventions in `frontend/app/`.
+- Reuse existing shared components from `frontend/components/` before creating new ones.
+- Reuse utilities from `frontend/lib/` when possible.
+- Keep TypeScript types explicit for API-driven data.
+- Prefer server-friendly data fetching patterns and avoid unnecessary client-only logic.
+- **UI Framework Separation**: Use DaisyUI for main public pages and shadcn/ui for Admin Dashboard
+  - **DaisyUI**: Public pages (`/`, `/about/*`, `/programs/*`, `/academics/*`, `/chiang-rai-studies/*` public routes)
+  - **shadcn/ui**: Admin dashboards (`/admin/*`, `/chiang-rai-studies/admin/*`)
+  - Import shadcn/ui components only in admin routes and layouts
+  - Use DaisyUI classes and themes for public-facing content
+- Do not introduce a new UI library unless explicitly required.
+
+## Backend Rules
+- Keep NestJS module, controller, and service responsibilities clear.
+- Put backend source changes under `backend/src/`.
+- Respect existing validation and DTO patterns.
+- Assume the backend uses a global API prefix: `/api`.
+- Be careful with static upload paths and any logic related to `/uploads`.
+- Keep database access patterns consistent with the existing Drizzle-based implementation.
+
+## UI Framework Rules
+- **DaisyUI Public Pages**: Use DaisyUI components and classes for all public-facing routes
+  - Faculty public pages: `/`, `/about/*`, `/programs/*`, `/academics/*`, `/admissions`, `/research/*`, `/eservice/*`
+  - Chiang Rai Studies public pages: `/chiang-rai-studies/*` (except admin sub-routes)
+  - Use DaisyUI themes (`socTheme`) and design tokens for consistent branding
+- **shadcn/ui Admin Dashboards**: Use shadcn/ui components exclusively in admin interfaces
+  - Faculty admin: `/admin/*` routes
+  - Chiang Rai Studies admin: `/chiang-rai-studies/admin/*` routes
+  - Import from `frontend/components/ui/` only in admin layouts and pages
+- **Styling Separation**: 
+  - Public pages: Use `@layer base` and DaisyUI utility classes from `globals.css`
+  - Admin pages: Use shadcn/ui CSS variables and component patterns
+  - Never mix DaisyUI classes with shadcn/ui components in the same component
+- **Component Location**:
+  - Public components: `frontend/components/` (avoid `ui/` subdirectory)
+  - Admin components: `frontend/components/ui/` for shadcn/ui components
+- **Theme Consistency**:
+  - Public pages maintain Scholar theme and Chiang Rai brand colors
+  - Admin pages use professional slate theme with brand accent colors
+
+## API and Integration Rules
+- Frontend requests to backend endpoints should account for the `/api` prefix.
+- Be careful with local vs Docker networking assumptions.
+- For SSR or server-side fetches, verify whether the code should use internal Docker URLs or localhost fallbacks.
+- If you change endpoint paths, update all affected callers and admin pages.
+
+## Admin CRUD Rules
+- Treat admin work as multi-surface changes: verify list, create, edit, delete, dashboard stats, and affected public pages together.
+- For admin changes, inspect both the frontend admin route and the matching backend controller/service before editing.
+- Preserve current route group structure and naming patterns in `frontend/app/admin/` and `frontend/app/chiang-rai-studies/admin/`.
+- Do not change admin route paths, callback paths, or dashboard structure unless the task explicitly requires it.
+- Keep admin forms aligned with backend DTOs, validation expectations, enum values, and required fields.
+- When a CRUD entity exposes slug-based public pages, verify both admin by-id flows and public slug/detail flows.
+- When deleting records with uploaded media, verify whether image cleanup must happen before or alongside record deletion.
+- Keep confirmation, loading, and error states intact on destructive admin actions.
+
+## Faculty Admin Rules
+- Faculty admin lives under `/admin` and currently covers `dashboard`, `staff`, `departments`, `positions`, `users`, and `news`.
+- Preserve the auth flow `/admin/login` -> `/api/auth/google` or `/api/auth/dev/login` -> `/admin/callback` -> `/admin/(dashboard)/dashboard`.
+- For Faculty admin API work, verify corresponding endpoints under `/api/staff`, `/api/departments`, `/api/news`, and related auth endpoints.
+- If you change faculty news behavior, also inspect public news listing/detail consumers and keep admin/public behavior aligned.
+- If staff or profile image behavior changes, preserve relative-path storage and verify both admin preview and public rendering.
+
+## Chiang Rai Studies Rules
+- Chiang Rai public pages live under `/chiang-rai-studies`, and admin pages live under `/chiang-rai-studies/admin`.
+- Treat `backend/src/chiang-rai/` as the authoritative backend area for Chiang Rai Studies feature work.
+- Preserve consistency between public pages, admin CRUD pages, homepage config, tags, search, and stats when changing Chiang Rai behavior.
+- Keep entity names and API namespaces consistent with the existing `chiang-rai` naming convention in both frontend and backend.
+- When changing Chiang Rai content models, inspect likely public consumers such as homepage sections, list pages, detail pages, sitemap, metadata, and JSON-LD generation.
+
+## Agent CRUD Checklists
+### Shared CRUD Checklist
+- Confirm affected frontend admin page, backend endpoint, and public consumer.
+- Check list, create, edit, delete, and by-id/by-slug flows that belong to the same entity.
+- Verify form fields still match DTOs, enums, required fields, and backend validation.
+- Verify success, loading, empty, and error states still behave correctly.
+- If media exists, verify preview, persistence, replacement, and cleanup behavior.
+
+### UI Framework Checklist
+- **Public Pages**: Use DaisyUI components, classes, and `socTheme` consistently
+- **Admin Pages**: Use shadcn/ui components from `frontend/components/ui/` only
+- **Component Imports**: Never import shadcn/ui in public routes or DaisyUI in admin routes
+- **Styling**: Public pages use DaisyUI utilities, Admin pages use shadcn/ui CSS variables
+- **Theme Colors**: Public pages use Scholar/Chiang Rai branding, Admin pages use slate theme
+
+### Faculty: Staff
+- Check admin list, create/edit form, delete flow, and public staff rendering.
+- Verify department, position, and profile image fields still resolve correctly.
+
+### Faculty: Departments
+- Check admin list, create, edit, and delete behavior.
+- Verify related staff or public references do not break after changes.
+
+### Faculty: Positions
+- Check admin list, create, edit, and delete behavior.
+- Verify staff forms and displayed labels still use the updated position data correctly.
+
+### Faculty: Users
+- Check admin list and any supported create/edit/delete behavior.
+- Verify auth-related fields or role/permission assumptions remain compatible with current flows.
+
+### Faculty: News
+- Check admin list, create, edit, and delete behavior.
+- Verify public listing/detail consumers, if affected, still render correctly.
+
+### Chiang Rai: Articles
+- Check admin list, create, edit, delete, `by-id` fetch, and public slug detail page.
+- Verify slug, tags, publish status, metadata, and sitemap/detail consumers if affected.
+- Articles CRUD completed 2026-02-13 with full admin and public flows.
+
+### Chiang Rai: Artifacts
+- Check admin list, create, edit, and delete behavior.
+- Verify category mapping, archive filters, and artifact detail compatibility.
+
+### Chiang Rai: Activities
+- Check admin list, create, edit, delete, `by-id` fetch, and public slug detail page.
+- Verify type enum, pagination, event date/location fields, and image cleanup behavior.
+
+### Chiang Rai: Learning Sites
+- Check admin list, create, edit, delete, `by-id` fetch, and public slug detail page.
+- Verify thumbnail, media gallery, content images, tags, and removed-image cleanup behavior.
+
+### Chiang Rai: Staff
+- Check admin list, import, delete, and grouped display behavior.
+- Verify faculty import compatibility and role/group mapping.
+
+### Chiang Rai: Settings
+- Check settings form load/save behavior.
+- Verify homepage hero image, title, subtitle, and dependent homepage sections still render correctly.
+
+## Media and Uploaded Image Rules
+- Store uploaded file references as relative paths only, especially under `/uploads/chiang-rai/...` and other project upload namespaces.
+- Do not store backend-only absolute URLs in the database.
+- For admin client rendering, verify URL resolution against `NEXT_PUBLIC_API_URL` conventions.
+- For SSR or server-rendered public pages, verify URL resolution against `INTERNAL_API_URL` or the current fallback strategy.
+- When replacing or deleting media in rich content, also consider embedded content images, thumbnails, and gallery arrays rather than only the primary image field.
+- Be careful not to orphan files on disk when edit/delete behavior is expected to perform cleanup.
+
+## Documentation and Workflow Rules
+After any medium or large task:
+- update `docs/WORKFLOW-project-status.md` when project status changes
+- update the relevant `docs/PLAN-*.md` phase/checklist when feature status changes
+- update the relevant `docs/WORKFLOW-*.md` file when operational behavior changes
+- update `.agent/workflows/*.md` only when executable steps changed
+
+When adding a new operational process:
+- document it in `docs/WORKFLOW-*.md`
+- add or update a matching executable workflow in `.agent/workflows/`
+
+## Status Taxonomy
+Use only these labels in plan/status documents:
+- `✅ COMPLETE`
+- `🔄 IN PROGRESS`
+- `📋 PENDING`
+
+For checklists, use:
+- `[x]` completed
+- `[ ]` pending
+
+## Validation Rules
+Before finishing implementation when relevant:
+- run frontend lint from `frontend/`
+- run backend lint or targeted tests from `backend/`
+- avoid claiming success without verifying the affected area
+- **UI Framework Validation**: 
+  - Verify public pages use only DaisyUI components and classes
+  - Verify admin pages use only shadcn/ui components from `frontend/components/ui/`
+  - Check there are no cross-imports between UI frameworks inappropriately
+  - Test theme consistency across public (Scholar/Chiang Rai) and admin (slate) pages
+
+## Safety Rules
+- Do not delete or rename major directories without explicit instruction.
+- Do not overwrite large content sections or seeded data unless the task specifically requires it.
+- Be careful around admin CRUD flows, image uploads, and route changes because they often affect multiple pages.
+
+## Preferred Task Flow
+1. Read the relevant plan/workflow docs.
+2. Inspect the authoritative code path.
+3. Make the smallest correct implementation.
+4. Verify affected frontend/backend behavior.
+5. Sync docs and workflows if the task meaningfully changed project status or process.

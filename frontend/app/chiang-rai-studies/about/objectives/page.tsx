@@ -5,7 +5,15 @@ import { Target, Search, Database, BookOpenCheck, Network, Heart } from 'lucide-
 export const metadata: Metadata = {
     title: 'วัตถุประสงค์ | ศูนย์เชียงรายศึกษา',
     description: 'พันธกิจ 5 ประการ เพื่อการอนุรักษ์และพัฒนาเชียงรายศึกษา ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    alternates: {
+        canonical: '/chiang-rai-studies/about/objectives',
+    },
     openGraph: { title: 'วัตถุประสงค์ | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/about/objectives' },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'วัตถุประสงค์ | ศูนย์เชียงรายศึกษา',
+        description: 'พันธกิจ 5 ประการ เพื่อการอนุรักษ์และพัฒนาเชียงรายศึกษา ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    },
 };
 
 export default function ObjectivesPage() {

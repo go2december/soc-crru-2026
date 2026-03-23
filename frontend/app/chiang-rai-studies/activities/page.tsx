@@ -14,7 +14,15 @@ import { Button } from '@/components/ui/button';
 export const metadata: Metadata = {
     title: 'กิจกรรมและข่าวสาร | ศูนย์เชียงรายศึกษา',
     description: 'ติดตามความเคลื่อนไหว กิจกรรม สัมมนา อบรม และข่าวสารจากศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    alternates: {
+        canonical: '/chiang-rai-studies/activities',
+    },
     openGraph: { title: 'กิจกรรมและข่าวสาร | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/activities' },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'กิจกรรมและข่าวสาร | ศูนย์เชียงรายศึกษา',
+        description: 'ติดตามความเคลื่อนไหว กิจกรรม สัมมนา อบรม และข่าวสารจากศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    },
 };
 
 const PUBLIC_URL = process.env.NEXT_PUBLIC_API_URL || '';

@@ -1,6 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Building2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface Department {
     id: number;
@@ -13,6 +25,7 @@ export default function AdminDepartmentsPage() {
     const [departments, setDepartments] = useState<Department[]>([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<Department | null>(null);
 
@@ -58,7 +71,12 @@ export default function AdminDepartmentsPage() {
                 isAcademicUnit: true
             });
         }
-        (document.getElementById('dept_modal') as HTMLDialogElement).showModal();
+        setIsFormOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsFormOpen(false);
+        setEditingDepartment(null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -91,7 +109,7 @@ export default function AdminDepartmentsPage() {
 
             if (res.ok) {
                 await fetchDepartments();
-                (document.getElementById('dept_modal') as HTMLDialogElement).close();
+                handleCloseModal();
             } else {
                 alert('เกิดข้อผิดพลาด: ' + await res.text());
             }
@@ -117,7 +135,6 @@ export default function AdminDepartmentsPage() {
 
             if (res.ok) {
                 await fetchDepartments();
-                (document.getElementById('delete_dept_modal') as HTMLDialogElement).close();
                 setDeleteTarget(null);
             } else {
                 alert('ไม่สามารถลบได้ (อาจมีบุคลากรสังกัดอยู่)');
@@ -129,61 +146,63 @@ export default function AdminDepartmentsPage() {
         }
     };
 
-    if (loading) return <div className="p-10 text-center"><span className="loading loading-spinner"></span></div>;
+    if (loading) return <div className="flex h-64 items-center justify-center"><div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" /></div>;
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold">🏢 จัดการสังกัด / หน่วยงาน</h1>
-                    <p className="opacity-70">เพิ่มหรือแก้ไขสาขาวิชาและหน่วยงานภายในคณะ</p>
+                    <h1 className="flex items-center gap-2 text-2xl font-bold"><Building2 className="h-7 w-7 text-primary" />จัดการสังกัด / หน่วยงาน</h1>
+                    <p className="text-sm text-muted-foreground">เพิ่มหรือแก้ไขสาขาวิชาและหน่วยงานภายในคณะ</p>
                 </div>
-                <button onClick={() => handleOpenModal(null)} className="btn btn-primary gap-2">
-                    ➕ เพิ่มหน่วยงานใหม่
-                </button>
+                <Button onClick={() => handleOpenModal(null)} className="gap-2"><Plus className="h-4 w-4" />เพิ่มหน่วยงานใหม่</Button>
             </div>
 
-            <div className="card bg-base-100 shadow-xl overflow-hidden">
-                <table className="table">
-                    <thead className="bg-base-200">
+            <Card className="overflow-hidden border-border/70 shadow-sm">
+                <CardContent className="p-0">
+                <table className="w-full text-sm">
+                    <thead className="bg-muted/40 text-left text-muted-foreground">
                         <tr>
-                            <th className="w-16">ID</th>
-                            <th>ชื่อหน่วยงาน (ไทย)</th>
-                            <th>ชื่อหน่วยงาน (อังกฤษ)</th>
-                            <th>ประเภท</th>
-                            <th className="w-24 text-center">จัดการ</th>
+                            <th className="w-16 px-4 py-3 font-medium">ID</th>
+                            <th className="px-4 py-3 font-medium">ชื่อหน่วยงาน (ไทย)</th>
+                            <th className="px-4 py-3 font-medium">ชื่อหน่วยงาน (อังกฤษ)</th>
+                            <th className="px-4 py-3 font-medium">ประเภท</th>
+                            <th className="w-24 px-4 py-3 text-center font-medium">จัดการ</th>
                         </tr>
                     </thead>
                     <tbody>
                         {departments.map((dept) => (
-                            <tr key={dept.id} className="hover">
-                                <td>{dept.id}</td>
-                                <td className="font-semibold">{dept.nameTh}</td>
-                                <td className="font-mono text-sm opacity-80">{dept.nameEn || '-'}</td>
-                                <td>
+                            <tr key={dept.id} className="border-t align-middle hover:bg-muted/20">
+                                <td className="px-4 py-3">{dept.id}</td>
+                                <td className="px-4 py-3 font-semibold">{dept.nameTh}</td>
+                                <td className="px-4 py-3 font-mono text-sm text-muted-foreground">{dept.nameEn || '-'}</td>
+                                <td className="px-4 py-3">
                                     {dept.isAcademicUnit ? (
-                                        <span className="badge badge-primary badge-outline">สายวิชาการ</span>
+                                        <span className="inline-flex rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">สายวิชาการ</span>
                                     ) : (
-                                        <span className="badge badge-secondary badge-outline">สายสนับสนุน</span>
+                                        <span className="inline-flex rounded-full border border-slate-300 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">สายสนับสนุน</span>
                                     )}
                                 </td>
-                                <td>
+                                <td className="px-4 py-3">
                                     <div className="flex gap-2 justify-center">
-                                        <button
+                                        <Button
                                             onClick={() => handleOpenModal(dept)}
-                                            className="btn btn-square btn-ghost btn-sm text-info"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-sky-600"
                                         >
-                                            ✏️
-                                        </button>
-                                        <button
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button
                                             onClick={() => {
                                                 setDeleteTarget(dept);
-                                                (document.getElementById('delete_dept_modal') as HTMLDialogElement).showModal();
                                             }}
-                                            className="btn btn-square btn-ghost btn-sm text-error"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-destructive"
                                         >
-                                            🗑️
-                                        </button>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
                                     </div>
                                 </td>
                             </tr>
@@ -191,89 +210,75 @@ export default function AdminDepartmentsPage() {
                     </tbody>
                 </table>
                 {departments.length === 0 && (
-                    <div className="text-center py-10 opacity-50">ไม่พบข้อมูลหน่วยงาน</div>
+                    <div className="py-10 text-center text-muted-foreground">ไม่พบข้อมูลหน่วยงาน</div>
                 )}
-            </div>
+                </CardContent>
+            </Card>
 
-            {/* Edit Modal */}
-            <dialog id="dept_modal" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg mb-4">
-                        {editingDepartment ? '✏️ แก้ไขหน่วยงาน' : '➕ เพิ่มหน่วยงานใหม่'}
-                    </h3>
+            <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open && !submitting) handleCloseModal(); }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{editingDepartment ? 'แก้ไขหน่วยงาน' : 'เพิ่มหน่วยงานใหม่'}</DialogTitle>
+                        <DialogDescription>กำหนดชื่อหน่วยงานและประเภทการใช้งานในระบบ</DialogDescription>
+                    </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">ชื่อหน่วยงาน (ไทย) *</span></label>
-                            <input
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">ชื่อหน่วยงาน (ไทย) *</label>
+                            <Input
                                 type="text"
-                                className="input input-bordered w-full"
                                 required
                                 value={formData.nameTh}
                                 onChange={e => setFormData({ ...formData, nameTh: e.target.value })}
                                 placeholder="เช่น สาขาวิชาสังคมวิทยา"
                             />
                         </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text">ชื่อหน่วยงาน (อังกฤษ)</span></label>
-                            <input
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">ชื่อหน่วยงาน (อังกฤษ)</label>
+                            <Input
                                 type="text"
-                                className="input input-bordered w-full"
                                 value={formData.nameEn}
                                 onChange={e => setFormData({ ...formData, nameEn: e.target.value })}
                                 placeholder="e.g. Sociology Program"
                             />
                         </div>
-                        <div className="form-control">
-                            <label className="label cursor-pointer justify-start gap-4">
+                        <div className="space-y-2">
+                            <label className="flex cursor-pointer items-center gap-4 text-sm font-medium">
                                 <input
                                     type="checkbox"
-                                    className="toggle toggle-primary"
+                                    className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
                                     checked={formData.isAcademicUnit}
                                     onChange={e => setFormData({ ...formData, isAcademicUnit: e.target.checked })}
                                 />
-                                <span className="label-text font-semibold">หน่วยงานสายวิชาการ (Academic Unit)</span>
+                                <span>หน่วยงานสายวิชาการ (Academic Unit)</span>
                             </label>
-                            <div className="label pt-0">
-                                <span className="label-text-alt opacity-70">
-                                    เปิดใช้งานหากเป็น "สาขาวิชา" หรือหน่วยงานที่มีการเรียนการสอน
-                                </span>
-                            </div>
+                            <p className="text-xs text-muted-foreground">เปิดใช้งานหากเป็น &quot;สาขาวิชา&quot; หรือหน่วยงานที่มีการเรียนการสอน</p>
                         </div>
 
-                        <div className="modal-action">
-                            <button type="button" onClick={() => (document.getElementById('dept_modal') as HTMLDialogElement).close()} className="btn btn-ghost" disabled={submitting}>ยกเลิก</button>
-                            <button type="submit" className="btn btn-primary" disabled={submitting}>
-                                {submitting ? <span className="loading loading-spinner"></span> : 'บันทึก'}
-                            </button>
-                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="ghost" onClick={handleCloseModal} disabled={submitting}>ยกเลิก</Button>
+                            <Button type="submit" disabled={submitting}>{submitting ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+                        </DialogFooter>
                     </form>
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button>close</button>
-                </form>
-            </dialog>
+                </DialogContent>
+            </Dialog>
 
-            {/* Delete Modal */}
-            <dialog id="delete_dept_modal" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg text-error">ยืนยันการลบหน่วยงาน</h3>
-                    <p className="py-4">
+            <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !submitting) setDeleteTarget(null); }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="text-destructive">ยืนยันการลบหน่วยงาน</DialogTitle>
+                        <DialogDescription>
                         ต้องการลบ <strong>{deleteTarget?.nameTh}</strong> ใช่หรือไม่?
-                        <br />
-                        <span className="text-sm text-error opacity-80 mt-2 block">
+                        <span className="mt-2 block text-sm text-destructive/80">
                             ⚠️ คำเตือน: หากมีบุคลากรสังกัดหน่วยงานนี้อยู่ จะไม่สามารถลบได้
                         </span>
-                    </p>
-                    <div className="modal-action">
-                        <form method="dialog">
-                            <button className="btn btn-ghost">ยกเลิก</button>
-                        </form>
-                        <button onClick={handleDelete} className="btn btn-error" disabled={submitting}>
-                            ยืนยันลบ
-                        </button>
-                    </div>
-                </div>
-            </dialog>
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setDeleteTarget(null)} disabled={submitting}>ยกเลิก</Button>
+                        <Button variant="destructive" onClick={handleDelete} disabled={submitting}>ยืนยันลบ</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

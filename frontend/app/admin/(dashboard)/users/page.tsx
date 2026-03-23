@@ -1,6 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import { Pencil, Search, Shield, Trash2 } from 'lucide-react';
 
 interface User {
     id: string;
@@ -15,10 +28,10 @@ interface User {
 
 // ใช้งานแค่ enum เพื่อแสดงผลและเลือก แต่เก็บจริงเป็น array hierarchy
 const ROLE_OPTIONS = [
-    { value: 'ADMIN', label: 'ผู้ดูแลระบบ (Admin)', desc: 'จัดการทุกอย่างในระบบ', color: 'badge-error' },
-    { value: 'EDITOR', label: 'บรรณาธิการ (Editor)', desc: 'จัดการเนื้อหา ข่าว หลักสูตร บุคลากร', color: 'badge-warning' },
-    { value: 'STAFF', label: 'บุคลากร (Staff)', desc: 'เข้าสู่ระบบและแก้ไขข้อมูลส่วนตัว', color: 'badge-info' },
-    { value: 'GUEST', label: 'ผู้เยี่ยมชม (Guest)', desc: 'ไม่มีสิทธิ์จัดการใดๆ', color: 'badge-ghost' },
+    { value: 'ADMIN', label: 'ผู้ดูแลระบบ (Admin)', desc: 'จัดการทุกอย่างในระบบ', color: 'bg-red-100 text-red-700 border-red-200' },
+    { value: 'EDITOR', label: 'บรรณาธิการ (Editor)', desc: 'จัดการเนื้อหา ข่าว หลักสูตร บุคลากร', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+    { value: 'STAFF', label: 'บุคลากร (Staff)', desc: 'เข้าสู่ระบบและแก้ไขข้อมูลส่วนตัว', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    { value: 'GUEST', label: 'ผู้เยี่ยมชม (Guest)', desc: 'ไม่มีสิทธิ์จัดการใดๆ', color: 'bg-slate-100 text-slate-700 border-slate-200' },
 ];
 
 export default function AdminUsersPage() {
@@ -107,11 +120,6 @@ export default function AdminUsersPage() {
                 console.log('Updated User:', updatedUser); // Debug
                 await fetchUsers();
 
-                // Close Native Dialog
-                const modal = document.getElementById('role_modal') as HTMLDialogElement | null;
-                if (modal) {
-                    modal.close();
-                }
                 setSelectedUser(null);
             } else {
                 const errorText = await res.text();
@@ -153,8 +161,6 @@ export default function AdminUsersPage() {
 
     const confirmDeleteUser = (user: User) => {
         setUserToDelete(user);
-        const modal = document.getElementById('delete_modal') as HTMLDialogElement | null;
-        if (modal) modal.showModal();
     };
 
     const handleDeleteUser = async () => {
@@ -174,8 +180,6 @@ export default function AdminUsersPage() {
 
             if (res.ok) {
                 await fetchUsers();
-                const modal = document.getElementById('delete_modal') as HTMLDialogElement | null;
-                if (modal) modal.close();
                 setUserToDelete(null);
             } else {
                 alert('เกิดข้อผิดพลาดในการลบผู้ใช้');
@@ -197,18 +201,12 @@ export default function AdminUsersPage() {
         console.log('Open Edit Modal:', user.id);
         setSelectedUser(user);
         setSelectedRoleLevel(getPrimaryRole(user.roles));
-
-        // Show Native Dialog
-        const modal = document.getElementById('role_modal') as HTMLDialogElement | null;
-        if (modal) {
-            modal.showModal();
-        }
     };
 
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <span className="loading loading-spinner loading-lg"></span>
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
             </div>
         );
     }
@@ -222,48 +220,48 @@ export default function AdminUsersPage() {
             </div>
 
             {/* Role Legend */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
                 {ROLE_OPTIONS.map(role => (
-                    <div key={role.value} className="bg-base-100 p-3 rounded-lg shadow-sm border border-base-200">
-                        <span className={`badge ${role.color} mb-1`}>{role.value}</span>
-                        <p className="text-xs opacity-70">{role.desc}</p>
-                    </div>
+                    <Card key={role.value} className="border-border/70 shadow-sm">
+                        <CardContent className="space-y-2 p-4">
+                            <span className={cn('inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold', role.color)}>{role.value}</span>
+                            <p className="text-xs text-muted-foreground">{role.desc}</p>
+                        </CardContent>
+                    </Card>
                 ))}
             </div>
 
             {/* Search Bar */}
-            <div className="flex justify-between items-center bg-base-100 p-4 rounded-lg shadow-sm">
-                <div className="form-control w-full max-w-sm">
-                    <div className="relative">
-                        <input
+            <Card className="border-border/70 shadow-sm">
+                <CardContent className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
+                    <div className="relative w-full max-w-sm">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
                             type="text"
                             placeholder="ค้นหาชื่อ หรือ อีเมล..."
-                            className="input input-bordered w-full pr-10"
+                            className="pl-9"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <button className="absolute right-0 top-0 h-full px-3 text-base-content/50">
-                            🔍
-                        </button>
                     </div>
-                </div>
-                <div className="text-sm opacity-60">
+                    <div className="text-sm text-muted-foreground">
                     ทั้งหมด {users.filter(u => u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase())).length} คน
-                </div>
-            </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Users Table */}
-            <div className="card bg-base-100 shadow-lg">
-                <div className="card-body">
+            <Card className="border-border/70 shadow-sm">
+                <CardContent className="p-0">
                     <div className="overflow-x-auto">
-                        <table className="table">
-                            <thead>
+                        <table className="w-full text-sm">
+                            <thead className="border-b bg-muted/40 text-left text-muted-foreground">
                                 <tr>
-                                    <th>ผู้ใช้</th>
-                                    <th>ระดับสิทธิ์</th>
-                                    <th>สถานะ</th>
-                                    <th>เข้าสู่ระบบล่าสุด</th>
-                                    <th>จัดการ</th>
+                                    <th className="px-4 py-3 font-medium">ผู้ใช้</th>
+                                    <th className="px-4 py-3 font-medium">ระดับสิทธิ์</th>
+                                    <th className="px-4 py-3 font-medium">สถานะ</th>
+                                    <th className="px-4 py-3 font-medium">เข้าสู่ระบบล่าสุด</th>
+                                    <th className="px-4 py-3 font-medium">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -277,59 +275,59 @@ export default function AdminUsersPage() {
                                         const roleInfo = ROLE_OPTIONS.find(r => r.value === primaryRole);
 
                                         return (
-                                            <tr key={user.id} className={!user.isActive ? 'opacity-50' : ''}>
-                                                <td>
+                                            <tr key={user.id} className={cn('border-b align-middle', !user.isActive && 'opacity-50')}>
+                                                <td className="px-4 py-3">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="avatar">
-                                                            <div className="w-10 rounded-full">
-                                                                {user.avatar ? (
-                                                                    <img src={user.avatar} alt={user.name || ''} />
-                                                                ) : (
-                                                                    <div className="bg-primary/20 w-full h-full flex items-center justify-center text-primary font-bold">
-                                                                        {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-primary font-bold">
+                                                            {user.avatar ? (
+                                                                <img src={user.avatar} alt={user.name || ''} className="h-full w-full object-cover" />
+                                                            ) : (
+                                                                user.name?.charAt(0) || user.email.charAt(0).toUpperCase()
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <div className="font-bold">{user.name || '-'}</div>
-                                                            <div className="text-xs opacity-60">{user.email}</div>
+                                                            <div className="text-xs text-muted-foreground">{user.email}</div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <span className={`badge ${roleInfo?.color || 'badge-ghost'}`}>
+                                                <td className="px-4 py-3">
+                                                    <span className={cn('inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold', roleInfo?.color || 'bg-slate-100 text-slate-700 border-slate-200')}>
                                                         {primaryRole}
                                                     </span>
                                                 </td>
-                                                <td>
+                                                <td className="px-4 py-3">
                                                     <input
                                                         type="checkbox"
-                                                        className="toggle toggle-success toggle-sm"
+                                                        className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
                                                         checked={user.isActive}
                                                         onChange={(e) => toggleUserActive(user.id, e.target.checked)}
                                                         disabled={updating === user.id}
                                                     />
                                                 </td>
-                                                <td className="text-sm">{formatDate(user.lastLoginAt)}</td>
-                                                <td>
+                                                <td className="px-4 py-3 text-sm">{formatDate(user.lastLoginAt)}</td>
+                                                <td className="px-4 py-3">
                                                     <div className="flex gap-2">
-                                                        <button
+                                                        <Button
                                                             onClick={() => openEditModal(user)}
-                                                            className="btn btn-ghost btn-xs text-primary tooltip"
-                                                            data-tip="แก้ไขสิทธิ์"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-primary"
                                                             disabled={updating === user.id}
+                                                            title="แก้ไขสิทธิ์"
                                                         >
-                                                            ✎
-                                                        </button>
-                                                        <button
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
                                                             onClick={() => confirmDeleteUser(user)}
-                                                            className="btn btn-ghost btn-xs text-error tooltip"
-                                                            data-tip="ลบผู้ใช้"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-destructive"
                                                             disabled={updating === user.id}
+                                                            title="ลบผู้ใช้"
                                                         >
-                                                            🗑️
-                                                        </button>
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -337,86 +335,71 @@ export default function AdminUsersPage() {
                                     })}
                                 {users.filter(u => u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="text-center py-8 opacity-50">ไม่พบข้อมูลผู้ใช้</td>
+                                        <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">ไม่พบข้อมูลผู้ใช้</td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
 
             {/* Delete Confirmation Modal */}
-            <dialog id="delete_modal" className="modal">
-                <div className="modal-box">
-                    <h3 className="font-bold text-lg text-error">ยืนยันการลบผู้ใช้</h3>
-                    <p className="py-4">คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ <strong>{userToDelete?.name || userToDelete?.email}</strong>? <br />การกระทำนี้ไม่สามารถย้อนกลับได้</p>
-                    <div className="modal-action">
-                        <form method="dialog">
-                            <button className="btn btn-ghost" onClick={() => setUserToDelete(null)}>ยกเลิก</button>
-                        </form>
-                        <button
-                            className="btn btn-error"
-                            onClick={handleDeleteUser}
-                            disabled={updating === userToDelete?.id}
-                        >
-                            {updating === userToDelete?.id ? <span className="loading loading-spinner"></span> : 'ยืนยันลบ'}
-                        </button>
-                    </div>
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button onClick={() => setUserToDelete(null)}>close</button>
-                </form>
-            </dialog>
+            <Dialog open={!!userToDelete} onOpenChange={(open) => { if (!open) setUserToDelete(null); }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="text-destructive">ยืนยันการลบผู้ใช้</DialogTitle>
+                        <DialogDescription>
+                            คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ <strong>{userToDelete?.name || userToDelete?.email}</strong>? การกระทำนี้ไม่สามารถย้อนกลับได้
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setUserToDelete(null)}>ยกเลิก</Button>
+                        <Button variant="destructive" onClick={handleDeleteUser} disabled={updating === userToDelete?.id}>
+                            {updating === userToDelete?.id ? 'กำลังลบ...' : 'ยืนยันลบ'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
-            {/* Standard DaisyUI Modal using <dialog> */}
-            <dialog id="role_modal" className="modal">
-                <div className="modal-box">
-                    <form method="dialog">
-                        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={() => setSelectedUser(null)}>✕</button>
-                    </form>
+            <Dialog open={!!selectedUser} onOpenChange={(open) => { if (!open) setSelectedUser(null); }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>ปรับระดับสิทธิ์: {selectedUser?.name}</DialogTitle>
+                        <DialogDescription>
+                            เลือกระดับสิทธิ์แบบ hierarchy สำหรับบัญชีผู้ใช้นี้
+                        </DialogDescription>
+                    </DialogHeader>
 
-                    <h3 className="font-bold text-lg mb-4">ปรับระดับสิทธิ์: {selectedUser?.name}</h3>
-
-                    <div className="form-control w-full">
-                        <label className="label">
-                            <span className="label-text">เลือกระดับสิทธิ์ (Hierarchy)</span>
-                        </label>
-                        <select
-                            className="select select-bordered w-full"
-                            value={selectedRoleLevel}
-                            onChange={(e) => setSelectedRoleLevel(e.target.value)}
-                        >
-                            {ROLE_OPTIONS.map(role => (
-                                <option key={role.value} value={role.value}>
-                                    {role.label}
-                                </option>
-                            ))}
-                        </select>
-                        <label className="label">
-                            <span className="label-text-alt text-gray-500">
-                                {ROLE_OPTIONS.find(r => r.value === selectedRoleLevel)?.desc}
-                            </span>
-                        </label>
+                    <div className="space-y-3">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">เลือกระดับสิทธิ์ (Hierarchy)</label>
+                            <select
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                value={selectedRoleLevel}
+                                onChange={(e) => setSelectedRoleLevel(e.target.value)}
+                            >
+                                {ROLE_OPTIONS.map(role => (
+                                    <option key={role.value} value={role.value}>
+                                        {role.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                            <Shield className="mr-1 inline h-4 w-4" />
+                            {ROLE_OPTIONS.find(r => r.value === selectedRoleLevel)?.desc}
+                        </p>
                     </div>
 
-                    <div className="modal-action mt-6">
-                        <form method="dialog">
-                            <button className="btn btn-ghost" onClick={() => setSelectedUser(null)}>ยกเลิก</button>
-                        </form>
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleSaveRole}
-                            disabled={updating === selectedUser?.id}
-                        >
-                            {updating === selectedUser?.id ? <span className="loading loading-spinner"></span> : 'บันทึก'}
-                        </button>
-                    </div>
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button onClick={() => setSelectedUser(null)}>close</button>
-                </form>
-            </dialog>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setSelectedUser(null)}>ยกเลิก</Button>
+                        <Button onClick={handleSaveRole} disabled={updating === selectedUser?.id}>
+                            {updating === selectedUser?.id ? 'กำลังบันทึก...' : 'บันทึก'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

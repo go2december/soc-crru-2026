@@ -723,16 +723,24 @@ export class ChiangRaiService {
   }
 
   async createArticle(data: typeof chiangRaiArticles.$inferInsert) {
-    return this.drizzle.db.insert(chiangRaiArticles).values(data).returning();
+    const payload = { ...data };
+    if (payload.publishedAt && typeof payload.publishedAt === 'string') {
+      payload.publishedAt = new Date(payload.publishedAt);
+    }
+    return this.drizzle.db.insert(chiangRaiArticles).values(payload).returning();
   }
 
   async updateArticle(
     id: string,
     data: Partial<typeof chiangRaiArticles.$inferInsert>,
   ) {
+    const payload = { ...data };
+    if (payload.publishedAt && typeof payload.publishedAt === 'string') {
+      payload.publishedAt = new Date(payload.publishedAt);
+    }
     return this.drizzle.db
       .update(chiangRaiArticles)
-      .set(data)
+      .set(payload)
       .where(eq(chiangRaiArticles.id, id))
       .returning();
   }
@@ -980,16 +988,24 @@ export class ChiangRaiService {
   }
 
   async createActivity(data: typeof chiangRaiActivities.$inferInsert) {
-    return this.drizzle.db.insert(chiangRaiActivities).values(data).returning();
+    const payload = { ...data };
+    if (payload.publishedAt && typeof payload.publishedAt === 'string') payload.publishedAt = new Date(payload.publishedAt);
+    if (payload.eventDate && typeof payload.eventDate === 'string') payload.eventDate = new Date(payload.eventDate);
+    if (payload.eventEndDate && typeof payload.eventEndDate === 'string') payload.eventEndDate = new Date(payload.eventEndDate);
+    return this.drizzle.db.insert(chiangRaiActivities).values(payload).returning();
   }
 
   async updateActivity(
     id: string,
     data: Partial<typeof chiangRaiActivities.$inferInsert>,
   ) {
+    const payload = { ...data, updatedAt: new Date() };
+    if (payload.publishedAt && typeof payload.publishedAt === 'string') payload.publishedAt = new Date(payload.publishedAt);
+    if (payload.eventDate && typeof payload.eventDate === 'string') payload.eventDate = new Date(payload.eventDate);
+    if (payload.eventEndDate && typeof payload.eventEndDate === 'string') payload.eventEndDate = new Date(payload.eventEndDate);
     return this.drizzle.db
       .update(chiangRaiActivities)
-      .set({ ...data, updatedAt: new Date() })
+      .set(payload)
       .where(eq(chiangRaiActivities.id, id))
       .returning();
   }
@@ -1218,11 +1234,19 @@ export class ChiangRaiService {
   }
 
   async createLearningSite(data: typeof chiangRaiLearningSites.$inferInsert) {
-    return this.drizzle.db.insert(chiangRaiLearningSites).values(data).returning();
+    const payload = { ...data };
+    if (payload.publishedAt && typeof payload.publishedAt === 'string') {
+      payload.publishedAt = new Date(payload.publishedAt);
+    }
+    return this.drizzle.db.insert(chiangRaiLearningSites).values(payload).returning();
   }
 
   async updateLearningSite(id: string, data: Partial<typeof chiangRaiLearningSites.$inferInsert>) {
-    return this.drizzle.db.update(chiangRaiLearningSites).set({ ...data }).where(eq(chiangRaiLearningSites.id, id)).returning();
+    const payload = { ...data };
+    if (payload.publishedAt && typeof payload.publishedAt === 'string') {
+      payload.publishedAt = new Date(payload.publishedAt);
+    }
+    return this.drizzle.db.update(chiangRaiLearningSites).set(payload).where(eq(chiangRaiLearningSites.id, id)).returning();
   }
 
   async deleteLearningSite(id: string) {

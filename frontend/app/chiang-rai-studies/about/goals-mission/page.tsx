@@ -5,7 +5,15 @@ import { Flag, CheckCircle, Globe, Users, BookOpen, Layers, PenTool, Radio } fro
 export const metadata: Metadata = {
     title: 'เป้าหมายและกิจกรรมหลัก | ศูนย์เชียงรายศึกษา',
     description: 'เป้าหมายและกิจกรรมหลักของศูนย์เชียงรายศึกษา ขับเคลื่อนการอนุรักษ์และพัฒนาที่ยั่งยืน คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    alternates: {
+        canonical: '/chiang-rai-studies/about/goals-mission',
+    },
     openGraph: { title: 'เป้าหมายและกิจกรรมหลัก | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/about/goals-mission' },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'เป้าหมายและกิจกรรมหลัก | ศูนย์เชียงรายศึกษา',
+        description: 'เป้าหมายและกิจกรรมหลักของศูนย์เชียงรายศึกษา ขับเคลื่อนการอนุรักษ์และพัฒนาที่ยั่งยืน คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    },
 };
 
 export default function GoalsMissionPage() {

@@ -1,91 +1,144 @@
 # Chiang Rai Studies Center Web Development Plan
+**Updated:** March 23, 2026
 
-This document outlines the development plan for the **Chiang Rai Studies Center (ศูนย์เชียงรายศึกษา)** website, implemented as a microservice within the existing Social Sciences Faculty ecosystem.
+ศูนย์เชียงรายศึกษา — แหล่งรวบรวม อนุรักษ์ และต่อยอดองค์ความรู้อัตลักษณ์เชียงราย
 
-## 1. System Architecture
+---
 
-The system will leverage the existing technology stack while ensuring separation of concerns:
+## 🏗️ สถาปัตยกรรมระบบ (System Architecture)
 
--   **Database (PostgreSQL):**
-    -   Utilize the existing PostgreSQL instance.
-    -   Create a dedicated **Schema** (e.g., `chiang_rai_identities`, `chiang_rai_artifacts`) to isolate data.
-    -   **Dedicated Staff Table:** Create `chiang_rai_staff` to manage personnel specific to the center, separating them from the main faculty staff directory.
-    -   Tables will store data related to the "5 Chiang Rai Identities", research papers, activities, and staff.
--   **Backend (Payload CMS / Nest.js):**
-    -   Integrate as a new **Collection** or **Module** within the existing Payload CMS (or Nest.js backend) to serve as the Content Management System.
-    -   Expose RESTful/GraphQL APIs for the frontend.
--   **Frontend (Next.js):**
-    -   Develop as a distinct part of the Next.js application (e.g., under `/chiang-rai-studies` route or a separate sub-domain).
-    -   Focus on **Server-Side Rendering (SSR)** and **Static Site Generation (SSG)** for optimal SEO, as the content is knowledge-heavy.
-    -   **Design Theme:** "Modern Lanna" - reflecting Chiang Rai's culture with a modern UI.
+- **Database:** PostgreSQL 18, dedicated tables prefixed `chiang_rai_*`
+- **Backend:** NestJS module (`chiang-rai.module`) with 37 REST endpoints
+- **Frontend:** Next.js App Router under `/chiang-rai-studies` route
+- **Design Theme:** "Modern Lanna" — purple/orange/white with light blue-white hero
 
-## 2. Sitemap & Information Architecture
+---
 
-The website will consist of the following key sections:
+## 🗺️ แผนผังเว็บไซต์และสถาปัตยกรรมข้อมูล (Sitemap & Information Architecture)
 
-1.  **Home (หน้าแรก):** Highlights, latest news, upcoming activities, and an introduction.
-2.  **About Us (เกี่ยวกับศูนย์ฯ):**
-    -   [x] History & Objectives.
-    -   [x] Organizational Structure (Director, Academic, Network, Dissemination divisions).
-    -   [x] Steering Committee.
-3.  **Digital Archive (คลังข้อมูลดิจิทัล):** *Core Feature*. Categorized by the "5 Chiang Rai Identities":
-    -   History (ประวัติศาสตร์)
-    -   Archaeology (โบราณคดี)
-    -   Culture, Beliefs & Traditions (วัฒนธรรม ความเชื่อ และประเพณี)
-    -   Performing Arts (ศิลปะการแสดง)
-    -   Local Wisdom & Livelihood (ภูมิปัญญาท้องถิ่น อาชีพ และวิถีชีวิต)
-4.  **Academic & Research (งานวิชาการและวิจัย):** Research papers, articles, and publications.
-5.  **Activities & Training (กิจกรรมและอบรม):** News on seminars, training workshops, and exhibitions.
-6.  **Networks (ภาคีเครือข่าย):** Partnerships with government, private sector, and communities.
-7.  **Contact (ติดต่อเรา):** Location and contact channels.
+| Route | Status | Description |
+|-------|--------|-------------|
+| `/chiang-rai-studies` | ✅ Done | หน้าแรก (Hero light blue-white, 5 identities, news, stats) |
+| `/about/history` | ✅ Done | ความเป็นมา |
+| `/about/objectives` | ✅ Done | วัตถุประสงค์ |
+| `/about/goals-mission` | ✅ Done | เป้าหมาย/พันธกิจ |
+| `/about/structure` | ✅ Done | โครงสร้างองค์กร |
+| `/archive` | ✅ Done | คลังข้อมูล 5 อัตลักษณ์ (list + filter) |
+| `/archive/[id]` | ✅ Done | รายละเอียด artifact |
+| `/articles` | ✅ Done | บทความวิชาการ (list) |
+| `/articles/[slug]` | ✅ Done | บทความ (detail) |
+| `/activities` | ✅ Done | กิจกรรม/ข่าวสาร (list + pagination) |
+| `/activities/[slug]` | ✅ Done | กิจกรรม (detail - full editorial) ← Mar 19 |
+| `/learning-sites` | ✅ Done | แหล่งเรียนรู้ (list + tag filter) |
+| `/learning-sites/[slug]` | ✅ Done | แหล่งเรียนรู้ (detail - full editorial) ← Mar 19 |
+| `/staff` | ✅ Done | ทำเนียบบุคลากร |
+| `/contact` | ✅ Done | ติดต่อเรา |
+| `/admin` | ✅ Done | Admin Dashboard + CRUD (17 pages) |
 
+---
 
-## 3. Brand Identity & Design System
+## 🎨 อัตลักษณ์แบรนด์และระบบออกแบบ (Brand Identity & Design System)
 
 ### Corporate Identity (CI)
-- **Primary Color:** **Chiang Rai Purple (สีม่วงบัวสาย)**
-  - *Hex:* `#702963` (Byzantium) or `#6B21A8` (Purple-800)
-  - *Meaning:* Wanthong Chai (Saturday), the birth day of King Mangrai the Great. Represents prosperity, peace, and elegance.
-  - *Usage:* Headers, Hero Backgrounds, Primary Buttons.
-- **Accent Color:** **Puang Said Orange (สีส้มพวงแสด)**
-  - *Hex:* `#F97316` (Orange-500)
-  - *Meaning:* Provincial Flower (Pyrostegia venusta). Represents vitality and local flora.
-  - *Usage:* Highlights, Calls to Action (CTA), Decorative lines.
-- **Base Color:** **Mist White (สีขาวหมอก/ช้างเผือก)**
-  - *Hex:* `#F8FAFC` (Slate-50)
-  - *Meaning:* White Elephant under the clouds (Provincial Seal). Represents purity and auspiciousness.
-  - *Usage:* Backgrounds, Cards, Typography on dark backgrounds.
+- **Primary:** Chiang Rai Purple `#2e1065` / `#702963` — ม่วงบัวสาย (วันเกิดพ่อขุนเม็งราย)
+- **Accent:** Puang Said Orange `#F97316` — ส้มพวงแสด (ดอกไม้ประจำจังหวัด)
+- **Base:** Mist White `#F8FAFC` — ช้างเผือกใต้เมฆ
+- **Homepage Hero:** Light Blue-White gradient (sky-50 → white → blue-50) ← Updated Mar 19
+- **Detail Pages:** Purple hero overlay with breadcrumb, full-width content
 
 ### Symbols & Motifs
-- **Provincial Seal:** White Elephant under clouds.
-- **Flora:** Kasalong Kham (Tree of Gold) & Puang Said (Orange Trumpet).
-- **Pattern:** Chiang Saen Hong Dam (Black Swan on Purple).
+- Provincial Seal: White Elephant under clouds
+- Flora: Kasalong Kham & Puang Said (Orange Trumpet)
+- Pattern: Chiang Saen Hong Dam (Black Swan on Purple)
 
-## 4. Development Phases
+---
 
-### Phase 1: Database & Content Modeling
--   **Analyze Data:** Define fields for the "5 Identities" to structure the Digital Archive.
--   **Schema Design:** Design PostgreSQL tables for:
-    -   `chiang_rai_identities` (Main Categories)
-    -   `chiang_rai_artifacts` (Digital Archive items)
-    -   `chiang_rai_articles` (Research/Academic articles)
-    -   `chiang_rai_staff` (Center Personnel - Separated from main staff)
-    -   `chiang_rai_activities` (Events)
+## 🚀 เฟสการพัฒนา (Development Phases)
 
-### Phase 2: Backend Development
--   **API Implementation:** Develop endpoints for CRUD operations on the new schemas.
--   **Search Functionality:** Implement filtering logic to allow searching artifacts by category (the 5 identities).
+### Phase 1: Database & Content Modeling ✅ COMPLETE
+- [x] PostgreSQL tables: artifacts, articles, activities, learning_sites, staff, config
+- [x] Drizzle ORM schema with indexes
+- [x] Enums: activity type (NEWS/EVENT/ANNOUNCEMENT), identity categories
 
-### Phase 3: Frontend Development
--   **UI/UX Design:** Create the "Modern Lanna" visual identity.
--   **Page Implementation:**
-    -   [x] Develop public-facing pages with SEO optimization (Home, About Us, Structure).
-    -   Create specific layouts for the Digital Archive to handle multimedia (images, video, audio).
-    -   Create specific layouts for the Digital Archive to handle multimedia (images, video, audio).
-    -   **Admin Dashboard:**
-        -   Develop a separate Admin Interface at `/chiang-rai-studies/admin`.
-        -   **Staff Management System:** Implement an "Import from Faculty" feature to allow selecting existing faculty staff and assigning them roles within the Center (Director, Academic, etc.) without duplicating data maintenance efforts.
+### Phase 2: Backend Development ✅ COMPLETE
+- [x] 37 API endpoints via `chiang-rai.controller.ts`
+- [x] CRUD for all entities
+- [x] Search, filter, pagination
+- [x] Image upload (Sharp + WebP) and delete endpoints
+- [x] Staff import from faculty
+- [x] Homepage config management
 
-### Phase 4: Integration & Deployment
--   **Testing:** Verify data flow between Backend and Frontend.
--   **Deployment:** Deploy content changes to the production environment, ensuring proper routing.
+### Phase 3: Frontend Development ✅ COMPLETE
+- [x] Homepage with hero, 5 identities, featured sections, stats
+- [x] About pages (history, objectives, goals-mission, structure)
+- [x] Archive: list with category filter + detail page
+- [x] Articles: list + detail (slug-based)
+- [x] Activities: list (pagination) + detail (full editorial with real data)
+- [x] Learning Sites: list (tag filter) + detail (full editorial, media gallery)
+- [x] Staff page + Contact page
+- [x] Admin Dashboard (17 pages): CRUD for all entities + settings
+- [x] Refactored complete admin dashboard to use shadcn/ui components (Card, Button, Input, Dialog)
+- [x] Image management workflow (upload/delete on edit/delete)
+- [x] Activities image cleanup workflow aligned with Learning Sites on edit/delete
+- [x] Tags as clickable links with filter
+- [x] SEO metadata (generateMetadata) + JSON-LD on detail pages
+- [x] Breadcrumb navigation
+- [x] Reading time calculation
+- [x] YouTube/video embed in media galleries
+
+### Phase 5.5: Articles CRUD ✅ COMPLETE (February 13, 2026)
+- [x] Articles CRUD backend endpoints (`getArticleById`, `createArticle`, `updateArticle`, `deleteArticle`)
+- [x] Articles admin pages: list, create, edit with auto-slug and tags
+- [x] Dashboard integration with articles count
+- [x] API prefix fixes for all admin client-side fetch calls
+- [x] Missing import fixes (Plus icon in artifacts create)
+
+### Phase 4: Content & Polish 🔄 IN PROGRESS
+- [ ] Content population — ข้อมูลจริงทุก section
+- [ ] Articles detail page — verify editorial layout consistency
+- [x] SEO consistency review for list/home pages
+- [ ] Responsive polish across homepage and list pages
+- [x] Chiang Rai OG image fallback for social sharing
+- [x] Chiang Rai sitemap + robots coverage for public routes
+
+### Phase 5: QA & Deployment 📋 PENDING
+- [x] SEO audit (sitemap.xml, robots.txt, OG tags ทุกหน้า) — quick wins completed for Chiang Rai public routes
+- [ ] Responsive audit (mobile/tablet ทุกหน้า)
+- [ ] Structured data validation for list/static pages
+- [ ] Social card validation on production domain
+- [ ] Full-text search optimization (server-side)
+- [ ] Production deployment prep
+- [ ] User acceptance testing
+- [ ] Monitoring & analytics setup
+
+---
+
+## 🗃️ ตารางฐานข้อมูล (Database Tables)
+
+```
+chiang_rai_artifacts        — id, title, category (5 identities), description, content, mediaUrls, tags
+chiang_rai_articles         — id, title, slug, content, tags, author, isPublished, publishedAt
+chiang_rai_activities       — id, title, slug, type (NEWS/EVENT/ANNOUNCEMENT), content, location, eventDate, eventEndDate, mediaUrls, tags
+chiang_rai_learning_sites   — id, title, slug, content, thumbnailUrl, mediaType, mediaUrls, tags, author
+chiang_rai_staff            — id, staffProfileId, role, group (ADVISOR/EXECUTIVE/COMMITTEE)
+chiang_rai_config           — id, heroBgUrl, heroTitle, heroSubtitle, digitalArchiveBgUrl
+```
+
+---
+
+## 🔌 จุดเชื่อมต่อ API (API Endpoints)
+
+See `WORKFLOW-chiang-rai-admin.md` for complete endpoint list.
+
+Key modules: Artifacts (5), Articles (6), Activities (6), Learning Sites (7), Staff (7), Config (2), Core (4)
+
+---
+
+## 🔗 ไฟล์ที่เกี่ยวข้อง (Related Workflow Files)
+
+- `docs/WORKFLOW-project-status.md` → consolidated project status snapshot
+- `docs/WORKFLOW-chiang-rai-admin.md` → human-readable Chiang Rai admin workflow
+- `docs/PLAN-workflow-standardization.md` → workflow governance and maintenance rules
+- `.agent/workflows/chiang-rai-admin.md` → executable Chiang Rai admin workflow
+- `.agent/workflows/content-population.md` → executable workflow for content completion
+- `.agent/workflows/local-deployment.md` → executable workflow for local deployment and release preparation

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Save, Loader2, ImagePlus, Video, Link2, X, Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -11,15 +11,7 @@ import 'react-quill-new/dist/quill.snow.css';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-const categoryOptions = [
-    { value: 'CULTURAL_SITE', label: 'แหล่งเรียนรู้ทางวัฒนธรรม' },
-    { value: 'MUSEUM', label: 'พิพิธภัณฑ์' },
-    { value: 'TEMPLE', label: 'วัด' },
-    { value: 'HISTORICAL_SITE', label: 'โบราณสถาน' },
-    { value: 'COMMUNITY', label: 'ชุมชน' },
-    { value: 'WISDOM_CENTER', label: 'ศูนย์ภูมิปัญญา' },
-    { value: 'ART_SPACE', label: 'พื้นที่ศิลปะ' },
-];
+
 
 export default function EditLearningSitePage() {
     const router = useRouter();
@@ -31,6 +23,7 @@ export default function EditLearningSitePage() {
     const [uploadingMedia, setUploadingMedia] = useState(false);
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
     const mediaInputRef = useRef<HTMLInputElement>(null);
+    const prevContentImagesRef = useRef<string[]>([]);
     const id = params.id as string;
 
     const [formData, setFormData] = useState({
@@ -49,6 +42,26 @@ export default function EditLearningSitePage() {
     const [tagInput, setTagInput] = useState('');
     const [autoSlug, setAutoSlug] = useState(false);
     const [externalLinkInput, setExternalLinkInput] = useState('');
+
+    const deleteImageFromServer = async (imageUrl: string) => {
+        if (!imageUrl || !imageUrl.startsWith('/uploads/chiang-rai/')) return;
+        const token = localStorage.getItem('admin_token');
+        try {
+            await fetch(`${API_URL}/api/upload/chiang-rai`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ url: imageUrl }),
+            });
+        } catch (err) {
+            console.error('Failed to delete image:', err);
+        }
+    };
+
+    const extractImageUrls = (html: string): string[] => {
+        const matches = html.match(/src=["'](\/uploads\/chiang-rai\/[^"']+)["']/g);
+        if (!matches) return [];
+        return matches.map(m => m.replace(/src=["']/, '').replace(/["']$/, ''));
+    };
 
     const getMediaType = (url: string) => {
         if (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo')) return 'video';
@@ -73,14 +86,19 @@ export default function EditLearningSitePage() {
 
     const fetchLearningSite = async () => {
         try {
+            console.log('Fetching learning site from:', `${API_URL}/api/chiang-rai/learning-sites/by-id/${id}`);
             const res = await fetch(`${API_URL}/api/chiang-rai/learning-sites/by-id/${id}`);
+            console.log('Fetch response status:', res.status, 'OK:', res.ok);
             if (res.ok) {
                 const data = await res.json();
+                console.log('Fetched data:', data);
                 setFormData({
                     ...data,
                     tags: data.tags || [],
                     mediaUrls: data.mediaUrls || [],
+                    externalLinks: [], // Backend doesn't return externalLinks separately
                 });
+                prevContentImagesRef.current = extractImageUrls(data.content || '');
             } else {
                 alert('ไม่พบข้อมูลแหล่งเรียนรู้');
                 router.push('/chiang-rai-studies/admin/learning-sites');
@@ -94,10 +112,15 @@ export default function EditLearningSitePage() {
     };
 
     const uploadImage = async (file: File): Promise<string | null> => {
+        const token = localStorage.getItem('admin_token');
         const uploadForm = new FormData();
         uploadForm.append('file', file);
         try {
-            const res = await fetch(`${API_URL}/api/upload/chiang-rai`, { method: 'POST', body: uploadForm });
+            const res = await fetch(`${API_URL}/api/upload/chiang-rai`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: uploadForm,
+            });
             if (res.ok) { const data = await res.json(); return data.url || data.path; }
             return null;
         } catch (error) { console.error('Upload error:', error); return null; }
@@ -107,10 +130,19 @@ export default function EditLearningSitePage() {
         const file = e.target.files?.[0];
         if (!file) return;
         setUploadingThumbnail(true);
+        const oldThumbnail = formData.thumbnailUrl;
         const url = await uploadImage(file);
-        if (url) setFormData(prev => ({ ...prev, thumbnailUrl: url }));
+        if (url) {
+            if (oldThumbnail) await deleteImageFromServer(oldThumbnail);
+            setFormData(prev => ({ ...prev, thumbnailUrl: url }));
+        }
         setUploadingThumbnail(false);
         if (thumbnailInputRef.current) thumbnailInputRef.current.value = '';
+    };
+
+    const handleRemoveThumbnail = async () => {
+        await deleteImageFromServer(formData.thumbnailUrl);
+        setFormData(prev => ({ ...prev, thumbnailUrl: '' }));
     };
 
     const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +159,9 @@ export default function EditLearningSitePage() {
         if (mediaInputRef.current) mediaInputRef.current.value = '';
     };
 
-    const handleRemoveMedia = (index: number) => {
+    const handleRemoveMedia = async (index: number) => {
+        const url = formData.mediaUrls[index];
+        await deleteImageFromServer(url);
         setFormData(prev => ({ ...prev, mediaUrls: prev.mediaUrls.filter((_, i) => i !== index) }));
     };
 
@@ -145,30 +179,55 @@ export default function EditLearningSitePage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.title.trim() || !formData.slug.trim()) { alert('กรุณากรอกชื่อและ Slug'); return; }
+        if (!formData.content) { alert('กรุณากรอกเนื้อหา'); return; }
         setSubmitting(true);
         try {
+            const token = localStorage.getItem('admin_token');
             const allMediaUrls = [...formData.mediaUrls, ...formData.externalLinks];
             const payload = {
-                ...formData,
-                tags: formData.tags.length > 0 ? formData.tags : null,
-                thumbnailUrl: formData.thumbnailUrl || null,
+                title: formData.title,
+                slug: formData.slug,
                 description: formData.description || null,
+                content: formData.content || '',
+                thumbnailUrl: formData.thumbnailUrl || null,
+                tags: formData.tags.length > 0 ? formData.tags : null,
                 author: formData.author || user?.name || 'ศูนย์เชียงรายศึกษา',
+                isPublished: formData.isPublished,
                 publishedAt: formData.isPublished ? new Date().toISOString() : null,
                 mediaUrls: allMediaUrls.length > 0 ? allMediaUrls : [],
-                mediaType: allMediaUrls.length > 0 ? 'IMAGE' : 'IMAGE',
+                mediaType: 'IMAGE',
             };
+            console.log('Sending PUT request to:', `${API_URL}/api/chiang-rai/learning-sites/${id}`);
+            console.log('Payload:', JSON.stringify(payload, null, 2));
+
             const res = await fetch(`${API_URL}/api/chiang-rai/learning-sites/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : '',
+                },
                 body: JSON.stringify(payload),
             });
+
+            console.log('Response status:', res.status, 'OK:', res.ok);
+            const responseText = await res.text();
+            console.log('Response body:', responseText);
+
+            // Success: 200, 201, or res.ok (any 2xx status)
             if (res.ok) {
+                const newContentImages = extractImageUrls(formData.content);
+                const removedImages = prevContentImagesRef.current.filter(url => !newContentImages.includes(url));
+                await Promise.all(removedImages.map(url => deleteImageFromServer(url)));
                 alert('อัปเดตข้อมูลสำเร็จ');
                 router.push('/chiang-rai-studies/admin/learning-sites');
             } else {
-                const error = await res.json();
-                alert(`เกิดข้อผิดพลาด: ${error.message}`);
+                console.error('API Error:', res.status, responseText);
+                try {
+                    const error = JSON.parse(responseText);
+                    alert(`เกิดข้อผิดพลาด: ${error.message || JSON.stringify(error)}`);
+                } catch {
+                    alert(`เกิดข้อผิดพลาด: HTTP ${res.status}`);
+                }
             }
         } catch (error) {
             console.error('Submit error:', error);
@@ -178,10 +237,56 @@ export default function EditLearningSitePage() {
         }
     };
 
-    const quillModules = {
-        toolbar: [[{ header: [1, 2, 3, false] }], ['bold', 'italic', 'underline'], [{ list: 'ordered' }, { list: 'bullet' }], [{ color: [] }, { background: [] }], ['link', 'image', 'video'], ['clean']],
-    };
-    const quillFormats = ['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'color', 'background', 'link', 'image', 'video'];
+    const quillModules = useMemo(() => {
+        const uploadUrl = `${API_URL}/api/upload/chiang-rai`;
+        return {
+            toolbar: {
+                container: [
+                    [{ header: [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline'],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    [{ color: [] }, { background: [] }],
+                    ['link', 'image'],
+                    ['clean'],
+                ],
+                handlers: {
+                    image: function(this: any) {
+                        const quill = this.quill;
+                        const input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        input.click();
+                        input.onchange = async () => {
+                            const file = input.files?.[0];
+                            if (!file) return;
+                            const token = localStorage.getItem('admin_token');
+                            const fd = new FormData();
+                            fd.append('file', file);
+                            try {
+                                const res = await fetch(uploadUrl, {
+                                    method: 'POST',
+                                    headers: { Authorization: `Bearer ${token}` },
+                                    body: fd,
+                                });
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    const url = data.url || data.path;
+                                    if (url) {
+                                        const range = quill.getSelection(true);
+                                        quill.insertEmbed(range.index, 'image', url);
+                                        quill.setSelection(range.index + 1);
+                                    }
+                                }
+                            } catch (err) {
+                                console.error('Image upload error:', err);
+                            }
+                        };
+                    }
+                },
+            },
+        };
+    }, []);
+    const quillFormats = ['header', 'bold', 'italic', 'underline', 'list', 'color', 'background', 'link', 'image'];
 
     if (loading) return (<div className="flex justify-center items-center h-64"><Loader2 className="animate-spin text-purple-600" size={32} /></div>);
 
@@ -242,7 +347,7 @@ export default function EditLearningSitePage() {
                     {formData.thumbnailUrl && (
                         <div className="relative w-full max-w-md aspect-video rounded-lg overflow-hidden border border-stone-200">
                             <img src={formData.thumbnailUrl.startsWith('/') ? `${API_URL}${formData.thumbnailUrl}` : formData.thumbnailUrl} alt="Thumbnail" className="w-full h-full object-cover" />
-                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, thumbnailUrl: '' }))} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition"><X size={14} /></button>
+                            <button type="button" onClick={handleRemoveThumbnail} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition"><X size={14} /></button>
                         </div>
                     )}
                 </div>
@@ -303,9 +408,9 @@ export default function EditLearningSitePage() {
                                         ) : (
                                             <img src={item.url.startsWith('/') ? `${API_URL}${item.url}` : item.url} alt={`Media ${index + 1}`} className="w-full h-28 object-cover" />
                                         )}
-                                        <button type="button" onClick={() => {
+                                        <button type="button" onClick={async () => {
                                             if (item.type === 'link') handleRemoveExternalLink(formData.externalLinks.indexOf(item.url));
-                                            else handleRemoveMedia(formData.mediaUrls.indexOf(item.url));
+                                            else await handleRemoveMedia(formData.mediaUrls.indexOf(item.url));
                                         }} className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"><X size={12} /></button>
                                     </div>
                                 );

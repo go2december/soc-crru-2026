@@ -2,6 +2,7 @@
 
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Card, CardContent } from '@/components/ui/card';
 
 function CallbackContent() {
     const router = useRouter();
@@ -33,12 +34,14 @@ function CallbackContent() {
     }, [searchParams, router]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#faf5ff] font-kanit">
-            <div className="text-center p-8 bg-white rounded-xl shadow-lg border border-purple-50">
-                <div className="w-12 h-12 rounded-full border-4 border-purple-200 border-t-purple-800 animate-spin mx-auto mb-4"></div>
-                <p className="text-lg font-bold text-purple-800">กำลังยืนยันตัวตน...</p>
-                <p className="text-sm text-purple-500 mt-2">กรุณารอสักครู่ ระบบกำลังนำท่านไปยังหน้าจัดการ</p>
-            </div>
+        <div className="min-h-screen flex items-center justify-center bg-[#faf5ff] font-kanit p-4">
+            <Card className="w-full max-w-md border-purple-100 shadow-lg">
+                <CardContent className="p-8 text-center">
+                    <div className="mx-auto mb-4 h-12 w-12 rounded-full border-4 border-purple-200 border-t-purple-800 animate-spin" />
+                    <p className="text-lg font-bold text-purple-800">กำลังยืนยันตัวตน...</p>
+                    <p className="mt-2 text-sm text-purple-500">กรุณารอสักครู่ ระบบกำลังนำท่านไปยังหน้าจัดการ</p>
+                </CardContent>
+            </Card>
         </div>
     );
 }
@@ -47,7 +50,7 @@ export default function ChiangRaiAdminCallbackPage() {
     return (
         <Suspense fallback={
             <div className="min-h-screen flex items-center justify-center bg-[#faf5ff]">
-                <div className="w-12 h-12 rounded-full border-4 border-purple-200 border-t-purple-800 animate-spin"></div>
+                <div className="h-12 w-12 rounded-full border-4 border-purple-200 border-t-purple-800 animate-spin"></div>
             </div>
         }>
             <CallbackContent />

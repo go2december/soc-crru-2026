@@ -31,6 +31,8 @@ export default function EditActivityPage() {
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
     const mediaInputRef = useRef<HTMLInputElement>(null);
     const prevContentRef = useRef<string>('');
+    const originalThumbnailRef = useRef<string>('');
+    const originalMediaUrlsRef = useRef<string[]>([]);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -165,6 +167,8 @@ export default function EditActivityPage() {
                 const data = await res.json();
                 const content = data.content || '';
                 prevContentRef.current = content;
+                originalThumbnailRef.current = data.thumbnailUrl || '';
+                originalMediaUrlsRef.current = data.mediaUrls || [];
                 setFormData({
                     title: data.title || '',
                     slug: data.slug || '',
@@ -198,7 +202,6 @@ export default function EditActivityPage() {
         const file = e.target.files?.[0];
         if (!file) return;
         setUploadingThumbnail(true);
-        if (formData.thumbnailUrl) await deleteImageFromServer(formData.thumbnailUrl);
         const url = await uploadImage(file);
         if (url) setFormData(prev => ({ ...prev, thumbnailUrl: url }));
         setUploadingThumbnail(false);
@@ -287,6 +290,21 @@ export default function EditActivityPage() {
             });
 
             if (res.ok) {
+                const currentContentImages = extractImageUrls(formData.content || '');
+                const previousContentImages = extractImageUrls(prevContentRef.current || '');
+                const removedContentImages = previousContentImages.filter(url => !currentContentImages.includes(url));
+                const removedMediaUrls = originalMediaUrlsRef.current.filter(url => !formData.mediaUrls.includes(url));
+                const removedThumbnail = originalThumbnailRef.current && originalThumbnailRef.current !== formData.thumbnailUrl
+                    ? [originalThumbnailRef.current]
+                    : [];
+
+                const imagesToDelete = Array.from(new Set([
+                    ...removedThumbnail,
+                    ...removedMediaUrls.filter(url => url.startsWith('/uploads/chiang-rai/')),
+                    ...removedContentImages,
+                ])).filter(url => url.startsWith('/uploads/chiang-rai/'));
+
+                await Promise.all(imagesToDelete.map(url => deleteImageFromServer(url)));
                 router.push('/chiang-rai-studies/admin/activities');
             } else {
                 const error = await res.json();
@@ -541,11 +559,6 @@ export default function EditActivityPage() {
                             theme="snow"
                             value={formData.content}
                             onChange={(value: string) => {
-                                const prevImages = extractImageUrls(prevContentRef.current);
-                                const newImages = extractImageUrls(value);
-                                const removedImages = prevImages.filter(img => !newImages.includes(img));
-                                removedImages.forEach(img => deleteImageFromServer(img));
-                                prevContentRef.current = value;
                                 setFormData(prev => ({ ...prev, content: value }));
                             }}
                             modules={quillModules}

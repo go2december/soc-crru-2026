@@ -1,4 +1,3 @@
-
 import { Mail, Users, Crown, Shield } from 'lucide-react';
 import Image from 'next/image';
 import { Metadata } from 'next';
@@ -8,6 +7,22 @@ const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
 export const metadata: Metadata = {
     title: 'ทำเนียบบุคลากร | ศูนย์เชียงรายศึกษา',
     description: 'ทีมงานผู้ขับเคลื่อนภารกิจการอนุรักษ์ เผยแพร่ และต่อยอดองค์ความรู้ท้องถิ่น คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    alternates: {
+        canonical: '/chiang-rai-studies/staff',
+    },
+    openGraph: {
+        title: 'ทำเนียบบุคลากร | ศูนย์เชียงรายศึกษา',
+        description: 'ทีมงานผู้ขับเคลื่อนภารกิจการอนุรักษ์ เผยแพร่ และต่อยอดองค์ความรู้ท้องถิ่น คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+        url: '/chiang-rai-studies/staff',
+        siteName: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
+        locale: 'th_TH',
+        type: 'website',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'ทำเนียบบุคลากร | ศูนย์เชียงรายศึกษา',
+        description: 'ทีมงานผู้ขับเคลื่อนภารกิจการอนุรักษ์ เผยแพร่ และต่อยอดองค์ความรู้ท้องถิ่น คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    },
 };
 
 interface StaffMember {

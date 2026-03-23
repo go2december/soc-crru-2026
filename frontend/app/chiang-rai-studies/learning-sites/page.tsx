@@ -8,7 +8,15 @@ import { th } from 'date-fns/locale';
 export const metadata: Metadata = {
     title: 'แหล่งเรียนรู้ทางวัฒนธรรม | ศูนย์เชียงรายศึกษา',
     description: 'รวมแหล่งเรียนรู้ทางวัฒนธรรมในเชียงราย พิพิธภัณฑ์ วัด โบราณสถาน ชุมชนท่องเที่ยว ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    alternates: {
+        canonical: '/chiang-rai-studies/learning-sites',
+    },
     openGraph: { title: 'แหล่งเรียนรู้ทางวัฒนธรรม | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/learning-sites' },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'แหล่งเรียนรู้ทางวัฒนธรรม | ศูนย์เชียงรายศึกษา',
+        description: 'รวมแหล่งเรียนรู้ทางวัฒนธรรมในเชียงราย พิพิธภัณฑ์ วัด โบราณสถาน ชุมชนท่องเที่ยว ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    },
 };
 
 const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';

@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Newspaper, Plus } from 'lucide-react';
 
 export default function CreateNewsPage() {
     const router = useRouter();
@@ -43,25 +49,28 @@ export default function CreateNewsPage() {
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
-            <h1 className="text-2xl font-bold">✍️ เขียนข่าวใหม่</h1>
+            <div>
+                <h1 className="flex items-center gap-2 text-2xl font-bold"><Newspaper className="h-7 w-7 text-primary" />เขียนข่าวใหม่</h1>
+                <p className="text-sm text-muted-foreground">สร้างข่าว กิจกรรม หรือประกาศสำหรับหน้าเว็บไซต์คณะ</p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="card bg-base-100 shadow-xl">
-                <div className="card-body space-y-4">
-                    <div className="form-control">
-                        <label className="label">หัวข้อข่าว</label>
-                        <input
+            <Card className="border-border/70 shadow-sm">
+                <CardContent className="space-y-4 p-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">หัวข้อข่าว</label>
+                        <Input
                             type="text"
-                            className="input input-bordered w-full"
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         />
                     </div>
 
-                    <div className="form-control">
-                        <label className="label">หมวดหมู่</label>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">หมวดหมู่</label>
                         <select
-                            className="select select-bordered w-full"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                             value={formData.category}
                             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                         >
@@ -71,35 +80,38 @@ export default function CreateNewsPage() {
                         </select>
                     </div>
 
-                    <div className="form-control">
-                        <label className="label">รูปภาพปก (URL)</label>
-                        <input
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">รูปภาพปก (URL)</label>
+                        <Input
                             type="url"
-                            className="input input-bordered w-full"
                             placeholder="https://example.com/image.jpg"
                             value={formData.thumbnailUrl}
                             onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
                         />
                     </div>
 
-                    <div className="form-control">
-                        <label className="label">เนื้อหาข่าว</label>
-                        <textarea
-                            className="textarea textarea-bordered h-40"
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">เนื้อหาข่าว</label>
+                        <Textarea
+                            className="min-h-40"
                             required
                             value={formData.content}
                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                        ></textarea>
+                        />
                     </div>
 
-                    <div className="card-actions justify-end mt-4">
-                        <a href="/admin/news" className="btn btn-ghost">ยกเลิก</a>
-                        <button type="submit" className="btn btn-primary" disabled={loading}>
-                            {loading ? <span className="loading loading-spinner"></span> : 'บันทึกข่าว'}
-                        </button>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <Button asChild type="button" variant="ghost">
+                            <Link href="/admin/news">ยกเลิก</Link>
+                        </Button>
+                        <Button type="submit" disabled={loading} className="gap-2">
+                            <Plus className="h-4 w-4" />
+                            {loading ? 'กำลังบันทึก...' : 'บันทึกข่าว'}
+                        </Button>
                     </div>
-                </div>
-            </form>
+                </form>
+                </CardContent>
+            </Card>
         </div>
     );
 }

@@ -1,9 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2, Search, Loader2, Filter, Star, Calendar, Megaphone, Newspaper } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface Activity {
     id: string;
@@ -20,7 +31,7 @@ interface Activity {
     createdAt: string;
 }
 
-const TYPE_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
+const TYPE_CONFIG: Record<string, { label: string; color: string; icon: LucideIcon }> = {
     NEWS: { label: 'ข่าวสาร', color: 'bg-blue-100 text-blue-700', icon: Newspaper },
     EVENT: { label: 'กิจกรรม', color: 'bg-purple-100 text-purple-700', icon: Calendar },
     ANNOUNCEMENT: { label: 'ประกาศ', color: 'bg-amber-100 text-amber-700', icon: Megaphone },
@@ -51,7 +62,7 @@ export default function AdminActivitiesPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState<string>('ALL');
-    const router = useRouter();
+    const [deleteTarget, setDeleteTarget] = useState<Activity | null>(null);
 
     useEffect(() => {
         fetchActivities();
@@ -71,12 +82,12 @@ export default function AdminActivitiesPage() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('คุณต้องการลบรายการนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถเรียกคืนได้')) return;
+    const handleDelete = async () => {
+        if (!deleteTarget) return;
         const token = localStorage.getItem('admin_token');
         try {
             const imagesToDelete: string[] = [];
-            const dataRes = await fetch(`${API_URL}/api/chiang-rai/activities/by-id/${id}`);
+            const dataRes = await fetch(`${API_URL}/api/chiang-rai/activities/by-id/${deleteTarget.id}`);
             if (dataRes.ok) {
                 const data = await dataRes.json();
                 if (data.thumbnailUrl?.startsWith('/uploads/chiang-rai/')) imagesToDelete.push(data.thumbnailUrl);
@@ -86,14 +97,15 @@ export default function AdminActivitiesPage() {
                 extractImageUrls(data.content || '').forEach(url => imagesToDelete.push(url));
             }
 
-            const res = await fetch(`${API_URL}/api/chiang-rai/activities/${id}`, {
+            const res = await fetch(`${API_URL}/api/chiang-rai/activities/${deleteTarget.id}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}` },
             });
 
             if (res.ok) {
-                setActivities(prev => prev.filter(item => item.id !== id));
+                setActivities(prev => prev.filter(item => item.id !== deleteTarget.id));
                 await Promise.all(imagesToDelete.map(url => deleteImageFromServer(url)));
+                setDeleteTarget(null);
             } else {
                 alert('เกิดข้อผิดพลาดในการลบข้อมูล');
             }
@@ -127,22 +139,21 @@ export default function AdminActivitiesPage() {
                     <h1 className="text-2xl font-bold text-stone-800">จัดการกิจกรรม/ข่าวสาร</h1>
                     <p className="text-stone-500 text-sm">Activities & News Management</p>
                 </div>
-                <Link
-                    href="/chiang-rai-studies/admin/activities/create"
-                    className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition shadow-sm"
-                >
-                    <Plus size={18} /> เพิ่มรายการใหม่
-                </Link>
+                <Button asChild className="gap-2 bg-purple-600 hover:bg-purple-700">
+                    <Link href="/chiang-rai-studies/admin/activities/create">
+                        <Plus size={18} /> เพิ่มรายการใหม่
+                    </Link>
+                </Button>
             </div>
 
             {/* Search & Filter */}
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={20} />
-                    <input
+                    <Input
                         type="text"
                         placeholder="ค้นหาตามชื่อ, ผู้เขียน, สถานที่..."
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                        className="pl-10 border-stone-200 focus-visible:ring-purple-500"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -150,22 +161,24 @@ export default function AdminActivitiesPage() {
                 <div className="flex items-center gap-2">
                     <Filter size={16} className="text-stone-400" />
                     {['ALL', 'NEWS', 'EVENT', 'ANNOUNCEMENT'].map((type) => (
-                        <button
+                        <Button
                             key={type}
                             onClick={() => setFilterType(type)}
+                            variant="ghost"
                             className={`px-3 py-1.5 rounded-full text-xs font-bold transition ${filterType === type
                                     ? 'bg-purple-600 text-white shadow-sm'
                                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                                 }`}
                         >
                             {type === 'ALL' ? 'ทั้งหมด' : TYPE_CONFIG[type]?.label || type}
-                        </button>
+                        </Button>
                     ))}
                 </div>
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+            <Card className="overflow-hidden border-stone-200 shadow-sm">
+                <CardContent className="p-0">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -228,7 +241,7 @@ export default function AdminActivitiesPage() {
                                                     <Pencil size={18} />
                                                 </Link>
                                                 <button
-                                                    onClick={() => handleDelete(item.id)}
+                                                    onClick={() => setDeleteTarget(item)}
                                                     className="inline-flex p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                                     title="ลบ"
                                                 >
@@ -248,7 +261,23 @@ export default function AdminActivitiesPage() {
                         </tbody>
                     </table>
                 </div>
-            </div>
+                </CardContent>
+            </Card>
+
+            <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="text-destructive">ยืนยันการลบรายการ</DialogTitle>
+                        <DialogDescription>
+                            คุณต้องการลบ <strong>{deleteTarget?.title}</strong> ใช่หรือไม่? การกระทำนี้ไม่สามารถเรียกคืนได้
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setDeleteTarget(null)}>ยกเลิก</Button>
+                        <Button variant="destructive" onClick={handleDelete}>ยืนยันลบ</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

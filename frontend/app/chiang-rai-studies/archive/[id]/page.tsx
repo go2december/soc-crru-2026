@@ -57,7 +57,17 @@ async function getArtifact(id: string): Promise<Artifact | null> {
             throw new Error('Failed to fetch artifact');
         }
 
-        return res.json();
+        const artifact = await res.json();
+        // Convert relative URLs to absolute URLs
+        if (artifact.thumbnailUrl && !artifact.thumbnailUrl.startsWith('http')) {
+            artifact.thumbnailUrl = `${API_URL}${artifact.thumbnailUrl}`;
+        }
+        if (artifact.mediaUrls && Array.isArray(artifact.mediaUrls)) {
+            artifact.mediaUrls = artifact.mediaUrls.map((url: string) =>
+                url.startsWith('/') ? `${API_URL}${url}` : url
+            );
+        }
+        return artifact;
     } catch (error) {
         console.error('Error fetching artifact:', error);
         return null;
@@ -90,11 +100,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const description = artifact.description
         ? artifact.description.slice(0, 160) + (artifact.description.length > 160 ? '...' : '')
         : 'คลังข้อมูลดิจิทัล รวบรวมองค์ความรู้ ประวัติศาสตร์ ศิลปวัฒนธรรม และภูมิปัญญาท้องถิ่นเชียงราย';
-    const ogImage = artifact.thumbnailUrl || (artifact.mediaUrls && artifact.mediaUrls.length > 0 ? artifact.mediaUrls[0] : null);
+    const ogImage = artifact.thumbnailUrl || (artifact.mediaUrls && artifact.mediaUrls[0]) || null;
 
     return {
         title: title,
         description: description,
+        alternates: {
+            canonical: `/chiang-rai-studies/archive/${id}`,
+        },
         openGraph: {
             title: title,
             description: description,

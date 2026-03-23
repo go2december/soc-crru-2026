@@ -20,7 +20,7 @@ CMD ["npm", "run", "start:dev"]
 # ---------------------------------------
 # Stage 2: Production (Antigravity Mode)
 # ---------------------------------------
-FROM node:25-alpine as production
+FROM node:25-alpine AS production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}

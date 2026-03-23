@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-const BASE_URL = 'https://soc.crru.ac.th';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://soc.crru.ac.th';
 const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
 
 async function fetchJson(path: string) {
@@ -13,10 +13,11 @@ async function fetchJson(path: string) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const [activities, articles, learningSites] = await Promise.all([
+    const [activities, articles, learningSites, artifacts] = await Promise.all([
         fetchJson('/api/chiang-rai/activities?limit=200'),
         fetchJson('/api/chiang-rai/articles?limit=200'),
         fetchJson('/api/chiang-rai/learning-sites?limit=200'),
+        fetchJson('/api/chiang-rai/artifacts?limit=500'),
     ]);
 
     const dynamicUrls = [
@@ -37,6 +38,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             lastModified: new Date(item.updatedAt || item.publishedAt || Date.now()),
             changeFrequency: 'monthly' as const,
             priority: 0.8,
+        })),
+        ...(Array.isArray(artifacts) ? artifacts : []).map((item: any) => ({
+            url: `${BASE_URL}/chiang-rai-studies/archive/${item.id}`,
+            lastModified: new Date(item.updatedAt || item.createdAt || Date.now()),
+            changeFrequency: 'monthly' as const,
+            priority: 0.7,
         })),
     ];
 

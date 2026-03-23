@@ -1,10 +1,18 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import * as path from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Serve uploaded files as static assets at /uploads path
+  app.useStaticAssets(path.join(process.cwd(), 'uploads'), {
+    prefix: '/uploads',
+  });
+
 
   // Enable CORS for frontend
   app.enableCors({

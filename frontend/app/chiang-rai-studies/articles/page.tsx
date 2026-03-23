@@ -8,7 +8,15 @@ import { th } from 'date-fns/locale';
 export const metadata: Metadata = {
     title: 'บทความวิชาการ | ศูนย์เชียงรายศึกษา',
     description: 'รวมบทความวิชาการ งานวิจัย และสิ่งพิมพ์จากศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    alternates: {
+        canonical: '/chiang-rai-studies/articles',
+    },
     openGraph: { title: 'บทความวิชาการ | ศูนย์เชียงรายศึกษา', url: '/chiang-rai-studies/articles' },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'บทความวิชาการ | ศูนย์เชียงรายศึกษา',
+        description: 'รวมบทความวิชาการ งานวิจัย และสิ่งพิมพ์จากศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    },
 };
 
 const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';

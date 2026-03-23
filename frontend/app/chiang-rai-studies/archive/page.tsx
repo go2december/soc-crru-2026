@@ -82,10 +82,24 @@ function ArchiveContent() {
                 const json = await res.json();
 
                 if (json.data && Array.isArray(json.data)) {
-                    setArtifacts(json.data);
+                    // Convert relative thumbnail URLs to absolute URLs
+                    const processedData = json.data.map((artifact: Artifact) => ({
+                        ...artifact,
+                        thumbnailUrl: artifact.thumbnailUrl && !artifact.thumbnailUrl.startsWith('http')
+                            ? `${API_URL}${artifact.thumbnailUrl}`
+                            : artifact.thumbnailUrl,
+                    }));
+                    setArtifacts(processedData);
                     setTotalPages(json.meta?.totalPages || 1);
                 } else if (Array.isArray(json)) {
-                    setArtifacts(json);
+                    // Convert relative thumbnail URLs to absolute URLs
+                    const processedData = json.map((artifact: Artifact) => ({
+                        ...artifact,
+                        thumbnailUrl: artifact.thumbnailUrl && !artifact.thumbnailUrl.startsWith('http')
+                            ? `${API_URL}${artifact.thumbnailUrl}`
+                            : artifact.thumbnailUrl,
+                    }));
+                    setArtifacts(processedData);
                     setTotalPages(1);
                 } else {
                     setArtifacts([]);

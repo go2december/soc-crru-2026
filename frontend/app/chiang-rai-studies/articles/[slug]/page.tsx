@@ -31,7 +31,17 @@ async function getArticle(slug: string): Promise<Article | null> {
             next: { revalidate: 60 }
         });
         if (!res.ok) return null;
-        return res.json();
+        const article = await res.json();
+        // Convert relative URLs to absolute URLs
+        if (article.thumbnailUrl && !article.thumbnailUrl.startsWith('http')) {
+            article.thumbnailUrl = `${API_URL}${article.thumbnailUrl}`;
+        }
+        if (article.mediaUrls && Array.isArray(article.mediaUrls)) {
+            article.mediaUrls = article.mediaUrls.map((url: string) =>
+                url.startsWith('/') ? `${API_URL}${url}` : url
+            );
+        }
+        return article;
     } catch (error) {
         console.error('Error fetching article:', error);
         return null;
@@ -50,6 +60,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return {
         title,
         description,
+        alternates: {
+            canonical: `/chiang-rai-studies/articles/${slug}`,
+        },
         openGraph: {
             title,
             description,

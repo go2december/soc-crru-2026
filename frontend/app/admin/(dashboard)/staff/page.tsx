@@ -1,22 +1,31 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { useStaffData, Staff } from './hooks/useStaffData';
 import StaffForm from './components/StaffForm';
 import { Users, Edit3, Plus, Search, Trash2, Link2, Crown, UserX, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export default function AdminStaffPage() {
     const { staffList, departments, users, academicPositions, adminPositions, loading, refetch } = useStaffData();
     const [searchTerm, setSearchTerm] = useState('');
+    const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
     const [staffToDelete, setStaffToDelete] = useState<Staff | null>(null);
     const [submitting, setSubmitting] = useState(false);
-
-    // Dialog Refs
-    const formModalRef = useRef<HTMLDialogElement>(null);
-    const deleteModalRef = useRef<HTMLDialogElement>(null);
 
     const getFullName = (staff: Staff) => {
         return `${staff.prefixTh || ''}${staff.firstNameTh} ${staff.lastNameTh}`;
@@ -24,15 +33,15 @@ export default function AdminStaffPage() {
 
     const handleOpenModal = (staff: Staff | null) => {
         setEditingStaff(staff);
-        formModalRef.current?.showModal();
+        setIsFormOpen(true);
     };
 
     const handleCloseModal = () => {
-        formModalRef.current?.close();
+        setIsFormOpen(false);
         setEditingStaff(null);
     };
 
-    const handleSubmit = async (payload: any) => {
+    const handleSubmit = async (payload: Record<string, unknown>) => {
         setSubmitting(true);
         const token = localStorage.getItem('admin_token');
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
@@ -93,7 +102,6 @@ export default function AdminStaffPage() {
 
             if (res.ok) {
                 await refetch();
-                deleteModalRef.current?.close();
                 setStaffToDelete(null);
             } else {
                 alert('Failed to delete staff member');
@@ -118,7 +126,7 @@ export default function AdminStaffPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
             </div>
         );
     }
@@ -135,10 +143,10 @@ export default function AdminStaffPage() {
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
                     <div className="relative w-full md:w-64">
-                        <input
+                        <Input
                             type="text"
                             placeholder="ค้นหาชื่อ..."
-                            className="input input-bordered w-full pl-10"
+                            className="pl-10"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -146,50 +154,48 @@ export default function AdminStaffPage() {
                             <Search className="h-5 w-5" />
                         </span>
                     </div>
-                    <button
+                    <Button
                         onClick={() => handleOpenModal(null)}
-                        className="btn btn-primary gap-2 whitespace-nowrap shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow"
+                        className="gap-2 whitespace-nowrap"
                     >
                         <Plus className="h-5 w-5" />
                         เพิ่มบุคลากร
-                    </button>
+                    </Button>
                 </div>
             </div>
 
             {/* Staff Table */}
-            <div className="card bg-base-100 shadow-xl border border-base-200">
-                <div className="card-body p-0">
+            <Card className="border-border/70 shadow-sm">
+                <CardContent className="p-0">
                     <div className="overflow-x-auto">
-                        <table className="table table-zebra w-full">
-                            <thead className="bg-base-200/50 text-base-content/70">
+                        <table className="w-full text-sm">
+                            <thead className="border-b bg-muted/40 text-left text-muted-foreground">
                                 <tr>
-                                    <th className="w-16 text-center">#</th>
-                                    <th>ข้อมูลส่วนตัว</th>
-                                    <th>ตำแหน่ง/สังกัด</th>
-                                    <th>สถานะ</th>
-                                    <th className="text-right pr-6">จัดการ</th>
+                                    <th className="w-16 px-4 py-3 text-center font-medium">#</th>
+                                    <th className="px-4 py-3 font-medium">ข้อมูลส่วนตัว</th>
+                                    <th className="px-4 py-3 font-medium">ตำแหน่ง/สังกัด</th>
+                                    <th className="px-4 py-3 font-medium">สถานะ</th>
+                                    <th className="px-4 py-3 text-right font-medium">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredStaff.map((staff, index) => {
                                     const linkedUser = users.find(u => u.id === staff.userId);
                                     return (
-                                        <tr key={staff.id} className="hover">
-                                            <td className="text-center font-mono opacity-50">{index + 1}</td>
-                                            <td>
+                                        <tr key={staff.id} className="border-b align-middle hover:bg-muted/20">
+                                            <td className="px-4 py-3 text-center font-mono text-muted-foreground">{index + 1}</td>
+                                            <td className="px-4 py-3">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="avatar">
-                                                        <div className="mask mask-squircle w-12 h-12 bg-gray-100 ring-1 ring-base-300 ring-offset-2">
-                                                            {staff.imageUrl ? (
-                                                                <img src={staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl} alt={staff.firstNameTh} className="object-cover" />
-                                                            ) : (
-                                                                <div className="flex items-center justify-center w-full h-full text-xs text-gray-400 font-bold">No Img</div>
-                                                            )}
-                                                        </div>
+                                                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-muted ring-1 ring-border">
+                                                        {staff.imageUrl ? (
+                                                            <img src={staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl} alt={staff.firstNameTh} className="h-full w-full object-cover" />
+                                                        ) : (
+                                                            <div className="flex items-center justify-center w-full h-full text-xs text-muted-foreground font-bold">No Img</div>
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <div className="font-bold text-base">{getFullName(staff)}</div>
-                                                        <div className="text-xs opacity-60 flex gap-2">
+                                                        <div className="flex gap-2 text-xs text-muted-foreground">
                                                             <span>{staff.firstNameEn} {staff.lastNameEn}</span>
                                                             {linkedUser && (
                                                                 <span className="text-success font-medium flex items-center gap-0.5" title={`Linked to ${linkedUser.email}`}>
@@ -201,48 +207,51 @@ export default function AdminStaffPage() {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td className="px-4 py-3">
                                                 <div className="flex flex-col gap-1">
-                                                    <span className="font-semibold text-sm text-primary-content/80 text-primary">
+                                                    <span className="font-semibold text-sm text-primary">
                                                         {staff.adminPosition || staff.academicPosition || '-'}
                                                     </span>
-                                                    <div className="flex items-center gap-2 text-xs opacity-70">
-                                                        <span className="badge badge-ghost badge-sm">{staff.department || '-'}</span>
+                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                        <span className="inline-flex rounded-full border border-border bg-muted px-2 py-0.5 text-xs">{staff.department || '-'}</span>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td className="px-4 py-3">
                                                 <div className="flex flex-wrap gap-1">
-                                                    <span className={`badge badge-sm ${staff.staffType === 'ACADEMIC' ? 'badge-primary badge-outline' : 'badge-secondary badge-outline'}`}>
+                                                    <span className={cn('inline-flex rounded-full border px-2 py-0.5 text-xs font-medium', staff.staffType === 'ACADEMIC' ? 'border-primary/30 bg-primary/10 text-primary' : 'border-slate-300 bg-slate-100 text-slate-700')}>
                                                         {staff.staffType === 'ACADEMIC' ? 'วิชาการ' : 'สนับสนุน'}
                                                     </span>
                                                     {staff.isExecutive && (
-                                                        <span className="badge badge-warning badge-sm gap-1 text-warning-content shadow-sm">
+                                                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
                                                             <Crown className="w-3 h-3" />
                                                             ผู้บริหาร
                                                         </span>
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="text-right pr-6">
+                                            <td className="px-4 py-3 text-right">
                                                 <div className="flex justify-end gap-2">
-                                                    <button
+                                                    <Button
                                                         onClick={() => handleOpenModal(staff)}
-                                                        className="btn btn-square btn-ghost btn-sm text-info hover:bg-info/10 tooltip tooltip-left"
-                                                        data-tip="แก้ไขข้อมูล"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-sky-600"
+                                                        title="แก้ไขข้อมูล"
                                                     >
                                                         <Edit3 className="w-5 h-5" />
-                                                    </button>
-                                                    <button
+                                                    </Button>
+                                                    <Button
                                                         onClick={() => {
                                                             setStaffToDelete(staff);
-                                                            deleteModalRef.current?.showModal();
                                                         }}
-                                                        className="btn btn-square btn-ghost btn-sm text-error hover:bg-error/10 tooltip tooltip-left"
-                                                        data-tip="ลบข้อมูล"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-destructive"
+                                                        title="ลบข้อมูล"
                                                     >
                                                         <Trash2 className="w-5 h-5" />
-                                                    </button>
+                                                    </Button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -259,24 +268,28 @@ export default function AdminStaffPage() {
                             </div>
                         )}
                     </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
 
             {/* Add/Edit Modal */}
-            <dialog ref={formModalRef} className="modal backdrop-blur-sm">
-                <div className="modal-box w-full max-w-4xl bg-base-100 shadow-2xl p-6">
-                    <h3 className="font-bold text-2xl mb-6 flex items-center gap-2 border-b pb-4">
-                        {editingStaff ? (
-                            <>
-                                <Edit3 className="w-6 h-6 text-primary" /> แก้ไขข้อมูลบุคลากร
-                                <span className="text-sm font-normal opacity-50 ml-auto bg-base-200 px-2 py-1 rounded">ID: {editingStaff.id}</span>
-                            </>
-                        ) : (
-                            <>
-                                <Plus className="w-6 h-6 text-success" /> เพิ่มบุคลากรใหม่
-                            </>
-                        )}
-                    </h3>
+            <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open && !submitting) handleCloseModal(); }}>
+                <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-2xl">
+                            {editingStaff ? (
+                                <>
+                                    <Edit3 className="w-6 h-6 text-primary" /> แก้ไขข้อมูลบุคลากร
+                                </>
+                            ) : (
+                                <>
+                                    <Plus className="w-6 h-6 text-primary" /> เพิ่มบุคลากรใหม่
+                                </>
+                            )}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {editingStaff ? `รหัสบุคลากร: ${editingStaff.id}` : 'กรอกข้อมูลเพื่อสร้างรายการบุคลากรใหม่'}
+                        </DialogDescription>
+                    </DialogHeader>
 
                     <StaffForm
                         initialData={editingStaff}
@@ -288,39 +301,29 @@ export default function AdminStaffPage() {
                         onCancel={handleCloseModal}
                         isLoading={submitting}
                     />
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button onClick={handleCloseModal}>close</button>
-                </form>
-            </dialog>
+                </DialogContent>
+            </Dialog>
 
             {/* Delete Modal */}
-            <dialog ref={deleteModalRef} className="modal backdrop-blur-sm">
-                <div className="modal-box max-w-sm">
-                    <div className="flex flex-col items-center text-center gap-4">
-                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-500">
+            <Dialog open={!!staffToDelete} onOpenChange={(open) => { if (!open && !submitting) setStaffToDelete(null); }}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader className="items-center text-center">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-500">
                             <AlertTriangle className="w-8 h-8" />
                         </div>
-                        <h3 className="font-bold text-xl">ยืนยันการลบ?</h3>
-                        <p className="opacity-70">
-                            คุณต้องการลบข้อมูลของ<br />
-                            <strong>{staffToDelete ? getFullName(staffToDelete) : ''}</strong><br />
-                            ใช่หรือไม่? การกระทำนี้ไม่สามารถเรียกคืนได้
-                        </p>
-                    </div>
-                    <div className="modal-action justify-center mt-6">
-                        <form method="dialog">
-                            <button className="btn btn-ghost" disabled={submitting}>ยกเลิก</button>
-                        </form>
-                        <button onClick={handleDelete} className="btn btn-error text-white px-8" disabled={submitting}>
-                            {submitting ? <span className="loading loading-spinner"></span> : 'ยืนยันลบ'}
-                        </button>
-                    </div>
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button onClick={() => setStaffToDelete(null)}>close</button>
-                </form>
-            </dialog>
+                        <DialogTitle>ยืนยันการลบ?</DialogTitle>
+                        <DialogDescription>
+                            คุณต้องการลบข้อมูลของ <strong>{staffToDelete ? getFullName(staffToDelete) : ''}</strong> ใช่หรือไม่? การกระทำนี้ไม่สามารถเรียกคืนได้
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="ghost" disabled={submitting} onClick={() => setStaffToDelete(null)}>ยกเลิก</Button>
+                        <Button variant="destructive" onClick={handleDelete} disabled={submitting}>
+                            {submitting ? 'กำลังลบ...' : 'ยืนยันลบ'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
