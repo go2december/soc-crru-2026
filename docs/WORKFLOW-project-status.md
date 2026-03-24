@@ -1,5 +1,5 @@
 # 📋 Workflow & Plan - SOC-CRRU Web Application
-**Updated:** March 23, 2026
+**Updated:** March 24, 2026
 
 ---
 
@@ -7,11 +7,11 @@
 
 | Component | Status | Progress | Notes |
 |-----------|--------|----------|-------|
-| **เว็บคณะสังคมศาสตร์ (Faculty)** | 🔄 Active | ~70% | หน้า public มี แต่ backend ยังไม่ครบ |
-| **ศูนย์เชียงรายศึกษา (CR Studies)** | ✅ Active | ~90% | CRUD ครบ, UI refined, detail pages done |
-| **Backend API** | ✅ Operational | ~85% | NestJS + Drizzle, 71+ endpoints |
-| **Database** | ✅ Operational | 100% | PostgreSQL 18 + Drizzle ORM |
-| **Infrastructure** | ✅ Running | 100% | Docker Compose, 4 services |
+| **เว็บคณะสังคมศาสตร์ (Faculty)** | 🔄 IN PROGRESS | ~80% | Public pages และ admin หลักพร้อมแล้ว รวมถึง news public/admin flow ใหม่ เหลือ SEO, responsive, content work, และ research search/filter |
+| **ศูนย์เชียงรายศึกษา (CR Studies)** | 🔄 IN PROGRESS | ~90% | CRUD, SEO core, detail pages, และ admin surfaces พร้อมแล้ว เหลือ content population, responsive, และ deployment validation |
+| **Backend API** | 🔄 IN PROGRESS | ~85% | NestJS + Drizzle พร้อมใช้งาน แต่ยังมีงาน optimization และ release-readiness บางส่วน |
+| **Database** | ✅ COMPLETE | 100% | PostgreSQL 18 + Drizzle ORM |
+| **Infrastructure** | ✅ COMPLETE | 100% | Docker Compose, 4 services |
 
 ---
 
@@ -25,16 +25,20 @@
 - `WORKFLOW-chiang-rai-admin.md` → human-readable Chiang Rai admin operating workflow
 - `WORKFLOW-project-status.md` → latest consolidated status snapshot
 
-### Executable workflows (`.agent/workflows/`)
+### Executable workflows (`.windsurf/workflows/`)
 - `chiang-rai-admin.md` → execution workflow for Chiang Rai admin feature work
 - `content-population.md` → workflow for populating and validating real content
 - `faculty-admin.md` → execution workflow for Faculty admin feature work
 - `local-deployment.md` → workflow for local deployment, QA, and release preparation
 - `release-checklist.md` → QA, SEO, responsive, and deployment readiness
 - `project-status-review.md` → workflow for reviewing and synchronizing plans and workflows
-- Before release or deployment: run `.agent/workflows/release-checklist.md`
-- During project review: run `.agent/workflows/project-status-review.md`
+- Before release or deployment: run `.windsurf/workflows/release-checklist.md`
+- During project review: run `.windsurf/workflows/project-status-review.md`
 
+### Local skill selection (`.windsurf/skills/`)
+- Use project-local Windsurf skills to choose the primary work mode for public frontend, admin dashboard, backend/API, media cleanup, SEO, debugging, and docs sync tasks.
+- See `README.md` for the team-facing local skill map.
+- See `.windsurfrules` for the detailed primary/companion skill map and route-specific constraints.
 
 ---
 
@@ -72,6 +76,8 @@ Infrastructure:
 ## 📁 เส้นทางฝั่ง Public (Faculty Frontend Routes)
 ```
 /                              → หน้าแรกคณะ
+/news                          → ข่าวสารคณะ (list)
+/news/[slug]                   → ข่าวสารคณะ (detail)
 /about                         → เกี่ยวกับคณะ (overview)
 /about/executive               → ผู้บริหาร
 /about/staff                   → บุคลากร (list)
@@ -110,6 +116,7 @@ Infrastructure:
 /admin/(dashboard)/users       → จัดการผู้ใช้
 /admin/(dashboard)/news        → จัดการข่าวสาร
 /admin/(dashboard)/news/create → สร้างข่าว
+/admin/(dashboard)/news/edit/[id] → แก้ไขข่าว
 ```
 
 ## 🔧 จุดเชื่อมต่อ Backend (Faculty Backend API)
@@ -142,33 +149,38 @@ Programs:
   DELETE /api/programs/:id       → Delete
 
 News:
-  GET    /api/news               → List
-  GET    /api/news/:id           → Get by ID
+  GET    /api/news               → Public list (published)
+  GET    /api/news/slug/:slug    → Public detail by slug
+  GET    /api/news/admin/all     → Admin list (includes drafts)
+  GET    /api/news/:id           → Admin get by ID
   POST   /api/news               → Create
-  PUT    /api/news/:id           → Update
+  PATCH  /api/news/:id           → Update
   DELETE /api/news/:id           → Delete
 
 Upload:
   POST   /api/upload/chiang-rai  → Upload image (chiang-rai)
   POST   /api/upload/staff       → Upload image (staff)
+  POST   /api/upload/news        → Upload image (faculty news)
+  POST   /api/upload/news/attachment → Upload attachment (faculty news)
   DELETE /api/upload/chiang-rai  → Delete image
+  DELETE /api/upload/news        → Delete image/attachment (faculty news)
 ```
 
 ## ✅ งานที่เสร็จแล้ว: Faculty (Completed)
 - [x] หน้าแรกพร้อม hero, stats, news preview
+- [x] ข่าวสารคณะ: public listing + detail page พร้อม metadata พื้นฐาน
 - [x] เกี่ยวกับคณะ: ผู้บริหาร, บุคลากร, โครงสร้าง, แผนยุทธศาสตร์
 - [x] หลักสูตรทั้งหมด (social-sci, home-eco, sub-programs)
 - [x] วิชาการ: credit-bank, short-courses, overview
 - [x] รับสมัคร, วิจัย, ระบบสารสนเทศ
 - [x] Admin: Login/Auth, Dashboard, Staff CRUD, Departments, Positions, Users, News
+- [x] Faculty News admin: create/edit/delete พร้อมหมวด `สมัครงาน`, รูปหลายภาพ, เอกสารแนบ, และ cleanup ไฟล์ตอนลบ/แทนที่
 - [x] Navigation (Main navbar with dropdowns)
 
 ## 🔄 งานที่กำลังดำเนินการ: Faculty (In Progress)
-- [ ] News detail page & public listing
 - [ ] Research database search/filter
 - [ ] E-service integrations (external links?)
 - [ ] Staff detail pages - verify data population
-- [ ] Admin: News edit page
 
 ## 📋 งานที่รอดำเนินการ: Faculty (Pending)
 - [ ] SEO metadata for all public routes
@@ -380,18 +392,18 @@ GOOGLE_CLIENT_SECRET=...
 
 ## 📝 Changelog
 
-### March 23, 2026
+  ### March 23, 2026
 
 - **Scope**
-  - migrated from Windsurf to **Antigravity** IDE support
-  - consolidated all executable workflows and project-specific skills into `.agent/`
-  - standardized documentation and workflow structure across `docs/` and `.agent/workflows/`
+  - standardized Windsurf project rules and executable workflow structure
+  - consolidated executable workflows into `.windsurf/workflows/`
+  - aligned documentation and workflow references across `docs/` and `.windsurf/workflows/`
   - fully migrated Chiang Rai Studies Admin Dashboard to use `shadcn/ui` components
-  - renamed/updated core rule files to `.antigravityrules`
-  - aligned `README.md` and all plan/workflow references with the new `.agent/` structure
+  - established `.windsurfrules` as the primary Windsurf project rule file
+  - aligned `README.md` and plan/workflow references with the Windsurf structure
 
 - **Updated/New Files**
-  - `.antigravityrules` (Primary rules)
+  - `.windsurfrules` (Primary Windsurf rules)
   - `README.md`
   - `docs/WORKFLOW-project-status.md`
   - `docs/WORKFLOW-faculty-admin.md`
@@ -399,12 +411,31 @@ GOOGLE_CLIENT_SECRET=...
   - `docs/PLAN-soc-crru-baseline.md`
   - `docs/PLAN-chiang-rai-studies.md`
   - `docs/PLAN-workflow-standardization.md`
-  - `.agent/workflows/` (Consolidated executable workflows)
+  - `.windsurf/workflows/` (Consolidated executable workflows)
 
-- **Impact**
+  - **Impact**
   - human-readable docs now follow a clearer naming pattern
   - cross-references between plans, workflow docs, and executable workflows are aligned
   - project status history is easier to maintain going forward
+
+ ### March 24, 2026
+
+ - **Scope**
+   - reviewed project status artifacts against the current Windsurf structure
+   - synced local skill-map references into team-facing docs
+   - corrected outdated workflow references from `.agent/workflows/` to `.windsurf/workflows/`
+   - normalized status labels in the consolidated project snapshot
+
+ - **Updated/New Files**
+   - `README.md`
+   - `docs/WORKFLOW-project-status.md`
+   - `docs/WORKFLOW-faculty-admin.md`
+   - `docs/WORKFLOW-chiang-rai-admin.md`
+
+ - **Impact**
+   - team-facing documentation now points to the Windsurf-native workflow and skill structure
+   - status snapshot uses the current taxonomy more consistently
+   - human-readable workflow docs no longer reference the legacy `.agent` path
 
 ### February 13, 2026
 
@@ -423,7 +454,7 @@ GOOGLE_CLIENT_SECRET=...
 ### Medium Priority
 3. SEO audit - OG tags, sitemap.xml, robots.txt
 4. Responsive audit - Mobile/Tablet ทุกหน้า
-5. Faculty News - detail page & public listing
+5. Faculty content population + Faculty news production validation
 
 ### Low Priority
 6. Full-text search optimization
@@ -433,5 +464,5 @@ GOOGLE_CLIENT_SECRET=...
 
 ---
 
-**Last Updated:** March 23, 2026
-**Next Review:** March 26, 2026
+ **Last Updated:** March 24, 2026
+ **Next Review:** March 27, 2026

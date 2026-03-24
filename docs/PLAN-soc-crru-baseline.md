@@ -1,18 +1,18 @@
 # Project Baseline: SOC-CRRU Web Application
-**Updated:** March 23, 2026
+**Updated:** March 24, 2026
 
-## 📋 ภาพรวมโครงการ (Project Overview)
+## ภาพรวมโครงการ (Project Overview)
 เว็บไซต์คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย — แพลตฟอร์มสำหรับนักศึกษา บุคลากร และประชาชนทั่วไป
 
-## 🗂️ โครงสร้างแผนและเวิร์กโฟลว์ (Planning & Workflow Structure)
+## โครงสร้างแผนและเวิร์กโฟลว์ (Planning & Workflow Structure)
 - **Canonical status snapshot**: `docs/WORKFLOW-project-status.md`
 - **Project baseline plan**: `docs/PLAN-soc-crru-baseline.md`
 - **Domain plan (Chiang Rai Studies)**: `docs/PLAN-chiang-rai-studies.md`
 - **Workflow governance**: `docs/PLAN-workflow-standardization.md`
 - **Human-readable admin workflow**: `docs/WORKFLOW-chiang-rai-admin.md`
-- **Executable workflows**: `.agent/workflows/*.md`
+- **Executable workflows**: `.windsurf/workflows/*.md`
 
-## 🏛️ อัตลักษณ์โครงการ (Project Identity)
+## อัตลักษณ์โครงการ (Project Identity)
 - **Name**: SOC-CRRU Web Application
 - **Purpose**: Academic platform for students/staff (Siam Innovator & Lifelong Learning)
 - **Status**: In Development
@@ -20,7 +20,7 @@
   - **Chiang Rai Studies**: ~90% (CRUD complete, UI refined)
   - **Backend API**: ~85% (71+ endpoints operational)
 
-## 🛠️ เทคโนโลยีหลัก (Technology Stack)
+## เทคโนโลยีหลัก (Technology Stack)
 ### Frontend
 - **Framework**: Next.js 16.1.1 (App Router, Server Components)
 - **Library**: React 19.2.3
@@ -51,7 +51,7 @@
   4. `soc_frontend`: Next.js [Port: 4000 → internal 3000]
 - **Volumes**: `./database/pgdata`, `./backend/uploads` (persistent)
 
-## 📁 เส้นทางหน้าเว็บคณะ (Faculty Website Routes)
+## เส้นทางหน้าเว็บคณะ (Faculty Website Routes)
 ```
 Public (26 pages):
 ├── /                          → หน้าแรกคณะ
@@ -68,7 +68,7 @@ Admin (9 pages):
 ├── /admin/(dashboard)/*       → Dashboard, Staff, Departments, Positions, Users, News
 ```
 
-## 🔧 โมดูลฝั่ง Backend (Backend Modules)
+## โมดูลฝั่ง Backend (Backend Modules)
 ```
 auth.module       → JWT + Google OAuth (6 endpoints)
 staff.module      → บุคลากร (10 endpoints)
@@ -79,31 +79,33 @@ upload.module     → Image upload/delete (3 endpoints)
 chiang-rai.module → ศูนย์เชียงรายศึกษา (37 endpoints)
 ```
 
-## ✅ งานที่เสร็จแล้ว (Completed)
+## งานที่เสร็จแล้ว (Completed)
 - [x] Full faculty public website (26 pages)
 - [x] Admin dashboard with CRUD for staff, departments, positions, users, news
+- [x] Faculty news public listing/detail + homepage news integration
+- [x] Faculty news admin edit flow with multi-image uploads, downloadable attachments, `JOB` category, and cleanup on delete/replace
 - [x] Chiang Rai Studies module (complete - see PLAN-chiang-rai-studies.md)
   - [x] Phase 5.5 Articles CRUD completed (2026-02-13)
   - [x] All admin CRUD operations (Artifacts, Articles, Activities, Learning Sites, Staff, Settings)
-  - [x] Full public pages with SEO metadata and responsive design
+  - [x] Full public pages with detail-page SEO metadata and core public route coverage
 - [x] Docker Compose infrastructure
 - [x] Auth system (JWT + Google OAuth + Dev bypass)
 - [x] Image upload/processing pipeline
 - [x] Documentation and workflow standardization (2026-03-23)
+- [x] Team-facing skill map references aligned across `.windsurfrules`, `README.md`, and `docs/WORKFLOW-project-status.md` (2026-03-24)
 
-## 🔄 งานที่กำลังดำเนินการ (In Progress)
-- [ ] News detail page & public listing
+## งานที่กำลังดำเนินการ (In Progress)
 - [ ] Research database search/filter
 - [ ] Staff detail pages - verify data population
 
-## 📋 งานที่รอดำเนินการ (Pending)
+## งานที่รอดำเนินการ (Pending)
 - [ ] SEO metadata for all faculty routes
 - [ ] Responsive audit (mobile/tablet)
 - [ ] Content population (real data)
 - [ ] Production deployment prep
 - [ ] Monitoring & analytics
 
-## 🚀 เวิร์กโฟลว์การพัฒนา (Development Workflow)
+## เวิร์กโฟลว์การพัฒนา (Development Workflow)
 ```bash
 git clone https://github.com/go2december/soc-crru-2026.git
 cd soc-crru-2026
@@ -119,14 +121,14 @@ docker compose logs frontend -f   # Watch logs
 - CR Admin: http://localhost:4000/chiang-rai-studies/admin/login
 - Faculty Admin: http://localhost:4000/admin/login
 
-## ⚠️ ข้อจำกัดสำคัญ (Known Constraints)
+## ข้อจำกัดสำคัญ (Known Constraints)
 - **Node Version**: Requires Node 25+ (bleeding edge)
 - **Frameworks**: Latest versions (Next 16, Postgres 18) — fewer community docs
 - **Ports**: 4000/4001 custom mapping must be respected
 - **Images**: Must store relative paths only in DB, frontend resolves to full URL at render time
 
-## 🔗 ไฟล์ที่เกี่ยวข้อง (Related Workflow Files)
+## ไฟล์ที่เกี่ยวข้อง (Related Workflow Files)
 - `docs/WORKFLOW-project-status.md` → consolidated project status snapshot
 - `docs/PLAN-workflow-standardization.md` → workflow governance and maintenance rules
-- `.agent/workflows/faculty-admin.md` → executable workflow for Faculty admin work
-- `.agent/workflows/local-deployment.md` → executable workflow for local deployment and release readiness
+- `.windsurf/workflows/faculty-admin.md` → executable workflow for Faculty admin work
+- `.windsurf/workflows/local-deployment.md` → executable workflow for local deployment and release readiness

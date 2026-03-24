@@ -1,10 +1,31 @@
 import {
+  ArrayMaxSize,
+  IsArray,
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class NewsAttachmentDto {
+  @IsNotEmpty()
+  @IsString()
+  originalName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  fileUrl: string;
+
+  @IsOptional()
+  @IsString()
+  mimeType?: string;
+
+  @IsOptional()
+  size?: number;
+}
 
 export class CreateNewsDto {
   @IsNotEmpty()
@@ -16,12 +37,28 @@ export class CreateNewsDto {
   content: string;
 
   @IsNotEmpty()
-  @IsEnum(['NEWS', 'EVENT', 'ANNOUNCE'])
-  category: 'NEWS' | 'EVENT' | 'ANNOUNCE';
+  @IsEnum(['NEWS', 'EVENT', 'ANNOUNCE', 'JOB'])
+  category: 'NEWS' | 'EVENT' | 'ANNOUNCE' | 'JOB';
 
   @IsOptional()
-  @IsUrl()
+  @IsString()
   thumbnailUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsString({ each: true })
+  mediaUrls?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => NewsAttachmentDto)
+  attachments?: NewsAttachmentDto[];
+
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
 
   @IsOptional()
   @IsString()

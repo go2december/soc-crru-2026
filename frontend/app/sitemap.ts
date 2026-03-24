@@ -13,7 +13,8 @@ async function fetchJson(path: string) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const [activities, articles, learningSites, artifacts] = await Promise.all([
+    const [facultyNews, activities, articles, learningSites, artifacts] = await Promise.all([
+        fetchJson('/api/news'),
         fetchJson('/api/chiang-rai/activities?limit=200'),
         fetchJson('/api/chiang-rai/articles?limit=200'),
         fetchJson('/api/chiang-rai/learning-sites?limit=200'),
@@ -21,6 +22,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ]);
 
     const dynamicUrls = [
+        ...(Array.isArray(facultyNews) ? facultyNews : []).map((item: any) => ({
+            url: `${BASE_URL}/news/${item.slug}`,
+            lastModified: new Date(item.updatedAt || item.publishedAt || Date.now()),
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
+        })),
         ...(Array.isArray(activities) ? activities : []).map((item: any) => ({
             url: `${BASE_URL}/chiang-rai-studies/activities/${item.slug}`,
             lastModified: new Date(item.updatedAt || item.publishedAt || Date.now()),
@@ -56,6 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${BASE_URL}/about/structure`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.6 },
         { url: `${BASE_URL}/programs`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.7 },
         { url: `${BASE_URL}/admissions`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+        { url: `${BASE_URL}/news`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
 
         // Chiang Rai Studies - static
         { url: `${BASE_URL}/chiang-rai-studies`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },

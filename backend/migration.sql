@@ -32,3 +32,13 @@ INSERT INTO "academic_positions" ("name_th", "sort_order") VALUES
 ('รองศาสตราจารย์ (รศ.)', 3),
 ('ศาสตราจารย์ (ศ.)', 4)
 ON CONFLICT DO NOTHING;
+
+DO $$ BEGIN
+    ALTER TYPE "public"."news_category" ADD VALUE 'JOB';
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+ALTER TABLE "news" ADD COLUMN IF NOT EXISTS "media_urls" text[];
+ALTER TABLE "news" ADD COLUMN IF NOT EXISTS "attachments" jsonb;
+ALTER TABLE "news" ALTER COLUMN "published_at" DROP NOT NULL;

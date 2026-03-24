@@ -36,6 +36,7 @@ export const newsCategoryEnum = pgEnum('news_category', [
   'NEWS',
   'EVENT',
   'ANNOUNCE',
+  'JOB',
 ]);
 
 // Staff-related Constants
@@ -215,6 +216,15 @@ export const news = pgTable('news', {
   content: text('content').notNull(),
   category: newsCategoryEnum('category').notNull(),
   thumbnailUrl: varchar('thumbnail_url', { length: 500 }),
+  mediaUrls: text('media_urls').array(),
+  attachments: jsonb('attachments').$type<
+    {
+      originalName: string;
+      fileUrl: string;
+      mimeType?: string;
+      size?: number;
+    }[]
+  >(),
   isPublished: boolean('is_published').default(true).notNull(),
   publishedAt: timestamp('published_at').defaultNow(),
   authorId: uuid('author_id').references(() => users.id),

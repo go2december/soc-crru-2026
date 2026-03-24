@@ -1,19 +1,19 @@
 # Faculty Admin Workflow
-**Updated:** March 23, 2026
+**Updated:** March 24, 2026
 
-## 📋 ภาพรวมกระบวนการทำงาน
+## ภาพรวมกระบวนการทำงาน
 
 ระบบ Admin ของคณะใช้งานภายใต้ `/admin` สำหรับจัดการข้อมูลหลักของเว็บไซต์คณะ เช่น บุคลากร ภาควิชา ตำแหน่ง ผู้ใช้ และข่าวสาร โดยใช้ระบบ Authentication ชุดเดียวกับ backend หลักของโปรเจกต์
 
-## 🗂️ บทบาทของเอกสาร (Document Role)
+## บทบาทของเอกสาร (Document Role)
 
 - ไฟล์นี้เป็น **human-readable workflow** สำหรับอธิบายภาพรวมการทำงานของระบบ Faculty admin
-- workflow สำหรับใช้งานเชิงปฏิบัติการใน IDE/agent ถูกแยกไว้ที่ `.agent/workflows/faculty-admin.md`
+- workflow สำหรับใช้งานเชิงปฏิบัติการใน IDE/agent ถูกแยกไว้ที่ `.windsurf/workflows/faculty-admin.md`
 - หากมีการเปลี่ยนขั้นตอนการทำงานจริง ควรอัปเดตทั้งไฟล์นี้และ executable workflow ให้สอดคล้องกัน
 
 ---
 
-## 🔐 ระบบ Authentication
+## ระบบ Authentication
 
 ### 1. Login Flow
 ```text
@@ -39,7 +39,7 @@
 
 ---
 
-## 🏗️ โครงสร้างหน้า Admin
+## โครงสร้างหน้า Admin
 
 ```text
 /admin/
@@ -56,7 +56,7 @@
 
 ---
 
-## 📊 องค์ประกอบหลักของแดชบอร์ด (Dashboard Features)
+## องค์ประกอบหลักของแดชบอร์ด (Dashboard Features)
 
 ### Stats / Summary
 - จำนวนข้อมูลสำคัญในระบบ
@@ -71,7 +71,7 @@
 
 ---
 
-## 🔧 งานจัดการข้อมูลหลัก (CRUD Operations)
+## งานจัดการข้อมูลหลัก (CRUD Operations)
 
 ### 1. Staff Management
 - **List**: ดูรายการบุคลากรทั้งหมด
@@ -101,20 +101,24 @@
 - **Create**: สร้างข่าวใหม่
 - **Edit**: แก้ไขข่าว
 - **Delete**: ลบข่าว
+- **Media**: รองรับรูปภาพหลายภาพสำหรับหน้า detail ข่าว
+- **Attachments**: รองรับเอกสารแนบสำหรับดาวน์โหลด เช่น PDF/DOCX
+- **Category**: รองรับหมวด `สมัครงาน` เพิ่มเติมจากข่าว/กิจกรรม/ประกาศ
 - **Public Flow**: ควรตรวจความสอดคล้องกับหน้า public listing/detail เสมอเมื่อมีการเปลี่ยนแปลง
 
 ---
 
-## 🖼️ แนวทางการจัดการรูปภาพ (Image Handling Guidance)
+## แนวทางการจัดการรูปภาพ (Image Handling Guidance)
 
 - การอัปโหลดรูปต้องใช้ endpoint ที่ถูกต้องภายใต้ `/api/upload/...`
 - ข้อมูลรูปภาพในฐานข้อมูลควรเก็บเป็น relative path ตาม convention ของโปรเจกต์
 - หน้าแสดงผลต้อง resolve URL ให้ตรงกับ environment ปัจจุบัน
 - หากมีการลบหรือแทนที่รูป ควรตรวจผลกระทบกับหน้า public และ admin preview
+- สำหรับ Faculty news ต้องรวมการลบไฟล์แนบที่อยู่ใน `/uploads/news/attachments` เมื่อมีการลบหรือแทนที่รายการ
 
 ---
 
-## ⚠️ ประเด็นสำคัญที่ต้องตรวจเสมอ (Known Checks)
+## ประเด็นสำคัญที่ต้องตรวจเสมอ (Known Checks)
 
 ### 1. API Prefix
 - Frontend ฝั่ง admin ต้องเรียก API ผ่าน path ที่มี `/api/` prefix ให้ถูกต้อง
@@ -130,7 +134,7 @@
 
 ---
 
-## 🔄 จุดเชื่อมต่อ API หลัก (Key API Surface)
+## จุดเชื่อมต่อ API หลัก (Key API Surface)
 
 ```text
 Auth:
@@ -154,28 +158,36 @@ Departments:
 
 News:
   GET    /api/news
+  GET    /api/news/slug/:slug
+  GET    /api/news/admin/all
   GET    /api/news/:id
   POST   /api/news
-  PUT    /api/news/:id
+  PATCH  /api/news/:id
   DELETE /api/news/:id
+
+Upload:
+  POST   /api/upload/news
+  POST   /api/upload/news/attachment
+  DELETE /api/upload/news
 ```
 
 ---
 
-## 🚀 Next Steps
+## Next Steps
 
-1. **News Detail & Listing** - ตรวจความครบของหน้า public ฝั่งข่าวสาร
-2. **Research Search/Filter** - ทำส่วนค้นหาและกรองข้อมูลวิจัย
-3. **SEO Coverage** - ตรวจ metadata สำหรับ public routes ให้ครบ
-4. **Responsive Audit** - ตรวจ mobile/tablet ในหน้าสำคัญ
+1. **Research Search/Filter** - ทำส่วนค้นหาและกรองข้อมูลวิจัย
+2. **SEO Coverage** - ตรวจ metadata สำหรับ public routes ให้ครบ
+3. **Responsive Audit** - ตรวจ mobile/tablet ในหน้าสำคัญ
+4. **Content Population** - เติมข้อมูลจริงในหน้า public และข่าวสาร
 5. **Production Readiness** - เตรียม deploy และ verification flow
 
 ---
 
-## 🔗 ไฟล์ที่เกี่ยวข้อง (Related Workflow Files)
+## ไฟล์ที่เกี่ยวข้อง (Related Workflow Files)
 
 - `docs/WORKFLOW-project-status.md` → consolidated project status snapshot
 - `docs/PLAN-soc-crru-baseline.md` → Faculty-side baseline plan
 - `docs/PLAN-workflow-standardization.md` → documentation governance rules
-- `.agent/workflows/faculty-admin.md` → executable Faculty admin workflow
-- `.agent/workflows/local-deployment.md` → executable workflow for local deployment and release preparation
+- `.windsurf/workflows/faculty-admin.md` → executable Faculty admin workflow
+- `.windsurf/workflows/local-deployment.md` → executable workflow for local deployment and release preparation
+- `.windsurf/workflows/release-checklist.md` → executable workflow for QA, SEO, responsive, and release readiness

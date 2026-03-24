@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from 'uuid';
 export class UploadService {
   private readonly uploadDir = './uploads/staff';
   private readonly chiangRaiUploadDir = './uploads/chiang-rai';
+  private readonly newsUploadDir = './uploads/news';
+  private readonly newsAttachmentUploadDir = './uploads/news/attachments';
 
   constructor() {
     // Ensure upload directories exist
@@ -16,6 +18,90 @@ export class UploadService {
     }
     if (!fs.existsSync(this.chiangRaiUploadDir)) {
       fs.mkdirSync(this.chiangRaiUploadDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.newsUploadDir)) {
+      fs.mkdirSync(this.newsUploadDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.newsAttachmentUploadDir)) {
+      fs.mkdirSync(this.newsAttachmentUploadDir, { recursive: true });
+    }
+  }
+
+  async saveNewsImage(file: Express.Multer.File): Promise<string> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+      throw new BadRequestException('Unsupported file type');
+    }
+
+    const filename = `${uuidv4()}.webp`;
+    const filepath = path.join(this.newsUploadDir, filename);
+
+    try {
+      await sharp(file.buffer)
+        .resize(1600, null, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .webp({ quality: 82 })
+        .toFile(filepath);
+
+      return `/uploads/news/${filename}`;
+    } catch (error) {
+      console.error('News image processing error:', error);
+      throw new BadRequestException('Failed to process image');
+    }
+  }
+
+  async saveNewsAttachment(file: Express.Multer.File): Promise<{
+    originalName: string;
+    fileUrl: string;
+    mimeType: string;
+    size: number;
+  }> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const sanitizedOriginalName = file.originalname.replace(/[^a-zA-Z0-9ก-๙._-]/g, '_');
+    const filename = `${uuidv4()}-${sanitizedOriginalName}`;
+    const filepath = path.join(this.newsAttachmentUploadDir, filename);
+
+    try {
+      await fs.promises.writeFile(filepath, file.buffer);
+      return {
+        originalName: file.originalname,
+        fileUrl: `/uploads/news/attachments/${filename}`,
+        mimeType: file.mimetype,
+        size: file.size,
+      };
+    } catch (error) {
+      console.error('News attachment save error:', error);
+      throw new BadRequestException('Failed to save attachment');
+    }
+  }
+
+  async deleteNewsFile(fileUrl: string): Promise<boolean> {
+    if (
+      !fileUrl ||
+      (!fileUrl.startsWith('/uploads/news/') &&
+        !fileUrl.startsWith('/uploads/news/attachments/'))
+    ) {
+      return false;
+    }
+
+    const relativePath = fileUrl.replace(/^\/uploads\//, '');
+    const filepath = path.join(process.cwd(), 'uploads', relativePath);
+
+    try {
+      await fs.promises.access(filepath);
+      await fs.promises.unlink(filepath);
+      return true;
+    } catch (error) {
+      console.error('Delete news file error:', error);
+      return false;
     }
   }
 

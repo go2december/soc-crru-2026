@@ -35,19 +35,29 @@ export class NewsController {
   // Public: Get List
   @Get()
   findAll() {
-    return this.newsService.findAll();
+    return this.newsService.findAllPublic();
   }
 
-  // Public: Get by ID
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.newsService.findOne(id);
+  // Admin: Get List (includes drafts)
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  findAllAdmin() {
+    return this.newsService.findAllAdmin();
   }
 
   // Public: Get by Slug
   @Get('slug/:slug')
   findBySlug(@Param('slug') slug: string) {
     return this.newsService.findBySlug(slug);
+  }
+
+  // Admin: Get by ID
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  findOne(@Param('id') id: string) {
+    return this.newsService.findOne(id);
   }
 
   // Update News (ADMIN, EDITOR)

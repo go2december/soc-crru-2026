@@ -34,10 +34,32 @@ export class UploadController {
     return { url: imageUrl };
   }
 
+  @Post('news')
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadNewsImage(@UploadedFile() file: Express.Multer.File) {
+    const imageUrl = await this.uploadService.saveNewsImage(file);
+    return { url: imageUrl };
+  }
+
+  @Post('news/attachment')
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadNewsAttachment(@UploadedFile() file: Express.Multer.File) {
+    return this.uploadService.saveNewsAttachment(file);
+  }
+
   @Delete('chiang-rai')
   @Roles('ADMIN', 'EDITOR', 'STAFF')
   async deleteChiangRaiImage(@Body('url') url: string) {
     const deleted = await this.uploadService.deleteChiangRaiImage(url);
+    return { deleted };
+  }
+
+  @Delete('news')
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  async deleteNewsFile(@Body('url') url: string) {
+    const deleted = await this.uploadService.deleteNewsFile(url);
     return { deleted };
   }
 }
