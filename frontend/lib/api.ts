@@ -1,3 +1,18 @@
+export interface ProgramInstructor {
+    id: string;
+    staffId: string;
+    role: 'CHAIR' | 'MEMBER';
+    sortOrder: number;
+    prefixTh?: string | null;
+    firstNameTh?: string | null;
+    lastNameTh?: string | null;
+    prefixEn?: string | null;
+    firstNameEn?: string | null;
+    lastNameEn?: string | null;
+    imageUrl?: string | null;
+    academicPositionNameTh?: string | null;
+}
+
 export interface Program {
     id: string;
     code: string;
@@ -24,6 +39,13 @@ export interface Program {
         title: string;
         description: string;
     }[];
+    // PR Media
+    galleryImages?: string[];
+    attachments?: { originalName: string; fileUrl: string; size?: number; mimeType?: string }[];
+    youtubeVideoUrl?: string;
+    facebookVideoUrl?: string;
+    // Instructors
+    instructors?: ProgramInstructor[];
 }
 
 // Environment handling for Docker vs Local

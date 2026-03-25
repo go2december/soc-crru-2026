@@ -1,11 +1,11 @@
 # Chiang Rai Studies Center Web Development Plan
-**Updated:** March 23, 2026
+**Updated:** March 24, 2026
 
 ศูนย์เชียงรายศึกษา — แหล่งรวบรวม อนุรักษ์ และต่อยอดองค์ความรู้อัตลักษณ์เชียงราย
 
 ---
 
-## 🏗️ สถาปัตยกรรมระบบ (System Architecture)
+## สถาปัตยกรรมระบบ (System Architecture)
 
 - **Database:** PostgreSQL 18, dedicated tables prefixed `chiang_rai_*`
 - **Backend:** NestJS module (`chiang-rai.module`) with 37 REST endpoints
@@ -14,30 +14,30 @@
 
 ---
 
-## 🗺️ แผนผังเว็บไซต์และสถาปัตยกรรมข้อมูล (Sitemap & Information Architecture)
+## แผนผังเว็บไซต์และสถาปัตยกรรมข้อมูล (Sitemap & Information Architecture)
 
 | Route | Status | Description |
 |-------|--------|-------------|
-| `/chiang-rai-studies` | ✅ Done | หน้าแรก (Hero light blue-white, 5 identities, news, stats) |
-| `/about/history` | ✅ Done | ความเป็นมา |
-| `/about/objectives` | ✅ Done | วัตถุประสงค์ |
-| `/about/goals-mission` | ✅ Done | เป้าหมาย/พันธกิจ |
-| `/about/structure` | ✅ Done | โครงสร้างองค์กร |
-| `/archive` | ✅ Done | คลังข้อมูล 5 อัตลักษณ์ (list + filter) |
-| `/archive/[id]` | ✅ Done | รายละเอียด artifact |
-| `/articles` | ✅ Done | บทความวิชาการ (list) |
-| `/articles/[slug]` | ✅ Done | บทความ (detail) |
-| `/activities` | ✅ Done | กิจกรรม/ข่าวสาร (list + pagination) |
-| `/activities/[slug]` | ✅ Done | กิจกรรม (detail - full editorial) ← Mar 19 |
-| `/learning-sites` | ✅ Done | แหล่งเรียนรู้ (list + tag filter) |
-| `/learning-sites/[slug]` | ✅ Done | แหล่งเรียนรู้ (detail - full editorial) ← Mar 19 |
-| `/staff` | ✅ Done | ทำเนียบบุคลากร |
-| `/contact` | ✅ Done | ติดต่อเรา |
-| `/admin` | ✅ Done | Admin Dashboard + CRUD (17 pages) |
+| `/chiang-rai-studies` | ✅ COMPLETE | หน้าแรก (Hero light blue-white, 5 identities, news, stats) |
+| `/about/history` | ✅ COMPLETE | ความเป็นมา |
+| `/about/objectives` | ✅ COMPLETE | วัตถุประสงค์ |
+| `/about/goals-mission` | ✅ COMPLETE | เป้าหมาย/พันธกิจ |
+| `/about/structure` | ✅ COMPLETE | โครงสร้างองค์กร |
+| `/archive` | ✅ COMPLETE | คลังข้อมูล 5 อัตลักษณ์ (list + filter) |
+| `/archive/[id]` | ✅ COMPLETE | รายละเอียด artifact |
+| `/articles` | ✅ COMPLETE | บทความวิชาการ (list) |
+| `/articles/[slug]` | ✅ COMPLETE | บทความ (detail) |
+| `/activities` | ✅ COMPLETE | กิจกรรม/ข่าวสาร (list + pagination) |
+| `/activities/[slug]` | ✅ COMPLETE | กิจกรรม (detail - full editorial) ← Mar 19 |
+| `/learning-sites` | ✅ COMPLETE | แหล่งเรียนรู้ (list + tag filter) |
+| `/learning-sites/[slug]` | ✅ COMPLETE | แหล่งเรียนรู้ (detail - full editorial) ← Mar 19 |
+| `/staff` | ✅ COMPLETE | ทำเนียบบุคลากร |
+| `/contact` | ✅ COMPLETE | ติดต่อเรา |
+| `/admin` | ✅ COMPLETE | Admin Dashboard + CRUD (17 pages) |
 
 ---
 
-## 🎨 อัตลักษณ์แบรนด์และระบบออกแบบ (Brand Identity & Design System)
+## อัตลักษณ์แบรนด์และระบบออกแบบ (Brand Identity & Design System)
 
 ### Corporate Identity (CI)
 - **Primary:** Chiang Rai Purple `#2e1065` / `#702963` — ม่วงบัวสาย (วันเกิดพ่อขุนเม็งราย)
@@ -53,7 +53,7 @@
 
 ---
 
-## 🚀 เฟสการพัฒนา (Development Phases)
+## เฟสการพัฒนา (Development Phases)
 
 ### Phase 1: Database & Content Modeling ✅ COMPLETE
 - [x] PostgreSQL tables: artifacts, articles, activities, learning_sites, staff, config
@@ -85,6 +85,8 @@
 - [x] Breadcrumb navigation
 - [x] Reading time calculation
 - [x] YouTube/video embed in media galleries
+- [x] Chiang Rai OG image fallback for social sharing
+- [x] Chiang Rai sitemap + robots coverage for public routes
 
 ### Phase 5.5: Articles CRUD ✅ COMPLETE (February 13, 2026)
 - [x] Articles CRUD backend endpoints (`getArticleById`, `createArticle`, `updateArticle`, `deleteArticle`)
@@ -98,8 +100,6 @@
 - [ ] Articles detail page — verify editorial layout consistency
 - [x] SEO consistency review for list/home pages
 - [ ] Responsive polish across homepage and list pages
-- [x] Chiang Rai OG image fallback for social sharing
-- [x] Chiang Rai sitemap + robots coverage for public routes
 
 ### Phase 5: QA & Deployment 📋 PENDING
 - [x] SEO audit (sitemap.xml, robots.txt, OG tags ทุกหน้า) — quick wins completed for Chiang Rai public routes
@@ -139,6 +139,6 @@ Key modules: Artifacts (5), Articles (6), Activities (6), Learning Sites (7), St
 - `docs/WORKFLOW-project-status.md` → consolidated project status snapshot
 - `docs/WORKFLOW-chiang-rai-admin.md` → human-readable Chiang Rai admin workflow
 - `docs/PLAN-workflow-standardization.md` → workflow governance and maintenance rules
-- `.agent/workflows/chiang-rai-admin.md` → executable Chiang Rai admin workflow
-- `.agent/workflows/content-population.md` → executable workflow for content completion
-- `.agent/workflows/local-deployment.md` → executable workflow for local deployment and release preparation
+- `.windsurf/workflows/chiang-rai-admin.md` → executable Chiang Rai admin workflow
+- `.windsurf/workflows/content-population.md` → executable workflow for content completion
+- `.windsurf/workflows/local-deployment.md` → executable workflow for local deployment and release preparation

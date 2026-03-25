@@ -10,6 +10,7 @@ export class UploadService {
   private readonly chiangRaiUploadDir = './uploads/chiang-rai';
   private readonly newsUploadDir = './uploads/news';
   private readonly newsAttachmentUploadDir = './uploads/news/attachments';
+  private readonly programsUploadDir = './uploads/programs';
 
   constructor() {
     // Ensure upload directories exist
@@ -24,6 +25,9 @@ export class UploadService {
     }
     if (!fs.existsSync(this.newsAttachmentUploadDir)) {
       fs.mkdirSync(this.newsAttachmentUploadDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.programsUploadDir)) {
+      fs.mkdirSync(this.programsUploadDir, { recursive: true });
     }
   }
 
@@ -198,6 +202,42 @@ export class UploadService {
     } catch (error) {
       console.error('Image processing error:', error);
       throw new BadRequestException('Failed to process image');
+    }
+  }
+
+  async saveProgramsFile(file: Express.Multer.File): Promise<string> {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const sanitizedOriginalName = file.originalname.replace(/[^a-zA-Z0-9ก-๙._-]/g, '_');
+    const filename = `${uuidv4()}-${sanitizedOriginalName}`;
+    const baseFilepath = path.join(this.programsUploadDir, filename);
+
+    try {
+      if (file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+        await sharp(file.buffer)
+          .resize(1920, null, { fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 85 })
+          .toFile(baseFilepath + '.webp');
+        return `/uploads/programs/${filename}.webp`;
+      } else {
+        await fs.promises.writeFile(baseFilepath, file.buffer);
+        return `/uploads/programs/${filename}`;
+      }
+    } catch (error) {
+      console.error('Programs file processing error:', error);
+      throw new BadRequestException('Failed to process programs file');
+    }
+  }
+
+  async deleteProgramsFile(fileUrl: string): Promise<boolean> {
+    if (!fileUrl || !fileUrl.startsWith('/uploads/programs/')) return false;
+    const filename = path.basename(fileUrl);
+    const filepath = path.join(this.programsUploadDir, filename);
+    try {
+      await fs.promises.access(filepath);
+      await fs.promises.unlink(filepath);
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 }

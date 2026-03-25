@@ -78,12 +78,17 @@ export function formatFacultyNewsDate(date?: string | null): string {
   });
 }
 
-export async function fetchFacultyNewsList(limit?: number): Promise<FacultyNewsItem[]> {
+export async function fetchFacultyNewsList(category?: string, limit?: number): Promise<FacultyNewsItem[]> {
   const apiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4001';
-  const query = limit ? `?limit=${limit}` : '';
+  let queryStr = '';
+  const params = new URLSearchParams();
+  if (category) params.append('category', category);
+  if (limit) params.append('limit', limit.toString());
+  
+  if (params.toString()) queryStr = `?${params.toString()}`;
 
   try {
-    const res = await fetch(`${apiUrl}/api/news${query}`, { cache: 'no-store' });
+    const res = await fetch(`${apiUrl}/api/news${queryStr}`, { cache: 'no-store' });
     if (!res.ok) return [];
     return res.json();
   } catch (error) {

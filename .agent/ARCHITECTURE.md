@@ -39,8 +39,6 @@ Specialist AI personas for different domains.
 | `frontend-specialist`    | Web UI/UX                  | frontend-design, react-best-practices, tailwind-patterns |
 | `backend-specialist`     | API, business logic        | api-patterns, nodejs-best-practices, database-design     |
 | `database-architect`     | Schema, SQL                | database-design, prisma-expert                           |
-| `mobile-developer`       | iOS, Android, RN           | mobile-design                                            |
-| `game-developer`         | Game logic, mechanics      | game-development                                         |
 | `devops-engineer`        | CI/CD, Docker              | deployment-procedures, docker-expert                     |
 | `security-auditor`       | Security compliance        | vulnerability-scanner, red-team-tactics                  |
 | `penetration-tester`     | Offensive security         | red-team-tactics                                         |
@@ -78,7 +76,6 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 | `api-patterns`          | REST, GraphQL, tRPC            |
 | `nestjs-expert`         | NestJS modules, DI, decorators |
 | `nodejs-best-practices` | Node.js async, modules         |
-| `python-patterns`       | Python standards, FastAPI      |
 
 ### Database
 
@@ -127,17 +124,7 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 | `plan-writing`  | Task planning, breakdown   |
 | `brainstorming` | Socratic questioning       |
 
-### Mobile
 
-| Skill           | Description           |
-| --------------- | --------------------- |
-| `mobile-design` | Mobile UI/UX patterns |
-
-### Game Development
-
-| Skill              | Description           |
-| ------------------ | --------------------- |
-| `game-development` | Game logic, mechanics |
 
 ### SEO & Growth
 
@@ -160,7 +147,6 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 | `clean-code`              | Coding standards (Global) |
 | `behavioral-modes`        | Agent personas            |
 | `parallel-agents`         | Multi-agent patterns      |
-| `mcp-builder`             | Model Context Protocol    |
 | `documentation-templates` | Doc formats               |
 | `i18n-localization`       | Internationalization      |
 | `performance-profiling`   | Web Vitals, optimization  |
@@ -255,7 +241,6 @@ python .agent/scripts/verify_all.py . --url http://localhost:3000
 - Lighthouse (Core Web Vitals)
 - Playwright E2E
 - Bundle Analysis
-- Mobile Audit
 - i18n Check
 
 For details, see [scripts/README.md](scripts/README.md)
@@ -270,7 +255,7 @@ For details, see [scripts/README.md](scripts/README.md)
 | **Total Skills**    | 36                            |
 | **Total Workflows** | 11                            |
 | **Total Scripts**   | 2 (master) + 18 (skill-level) |
-| **Coverage**        | ~90% web/mobile development   |
+| **Coverage**        | ~90% web development          |
 
 ---
 
@@ -280,7 +265,6 @@ For details, see [scripts/README.md](scripts/README.md)
 | -------- | --------------------- | ------------------------------------- |
 | Web App  | `frontend-specialist` | react-best-practices, frontend-design |
 | API      | `backend-specialist`  | api-patterns, nodejs-best-practices   |
-| Mobile   | `mobile-developer`    | mobile-design                         |
 | Database | `database-architect`  | database-design, prisma-expert        |
 | Security | `security-auditor`    | vulnerability-scanner                 |
 | Testing  | `test-engineer`       | testing-patterns, webapp-testing      |

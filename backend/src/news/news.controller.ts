@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
@@ -34,8 +35,8 @@ export class NewsController {
 
   // Public: Get List
   @Get()
-  findAll() {
-    return this.newsService.findAllPublic();
+  findAll(@Query('category') category?: string) {
+    return this.newsService.findAllPublic(category);
   }
 
   // Admin: Get List (includes drafts)

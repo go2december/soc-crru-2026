@@ -54,3 +54,7 @@ coverage/
 # ----- Docker -----
 # Uncomment if you don't want to track docker volumes
 # docker-compose.override.yml
+
+# ----- Media & Local Backups -----
+backend/uploads/
+*.sql

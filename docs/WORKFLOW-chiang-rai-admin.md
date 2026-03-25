@@ -1,19 +1,19 @@
 # Chiang Rai Studies Admin Workflow
-**Updated:** March 23, 2026
+**Updated:** March 24, 2026
 
-## 📋 ภาพรวมกระบวนการทำงาน
+## ภาพรวมกระบวนการทำงาน
 
 ระบบ Admin ของศูนย์เชียงรายศึกษาใช้งานภายใต้ `/chiang-rai-studies/admin` พร้อมระบบ Authentication แยกจาก Admin หลักของคณะ
 
-## 🗂️ Document Role
+## Document Role
 
 - ไฟล์นี้เป็น **human-readable workflow** สำหรับอธิบายภาพรวมการทำงานของระบบ admin
-- workflow สำหรับใช้งานเชิงปฏิบัติการใน IDE/agent ถูกแยกไว้ที่ `.agent/workflows/chiang-rai-admin.md`
+- workflow สำหรับใช้งานเชิงปฏิบัติการใน IDE/agent ถูกแยกไว้ที่ `.windsurf/workflows/chiang-rai-admin.md`
 - หากมีการเปลี่ยนขั้นตอนการทำงานจริง ควรอัปเดตทั้งไฟล์นี้และ executable workflow ให้สอดคล้องกัน
 
 ---
 
-## 🔐 ระบบ Authentication
+## ระบบ Authentication
 
 ### 1. Login Flow
 ```
@@ -39,7 +39,7 @@
 
 ---
 
-## 🏗️ โครงสร้างหน้า Admin
+## โครงสร้างหน้า Admin
 
 ```
 /chiang-rai-studies/admin/
@@ -65,11 +65,10 @@
 │   └── edit/[id]/page.tsx    # แก้ไขแหล่งเรียนรู้ (+ image deletion)
 ├── staff/page.tsx            # จัดการบุคลากร (Import + Delete)
 └── settings/page.tsx         # ตั้งค่าหน้าแรก (Hero BG, Title, Subtitle)
-```
 
 ---
 
-## 📊 Dashboard Features
+## Dashboard Features
 
 ### Stats Cards
 - **Artifacts** - จำนวนข้อมูลในคลังดิจิทัล
@@ -86,7 +85,7 @@
 
 ---
 
-## 🔧 CRUD Operations
+## CRUD Operations
 
 ### 1. Articles Management
 - **List**: `/admin/articles` - ค้นหา, ลบ, ดูหน้าเว็บ, แก้ไข
@@ -124,7 +123,7 @@
 
 ---
 
-## 🖼️ Image Management Workflow
+## Image Management Workflow
 
 ### Upload Flow
 ```
@@ -157,7 +156,7 @@ Delete (list page):
 
 ---
 
-## 🎨 UI/UX Theme
+## UI/UX Theme
 
 ### Colors
 - **Primary**: Lotus Purple (#2e1065, #702963)
@@ -176,7 +175,7 @@ Delete (list page):
 
 ---
 
-## ⚠️ Known Issues & Fixes (Resolved)
+## Known Issues & Fixes (Resolved)
 
 ### 1. API URL Prefix 
 - **Problem**: Backend ใช้ `setGlobalPrefix('api')` แต่ frontend บางส่วนไม่มี `/api/`
@@ -196,7 +195,7 @@ Delete (list page):
 
 ---
 
-## 🔄 API Endpoints (Complete)
+## API Endpoints (Complete)
 
 ### Base URL
 ```typescript
@@ -272,19 +271,21 @@ GET    /api/auth/profile
 
 ---
 
-## 🚀 Next Steps
+## Next Steps
 
 1. **Content Population** - ข้อมูลจริงทุก section
 2. **Articles Detail** - ตรวจสอบ layout consistency
-3. **SEO Audit** - OG tags, sitemap, robots.txt
-4. **Responsive Audit** - Mobile/Tablet check
+3. **Responsive Audit** - Mobile/Tablet check
+4. **Structured Data & Social Validation** - ตรวจ non-detail pages และ social cards บน production domain
 5. **Production Deploy** - Build verification
 
 ---
 
-## 🔗 Related Workflow Files
+## Related Workflow Files
 
 - `docs/WORKFLOW-project-status.md` → consolidated project status snapshot
 - `docs/PLAN-chiang-rai-studies.md` → Chiang Rai Studies implementation plan
 - `docs/PLAN-workflow-standardization.md` → documentation governance rules
-- `.agent/workflows/chiang-rai-admin.md` → executable admin workflow
+- `.windsurf/workflows/chiang-rai-admin.md` → executable admin workflow
+- `.windsurf/workflows/content-population.md` → executable workflow for content completion
+- `.windsurf/workflows/release-checklist.md` → executable workflow for QA, SEO, responsive, and release readiness

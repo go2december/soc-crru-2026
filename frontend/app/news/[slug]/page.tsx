@@ -6,10 +6,9 @@ import {
   ArrowLeft,
   CalendarDays,
   Download,
-  Images,
-  Newspaper,
   Paperclip,
 } from 'lucide-react';
+import NewsGalleryClient from './NewsGalleryClient';
 import {
   FACULTY_NEWS_CATEGORY_LABELS,
   FACULTY_NEWS_CATEGORY_STYLES,
@@ -73,103 +72,83 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
   const galleryImages = (newsItem.mediaUrls || []).map((url) => getFacultyNewsServerAssetUrl(url) || url);
   const fixedContent = fixContentImageUrls(newsItem.content || '');
 
+  const hasAttachments = newsItem.attachments && newsItem.attachments.length > 0;
+
   return (
-    <div className="bg-base-100">
-      <section className="relative overflow-hidden bg-gradient-to-br from-scholar-deep via-slate-900 to-scholar-accent text-white">
-        <div className="absolute inset-0 bg-black/25" />
-        <div className="container relative z-10 mx-auto px-4 py-12 sm:py-16 lg:py-20">
-          <div className="max-w-4xl space-y-5">
-            <Link href="/news" className="inline-flex items-center gap-2 text-sm text-white/80 transition hover:text-white">
-              <ArrowLeft className="h-4 w-4" /> กลับไปหน้าข่าวสาร
+    <div className="bg-base-100 min-h-screen pb-16 lg:pb-24">
+      {/* Immersive Magazine Hero Section */}
+      <section className="relative w-full h-[60vh] sm:h-[70vh] min-h-[400px] max-h-[700px] flex items-end">
+        {heroImage ? (
+          <Image
+            src={heroImage}
+            alt={newsItem.title}
+            fill
+            unoptimized
+            className="object-cover pointer-events-none"
+            priority
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-scholar-deep via-slate-900 to-scholar-accent" />
+        )}
+        
+        {/* Gradients to ensure text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+
+        <div className="container relative z-10 mx-auto px-4 pb-12 sm:pb-16 lg:pb-20">
+          <div className="max-w-4xl space-y-6">
+            <Link href={`/news${newsItem.category ? `?category=${newsItem.category}` : ''}`} className="group inline-flex items-center gap-2 font-medium text-white/80 transition-colors hover:text-white">
+              <span className="flex items-center justify-center p-2 rounded-full bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-all">
+                <ArrowLeft className="h-4 w-4" />
+              </span> กลับไปหน้าข่าวสาร
             </Link>
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              <span className={`rounded-full px-3 py-1 font-medium ${FACULTY_NEWS_CATEGORY_STYLES[newsItem.category]}`}>
+            
+            <div className="flex flex-wrap items-center gap-4 text-sm font-medium">
+              <span className={`rounded-full px-4 py-1.5 shadow-sm text-xs sm:text-sm whitespace-nowrap bg-white/20 backdrop-blur-md text-white ring-1 ring-white/30`}>
                 {FACULTY_NEWS_CATEGORY_LABELS[newsItem.category]}
               </span>
-              <span className="inline-flex items-center gap-2 text-white/75">
+              <span className="inline-flex items-center gap-1.5 text-white/80">
                 <CalendarDays className="h-4 w-4" />
                 {formatFacultyNewsDate(newsItem.publishedAt)}
               </span>
-              <span className="inline-flex items-center gap-2 text-white/75">
-                <Paperclip className="h-4 w-4" />
-                {newsItem.attachments?.length || 0} ไฟล์แนบ
-              </span>
+              {hasAttachments && (
+                <span className="inline-flex items-center gap-1.5 text-white/80">
+                  <Paperclip className="h-4 w-4" />
+                  {newsItem.attachments.length} ไฟล์
+                </span>
+              )}
             </div>
-            <h1 className="text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">{newsItem.title}</h1>
+            
+            <h1 className="text-3xl font-bold leading-tight sm:text-4xl md:text-5xl lg:text-6xl text-white drop-shadow-md">{newsItem.title}</h1>
           </div>
         </div>
       </section>
 
-      <div className="container mx-auto grid gap-8 px-4 py-8 sm:py-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:py-14">
-        <div className="space-y-8">
-          <div className="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
-            <div className="relative aspect-[16/9] bg-base-200">
-              {heroImage ? (
-                <Image
-                  src={heroImage}
-                  alt={newsItem.title}
-                  fill
-                  unoptimized
-                  className="object-cover"
-                  priority
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-base-content/40">
-                  <Newspaper className="h-12 w-12" />
-                </div>
-              )}
-            </div>
-          </div>
+      {/* Main Content Area */}
+      {/* We use grid if there are attachments for the sidebar, otherwise center it perfectly */}
+      <div className={`container mx-auto px-4 py-12 lg:py-16 ${hasAttachments ? 'grid gap-12 lg:grid-cols-[1fr_minmax(0,340px)]' : 'max-w-4xl'}`}>
+        
+        <div className="space-y-12">
+          {/* Article text */}
+          <article className="prose prose-base sm:prose-lg max-w-none prose-headings:font-bold prose-headings:text-base-content prose-p:text-base-content/80 prose-a:text-primary hover:prose-a:text-primary/80 prose-img:rounded-3xl prose-img:shadow-md" dangerouslySetInnerHTML={{ __html: fixedContent }} />
 
-          <article className="rounded-3xl border border-base-300 bg-base-100 shadow-sm">
-            <div className="prose prose-base sm:prose-lg max-w-none p-5 sm:p-6 md:p-8" dangerouslySetInnerHTML={{ __html: fixedContent }} />
-          </article>
-
-          {galleryImages.length > 0 && (
-            <section className="space-y-4 rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm">
-              <h2 className="flex items-center gap-2 text-xl font-bold text-base-content sm:text-2xl">
-                <Images className="h-5 w-5 text-scholar-accent" /> รูปภาพเพิ่มเติม
-              </h2>
-              <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {galleryImages.map((imageUrl, index) => (
-                  <div key={`${imageUrl}-${index}`} className="relative aspect-[4/3] overflow-hidden rounded-2xl border bg-base-200">
-                    <Image
-                      src={imageUrl}
-                      alt={`ภาพประกอบ ${index + 1}`}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+          {/* Gallery Section */}
+          <NewsGalleryClient galleryImages={galleryImages} />
         </div>
 
-        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-base-content">ข้อมูลข่าว</h2>
-            <div className="mt-4 space-y-3 text-sm text-base-content/75">
-              <div>
-                <p className="font-medium text-base-content">หมวดหมู่</p>
-                <p>{FACULTY_NEWS_CATEGORY_LABELS[newsItem.category]}</p>
+        {/* Sidebar (Only shows if there are attachments) */}
+        {hasAttachments && (
+          <aside className="space-y-8 lg:sticky lg:top-[100px] lg:self-start">
+            <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm overflow-hidden text-base-content">
+              {/* Header card */}
+              <div className="bg-base-200/50 p-5 border-b border-base-300">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <Download className="h-5 w-5 text-primary" /> เอกสารที่เกี่ยวข้อง
+                </h2>
+                <p className="text-xs text-base-content/60 mt-1">สามารถคลิกเพื่อดาวน์โหลดแผ่นพับ แจ้งกำหนดการ หรือแบบฟอร์มไฟล์แนบ</p>
               </div>
-              <div>
-                <p className="font-medium text-base-content">วันที่เผยแพร่</p>
-                <p>{formatFacultyNewsDate(newsItem.publishedAt)}</p>
-              </div>
-              <div>
-                <p className="font-medium text-base-content">รูปภาพเพิ่มเติม</p>
-                <p>{galleryImages.length} รูป</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-base-content">เอกสารดาวน์โหลด</h2>
-            {newsItem.attachments && newsItem.attachments.length > 0 ? (
-              <div className="mt-4 space-y-3">
+              
+              <div className="p-4 space-y-3">
                 {newsItem.attachments.map((attachment) => {
                   const href = getFacultyNewsServerAssetUrl(attachment.fileUrl) || attachment.fileUrl;
                   return (
@@ -179,27 +158,33 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
                       download
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-start gap-3 rounded-2xl border border-base-300 px-4 py-3 transition hover:border-scholar-accent/40 hover:bg-base-200/50"
+                      className="group flex flex-col gap-2 rounded-2xl border border-base-300 bg-base-100 p-4 transition-all hover:border-primary/50 hover:bg-primary/5 hover:shadow-md"
                     >
-                      <div className="mt-0.5 rounded-full bg-scholar-accent/10 p-2 text-scholar-accent">
-                        <Download className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate font-medium text-base-content">{attachment.originalName}</p>
-                        <p className="text-xs text-base-content/60">
-                          {attachment.mimeType || 'ไฟล์แนบ'}
-                          {typeof attachment.size === 'number' ? ` • ${(attachment.size / 1024 / 1024).toFixed(2)} MB` : ''}
-                        </p>
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 rounded-full bg-base-200 p-2 text-base-content/70 transition-colors group-hover:bg-primary group-hover:text-primary-content">
+                          <Paperclip className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="break-words font-medium text-base-content group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                            {attachment.originalName}
+                          </p>
+                          <div className="flex items-center gap-2 mt-2 text-xs font-medium text-base-content/50">
+                            <span className="uppercase tracking-wider px-2 py-0.5 bg-base-200 rounded-md">
+                              {attachment.mimeType?.split('/')[1] || 'FILE'}
+                            </span>
+                            {typeof attachment.size === 'number' && (
+                              <span>{(attachment.size / 1024 / 1024).toFixed(2)} MB</span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </a>
                   );
                 })}
               </div>
-            ) : (
-              <p className="mt-4 text-sm text-base-content/60">ข่าวรายการนี้ไม่มีเอกสารแนบ</p>
-            )}
-          </div>
-        </aside>
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );

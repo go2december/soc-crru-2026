@@ -65,11 +65,15 @@ export class NewsService {
     return result[0];
   }
 
-  async findAllPublic() {
+  async findAllPublic(category?: string) {
+    let whereCondition = eq(news.isPublished, true);
+    if (category) {
+      whereCondition = and(whereCondition, eq(news.category, category as any)) as any;
+    }
     return this.drizzle.db
       .select()
       .from(news)
-      .where(eq(news.isPublished, true))
+      .where(whereCondition)
       .orderBy(desc(news.publishedAt), desc(news.createdAt));
   }
 

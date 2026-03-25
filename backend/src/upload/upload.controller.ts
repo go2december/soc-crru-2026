@@ -62,4 +62,19 @@ export class UploadController {
     const deleted = await this.uploadService.deleteNewsFile(url);
     return { deleted };
   }
+
+  @Post('programs')
+  @Roles('ADMIN', 'EDITOR', 'STAFF') // Allow staff/editors to upload
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProgramsFile(@UploadedFile() file: Express.Multer.File) {
+    const fileUrl = await this.uploadService.saveProgramsFile(file);
+    return { url: fileUrl };
+  }
+
+  @Delete('programs')
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  async deleteProgramsFile(@Body('url') url: string) {
+    const deleted = await this.uploadService.deleteProgramsFile(url);
+    return { deleted };
+  }
 }

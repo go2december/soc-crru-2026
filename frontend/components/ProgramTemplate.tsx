@@ -1,12 +1,30 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import Breadcrumb from '@/components/Breadcrumb';
+import ProgramGalleryClient from '@/components/ProgramGalleryClient';
+import type { ProgramInstructor } from '@/lib/api';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+
+// ---- Helper: Parse YouTube ID from various URL formats ----
+function getYouTubeId(url: string): string | null {
+    if (!url) return null;
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/,
+        /youtube\.com\/shorts\/([^&\s?]+)/,
+    ];
+    for (const p of patterns) {
+        const m = url.match(p);
+        if (m) return m[1];
+    }
+    return null;
+}
 
 export interface ProgramData {
     id: string;
     title: string;
     degree: string;
-    image: string; // Banner/Hero Image
+    image: string;
     description: string;
     highlights: {
         title: string;
@@ -20,12 +38,16 @@ export interface ProgramData {
         major: number;
         freeElective: number;
     };
-    downloadLink?: string; // Link to PDF curriculum
-    level?: string; // e.g. "ปริญญาตรี", "ปริญญาโท"
-    concentrations?: {
-        title: string;
-        description: string;
-    }[];
+    downloadLink?: string;
+    level?: string;
+    concentrations?: { title: string; description: string }[];
+    // PR Media
+    galleryImages?: string[];
+    attachments?: { originalName: string; fileUrl: string; size?: number; mimeType?: string }[];
+    youtubeVideoUrl?: string;
+    facebookVideoUrl?: string;
+    // Instructors
+    instructors?: ProgramInstructor[];
 }
 
 interface ProgramTemplateProps {
@@ -33,21 +55,32 @@ interface ProgramTemplateProps {
 }
 
 export default function ProgramTemplate({ data }: ProgramTemplateProps) {
+    const youtubeId = getYouTubeId(data.youtubeVideoUrl || '');
+    const hasFacebookPage = !!data.facebookVideoUrl;
+    const hasGallery = (data.galleryImages ?? []).length > 0;
+    const hasAttachments = (data.attachments ?? []).length > 0;
+    const hasInstructors = (data.instructors ?? []).length > 0;
+    const chair = (data.instructors ?? []).find(i => i.role === 'CHAIR');
+    const members = (data.instructors ?? []).filter(i => i.role === 'MEMBER');
+    const hasPRMedia = youtubeId || hasFacebookPage || hasGallery || hasAttachments;
+
+    const fullGalleryUrls = (data.galleryImages ?? []).map(img =>
+        img.startsWith('/') ? `${API_URL}${img}` : img
+    );
+    const fullAttachments = (data.attachments ?? []).map(att => ({
+        ...att,
+        fileUrl: att.fileUrl.startsWith('/') ? `${API_URL}${att.fileUrl}` : att.fileUrl
+    }));
+
     return (
         <div className="bg-white font-sans text-scholar-text">
 
-            {/* 1. Hero / Header */}
+            {/* Hero */}
             <header className="relative h-[400px] flex items-center justify-center bg-scholar-deep overflow-hidden">
                 <div className="absolute inset-0 opacity-50">
-                    <Image
-                        src={data.image}
-                        alt={data.title}
-                        fill
-                        className="object-cover"
-                        priority
-                    />
+                    <Image src={data.image} alt={data.title} fill className="object-cover" priority />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-scholar-deep via-scholar-deep/60 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-scholar-deep via-scholar-deep/60 to-transparent" />
                 <div className="relative z-10 container mx-auto px-4 text-center lg:text-left pt-16">
                     <span className="inline-block px-3 py-1 rounded-full bg-scholar-accent text-white text-sm font-semibold mb-4 tracking-wider">
                         {data.level || "ปริญญาตรี (Bachelor's Degree)"}
@@ -58,20 +91,33 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                     <p className="text-xl lg:text-2xl text-scholar-gold font-light tracking-wide mb-8">
                         {data.degree}
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
                         <a
-                            href={data.level?.includes('โท') || data.level?.includes('เอก') || data.level?.includes('Master') || data.level?.includes('Doctor')
+                            href={data.level?.includes('โท') || data.level?.includes('เอก')
                                 ? "https://orasis.crru.ac.th/gds_crru/index.php/main/home"
                                 : "https://admission.crru.ac.th/"}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            target="_blank" rel="noopener noreferrer"
                             className="btn btn-primary text-white bg-gradient-to-r from-scholar-accent to-[#D9341C] border-none px-8 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all"
                         >
                             สมัครเรียนทันที
                         </a>
                         {data.downloadLink && (
-                            <a href={data.downloadLink} target="_blank" rel="noopener noreferrer" className="btn btn-outline text-white hover:bg-white hover:text-scholar-deep px-8 rounded-full">
+                            <a href={data.downloadLink.startsWith('/') ? `${API_URL}${data.downloadLink}` : data.downloadLink}
+                                target="_blank" rel="noopener noreferrer"
+                                className="btn btn-outline text-white hover:bg-white hover:text-scholar-deep px-8 rounded-full"
+                            >
                                 ดาวน์โหลดหลักสูตร (PDF)
+                            </a>
+                        )}
+                        {hasFacebookPage && (
+                            <a href={data.facebookVideoUrl} target="_blank" rel="noopener noreferrer"
+                                className="btn btn-outline text-white border-[#1877F2]/60 hover:bg-[#1877F2] hover:border-[#1877F2] hover:text-white px-8 rounded-full gap-2 transition-all"
+                            >
+                                {/* Facebook SVG Icon */}
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                </svg>
+                                Facebook หลักสูตร
                             </a>
                         )}
                     </div>
@@ -82,15 +128,11 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                 <Breadcrumb items={[
                     { label: 'หลักสูตร', href: '/programs' },
                     {
-                        label: data.level?.includes('เอก') || data.level?.includes('Doctor')
-                            ? 'หลักสูตรปริญญาเอก'
-                            : data.level?.includes('โท') || data.level?.includes('Master')
-                                ? 'หลักสูตรปริญญาโท'
+                        label: data.level?.includes('เอก') ? 'หลักสูตรปริญญาเอก'
+                            : data.level?.includes('โท') ? 'หลักสูตรปริญญาโท'
                                 : 'หลักสูตรปริญญาตรี',
-                        href: data.level?.includes('เอก') || data.level?.includes('Doctor')
-                            ? '/programs?level=doctoral'
-                            : data.level?.includes('โท') || data.level?.includes('Master')
-                                ? '/programs?level=master'
+                        href: data.level?.includes('เอก') ? '/programs?level=doctoral'
+                            : data.level?.includes('โท') ? '/programs?level=master'
                                 : '/programs?level=bachelor'
                     },
                     { label: data.title }
@@ -98,35 +140,48 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mt-8">
 
-                    {/* Left Column: Main Content */}
+                    {/* ===== LEFT COLUMN ===== */}
                     <div className="lg:col-span-2 space-y-12">
 
                         {/* Overview */}
                         <section>
-                            <h2 className="text-2xl font-bold text-scholar-deep mb-4 border-l-4 border-scholar-accent pl-3">
-                                เกี่ยวกับสาขาวิชา
-                            </h2>
-                            <p className="text-lg text-gray-600 leading-relaxed indent-8">
-                                {data.description}
-                            </p>
+                            <h2 className="text-2xl font-bold text-scholar-deep mb-4 border-l-4 border-scholar-accent pl-3">เกี่ยวกับสาขาวิชา</h2>
+                            <p className="text-lg text-gray-600 leading-relaxed indent-8">{data.description}</p>
                         </section>
 
-                        {/* Concentrations / Majors */}
+                        {/* YouTube Video Embed */}
+                        {youtubeId && (
+                            <section>
+                                <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3 flex items-center gap-3">
+                                    <svg className="w-7 h-7 text-red-600 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                                    </svg>
+                                    แนะนำหลักสูตร (วิดีโอ)
+                                </h2>
+                                <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-xl border border-gray-100">
+                                    <iframe
+                                        src={`https://www.youtube.com/embed/${youtubeId}?rel=0`}
+                                        title="วิดีโอแนะนำหลักสูตร"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        className="absolute inset-0 w-full h-full"
+                                    />
+                                </div>
+                            </section>
+                        )}
+
+                        {/* Concentrations */}
                         {data.concentrations && data.concentrations.length > 0 && (
                             <section>
-                                <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3">
-                                    แขนงวิชา / วิชาเอก
-                                </h2>
+                                <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3">แขนงวิชา / วิชาเอก</h2>
                                 <div className="space-y-6">
                                     {data.concentrations.map((item, index) => (
                                         <div key={index} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:border-scholar-gold/30 transition-all">
                                             <h3 className="font-bold text-xl text-scholar-deep mb-2 flex items-center gap-2">
-                                                <span className="w-2 h-2 rounded-full bg-scholar-accent"></span>
+                                                <span className="w-2 h-2 rounded-full bg-scholar-accent" />
                                                 {item.title}
                                             </h3>
-                                            <p className="text-gray-600 pl-4 border-l border-gray-200 ml-1">
-                                                {item.description}
-                                            </p>
+                                            <p className="text-gray-600 pl-4 border-l border-gray-200 ml-1">{item.description}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -134,49 +189,95 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                         )}
 
                         {/* Highlights */}
-                        <section>
-                            <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3">
-                                จุดเด่นของหลักสูตร
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {data.highlights.map((item, index) => (
-                                    <div key={index} className="bg-scholar-soft p-6 rounded-xl hover:shadow-md transition-shadow">
-                                        <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-scholar-accent mb-4 shadow-sm">
-                                            {item.icon || (
-                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                            )}
+                        {data.highlights.length > 0 && (
+                            <section>
+                                <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3">จุดเด่นของหลักสูตร</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {data.highlights.map((item, index) => (
+                                        <div key={index} className="bg-scholar-soft p-6 rounded-xl hover:shadow-md transition-shadow">
+                                            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-scholar-accent mb-4 shadow-sm">
+                                                {item.icon || (
+                                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                            <h3 className="font-bold text-lg text-scholar-deep mb-2">{item.title}</h3>
+                                            <p className="text-gray-600 text-sm">{item.description}</p>
                                         </div>
-                                        <h3 className="font-bold text-lg text-scholar-deep mb-2">{item.title}</h3>
-                                        <p className="text-gray-600 text-sm">{item.description}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                         {/* Career Paths */}
-                        <section>
-                            <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3">
-                                เส้นทางอาชีพในอนาคต
-                            </h2>
-                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {data.careers.map((career, index) => (
-                                    <li key={index} className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm hover:border-scholar-gold transition-colors">
-                                        <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        <span className="text-gray-700 font-medium">{career}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </section>
+                        {data.careers.length > 0 && (
+                            <section>
+                                <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3">เส้นทางอาชีพในอนาคต</h2>
+                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {data.careers.map((career, index) => (
+                                        <li key={index} className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm hover:border-scholar-gold transition-colors">
+                                            <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span className="text-gray-700 font-medium">{career}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </section>
+                        )}
+
+                        {/* Gallery (Lightbox) */}
+                        {hasGallery && (
+                            <ProgramGalleryClient galleryImages={fullGalleryUrls} />
+                        )}
+
+                        {/* Attachments / Downloads */}
+                        {hasAttachments && (
+                            <section>
+                                <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3">เอกสารดาวน์โหลด</h2>
+                                <div className="space-y-3">
+                                    {fullAttachments.map((file, index) => (
+                                        <a
+                                            key={index}
+                                            href={file.fileUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl shadow-sm hover:border-scholar-gold hover:shadow-md transition-all bg-white group"
+                                        >
+                                            <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-red-100 transition-colors">
+                                                <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <div className="flex-1 overflow-hidden">
+                                                <p className="font-semibold text-scholar-deep truncate">{file.originalName}</p>
+                                                {file.size && (
+                                                    <p className="text-xs text-gray-400 mt-0.5">{(file.size / 1024).toFixed(1)} KB</p>
+                                                )}
+                                            </div>
+                                            <div className="shrink-0 text-scholar-accent opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                </svg>
+                                            </div>
+                                        </a>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                     </div>
 
-                    {/* Right Column: Sidebar info */}
+                    {/* ===== RIGHT COLUMN (Sidebar) ===== */}
                     <div className="space-y-8">
 
                         {/* Structure Box */}
                         <div className="bg-white p-6 rounded-2xl shadow-lg border-t-8 border-scholar-deep">
                             <h3 className="text-xl font-bold text-scholar-deep mb-6 flex items-center gap-2">
-                                <svg className="w-6 h-6 text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                <svg className="w-6 h-6 text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
                                 โครงสร้างหลักสูตร
                             </h3>
                             <div className="space-y-4">
@@ -199,19 +300,81 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                             </div>
                         </div>
 
-                        {/* Contact / Ask More */}
+                        {/* Facebook Fanpage Widget */}
+                        {hasFacebookPage && (
+                            <a
+                                href={data.facebookVideoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-4 p-5 rounded-2xl shadow-lg border border-[#1877F2]/20 bg-gradient-to-br from-[#1877F2]/5 to-[#1877F2]/10 hover:from-[#1877F2]/15 hover:to-[#1877F2]/20 transition-all group"
+                            >
+                                <div className="w-12 h-12 bg-[#1877F2] rounded-xl flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+                                    <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p className="font-bold text-[#1877F2] leading-tight">Facebook Page</p>
+                                    <p className="text-sm text-gray-500 mt-0.5">ติดตามข่าวสารหลักสูตร</p>
+                                </div>
+                                <svg className="w-5 h-5 text-[#1877F2]/50 ml-auto group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+                        )}
+
+                        {/* Quick Links */}
+                        {hasAttachments && (
+                            <div className="bg-white p-5 rounded-2xl shadow-lg border border-gray-100">
+                                <h3 className="text-base font-bold text-scholar-deep mb-3 flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    เอกสารที่เกี่ยวข้อง
+                                </h3>
+                                <div className="space-y-2">
+                                    {fullAttachments.slice(0, 5).map((file, i) => (
+                                        <a
+                                            key={i}
+                                            href={file.fileUrl}
+                                            target="_blank" rel="noopener noreferrer"
+                                            className="flex items-center gap-2 text-sm text-gray-700 hover:text-scholar-accent transition-colors py-1 truncate"
+                                        >
+                                            <svg className="w-4 h-4 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            <span className="truncate">{file.originalName}</span>
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Contact Box */}
                         <div className="bg-scholar-deep text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-scholar-accent/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-scholar-accent/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                             <h3 className="text-lg font-bold mb-4">สอบถามข้อมูลเพิ่มเติม</h3>
                             <p className="text-white/80 text-sm mb-4">สงสัยเกี่ยวกับหลักสูตร หรือการรับสมัคร? ทักแชทสอบถามเจ้าหน้าที่ได้เลย</p>
-                            <Link href="/contact" className="btn btn-outline text-white hover:bg-white hover:text-scholar-deep w-full">
-                                ติดต่อเรา
-                            </Link>
+                            <Link href="/contact" className="btn btn-outline text-white hover:bg-white hover:text-scholar-deep w-full">ติดต่อเรา</Link>
                         </div>
 
                     </div>
-
                 </div>
+
+                {/* Instructors Section — bottom of content full width */}
+                {hasInstructors && (
+                    <section className="mt-16 pt-8 border-t border-gray-100">
+                        <h2 className="text-2xl font-bold text-scholar-deep mb-8 border-l-4 border-scholar-accent pl-3">
+                            คณาจารย์ประจำหลักสูตร
+                        </h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                            {chair && <InstructorCard inst={chair} apiUrl={API_URL} />}
+                            {members.map((inst) => (
+                                <InstructorCard key={inst.id} inst={inst} apiUrl={API_URL} />
+                            ))}
+                        </div>
+                    </section>
+                )}
             </div>
 
             {/* Bottom CTA */}
@@ -219,12 +382,86 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                 <div className="container mx-auto px-4">
                     <h2 className="text-3xl font-bold text-scholar-deep mb-4">พร้อมที่จะเป็นส่วนหนึ่งของครอบครัวเราหรือยัง?</h2>
                     <p className="text-gray-500 mb-8 max-w-xl mx-auto">เปิดรับสมัครรอบ TCAS แล้ววันนี้ อย่ารอช้า โอกาสดีๆ รอคุณอยู่</p>
-                    <a href="https://admission.crru.ac.th/" target="_blank" rel="noopener noreferrer" className="btn btn-lg btn-primary text-white bg-scholar-accent border-none px-12 rounded-full shadow-xl hover:scale-105">
+                    <a href="https://admission.crru.ac.th/" target="_blank" rel="noopener noreferrer"
+                        className="btn btn-lg btn-primary text-white bg-scholar-accent border-none px-12 rounded-full shadow-xl hover:scale-105"
+                    >
                         สมัครเรียน
                     </a>
                 </div>
             </section>
-
         </div>
+    );
+}
+
+// ---- InstructorCard Sub-Component ----
+function getAcademicPositionAbbr(nameTh: string | null | undefined): string | null {
+    if (!nameTh) return null;
+    const map: Record<string, string> = {
+        'ศาสตราจารย์': 'ศ.',
+        'รองศาสตราจารย์': 'รศ.',
+        'ผู้ช่วยศาสตราจารย์': 'ผศ.',
+        'อาจารย์': 'อ.',
+        'lecturer': 'Lect.',
+        'assistant professor': 'Asst. Prof.',
+        'associate professor': 'Assoc. Prof.',
+        'professor': 'Prof.',
+    };
+    const lower = nameTh.toLowerCase();
+    for (const [key, abbr] of Object.entries(map)) {
+        if (lower.includes(key.toLowerCase())) return abbr;
+    }
+    // Return first 4 chars if nothing matched (fallback graceful)
+    return nameTh.length > 6 ? nameTh.substring(0, 4) + '.' : nameTh;
+}
+
+function InstructorCard({ inst, apiUrl }: { inst: ProgramInstructor; apiUrl: string }) {
+    const isChair = inst.role === 'CHAIR';
+    const positionAbbr = getAcademicPositionAbbr(inst.academicPositionNameTh);
+    const titlePart = [positionAbbr, inst.prefixTh].filter(Boolean).join('');
+    const displayName = [titlePart, inst.firstNameTh, inst.lastNameTh].filter(Boolean).join(' ');
+    const imageUrl = inst.imageUrl
+        ? (inst.imageUrl.startsWith('/') ? `${apiUrl}${inst.imageUrl}` : inst.imageUrl)
+        : null;
+
+    return (
+        <Link
+            href={`/about/staff/${inst.staffId}`}
+            className={`flex flex-col items-center text-center p-4 rounded-2xl border shadow-sm transition-all hover:shadow-lg hover:border-scholar-accent/30 hover:-translate-y-1 group ${isChair ? 'border-scholar-gold/50 bg-amber-50/60' : 'border-gray-100 bg-white'}`}
+        >
+            {/* Photo */}
+            <div className="relative w-20 h-20 mb-3">
+                {imageUrl ? (
+                    <Image
+                        src={imageUrl}
+                        alt={displayName}
+                        fill
+                        unoptimized
+                        className="object-cover rounded-full ring-2 ring-white shadow-md group-hover:ring-scholar-accent/20 transition-all"
+                    />
+                ) : (
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-scholar-deep to-scholar-accent flex items-center justify-center ring-2 ring-white shadow-md group-hover:ring-scholar-accent/20 transition-all">
+                        <span className="text-white font-bold text-2xl">
+                            {inst.firstNameTh?.charAt(0) || '?'}
+                        </span>
+                    </div>
+                )}
+                {/* Chair Crown badge */}
+                {isChair && (
+                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center shadow-sm" title="ประธานหลักสูตร">
+                        <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M5 16L3 5l5.5 5L12 2l3.5 8L21 5l-2 11H5zm2 3h10v2H7v-2z" />
+                        </svg>
+                    </div>
+                )}
+            </div>
+            {/* Name and Titles */}
+            <p className="mt-1 font-bold text-scholar-deep text-sm leading-tight group-hover:text-scholar-accent transition-colors">
+                {displayName}
+            </p>
+            {/* Role badge */}
+            <span className={`mt-2 inline-block px-2 py-0.5 rounded-full text-xs font-semibold transition-colors ${isChair ? 'bg-amber-100 text-amber-700 group-hover:bg-amber-200' : 'bg-scholar-soft text-scholar-deep/70 group-hover:bg-scholar-accent/10 group-hover:text-scholar-accent'}`}>
+                {isChair ? 'ประธานหลักสูตร' : 'อ.ประจำหลักสูตร'}
+            </span>
+        </Link>
     );
 }

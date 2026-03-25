@@ -1,4 +1,4 @@
-import { fetchProgramByCode } from '@/lib/api';
+import { fetchProgramByCode, ProgramInstructor } from '@/lib/api';
 import ProgramTemplate, { ProgramData } from '@/components/ProgramTemplate';
 import { notFound } from 'next/navigation';
 
@@ -41,7 +41,12 @@ export default async function ProgramDynamicsPage(props: Props) {
             freeElective: 0
         },
         downloadLink: program.curriculumUrl,
-        concentrations: program.concentrations
+        concentrations: program.concentrations,
+        galleryImages: program.galleryImages,
+        attachments: program.attachments,
+        youtubeVideoUrl: program.youtubeVideoUrl,
+        facebookVideoUrl: program.facebookVideoUrl,
+        instructors: program.instructors as ProgramInstructor[] | undefined,
     };
 
     return <ProgramTemplate data={templateData} />;

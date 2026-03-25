@@ -171,6 +171,36 @@ export const programs = pgTable('programs', {
       description: string;
     }[]
   >(),
+
+  isActive: boolean('is_active').default(true).notNull(),
+
+  // PR Media enhancements
+  galleryImages: text('gallery_images').array(),
+  attachments: jsonb('attachments').$type<{
+    originalName: string;
+    fileUrl: string;
+    mimeType?: string;
+    size?: number;
+  }[]>(),
+  youtubeVideoUrl: varchar('youtube_video_url', { length: 500 }),
+  facebookVideoUrl: varchar('facebook_video_url', { length: 500 }),
+});
+
+export const programInstructorRoleEnum = pgEnum('program_instructor_role', [
+  'CHAIR', // ประธาน
+  'MEMBER', // อาจารย์ประจำหลักสูตร
+]);
+
+export const programInstructors = pgTable('program_instructors', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  programId: uuid('program_id')
+    .notNull()
+    .references(() => programs.id, { onDelete: 'cascade' }),
+  staffId: uuid('staff_id')
+    .notNull()
+    .references(() => staffProfiles.id, { onDelete: 'cascade' }),
+  role: programInstructorRoleEnum('role').default('MEMBER').notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
 });
 
 export const shortCourses = pgTable('short_courses', {

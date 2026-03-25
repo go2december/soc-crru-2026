@@ -79,7 +79,7 @@ soc-crru-web/
 │   └── test/             # E2E Tests
 ├── database/             # Database initialization & data
 ├── docs/                 # Canonical plans and workflow references
-├── .agent/               # Agent support files and docs, skills and executable workflows
+├── .windsurf/            # Windsurf support files, executable workflows, and future project skills
 └── docker-compose.yml    # Container Configuration
 ```
 
@@ -89,9 +89,43 @@ soc-crru-web/
 - `docs/PLAN-soc-crru-baseline.md` → project-wide baseline and pending work
 - `docs/PLAN-chiang-rai-studies.md` → Chiang Rai Studies implementation plan
 - `docs/PLAN-workflow-standardization.md` → workflow governance standard
-- `.agent/workflows/` → executable workflows for admin work, content population, release review, and local deployment
+- `.windsurf/workflows/` → executable workflows for admin work, content population, release review, and local deployment
 
-## 🤝 Contribution
+## � Local Skill Map
+
+- **Public frontend work**
+  - Primary: `soc-crru-public-frontend`
+  - Add: `ui-ux-pro-max`, `tailwind-patterns`, `nextjs-react-expert`, `soc-crru-seo-metadata`
+
+- **Admin dashboard work**
+  - Primary: `soc-crru-admin-dashboard`
+  - Add: `ui-ux-pro-max`, `nextjs-react-expert`, `lint-and-validate`, `systematic-debugging`
+
+- **Backend / API work**
+  - Primary: `soc-crru-backend-nest-drizzle`
+  - Add: `api-patterns`, `lint-and-validate`, `systematic-debugging`
+
+- **Chiang Rai CRUD work**
+  - Primary: `soc-crru-chiang-rai-crud`
+  - Add: `soc-crru-backend-nest-drizzle`, `api-patterns`, `soc-crru-media-upload-cleanup`, `soc-crru-seo-metadata`, `lint-and-validate`
+
+- **Media upload / cleanup work**
+  - Primary: `soc-crru-media-upload-cleanup`
+  - Add: route-surface skill (`soc-crru-admin-dashboard`, `soc-crru-chiang-rai-crud`, or `soc-crru-public-frontend`)
+
+- **SEO / metadata work**
+  - Primary: `soc-crru-seo-metadata`
+  - Add: `soc-crru-public-frontend`, `ui-ux-pro-max`, `nextjs-react-expert`
+
+- **Debugging**
+  - Primary: `systematic-debugging`
+  - Add: the implementation surface skill + `lint-and-validate`
+
+- **Docs / workflow sync**
+  - Primary: `soc-crru-docs-governance`
+  - Add: the implementation surface skill that changed project status or behavior
+
+## �🤝 Contribution
 
 This project is currently under active development.
 *   **Phase 1-5 (Frontend)**: ~90% Complete (Design, Content, Navigation)
