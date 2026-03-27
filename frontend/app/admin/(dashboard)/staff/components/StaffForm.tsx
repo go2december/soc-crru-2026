@@ -140,7 +140,7 @@ export default function StaffForm({ initialData, departments, users, academicPos
         const payload = {
             ...formData,
             departmentId: parseInt(formData.departmentId || '0'),
-            academicPositionId: formData.staffType === 'ACADEMIC' && formData.academicPositionId ? parseInt(formData.academicPositionId) : undefined,
+            academicPositionId: formData.staffType === 'ACADEMIC' && formData.academicPositionId ? parseInt(formData.academicPositionId) : null,
             userId: cleanString(formData.userId),
             prefixTh: cleanString(formData.prefixTh),
             firstNameTh: formData.firstNameTh.trim(),
@@ -148,7 +148,7 @@ export default function StaffForm({ initialData, departments, users, academicPos
             prefixEn: cleanString(formData.prefixEn),
             firstNameEn: cleanString(formData.firstNameEn),
             lastNameEn: cleanString(formData.lastNameEn),
-            adminPositionId: formData.adminPositionId ? parseInt(formData.adminPositionId) : undefined,
+            adminPositionId: formData.adminPositionId ? parseInt(formData.adminPositionId) : null,
             contactEmail: cleanString(formData.contactEmail),
             imageUrl: cleanString(formData.imageUrl),
             education: eduList,
@@ -321,7 +321,7 @@ export default function StaffForm({ initialData, departments, users, academicPos
                             <Label>สังกัด (Department) <span className="text-destructive">*</span></Label>
                             <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring" required value={formData.departmentId} onChange={e => setFormData({ ...formData, departmentId: e.target.value })}>
                                 <option value="">-- เลือกสังกัด --</option>
-                                {departments.map(dept => (<option key={dept.id} value={dept.id}>{dept.nameTh}</option>))}
+                                {departments.map(dept => (<option key={dept.id} value={dept.id.toString()}>{dept.nameTh}</option>))}
                             </select>
                         </div>
 
@@ -330,7 +330,7 @@ export default function StaffForm({ initialData, departments, users, academicPos
                                 <Label>ตำแหน่งทางวิชาการ</Label>
                                 <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring" value={formData.academicPositionId} onChange={e => setFormData({ ...formData, academicPositionId: e.target.value })}>
                                     <option value="">-- ไม่มี --</option>
-                                    {academicPositions.map(p => (<option key={p.id} value={p.id}>{p.nameTh}</option>))}
+                                    {academicPositions.map(p => (<option key={p.id} value={p.id.toString()}>{p.nameTh}</option>))}
                                 </select>
                             </div>
                         )}
@@ -338,7 +338,7 @@ export default function StaffForm({ initialData, departments, users, academicPos
                             <Label>ตำแหน่งบริหาร / หน้าที่</Label>
                             <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring" value={formData.adminPositionId} onChange={e => setFormData({ ...formData, adminPositionId: e.target.value })}>
                                 <option value="">-- ไม่มี --</option>
-                                {adminPositions.map(p => (<option key={p.id} value={p.id}>{p.nameTh}</option>))}
+                                {adminPositions.map(p => (<option key={p.id} value={p.id.toString()}>{p.nameTh}</option>))}
                             </select>
                         </div>
 

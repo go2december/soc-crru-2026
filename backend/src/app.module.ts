@@ -13,6 +13,7 @@ import { UploadModule } from './upload/upload.module';
 import { ChiangRaiModule } from './chiang-rai/chiang-rai.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { AdmissionsModule } from './admissions/admissions.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { join } from 'path';
     NewsModule,
     UploadModule,
     ChiangRaiModule,
+    AdmissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

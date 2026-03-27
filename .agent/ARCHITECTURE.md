@@ -1,100 +1,125 @@
-# Antigravity Kit Architecture
+# SOC-CRRU Web - Architecture
 
-> Comprehensive AI Agent Capability Expansion Toolkit
-
----
-
-## 📋 Overview
-
-Antigravity Kit is a modular system consisting of:
-
-- **20 Specialist Agents** - Role-based AI personas
-- **36 Skills** - Domain-specific knowledge modules
-- **11 Workflows** - Slash command procedures
+> คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย (Faculty of Social Sciences, CRRU)
 
 ---
 
-## 🏗️ Directory Structure
+## 📋 Project Tech Stack
+
+| Layer      | Technology                   | Port  |
+| ---------- | ---------------------------- | ----- |
+| Frontend   | Next.js 15 + Tailwind CSS v4 | 4000  |
+| Backend    | NestJS + Drizzle ORM         | 4001  |
+| Database   | PostgreSQL 16                | 5432  |
+| Auth       | Google OAuth (@crru.ac.th)   | -     |
+| UI Library | shadcn/ui                    | -     |
+| OS         | Windows (PowerShell)         | -     |
+
+### Key Directories
+
+```plaintext
+soc-crru-web/
+├── frontend/           # Next.js 15 (App Router)
+│   ├── app/            # Pages & Routes
+│   │   ├── admin/      # Admin Dashboard (CRUD)
+│   │   ├── admissions/ # Admission pages
+│   │   └── programs/   # Program pages
+│   ├── components/     # Shared components (shadcn/ui)
+│   └── lib/            # Utilities
+├── backend/            # NestJS API
+│   └── src/
+│       ├── auth/       # Google OAuth + JWT + Roles
+│       ├── admissions/ # Admissions CRUD
+│       ├── programs/   # Programs CRUD
+│       ├── staff/      # Staff profiles
+│       ├── news/       # News CRUD
+│       ├── departments/# Departments
+│       ├── upload/     # File upload service
+│       ├── drizzle/    # ORM schema & service
+│       └── chiang-rai/ # Chiang Rai Studies (shared: users + staff only)
+└── .agent/             # AI Agent Kit
+```
+
+### Important Notes
+
+- **ศูนย์เชียงรายศึกษา** แชร์กับเว็บคณะเฉพาะ **Users** และ **ข้อมูลบุคลากร** เท่านั้น
+- Backend global prefix: `/api`
+- Auth: JWT token stored in `localStorage` as `admin_token`
+- Roles: `ADMIN`, `EDITOR`, `STAFF`, `GUEST`
+- Dev login: `GET /api/auth/dev/login` or `POST /api/auth/dev/token`
+
+---
+
+## 🏗️ Agent Kit Structure
 
 ```plaintext
 .agent/
 ├── ARCHITECTURE.md          # This file
 ├── agents/                  # 20 Specialist Agents
 ├── skills/                  # 36 Skills
-├── workflows/               # 11 Slash Commands
-├── rules/                   # Global Rules
-└── scripts/                 # Master Validation Scripts
+├── workflows/               # 12 Slash Commands
+├── rules/                   # Global Rules (GEMINI.md)
+└── scripts/                 # Validation Scripts
 ```
 
 ---
 
 ## 🤖 Agents (20)
 
-Specialist AI personas for different domains.
-
-| Agent                    | Focus                      | Skills Used                                              |
-| ------------------------ | -------------------------- | -------------------------------------------------------- |
-| `orchestrator`           | Multi-agent coordination   | parallel-agents, behavioral-modes                        |
-| `project-planner`        | Discovery, task planning   | brainstorming, plan-writing, architecture                |
-| `frontend-specialist`    | Web UI/UX                  | frontend-design, react-best-practices, tailwind-patterns |
-| `backend-specialist`     | API, business logic        | api-patterns, nodejs-best-practices, database-design     |
-| `database-architect`     | Schema, SQL                | database-design, prisma-expert                           |
-| `devops-engineer`        | CI/CD, Docker              | deployment-procedures, docker-expert                     |
-| `security-auditor`       | Security compliance        | vulnerability-scanner, red-team-tactics                  |
-| `penetration-tester`     | Offensive security         | red-team-tactics                                         |
-| `test-engineer`          | Testing strategies         | testing-patterns, tdd-workflow, webapp-testing           |
-| `debugger`               | Root cause analysis        | systematic-debugging                                     |
-| `performance-optimizer`  | Speed, Web Vitals          | performance-profiling                                    |
-| `seo-specialist`         | Ranking, visibility        | seo-fundamentals, geo-fundamentals                       |
-| `documentation-writer`   | Manuals, docs              | documentation-templates                                  |
-| `product-manager`        | Requirements, user stories | plan-writing, brainstorming                              |
-| `product-owner`          | Strategy, backlog, MVP     | plan-writing, brainstorming                              |
-| `qa-automation-engineer` | E2E testing, CI pipelines  | webapp-testing, testing-patterns                         |
-| `code-archaeologist`     | Legacy code, refactoring   | clean-code, code-review-checklist                        |
-| `explorer-agent`         | Codebase analysis          | -                                                        |
+| Agent                    | Focus                    | Primary Skills                                           |
+| ------------------------ | ------------------------ | -------------------------------------------------------- |
+| `orchestrator`           | Multi-agent coordination | parallel-agents, behavioral-modes                        |
+| `project-planner`        | Discovery, task planning | brainstorming, plan-writing, architecture                |
+| `frontend-specialist`    | Web UI/UX                | frontend-design, react-best-practices, tailwind-patterns |
+| `backend-specialist`     | API, business logic      | api-patterns, nodejs-best-practices, database-design     |
+| `database-architect`     | Schema, SQL, Drizzle     | database-design                                          |
+| `mobile-developer`       | iOS, Android, RN         | mobile-design                                            |
+| `game-developer`         | Game logic               | game-development                                         |
+| `devops-engineer`        | CI/CD, Docker            | deployment-procedures                                    |
+| `security-auditor`       | Security compliance      | vulnerability-scanner, red-team-tactics                  |
+| `penetration-tester`     | Offensive security       | red-team-tactics                                         |
+| `test-engineer`          | Testing strategies       | testing-patterns, tdd-workflow, webapp-testing           |
+| `debugger`               | Root cause analysis      | systematic-debugging                                     |
+| `performance-optimizer`  | Speed, Web Vitals        | performance-profiling                                    |
+| `seo-specialist`         | Ranking, visibility      | seo-fundamentals, geo-fundamentals                       |
+| `documentation-writer`   | Manuals, docs            | documentation-templates                                  |
+| `product-manager`        | Requirements             | plan-writing, brainstorming                              |
+| `product-owner`          | Strategy, backlog        | plan-writing, brainstorming                              |
+| `qa-automation-engineer` | E2E testing              | webapp-testing, testing-patterns                         |
+| `code-archaeologist`     | Legacy code, refactoring | clean-code, code-review-checklist                        |
+| `explorer-agent`         | Codebase analysis        | -                                                        |
 
 ---
 
 ## 🧩 Skills (36)
 
-Modular knowledge domains that agents can load on-demand. based on task context.
-
 ### Frontend & UI
 
-| Skill                   | Description                                                           |
-| ----------------------- | --------------------------------------------------------------------- |
-| `react-best-practices`  | React & Next.js performance optimization (Vercel - 57 rules)          |
-| `web-design-guidelines` | Web UI audit - 100+ rules for accessibility, UX, performance (Vercel) |
-| `tailwind-patterns`     | Tailwind CSS v4 utilities                                             |
-| `frontend-design`       | UI/UX patterns, design systems                                        |
-| `ui-ux-pro-max`         | 50 styles, 21 palettes, 50 fonts                                      |
+| Skill                   | Description                              |
+| ----------------------- | ---------------------------------------- |
+| `react-best-practices`  | React & Next.js optimization (57 rules)  |
+| `web-design-guidelines` | Web UI audit (100+ rules)                |
+| `tailwind-patterns`     | Tailwind CSS v4 utilities                |
+| `frontend-design`       | UI/UX patterns, design systems           |
 
 ### Backend & API
 
-| Skill                   | Description                    |
-| ----------------------- | ------------------------------ |
-| `api-patterns`          | REST, GraphQL, tRPC            |
-| `nestjs-expert`         | NestJS modules, DI, decorators |
-| `nodejs-best-practices` | Node.js async, modules         |
+| Skill                   | Description                |
+| ----------------------- | -------------------------- |
+| `api-patterns`          | REST, GraphQL, tRPC        |
+| `nodejs-best-practices` | Node.js async, modules     |
+| `python-patterns`       | Python standards, FastAPI  |
 
 ### Database
 
 | Skill             | Description                 |
 | ----------------- | --------------------------- |
 | `database-design` | Schema design, optimization |
-| `prisma-expert`   | Prisma ORM, migrations      |
-
-### TypeScript/JavaScript
-
-| Skill               | Description                         |
-| ------------------- | ----------------------------------- |
-| `typescript-expert` | Type-level programming, performance |
 
 ### Cloud & Infrastructure
 
 | Skill                   | Description               |
 | ----------------------- | ------------------------- |
-| `docker-expert`         | Containerization, Compose |
 | `deployment-procedures` | CI/CD, deploy workflows   |
 | `server-management`     | Infrastructure management |
 
@@ -106,7 +131,6 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 | `webapp-testing`        | E2E, Playwright          |
 | `tdd-workflow`          | Test-driven development  |
 | `code-review-checklist` | Code review standards    |
-| `lint-and-validate`     | Linting, validation      |
 
 ### Security
 
@@ -124,22 +148,6 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 | `plan-writing`  | Task planning, breakdown   |
 | `brainstorming` | Socratic questioning       |
 
-
-
-### SEO & Growth
-
-| Skill              | Description                   |
-| ------------------ | ----------------------------- |
-| `seo-fundamentals` | SEO, E-E-A-T, Core Web Vitals |
-| `geo-fundamentals` | GenAI optimization            |
-
-### Shell/CLI
-
-| Skill                | Description               |
-| -------------------- | ------------------------- |
-| `bash-linux`         | Linux commands, scripting |
-| `powershell-windows` | Windows PowerShell        |
-
 ### Other
 
 | Skill                     | Description               |
@@ -147,126 +155,70 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 | `clean-code`              | Coding standards (Global) |
 | `behavioral-modes`        | Agent personas            |
 | `parallel-agents`         | Multi-agent patterns      |
+| `mcp-builder`             | Model Context Protocol    |
 | `documentation-templates` | Doc formats               |
 | `i18n-localization`       | Internationalization      |
 | `performance-profiling`   | Web Vitals, optimization  |
 | `systematic-debugging`    | Troubleshooting           |
+| `mobile-design`           | Mobile UI/UX patterns     |
+| `game-development`        | Game logic, mechanics     |
+| `seo-fundamentals`        | SEO, E-E-A-T              |
+| `geo-fundamentals`        | GenAI optimization        |
+| `bash-linux`              | Linux commands            |
+| `powershell-windows`      | Windows PowerShell        |
+| `intelligent-routing`     | Auto agent selection      |
+| `rust-pro`                | Rust development          |
 
 ---
 
-## 🔄 Workflows (11)
+## 🔄 Workflows (12)
 
-Slash command procedures. Invoke with `/command`.
-
-| Command          | Description              |
-| ---------------- | ------------------------ |
-| `/brainstorm`    | Socratic discovery       |
-| `/create`        | Create new features      |
-| `/debug`         | Debug issues             |
-| `/deploy`        | Deploy application       |
-| `/enhance`       | Improve existing code    |
-| `/orchestrate`   | Multi-agent coordination |
-| `/plan`          | Task breakdown           |
-| `/preview`       | Preview changes          |
-| `/status`        | Check project status     |
-| `/test`          | Run tests                |
-| `/ui-ux-pro-max` | Design with 50 styles    |
-
----
-
-## 🎯 Skill Loading Protocol
-
-```plaintext
-User Request → Skill Description Match → Load SKILL.md
-                                            ↓
-                                    Read references/
-                                            ↓
-                                    Read scripts/
-```
-
-### Skill Structure
-
-```plaintext
-skill-name/
-├── SKILL.md           # (Required) Metadata & instructions
-├── scripts/           # (Optional) Python/Bash scripts
-├── references/        # (Optional) Templates, docs
-└── assets/            # (Optional) Images, logos
-```
-
-### Enhanced Skills (with scripts/references)
-
-| Skill               | Files | Coverage                            |
-| ------------------- | ----- | ----------------------------------- |
-| `ui-ux-pro-max`     | 27    | 50 styles, 21 palettes, 50 fonts    |
-| `app-builder`       | 20    | Full-stack scaffolding              |
+| Command          | Description                    |
+| ---------------- | ------------------------------ |
+| `/brainstorm`    | Socratic discovery             |
+| `/create`        | Create new features            |
+| `/commit`        | Git commit & push              |
+| `/debug`         | Systematic debugging           |
+| `/deploy`        | Deploy application             |
+| `/enhance`       | Improve existing code          |
+| `/orchestrate`   | Multi-agent coordination       |
+| `/plan`          | Task breakdown                 |
+| `/preview`       | Preview dev servers            |
+| `/status`        | Check project status           |
+| `/test`          | Run/generate tests             |
+| `/ui-ux-pro-max` | Design with premium aesthetics |
 
 ---
 
-## � Scripts (2)
-
-Master validation scripts that orchestrate skill-level scripts.
-
-### Master Scripts
-
-| Script          | Purpose                                 | When to Use              |
-| --------------- | --------------------------------------- | ------------------------ |
-| `checklist.py`  | Priority-based validation (Core checks) | Development, pre-commit  |
-| `verify_all.py` | Comprehensive verification (All checks) | Pre-deployment, releases |
-
-### Usage
-
-```bash
-# Quick validation during development
-python .agent/scripts/checklist.py .
-
-# Full verification before deployment
-python .agent/scripts/verify_all.py . --url http://localhost:3000
-```
-
-### What They Check
-
-**checklist.py** (Core checks):
-
-- Security (vulnerabilities, secrets)
-- Code Quality (lint, types)
-- Schema Validation
-- Test Suite
-- UX Audit
-- SEO Check
-
-**verify_all.py** (Full suite):
-
-- Everything in checklist.py PLUS:
-- Lighthouse (Core Web Vitals)
-- Playwright E2E
-- Bundle Analysis
-- i18n Check
-
-For details, see [scripts/README.md](scripts/README.md)
-
----
-
-## 📊 Statistics
-
-| Metric              | Value                         |
-| ------------------- | ----------------------------- |
-| **Total Agents**    | 20                            |
-| **Total Skills**    | 36                            |
-| **Total Workflows** | 11                            |
-| **Total Scripts**   | 2 (master) + 18 (skill-level) |
-| **Coverage**        | ~90% web development          |
-
----
-
-## 🔗 Quick Reference
+## 🎯 Quick Reference
 
 | Need     | Agent                 | Skills                                |
 | -------- | --------------------- | ------------------------------------- |
 | Web App  | `frontend-specialist` | react-best-practices, frontend-design |
 | API      | `backend-specialist`  | api-patterns, nodejs-best-practices   |
-| Database | `database-architect`  | database-design, prisma-expert        |
+| Database | `database-architect`  | database-design                       |
 | Security | `security-auditor`    | vulnerability-scanner                 |
 | Testing  | `test-engineer`       | testing-patterns, webapp-testing      |
 | Debug    | `debugger`            | systematic-debugging                  |
 | Plan     | `project-planner`     | brainstorming, plan-writing           |
+
+---
+
+## 📊 Dev Commands
+
+```powershell
+# Frontend (port 4000)
+cd frontend; npm run dev
+
+# Backend (port 4001)
+cd backend; npm run start:dev
+
+# Build check
+cd backend; npm run build
+
+# Database migration (manual)
+cd backend; node migration.js
+
+# Drizzle generate
+cd backend; npx drizzle-kit generate
+```

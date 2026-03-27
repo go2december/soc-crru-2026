@@ -7,29 +7,64 @@ async function run() {
   const client = await pool.connect();
   
   try {
-    console.log('Adding is_active to programs');
-    await client.query(`
-      ALTER TABLE "programs" ADD COLUMN IF NOT EXISTS "is_active" boolean DEFAULT true NOT NULL;
-    `);
-
-    console.log('Creating program_instructor_role enum');
+    console.log('Creating admission_schedule_status enum if not exists');
     try {
-      await client.query(`CREATE TYPE "public"."program_instructor_role" AS ENUM('CHAIR', 'MEMBER');`);
+      await client.query(`CREATE TYPE "public"."admission_schedule_status" AS ENUM('CLOSED', 'OPEN', 'UPCOMING', 'ALWAYS');`);
     } catch(e) {
       console.log('Enum may already exist');
     }
 
-    console.log('Creating program_instructors table');
+    console.log('Creating admission_config table');
     await client.query(`
-      CREATE TABLE IF NOT EXISTS "program_instructors" (
+      CREATE TABLE IF NOT EXISTS "admission_config" (
+        "id" integer PRIMARY KEY DEFAULT 1,
+        "youtube_video_url" varchar(500),
+        "brochure_url" varchar(500),
+        "bachelor_link" varchar(500),
+        "graduate_link" varchar(500),
+        "updated_at" timestamp DEFAULT now() NOT NULL
+      );
+    `);
+
+    console.log('Creating admission_schedules table');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "admission_schedules" (
         "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-        "program_id" uuid NOT NULL REFERENCES "programs"("id") ON DELETE cascade ON UPDATE no action,
-        "staff_id" uuid NOT NULL REFERENCES "staff_profiles"("id") ON DELETE cascade ON UPDATE no action,
-        "role" "public"."program_instructor_role" DEFAULT 'MEMBER' NOT NULL,
-        "sort_order" integer DEFAULT 0 NOT NULL
+        "round_name" varchar(255) NOT NULL,
+        "description" varchar(500),
+        "period" varchar(255) NOT NULL,
+        "channel" varchar(255) NOT NULL,
+        "status" "public"."admission_schedule_status" DEFAULT 'UPCOMING' NOT NULL,
+        "link" varchar(500),
+        "sort_order" integer DEFAULT 0 NOT NULL,
+        "created_at" timestamp DEFAULT now() NOT NULL,
+        "updated_at" timestamp DEFAULT now() NOT NULL
       );
     `);
     
+    console.log('Creating admission_documents table');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "admission_documents" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "title" varchar(500) NOT NULL,
+        "file_url" varchar(500) NOT NULL,
+        "sort_order" integer DEFAULT 0 NOT NULL,
+        "created_at" timestamp DEFAULT now() NOT NULL,
+        "updated_at" timestamp DEFAULT now() NOT NULL
+      );
+    `);
+
+    // Add table_title column if it doesn't exist yet
+    console.log('Adding table_title to admission_config (if needed)');
+    try {
+      await client.query(`
+        ALTER TABLE "admission_config"
+        ADD COLUMN IF NOT EXISTS "table_title" varchar(255) DEFAULT 'ตารางรอบรับสมัคร ประจำปีการศึกษา 2569';
+      `);
+    } catch(e) {
+      console.log('table_title column may already exist');
+    }
+
     console.log('Migration complete!');
   } catch(e) {
     console.error('Migration failed:', e);

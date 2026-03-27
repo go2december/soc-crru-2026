@@ -16,7 +16,8 @@ import {
     ChevronLeft,
     ExternalLink,
     ShieldCheck,
-    Briefcase
+    Briefcase,
+    CalendarDays
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -127,6 +128,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             items: [
                 { href: '/admin/news', label: 'ข่าวสาร', icon: Newspaper, minLevel: 2 },
                 { href: '/admin/programs', label: 'หลักสูตร', icon: GraduationCap, minLevel: 2 },
+                { href: '/admin/admissions', label: 'รับสมัคร', icon: CalendarDays, minLevel: 2 },
             ]
         },
         {

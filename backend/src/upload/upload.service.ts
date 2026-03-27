@@ -69,14 +69,16 @@ export class UploadService {
       throw new BadRequestException('No file uploaded');
     }
 
-    const sanitizedOriginalName = file.originalname.replace(/[^a-zA-Z0-9ก-๙._-]/g, '_');
+    // Fix Multer latin1 encoding issue for Thai characters
+    const utf8OriginalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    const sanitizedOriginalName = utf8OriginalName.replace(/[^a-zA-Z0-9ก-๙._-]/g, '_');
     const filename = `${uuidv4()}-${sanitizedOriginalName}`;
     const filepath = path.join(this.newsAttachmentUploadDir, filename);
 
     try {
       await fs.promises.writeFile(filepath, file.buffer);
       return {
-        originalName: file.originalname,
+        originalName: utf8OriginalName,
         fileUrl: `/uploads/news/attachments/${filename}`,
         mimeType: file.mimetype,
         size: file.size,
@@ -207,7 +209,10 @@ export class UploadService {
 
   async saveProgramsFile(file: Express.Multer.File): Promise<string> {
     if (!file) throw new BadRequestException('No file uploaded');
-    const sanitizedOriginalName = file.originalname.replace(/[^a-zA-Z0-9ก-๙._-]/g, '_');
+    
+    // Fix Multer latin1 encoding issue for Thai characters
+    const utf8OriginalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    const sanitizedOriginalName = utf8OriginalName.replace(/[^a-zA-Z0-9ก-๙._-]/g, '_');
     const filename = `${uuidv4()}-${sanitizedOriginalName}`;
     const baseFilepath = path.join(this.programsUploadDir, filename);
 

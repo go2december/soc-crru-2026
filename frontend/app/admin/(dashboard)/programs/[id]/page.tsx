@@ -86,6 +86,23 @@ export default function ProgramEditorPage() {
         fetchContext();
     }, [isNew, params.id]);
 
+    const deleteManagedFile = async (url: string) => {
+        if (!url?.startsWith('/uploads/programs/')) return;
+        const token = localStorage.getItem('admin_token');
+        try {
+            await fetch(`${API_URL}/api/upload/programs`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ url }),
+            });
+        } catch (error) {
+            console.error('Error deleting managed file:', error);
+        }
+    };
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'banner_url' | 'curriculum_url') => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -103,6 +120,12 @@ export default function ProgramEditorPage() {
 
             if (res.ok) {
                 const data = await res.json();
+                
+                // If there was an existing file, delete it first to prevent orphaned files
+                if (formData[field]) {
+                    await deleteManagedFile(formData[field]);
+                }
+                
                 setFormData(prev => ({ ...prev, [field]: data.url }));
             } else {
                 alert('อัปโหลดไฟล์ล้มเหลว');
@@ -177,7 +200,11 @@ export default function ProgramEditorPage() {
                 careers: formData.careers,
                 highlights: formData.highlights,
                 concentrations: formData.concentrations,
-                instructors: formData.instructors.map((inst, idx) => ({ ...inst, sortOrder: idx })),
+                instructors: formData.instructors.map((inst, idx) => ({
+                    staffId: inst.staffId,
+                    role: inst.role,
+                    sortOrder: idx
+                })),
                 gallery_images: formData.gallery_images,
                 attachments: formData.attachments,
                 youtube_video_url: formData.youtube_video_url,
@@ -293,7 +320,10 @@ export default function ProgramEditorPage() {
                                 <div className="relative w-full aspect-video rounded-lg overflow-hidden group">
                                     <img src={formData.banner_url.startsWith('/') ? `${API_URL}${formData.banner_url}` : formData.banner_url} alt="Banner" className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                        <Button variant="destructive" size="sm" onClick={() => setFormData(p => ({ ...p, banner_url: '' }))}>นำออก</Button>
+                                        <Button variant="destructive" size="sm" onClick={async () => {
+                                            await deleteManagedFile(formData.banner_url);
+                                            setFormData(p => ({ ...p, banner_url: '' }));
+                                        }}>นำออก</Button>
                                     </div>
                                 </div>
                             ) : (
@@ -314,7 +344,10 @@ export default function ProgramEditorPage() {
                                     <a href={formData.curriculum_url.startsWith('/') ? `${API_URL}${formData.curriculum_url}` : formData.curriculum_url} target="_blank" rel="noreferrer" className="text-sm text-sky-600 hover:underline break-all block px-4 text-center">
                                         ดูไฟล์ที่แนบไว้
                                     </a>
-                                    <Button variant="ghost" size="sm" className="text-destructive mt-2" onClick={() => setFormData(p => ({ ...p, curriculum_url: '' }))}>นำออก</Button>
+                                    <Button variant="ghost" size="sm" className="text-destructive mt-2" onClick={async () => {
+                                        await deleteManagedFile(formData.curriculum_url);
+                                        setFormData(p => ({ ...p, curriculum_url: '' }));
+                                    }}>นำออก</Button>
                                 </div>
                             ) : (
                                 <>
@@ -477,7 +510,10 @@ export default function ProgramEditorPage() {
                                     <div key={i} className="relative group aspect-video rounded-lg overflow-hidden border">
                                         <img src={img.startsWith('/') ? `${API_URL}${img}` : img} alt="" className="w-full h-full object-cover" />
                                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                            <Button variant="destructive" size="sm" onClick={() => setFormData(p => ({ ...p, gallery_images: p.gallery_images.filter((_, idx) => idx !== i) }))}>ลบ</Button>
+                                            <Button variant="destructive" size="sm" onClick={async () => {
+                                                await deleteManagedFile(img);
+                                                setFormData(p => ({ ...p, gallery_images: p.gallery_images.filter((_, idx) => idx !== i) }));
+                                            }}>ลบ</Button>
                                         </div>
                                     </div>
                                 ))}
@@ -508,7 +544,10 @@ export default function ProgramEditorPage() {
                                             <span className="text-sm truncate font-medium">{file.originalName}</span>
                                             {file.size && <span className="text-xs text-muted-foreground shrink-0 hidden sm:block">({(file.size / 1024).toFixed(1)} KB)</span>}
                                         </div>
-                                        <Button variant="ghost" size="icon" className="text-destructive shrink-0" onClick={() => setFormData(p => ({ ...p, attachments: p.attachments.filter((_, idx) => idx !== i) }))}>
+                                        <Button variant="ghost" size="icon" className="text-destructive shrink-0" onClick={async () => {
+                                            await deleteManagedFile(file.fileUrl);
+                                            setFormData(p => ({ ...p, attachments: p.attachments.filter((_, idx) => idx !== i) }));
+                                        }}>
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
                                     </div>

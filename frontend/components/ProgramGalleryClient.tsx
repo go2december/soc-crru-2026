@@ -70,32 +70,38 @@ export default function ProgramGalleryClient({ galleryImages, apiUrl = '' }: Pro
 
   if (!fullUrls || fullUrls.length === 0) return null;
 
-  return (
-    <>
-      <section className="space-y-6">
-        <h2 className="flex items-center gap-2 text-2xl font-bold text-scholar-deep border-l-4 border-scholar-accent pl-3">
-          <Images className="h-6 w-6 text-scholar-accent" />
-          ประมวลภาพกิจกรรม ({fullUrls.length})
-        </h2>
-        <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
-          {fullUrls.map((imageUrl, index) => (
-            <div
-              key={`${imageUrl}-${index}`}
-              className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-gray-100 bg-gray-100 shadow-sm cursor-pointer"
-              onClick={() => openLightbox(index)}
-            >
-              <Image
-                src={imageUrl}
-                alt={`ภาพประกอบ ${index + 1}`}
-                fill
-                unoptimized
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/10 opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none" />
-            </div>
-          ))}
+    return (
+      <>
+        <div className="grid gap-3 grid-cols-2 pt-2">
+          {fullUrls.slice(0, 4).map((imageUrl, index) => {
+            const isLastBox = index === 3;
+            const remainingCount = fullUrls.length - 4;
+
+            return (
+              <div
+                key={`${imageUrl}-${index}`}
+                className="group relative aspect-square overflow-hidden rounded-xl border border-gray-100 bg-gray-100 shadow-sm cursor-pointer"
+                onClick={() => openLightbox(index)}
+              >
+                <Image
+                  src={imageUrl}
+                  alt={`ภาพประกอบ ${index + 1}`}
+                  fill
+                  unoptimized
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/10 opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none" />
+
+                {isLastBox && remainingCount > 0 && (
+                  <div className="absolute inset-0 bg-scholar-deep/70 flex flex-col items-center justify-center transition-colors hover:bg-scholar-deep/80 pointer-events-none backdrop-blur-[2px]">
+                    <span className="text-white text-2xl font-bold">+{remainingCount}</span>
+                    <span className="text-white/80 text-xs font-medium mt-1">ดูทั้งหมด</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
-      </section>
 
       {/* Lightbox */}
       {currentIndex !== null && (

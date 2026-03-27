@@ -156,7 +156,7 @@ export default function NewsForm({ mode, initialData, onSubmit, submitting }: Ne
     setUploadingThumbnail(true);
     try {
       const nextUrl = await uploadImage(file);
-      if (mode === 'edit' && values.thumbnailUrl && values.thumbnailUrl !== nextUrl) {
+      if (values.thumbnailUrl && values.thumbnailUrl !== nextUrl) {
         await deleteManagedFile(values.thumbnailUrl);
       }
       setValues((prev) => ({ ...prev, thumbnailUrl: nextUrl }));
@@ -398,7 +398,15 @@ export default function NewsForm({ mode, initialData, onSubmit, submitting }: Ne
                       <div className="flex min-w-0 items-center gap-3">
                         <FileText className="h-4 w-4 text-primary" />
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{attachment.originalName}</p>
+                          <a 
+                            href={getFacultyNewsImageUrl(attachment.fileUrl) || attachment.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download={attachment.originalName}
+                            className="truncate text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline block"
+                          >
+                            {attachment.originalName}
+                          </a>
                           <p className="text-xs text-muted-foreground">
                             {attachment.mimeType || 'application/octet-stream'}
                             {typeof attachment.size === 'number' ? ` • ${(attachment.size / 1024 / 1024).toFixed(2)} MB` : ''}

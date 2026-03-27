@@ -10,72 +10,61 @@ $ARGUMENTS
 
 ## Task
 
-Manage preview server: start, stop, status check.
+Manage preview servers for SOC-CRRU Web project.
 
-### Commands
+### Architecture
+
+| Service  | Port | Command              | Directory |
+| -------- | ---- | -------------------- | --------- |
+| Frontend | 4000 | `npm run dev`        | frontend/ |
+| Backend  | 4001 | `npm run start:dev`  | backend/  |
+
+---
+
+## Sub-commands
 
 ```
 /preview           - Show current status
-/preview start     - Start server
-/preview stop      - Stop server
-/preview restart   - Restart
-/preview check     - Health check
+/preview start     - Start both servers
+/preview frontend  - Start frontend only
+/preview backend   - Start backend only
+/preview stop      - Stop all servers
 ```
 
 ---
 
-## Usage Examples
+## Start Both Servers
 
-### Start Server
-```
-/preview start
+// turbo-all
 
-Response:
-🚀 Starting preview...
-   Port: 3000
-   Type: Next.js
-
-✅ Preview ready!
-   URL: http://localhost:3000
+1. Start backend (background)
+```powershell
+cd backend; npm run start:dev
 ```
 
-### Status Check
-```
-/preview
-
-Response:
-=== Preview Status ===
-
-🌐 URL: http://localhost:3000
-📁 Project: C:/projects/my-app
-🏷️ Type: nextjs
-💚 Health: OK
+2. Start frontend (background)
+```powershell
+cd frontend; npm run dev
 ```
 
-### Port Conflict
+3. Verify health
 ```
-/preview start
-
-Response:
-⚠️ Port 3000 is in use.
-
-Options:
-1. Start on port 3001
-2. Close app on 3000
-3. Specify different port
-
-Which one? (default: 1)
+🚀 Preview ready!
+   Frontend: http://localhost:4000
+   Backend:  http://localhost:4001/api
+   Admin:    http://localhost:4000/admin
+   Dev Login: http://localhost:4001/api/auth/dev/login
 ```
 
 ---
 
-## Technical
+## Port Conflict Resolution
 
-Auto preview uses `auto_preview.py` script:
+```powershell
+# Find process on port
+netstat -ano | findstr :4000
+netstat -ano | findstr :4001
 
-```bash
-python .agent/scripts/auto_preview.py start [port]
-python .agent/scripts/auto_preview.py stop
-python .agent/scripts/auto_preview.py status
+# Kill process by PID
+taskkill /PID <PID> /F
 ```
-

@@ -36,6 +36,13 @@
       "when": 1774338253481,
       "tag": "0004_friendly_hannibal_king",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1774602886953,
+      "tag": "0005_early_strong_guy",
+      "breakpoints": true
     }
   ]
 }

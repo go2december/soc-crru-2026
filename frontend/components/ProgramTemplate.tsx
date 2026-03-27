@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Breadcrumb from '@/components/Breadcrumb';
 import ProgramGalleryClient from '@/components/ProgramGalleryClient';
 import type { ProgramInstructor } from '@/lib/api';
+import { formatStaffName } from '@/lib/utils';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -192,18 +193,20 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                         {data.highlights.length > 0 && (
                             <section>
                                 <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3">จุดเด่นของหลักสูตร</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {data.highlights.map((item, index) => (
-                                        <div key={index} className="bg-scholar-soft p-6 rounded-xl hover:shadow-md transition-shadow">
-                                            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-scholar-accent mb-4 shadow-sm">
+                                        <div key={index} className="flex gap-4 items-start bg-white border border-gray-100 p-5 rounded-xl hover:shadow-md hover:border-scholar-accent/30 transition-all">
+                                            <div className="w-12 h-12 bg-scholar-soft rounded-xl flex items-center justify-center text-scholar-accent shrink-0 shadow-sm">
                                                 {item.icon || (
                                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 )}
                                             </div>
-                                            <h3 className="font-bold text-lg text-scholar-deep mb-2">{item.title}</h3>
-                                            <p className="text-gray-600 text-sm">{item.description}</p>
+                                            <div>
+                                                <h3 className="font-bold text-lg text-scholar-deep mb-1">{item.title}</h3>
+                                                <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -227,45 +230,7 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                             </section>
                         )}
 
-                        {/* Gallery (Lightbox) */}
-                        {hasGallery && (
-                            <ProgramGalleryClient galleryImages={fullGalleryUrls} />
-                        )}
 
-                        {/* Attachments / Downloads */}
-                        {hasAttachments && (
-                            <section>
-                                <h2 className="text-2xl font-bold text-scholar-deep mb-6 border-l-4 border-scholar-accent pl-3">เอกสารดาวน์โหลด</h2>
-                                <div className="space-y-3">
-                                    {fullAttachments.map((file, index) => (
-                                        <a
-                                            key={index}
-                                            href={file.fileUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl shadow-sm hover:border-scholar-gold hover:shadow-md transition-all bg-white group"
-                                        >
-                                            <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-red-100 transition-colors">
-                                                <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                            <div className="flex-1 overflow-hidden">
-                                                <p className="font-semibold text-scholar-deep truncate">{file.originalName}</p>
-                                                {file.size && (
-                                                    <p className="text-xs text-gray-400 mt-0.5">{(file.size / 1024).toFixed(1)} KB</p>
-                                                )}
-                                            </div>
-                                            <div className="shrink-0 text-scholar-accent opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                </svg>
-                                            </div>
-                                        </a>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
 
                     </div>
 
@@ -300,7 +265,36 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                             </div>
                         </div>
 
-                        {/* Facebook Fanpage Widget */}
+                        {/* 2. Documents */}
+                        {hasAttachments && (
+                            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                                <h3 className="text-base font-bold text-scholar-deep mb-4 flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    เอกสารประชาสัมพันธ์
+                                </h3>
+                                <div className="space-y-3">
+                                    {fullAttachments.slice(0, 5).map((file, i) => (
+                                        <a
+                                            key={i}
+                                            href={file.fileUrl}
+                                            target="_blank" rel="noopener noreferrer"
+                                            className="flex items-center gap-3 text-sm text-gray-700 hover:text-scholar-accent transition-colors py-2 border-b border-gray-50 last:border-0 group"
+                                        >
+                                            <div className="w-8 h-8 rounded-lg shrink-0 bg-red-50 flex items-center justify-center text-red-500 group-hover:bg-red-100 transition-colors">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <span className="truncate flex-1 font-medium">{file.originalName}</span>
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 3. Facebook Fanpage Widget */}
                         {hasFacebookPage && (
                             <a
                                 href={data.facebookVideoUrl}
@@ -323,39 +317,27 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                             </a>
                         )}
 
-                        {/* Quick Links */}
-                        {hasAttachments && (
-                            <div className="bg-white p-5 rounded-2xl shadow-lg border border-gray-100">
-                                <h3 className="text-base font-bold text-scholar-deep mb-3 flex items-center gap-2">
+                        {/* 4. Gallery Box */}
+                        {hasGallery && (
+                            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                                <h3 className="text-base font-bold text-scholar-deep mb-4 flex items-center gap-2">
                                     <svg className="w-5 h-5 text-scholar-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    เอกสารที่เกี่ยวข้อง
+                                    ประมวลภาพกิจกรรม
                                 </h3>
-                                <div className="space-y-2">
-                                    {fullAttachments.slice(0, 5).map((file, i) => (
-                                        <a
-                                            key={i}
-                                            href={file.fileUrl}
-                                            target="_blank" rel="noopener noreferrer"
-                                            className="flex items-center gap-2 text-sm text-gray-700 hover:text-scholar-accent transition-colors py-1 truncate"
-                                        >
-                                            <svg className="w-4 h-4 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
-                                            <span className="truncate">{file.originalName}</span>
-                                        </a>
-                                    ))}
-                                </div>
+                                {/* Using the existing client component inside the sidebar */}
+                                <ProgramGalleryClient galleryImages={fullGalleryUrls} />
                             </div>
                         )}
 
-                        {/* Contact Box */}
-                        <div className="bg-scholar-deep text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-scholar-accent/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-                            <h3 className="text-lg font-bold mb-4">สอบถามข้อมูลเพิ่มเติม</h3>
-                            <p className="text-white/80 text-sm mb-4">สงสัยเกี่ยวกับหลักสูตร หรือการรับสมัคร? ทักแชทสอบถามเจ้าหน้าที่ได้เลย</p>
-                            <Link href="/contact" className="btn btn-outline text-white hover:bg-white hover:text-scholar-deep w-full">ติดต่อเรา</Link>
+                        {/* 5. Minimal Contact Box */}
+                        <div className="bg-gray-50 border border-gray-200 p-8 rounded-2xl text-center">
+                            <h3 className="text-lg font-bold text-scholar-deep mb-2">สอบถามข้อมูลเพิ่มเติม</h3>
+                            <p className="text-gray-600 text-sm mb-6 leading-relaxed">สงสัยเกี่ยวกับหลักสูตร หรือการรับสมัคร?<br />ทักสอบถามเจ้าหน้าที่ได้เลย</p>
+                            <Link href="/contact" className="inline-block w-full px-6 py-3 bg-white border-2 border-scholar-deep text-scholar-deep font-bold text-sm rounded-full hover:bg-scholar-deep hover:text-white transition-all shadow-sm">
+                                ติดต่อเรา
+                            </Link>
                         </div>
 
                     </div>
@@ -365,7 +347,7 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                 {hasInstructors && (
                     <section className="mt-16 pt-8 border-t border-gray-100">
                         <h2 className="text-2xl font-bold text-scholar-deep mb-8 border-l-4 border-scholar-accent pl-3">
-                            คณาจารย์ประจำหลักสูตร
+                            อาจารย์ประจำหลักสูตร
                         </h2>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                             {chair && <InstructorCard inst={chair} apiUrl={API_URL} />}
@@ -381,7 +363,7 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
             <section className="py-20 bg-scholar-soft mt-12 text-center">
                 <div className="container mx-auto px-4">
                     <h2 className="text-3xl font-bold text-scholar-deep mb-4">พร้อมที่จะเป็นส่วนหนึ่งของครอบครัวเราหรือยัง?</h2>
-                    <p className="text-gray-500 mb-8 max-w-xl mx-auto">เปิดรับสมัครรอบ TCAS แล้ววันนี้ อย่ารอช้า โอกาสดีๆ รอคุณอยู่</p>
+                    <p className="text-gray-500 mb-8 max-w-xl mx-auto">{data.title}</p>
                     <a href="https://admission.crru.ac.th/" target="_blank" rel="noopener noreferrer"
                         className="btn btn-lg btn-primary text-white bg-scholar-accent border-none px-12 rounded-full shadow-xl hover:scale-105"
                     >
@@ -394,31 +376,9 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
 }
 
 // ---- InstructorCard Sub-Component ----
-function getAcademicPositionAbbr(nameTh: string | null | undefined): string | null {
-    if (!nameTh) return null;
-    const map: Record<string, string> = {
-        'ศาสตราจารย์': 'ศ.',
-        'รองศาสตราจารย์': 'รศ.',
-        'ผู้ช่วยศาสตราจารย์': 'ผศ.',
-        'อาจารย์': 'อ.',
-        'lecturer': 'Lect.',
-        'assistant professor': 'Asst. Prof.',
-        'associate professor': 'Assoc. Prof.',
-        'professor': 'Prof.',
-    };
-    const lower = nameTh.toLowerCase();
-    for (const [key, abbr] of Object.entries(map)) {
-        if (lower.includes(key.toLowerCase())) return abbr;
-    }
-    // Return first 4 chars if nothing matched (fallback graceful)
-    return nameTh.length > 6 ? nameTh.substring(0, 4) + '.' : nameTh;
-}
-
 function InstructorCard({ inst, apiUrl }: { inst: ProgramInstructor; apiUrl: string }) {
     const isChair = inst.role === 'CHAIR';
-    const positionAbbr = getAcademicPositionAbbr(inst.academicPositionNameTh);
-    const titlePart = [positionAbbr, inst.prefixTh].filter(Boolean).join('');
-    const displayName = [titlePart, inst.firstNameTh, inst.lastNameTh].filter(Boolean).join(' ');
+    const displayName = formatStaffName(inst);
     const imageUrl = inst.imageUrl
         ? (inst.imageUrl.startsWith('/') ? `${apiUrl}${inst.imageUrl}` : inst.imageUrl)
         : null;
@@ -460,7 +420,7 @@ function InstructorCard({ inst, apiUrl }: { inst: ProgramInstructor; apiUrl: str
             </p>
             {/* Role badge */}
             <span className={`mt-2 inline-block px-2 py-0.5 rounded-full text-xs font-semibold transition-colors ${isChair ? 'bg-amber-100 text-amber-700 group-hover:bg-amber-200' : 'bg-scholar-soft text-scholar-deep/70 group-hover:bg-scholar-accent/10 group-hover:text-scholar-accent'}`}>
-                {isChair ? 'ประธานหลักสูตร' : 'อ.ประจำหลักสูตร'}
+                {isChair ? 'ประธานหลักสูตร' : 'อาจารย์ประจำหลักสูตร'}
             </span>
         </Link>
     );

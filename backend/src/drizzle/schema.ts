@@ -270,6 +270,49 @@ export const banners = pgTable('banners', {
 });
 
 // ------------------------------------------
+// 5.5 Admissions (Admissions Center)
+// ------------------------------------------
+
+export const admissionScheduleStatusEnum = pgEnum('admission_schedule_status', [
+  'CLOSED',
+  'OPEN',
+  'UPCOMING',
+  'ALWAYS',
+]);
+
+export const admissionConfig = pgTable('admission_config', {
+  id: integer('id').primaryKey().default(1),
+  youtubeVideoUrl: varchar('youtube_video_url', { length: 500 }),
+  brochureUrl: varchar('brochure_url', { length: 500 }),
+  bachelorLink: varchar('bachelor_link', { length: 500 }),
+  graduateLink: varchar('graduate_link', { length: 500 }),
+  tableTitle: varchar('table_title', { length: 255 }).default('ตารางรอบรับสมัคร ประจำปีการศึกษา 2569'),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const admissionSchedules = pgTable('admission_schedules', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  roundName: varchar('round_name', { length: 255 }).notNull(),
+  description: varchar('description', { length: 500 }),
+  period: varchar('period', { length: 255 }).notNull(),
+  channel: varchar('channel', { length: 255 }).notNull(),
+  status: admissionScheduleStatusEnum('status').default('UPCOMING').notNull(),
+  link: varchar('link', { length: 500 }),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const admissionDocuments = pgTable('admission_documents', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 500 }).notNull(),
+  fileUrl: varchar('file_url', { length: 500 }).notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// ------------------------------------------
 // 6. Chiang Rai Studies Center (Microservice)
 // ------------------------------------------
 

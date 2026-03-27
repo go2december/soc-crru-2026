@@ -151,8 +151,11 @@ When user's prompt is NOT in English:
 
 | Project Type                           | Primary Agent         | Skills                        |
 | -------------------------------------- | --------------------- | ----------------------------- |
+| **MOBILE** (iOS, Android, RN, Flutter) | `mobile-developer`    | mobile-design                 |
 | **WEB** (Next.js, React web)           | `frontend-specialist` | frontend-design               |
 | **BACKEND** (API, server, DB)          | `backend-specialist`  | api-patterns, database-design |
+
+> 🔴 **Mobile + frontend-specialist = WRONG.** Mobile = mobile-developer ONLY.
 
 ### 🛑 Socratic Gate
 
@@ -208,6 +211,7 @@ When user's prompt is NOT in English:
 | `accessibility_checker.py` | frontend-design       | After UI change     |
 | `seo_checker.py`           | seo-fundamentals      | After page change   |
 | `bundle_analyzer.py`       | performance-profiling | Before deploy       |
+| `mobile_audit.py`          | mobile-design         | After mobile change |
 | `lighthouse_audit.py`      | performance-profiling | Before deploy       |
 | `playwright_runner.py`     | webapp-testing        | Before deploy       |
 
@@ -239,6 +243,7 @@ When user's prompt is NOT in English:
 | Task         | Read                            |
 | ------------ | ------------------------------- |
 | Web UI/UX    | `.agent/frontend-specialist.md` |
+| Mobile UI/UX | `.agent/mobile-developer.md`    |
 
 **These agents contain:**
 
@@ -255,13 +260,14 @@ When user's prompt is NOT in English:
 
 ### Agents & Skills
 
-- **Masters**: `orchestrator`, `project-planner`, `security-auditor` (Cyber/Audit), `backend-specialist` (API/DB), `frontend-specialist` (UI/UX), `debugger`
-- **Key Skills**: `clean-code`, `brainstorming`, `app-builder`, `frontend-design`, `plan-writing`, `behavioral-modes`
+- **Masters**: `orchestrator`, `project-planner`, `security-auditor` (Cyber/Audit), `backend-specialist` (API/DB), `frontend-specialist` (UI/UX), `mobile-developer`, `debugger`, `game-developer`
+- **Key Skills**: `clean-code`, `brainstorming`, `app-builder`, `frontend-design`, `mobile-design`, `plan-writing`, `behavioral-modes`
+
 ### Key Scripts
 
 - **Verify**: `.agent/scripts/verify_all.py`, `.agent/scripts/checklist.py`
 - **Scanners**: `security_scan.py`, `dependency_analyzer.py`
-- **Audits**: `ux_audit.py`, `lighthouse_audit.py`, `seo_checker.py`
+- **Audits**: `ux_audit.py`, `mobile_audit.py`, `lighthouse_audit.py`, `seo_checker.py`
 - **Test**: `playwright_runner.py`, `test_runner.py`
 
 ---

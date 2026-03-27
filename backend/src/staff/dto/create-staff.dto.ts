@@ -53,12 +53,12 @@ export class CreateStaffDto {
   // ตำแหน่งวิชาการ (สำหรับสายวิชาการ)
   @IsNumber()
   @IsOptional()
-  academicPositionId?: number;
+  academicPositionId?: number | null;
 
   // ตำแหน่งบริหาร
   @IsNumber()
   @IsOptional()
-  adminPositionId?: number;
+  adminPositionId?: number | null;
 
   // วุฒิการศึกษา (รองรับหลายวุฒิ)
   @IsArray()
