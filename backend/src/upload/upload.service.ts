@@ -11,6 +11,7 @@ export class UploadService {
   private readonly newsUploadDir = './uploads/news';
   private readonly newsAttachmentUploadDir = './uploads/news/attachments';
   private readonly programsUploadDir = './uploads/programs';
+  private readonly researchUploadDir = './uploads/research';
 
   constructor() {
     // Ensure upload directories exist
@@ -28,6 +29,9 @@ export class UploadService {
     }
     if (!fs.existsSync(this.programsUploadDir)) {
       fs.mkdirSync(this.programsUploadDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.researchUploadDir)) {
+      fs.mkdirSync(this.researchUploadDir, { recursive: true });
     }
   }
 
@@ -154,6 +158,52 @@ export class UploadService {
       return true;
     } catch (error) {
       console.error('Delete image error:', error);
+      return false;
+    }
+  }
+
+  async saveResearchImage(file: Express.Multer.File): Promise<string> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+      throw new BadRequestException('Unsupported file type');
+    }
+
+    const filename = `${uuidv4()}.webp`;
+    const filepath = path.join(this.researchUploadDir, filename);
+
+    try {
+      await sharp(file.buffer)
+        .resize(1600, null, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .webp({ quality: 82 })
+        .toFile(filepath);
+
+      return `/uploads/research/${filename}`;
+    } catch (error) {
+      console.error('Research image processing error:', error);
+      throw new BadRequestException('Failed to process image');
+    }
+  }
+
+  async deleteResearchImage(fileUrl: string): Promise<boolean> {
+    if (!fileUrl || !fileUrl.startsWith('/uploads/research/')) {
+      return false;
+    }
+
+    const filename = path.basename(fileUrl);
+    const filepath = path.join(this.researchUploadDir, filename);
+
+    try {
+      await fs.promises.access(filepath);
+      await fs.promises.unlink(filepath);
+      return true;
+    } catch (error) {
+      console.error('Delete research image error:', error);
       return false;
     }
   }

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { DrizzleService } from '../drizzle/drizzle.service';
 import { programs, programInstructors, staffProfiles, academicPositions } from '../drizzle/schema';
 import { CreateProgramDto } from './dto/create-program.dto';
@@ -55,9 +55,30 @@ export class ProgramsService {
   /**
    * Get all programs
    */
-  async findAll() {
-    const allPrograms = await this.drizzle.db.select().from(programs).orderBy(programs.code);
-    return allPrograms;
+  async findAll(page: number = 1, limit: number = 100) {
+    const offset = (page - 1) * limit;
+
+    const data = await this.drizzle.db
+        .select()
+        .from(programs)
+        .orderBy(programs.code)
+        .limit(limit)
+        .offset(offset);
+
+    const countResult = await this.drizzle.db
+        .select({ count: sql<number>`count(*)` })
+        .from(programs);
+    const totalCount = Number(countResult[0].count);
+
+    return {
+      data,
+      meta: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    };
   }
 
   /**

@@ -8,7 +8,7 @@ import BrochureLightbox from '@/components/BrochureLightbox';
 import {
     GraduationCap, BookOpen, Sparkles, FileDown,
     CalendarDays, MapPin, ChevronRight,
-    PlayCircle, Download, Clock
+    PlayCircle, Download, Clock, ExternalLink
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
@@ -122,7 +122,7 @@ export default function AdmissionPage() {
                                 <Link href={bachelorLink} target="_blank"
                                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-scholar-accent text-white font-semibold shadow-lg hover:bg-scholar-accent/90 hover:scale-105 transition-all duration-200">
                                     <GraduationCap className="w-5 h-5" />
-                                    สมัครปริญญาตรี (TCAS)
+                                    สมัครเรียนปริญญาตรี
                                 </Link>
                                 <Link href={graduateLink} target="_blank"
                                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/15 backdrop-blur-sm border border-white/30 text-white font-semibold hover:bg-white/25 hover:scale-105 transition-all duration-200">
@@ -146,9 +146,9 @@ export default function AdmissionPage() {
                             <GraduationCap className="w-8 h-8" />
                         </div>
                         <h2 className="text-xl font-bold text-scholar-deep mb-2 group-hover:text-scholar-accent transition-colors">ระดับปริญญาตรี</h2>
-                        <p className="text-gray-500 text-sm mb-5 leading-relaxed">รับสมัครผ่านระบบ TCAS สำหรับนักเรียน ม.6 / ปวช.</p>
+                        <p className="text-gray-500 text-sm mb-5 leading-relaxed">เปิดรับสมัครบุคคลเข้าศึกษาต่อ ระดับปริญญาตรี สำหรับ ม.6 / ปวช. หรือเทียบเท่า</p>
                         <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-sky-600 text-white rounded-xl text-sm font-medium group-hover:bg-scholar-accent transition-colors">
-                            ไปที่ระบบ TCAS <ChevronRight className="w-4 h-4" />
+                            ไปที่ระบบรับสมัคร <ChevronRight className="w-4 h-4" />
                         </span>
                     </Link>
 

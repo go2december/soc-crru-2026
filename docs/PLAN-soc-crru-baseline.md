@@ -1,5 +1,5 @@
 # Project Baseline: SOC-CRRU Web Application
-**Updated:** March 24, 2026
+**Updated:** April 3, 2026
 
 ## ภาพรวมโครงการ (Project Overview)
 เว็บไซต์คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย — แพลตฟอร์มสำหรับนักศึกษา บุคลากร และประชาชนทั่วไป
@@ -16,7 +16,7 @@
 - **Name**: SOC-CRRU Web Application
 - **Purpose**: Academic platform for students/staff (Siam Innovator & Lifelong Learning)
 - **Status**: In Development
-  - **Faculty Frontend**: ~70% (Public pages done, some features incomplete)
+  - **Faculty Frontend**: ~80% (Public pages และ admin หลักพร้อมแล้ว เหลือ SEO, responsive, content work, และ research search/filter)
   - **Chiang Rai Studies**: ~90% (CRUD complete, UI refined)
   - **Backend API**: ~85% (71+ endpoints operational)
 

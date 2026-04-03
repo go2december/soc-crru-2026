@@ -73,18 +73,25 @@ export async function fetchPrograms(): Promise<Program[]> {
                 console.warn(`[API] Internal fetch failed, retrying localhost...`);
                 try {
                     const fallbackRes = await fetch(`http://localhost:3001/api/programs`, { cache: 'no-store' });
-                    if (fallbackRes.ok) return fallbackRes.json();
+                    if (fallbackRes.ok) {
+                        const fallbackJson = await fallbackRes.json();
+                        return fallbackJson.data || [];
+                    }
                 } catch (e) { }
             }
             throw new Error(`Failed to fetch programs: ${res.status}`);
         }
-        return res.json();
+        const resJson = await res.json();
+        return resJson.data || [];
     } catch (error) {
         // If the first fetch completely failed (network error), try fallback for server-side hybrid dev
         if (typeof window === 'undefined' && baseUrl.includes('soc_backend')) {
             try {
                 const fallbackRes = await fetch(`http://localhost:3001/api/programs`, { cache: 'no-store' });
-                if (fallbackRes.ok) return fallbackRes.json();
+                if (fallbackRes.ok) {
+                    const fallbackJson = await fallbackRes.json();
+                    return fallbackJson.data || [];
+                }
             } catch (e) {
                 console.error('[API] Fallback fetch also failed', e);
             }

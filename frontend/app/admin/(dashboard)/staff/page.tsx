@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { useStaffData, Staff } from './hooks/useStaffData';
 import StaffForm from './components/StaffForm';
 import { Users, Edit3, Plus, Search, Trash2, Link2, Crown, UserX, AlertTriangle } from 'lucide-react';
@@ -16,16 +17,21 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import AdminPagination from '@/components/AdminPagination';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export default function AdminStaffPage() {
-    const { staffList, departments, users, academicPositions, adminPositions, loading, refetch } = useStaffData();
+    const { staffList, meta, page, setPage, departments, users, academicPositions, adminPositions, loading, refetch } = useStaffData();
     const [searchTerm, setSearchTerm] = useState('');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
     const [staffToDelete, setStaffToDelete] = useState<Staff | null>(null);
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm, setPage]);
 
     const getFullName = (staff: Staff) => {
         return `${staff.prefixTh || ''}${staff.firstNameTh} ${staff.lastNameTh}`;
@@ -113,15 +119,19 @@ export default function AdminStaffPage() {
         }
     };
 
-    // Optimize filter logic with useMemo
-    const filteredStaff = useMemo(() => {
-        return staffList.filter(staff =>
-            staff.firstNameTh.includes(searchTerm) ||
-            staff.lastNameTh.includes(searchTerm) ||
-            (staff.firstNameEn && staff.firstNameEn.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (staff.contactEmail && staff.contactEmail.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-    }, [staffList, searchTerm]);
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    const visibleStaff = normalizedSearch
+        ? staffList.filter(staff =>
+            staff.firstNameTh.toLowerCase().includes(normalizedSearch) ||
+            staff.lastNameTh.toLowerCase().includes(normalizedSearch) ||
+            (staff.firstNameEn && staff.firstNameEn.toLowerCase().includes(normalizedSearch)) ||
+            (staff.lastNameEn && staff.lastNameEn.toLowerCase().includes(normalizedSearch)) ||
+            (staff.contactEmail && staff.contactEmail.toLowerCase().includes(normalizedSearch))
+        )
+        : staffList;
+
+    const currentPage = meta?.page ?? page;
+    const totalPages = normalizedSearch ? 1 : (meta?.totalPages ?? 1);
 
     if (loading) {
         return (
@@ -179,16 +189,24 @@ export default function AdminStaffPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredStaff.map((staff, index) => {
+                                {visibleStaff.map((staff, index) => {
                                     const linkedUser = users.find(u => u.id === staff.userId);
+                                    const itemsPerPage = meta?.limit ?? (visibleStaff.length || 1);
+                                    const staffImageUrl = staff.imageUrl ? (staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl) : null;
                                     return (
                                         <tr key={staff.id} className="border-b align-middle hover:bg-muted/20">
-                                            <td className="px-4 py-3 text-center font-mono text-muted-foreground">{index + 1}</td>
+                                            <td className="px-4 py-3 text-center font-mono text-muted-foreground">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-muted ring-1 ring-border">
-                                                        {staff.imageUrl ? (
-                                                            <img src={staff.imageUrl.startsWith('/') ? `${API_URL}${staff.imageUrl}` : staff.imageUrl} alt={staff.firstNameTh} className="h-full w-full object-cover" />
+                                                    <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-muted ring-1 ring-border">
+                                                        {staffImageUrl ? (
+                                                            <Image
+                                                                src={staffImageUrl}
+                                                                alt={staff.firstNameTh}
+                                                                fill
+                                                                unoptimized
+                                                                className="object-cover"
+                                                            />
                                                         ) : (
                                                             <div className="flex items-center justify-center w-full h-full text-xs text-muted-foreground font-bold">No Img</div>
                                                         )}
@@ -260,16 +278,26 @@ export default function AdminStaffPage() {
                             </tbody>
                         </table>
 
-                        {filteredStaff.length === 0 && (
+                        {visibleStaff.length === 0 && (
                             <div className="flex flex-col items-center justify-center py-16 opacity-60">
                                 <UserX className="w-16 h-16 text-gray-300 mb-4" />
                                 <p className="text-lg font-medium">ไม่พบข้อมูลบุคลากร</p>
-                                <p className="text-sm">ลองค้นหาด้วยคำอื่น หรือเพิ่มบุคลากรใหม่</p>
+                                <p className="text-sm">ลองค้นหาด้วยคำอื่น หรือเปลี่ยนหน้าเพื่อดูรายการเพิ่มเติม</p>
                             </div>
                         )}
                     </div>
                 </CardContent>
             </Card>
+
+            {!normalizedSearch && totalPages > 1 && (
+                <div className="flex justify-end mt-4">
+                    <AdminPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                    />
+                </div>
+            )}
 
             {/* Add/Edit Modal */}
             <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open && !submitting) handleCloseModal(); }}>

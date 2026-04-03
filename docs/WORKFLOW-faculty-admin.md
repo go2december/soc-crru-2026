@@ -1,5 +1,5 @@
 # Faculty Admin Workflow
-**Updated:** March 24, 2026
+**Updated:** April 3, 2026
 
 ## ภาพรวมกระบวนการทำงาน
 
@@ -178,7 +178,7 @@ Upload:
 1. **Research Search/Filter** - ทำส่วนค้นหาและกรองข้อมูลวิจัย
 2. **SEO Coverage** - ตรวจ metadata สำหรับ public routes ให้ครบ
 3. **Responsive Audit** - ตรวจ mobile/tablet ในหน้าสำคัญ
-4. **Content Population** - เติมข้อมูลจริงในหน้า public และข่าวสาร
+4. **Content Population** - เติมข้อมูลจริงในหน้า public และข่าวสาร รวมถึง Faculty news production validation
 5. **Production Readiness** - เตรียม deploy และ verification flow
 
 ---

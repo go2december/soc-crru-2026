@@ -79,7 +79,7 @@ soc-crru-web/
 │   └── test/             # E2E Tests
 ├── database/             # Database initialization & data
 ├── docs/                 # Canonical plans and workflow references
-├── .windsurf/            # Windsurf support files, executable workflows, and future project skills
+├── .windsurf/            # Windsurf rules, executable task workflows, and local project skills
 └── docker-compose.yml    # Container Configuration
 ```
 
@@ -89,7 +89,8 @@ soc-crru-web/
 - `docs/PLAN-soc-crru-baseline.md` → project-wide baseline and pending work
 - `docs/PLAN-chiang-rai-studies.md` → Chiang Rai Studies implementation plan
 - `docs/PLAN-workflow-standardization.md` → workflow governance standard
-- `.windsurf/workflows/` → executable workflows for admin work, content population, release review, and local deployment
+- `.windsurf/workflows/` → executable Windsurf task workflows for admin work, content population, release review, and local deployment
+- `.windsurf/skills/` → local Windsurf skills for task routing, surface-specific rules, and implementation guidance
 
 ## � Local Skill Map
 

@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DrizzleService } from '../drizzle/drizzle.service';
-import { users, staffProfiles, news, researchAuthors, chiangRaiMediaTypeEnum } from '../drizzle/schema';
+import { users, staffProfiles, news } from '../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
 interface GoogleUser {
@@ -152,12 +152,7 @@ export class AuthService {
       .set({ authorId: null })
       .where(eq(news.authorId, userId));
 
-    // 3. Delete from Research Authors?
-    // researchAuthors links staffId (not userId), and staffProfiles links userId.
-    // So deleting User unlinks StaffProfile, but StaffProfile remains.
-    // So ResearchAuthors is safe (referenced to StaffProfile).
-
-    // 4. Finally Delete User
+    // 3. Finally Delete User
     const deleted = await this.drizzle.db
       .delete(users)
       .where(eq(users.id, userId))

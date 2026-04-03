@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
     Users,
     Newspaper,
+    FlaskConical,
     GraduationCap,
     ShieldCheck,
     Plus,
@@ -27,13 +29,14 @@ interface User {
 interface Stats {
     totalStaff: number;
     totalNews: number;
+    totalResearch: number;
     totalPrograms: number;
     totalUsers: number;
 }
 
 export default function AdminDashboardPage() {
     const [user, setUser] = useState<User | null>(null);
-    const [stats, setStats] = useState<Stats>({ totalStaff: 0, totalNews: 0, totalPrograms: 0, totalUsers: 0 });
+    const [stats, setStats] = useState<Stats>({ totalStaff: 0, totalNews: 0, totalResearch: 0, totalPrograms: 0, totalUsers: 0 });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -53,15 +56,21 @@ export default function AdminDashboardPage() {
                 // Fetch stats (staff count)
                 const staffRes = await fetch(`${apiUrl}/api/staff`);
                 if (staffRes.ok) {
-                    const staffData = await staffRes.json();
-                    setStats(prev => ({ ...prev, totalStaff: staffData.length }));
+                    const staffJson = await staffRes.json();
+                    setStats(prev => ({ ...prev, totalStaff: staffJson.meta?.total || staffJson.data?.length || 0 }));
+                }
+
+                const researchRes = await fetch(`${apiUrl}/api/research/stats`);
+                if (researchRes.ok) {
+                    const researchJson = await researchRes.json();
+                    setStats(prev => ({ ...prev, totalResearch: researchJson.total || 0 }));
                 }
 
                 // Fetch programs count
                 const programsRes = await fetch(`${apiUrl}/api/programs`);
                 if (programsRes.ok) {
-                    const programsData = await programsRes.json();
-                    setStats(prev => ({ ...prev, totalPrograms: programsData.length }));
+                    const programsJson = await programsRes.json();
+                    setStats(prev => ({ ...prev, totalPrograms: programsJson.meta?.total || programsJson.data?.length || programsJson.length || 0 }));
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -163,22 +172,22 @@ export default function AdminDashboardPage() {
                 </Card>
                 <Card className="shadow-sm hover:shadow-md transition-shadow">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">งานวิจัย</CardTitle>
+                        <FlaskConical className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.totalResearch}</div>
+                        <p className="text-xs text-muted-foreground">โครงการวิจัยทั้งหมด</p>
+                    </CardContent>
+                </Card>
+                <Card className="shadow-sm hover:shadow-md transition-shadow">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">หลักสูตร</CardTitle>
                         <GraduationCap className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{stats.totalPrograms}</div>
                         <p className="text-xs text-muted-foreground">เปิดสอนปัจจุบัน</p>
-                    </CardContent>
-                </Card>
-                <Card className="shadow-sm hover:shadow-md transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">ผู้ใช้งาน</CardTitle>
-                        <div className="h-4 w-4 rounded-full bg-green-500/20 p-0.5" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalUsers || '-'}</div>
-                        <p className="text-xs text-muted-foreground">Active Users</p>
                     </CardContent>
                 </Card>
             </div>
@@ -196,7 +205,7 @@ export default function AdminDashboardPage() {
                     <CardContent>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <Button variant="outline" className="h-auto py-4 justify-start gap-4 hover:bg-primary/5 hover:border-primary/30 group" asChild>
-                                <a href="/admin/staff">
+                                <Link href="/admin/staff">
                                     <div className="bg-primary/10 p-2 rounded-lg group-hover:bg-primary/20 transition-colors">
                                         <Plus className="w-5 h-5 text-primary" />
                                     </div>
@@ -204,11 +213,11 @@ export default function AdminDashboardPage() {
                                         <div className="font-semibold text-foreground">เพิ่มบุคลากร</div>
                                         <div className="text-xs text-muted-foreground">จัดการข้อมูลอาจารย์/จนท.</div>
                                     </div>
-                                </a>
+                                </Link>
                             </Button>
 
                             <Button variant="outline" className="h-auto py-4 justify-start gap-4 hover:bg-orange-500/5 hover:border-orange-500/30 group" asChild>
-                                <a href="/admin/news">
+                                <Link href="/admin/news">
                                     <div className="bg-orange-500/10 p-2 rounded-lg group-hover:bg-orange-500/20 transition-colors">
                                         <PenTool className="w-5 h-5 text-orange-600" />
                                     </div>
@@ -216,11 +225,11 @@ export default function AdminDashboardPage() {
                                         <div className="font-semibold text-foreground">เขียนข่าวใหม่</div>
                                         <div className="text-xs text-muted-foreground">ประชาสัมพันธ์กิจกรรม</div>
                                     </div>
-                                </a>
+                                </Link>
                             </Button>
 
                             <Button variant="outline" className="h-auto py-4 justify-start gap-4 hover:bg-blue-500/5 hover:border-blue-500/30 group" asChild>
-                                <a href="/admin/programs">
+                                <Link href="/admin/programs">
                                     <div className="bg-blue-500/10 p-2 rounded-lg group-hover:bg-blue-500/20 transition-colors">
                                         <LayoutTemplate className="w-5 h-5 text-blue-600" />
                                     </div>
@@ -228,7 +237,19 @@ export default function AdminDashboardPage() {
                                         <div className="font-semibold text-foreground">จัดการหลักสูตร</div>
                                         <div className="text-xs text-muted-foreground">แก้ไขข้อมูลรายวิชา</div>
                                     </div>
-                                </a>
+                                </Link>
+                            </Button>
+
+                            <Button variant="outline" className="h-auto py-4 justify-start gap-4 hover:bg-violet-500/5 hover:border-violet-500/30 group" asChild>
+                                <Link href="/admin/research">
+                                    <div className="bg-violet-500/10 p-2 rounded-lg group-hover:bg-violet-500/20 transition-colors">
+                                        <FlaskConical className="w-5 h-5 text-violet-600" />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="font-semibold text-foreground">จัดการงานวิจัย</div>
+                                        <div className="text-xs text-muted-foreground">โครงการ ทีมวิจัย และผลผลิต</div>
+                                    </div>
+                                </Link>
                             </Button>
 
                             <Button variant="outline" className="h-auto py-4 justify-start gap-4 hover:bg-slate-500/5 hover:border-slate-500/30 group" asChild>

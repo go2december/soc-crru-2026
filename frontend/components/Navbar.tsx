@@ -179,7 +179,7 @@ export default function Navbar() {
                         </li>
                         <li className="block">
                             <a href="https://admission.crru.ac.th/" target="_blank" rel="noopener noreferrer" className="block px-3 py-2 text-sm text-white/90 hover:text-scholar-accent hover:bg-white/10 rounded-md transition-colors" onClick={() => setOpenDropdown(null)}>
-                                ระดับปริญญาตรี (TCAS)
+                                ระดับปริญญาตรี
                             </a>
                         </li>
                         <li className="block">

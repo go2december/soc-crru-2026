@@ -10,6 +10,8 @@ import {
   pgEnum,
   jsonb,
   index,
+  primaryKey,
+  real,
 } from 'drizzle-orm/pg-core';
 
 // ------------------------------------------
@@ -27,10 +29,18 @@ export const degreeLevelEnum = pgEnum('degree_level', [
   'MASTER',
   'PHD',
 ]);
-export const researchCategoryEnum = pgEnum('research_category', [
-  'ACADEMIC',
-  'INNOVATION',
-  'COMMUNITY',
+export const projectStatusEnum = pgEnum('project_status', [
+  'ONGOING',
+  'COMPLETED',
+  'PUBLISHED',
+  'CANCELLED',
+]);
+export const memberRoleEnum = pgEnum('member_role', [
+  'HEAD',
+  'CO_RESEARCHER',
+  'ADVISOR',
+  'ASSISTANT',
+  'EXTERNAL_EXPERT',
 ]);
 export const newsCategoryEnum = pgEnum('news_category', [
   'NEWS',
@@ -216,24 +226,155 @@ export const shortCourses = pgTable('short_courses', {
 // 4. Research & Innovation
 // ------------------------------------------
 
-export const researchProjects = pgTable('research_projects', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  title: varchar('title', { length: 500 }).notNull(),
-  abstract: text('abstract'),
-  publicationYear: integer('publication_year').notNull(),
-  category: researchCategoryEnum('category').notNull(),
-  externalLink: varchar('external_link', { length: 500 }),
-});
+export const researchProjects = pgTable(
+  'research_projects',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: varchar('slug', { length: 255 }).notNull().unique(),
+    titleTh: varchar('title_th', { length: 500 }).notNull(),
+    titleEn: varchar('title_en', { length: 500 }),
+    abstractTh: text('abstract_th'),
+    abstractEn: text('abstract_en'),
+    year: integer('year').notNull(),
+    budget: decimal('budget', { precision: 12, scale: 2 }),
+    fundingSource: varchar('funding_source', { length: 255 }),
+    status: projectStatusEnum('status').default('ONGOING').notNull(),
+    isSocialService: boolean('is_social_service').default(false).notNull(),
+    isCommercial: boolean('is_commercial').default(false).notNull(),
+    coverImageUrl: varchar('cover_image_url', { length: 500 }),
+    keywords: text('keywords').array(),
+    isPublished: boolean('is_published').default(true).notNull(),
+    publishedAt: timestamp('published_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      slugIdx: index('research_projects_slug_idx').on(table.slug),
+      titleThIdx: index('research_projects_title_th_idx').on(table.titleTh),
+      yearIdx: index('research_projects_year_idx').on(table.year),
+      statusIdx: index('research_projects_status_idx').on(table.status),
+      isPublishedIdx: index('research_projects_is_published_idx').on(table.isPublished),
+      fundingSourceIdx: index('research_projects_funding_source_idx').on(table.fundingSource),
+      publishedAtIdx: index('research_projects_published_at_idx').on(table.publishedAt),
+    };
+  },
+);
 
-export const researchAuthors = pgTable('research_authors', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  researchId: uuid('research_id')
-    .notNull()
-    .references(() => researchProjects.id),
-  staffId: uuid('staff_id')
-    .notNull()
-    .references(() => staffProfiles.id),
-});
+export const projectMembers = pgTable(
+  'project_members',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => researchProjects.id, { onDelete: 'cascade' }),
+    staffProfileId: uuid('staff_profile_id').references(() => staffProfiles.id, {
+      onDelete: 'set null',
+    }),
+    externalName: varchar('external_name', { length: 255 }),
+    role: memberRoleEnum('role').default('CO_RESEARCHER').notNull(),
+    organization: varchar('organization', { length: 255 }),
+    positionTitle: varchar('position_title', { length: 255 }),
+    sortOrder: integer('sort_order').default(0).notNull(),
+  },
+  (table) => {
+    return {
+      projectIdx: index('project_members_project_id_idx').on(table.projectId),
+      staffProfileIdx: index('project_members_staff_profile_id_idx').on(table.staffProfileId),
+      roleIdx: index('project_members_role_idx').on(table.role),
+      sortOrderIdx: index('project_members_sort_order_idx').on(table.sortOrder),
+    };
+  },
+);
+
+export const projectLocations = pgTable(
+  'project_locations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => researchProjects.id, { onDelete: 'cascade' }),
+    subDistrict: varchar('sub_district', { length: 100 }),
+    district: varchar('district', { length: 100 }),
+    province: varchar('province', { length: 100 }).default('เชียงราย'),
+    lat: real('lat'),
+    lng: real('lng'),
+  },
+  (table) => {
+    return {
+      projectIdx: index('project_locations_project_id_idx').on(table.projectId),
+      provinceIdx: index('project_locations_province_idx').on(table.province),
+      districtIdx: index('project_locations_district_idx').on(table.district),
+    };
+  },
+);
+
+export const projectSdgs = pgTable(
+  'project_sdgs',
+  {
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => researchProjects.id, { onDelete: 'cascade' }),
+    sdgId: integer('sdg_id').notNull(),
+  },
+  (table) => {
+    return {
+      pk: primaryKey({ columns: [table.projectId, table.sdgId] }),
+      sdgIdx: index('project_sdgs_sdg_id_idx').on(table.sdgId),
+    };
+  },
+);
+
+export const researchOutputs = pgTable(
+  'research_outputs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => researchProjects.id, { onDelete: 'cascade' }),
+    outputType: varchar('output_type', { length: 100 }),
+    title: text('title').notNull(),
+    journalName: varchar('journal_name', { length: 500 }),
+    publicationDate: timestamp('publication_date'),
+    volume: varchar('volume', { length: 50 }),
+    issue: varchar('issue', { length: 50 }),
+    pages: varchar('pages', { length: 50 }),
+    citation: text('citation'),
+    doiUrl: varchar('doi_url', { length: 500 }),
+    tciUrl: varchar('tci_url', { length: 500 }),
+    externalUrl: varchar('external_url', { length: 500 }),
+    tier: varchar('tier', { length: 50 }),
+  },
+  (table) => {
+    return {
+      projectIdx: index('research_outputs_project_id_idx').on(table.projectId),
+      publicationDateIdx: index('research_outputs_publication_date_idx').on(table.publicationDate),
+      outputTypeIdx: index('research_outputs_output_type_idx').on(table.outputType),
+    };
+  },
+);
+
+export const researchAttachments = pgTable(
+  'research_attachments',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => researchProjects.id, { onDelete: 'cascade' }),
+    fileName: varchar('file_name', { length: 255 }).notNull(),
+    fileType: varchar('file_type', { length: 50 }),
+    fileUrl: varchar('file_url', { length: 500 }).notNull(),
+    downloadCount: integer('download_count').default(0).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      projectIdx: index('research_attachments_project_id_idx').on(table.projectId),
+      fileTypeIdx: index('research_attachments_file_type_idx').on(table.fileType),
+      createdAtIdx: index('research_attachments_created_at_idx').on(table.createdAt),
+    };
+  },
+);
 
 // ------------------------------------------
 // 5. Content Management (CMS)

@@ -14,7 +14,7 @@ import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { CreatePositionDto, UpdatePositionDto } from './dto/position.dto';
 import { UploadService } from '../upload/upload.service';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 @Injectable()
 export class StaffService {
@@ -55,8 +55,10 @@ export class StaffService {
     return result[0];
   }
 
-  async findAll() {
-    return await this.drizzle.db
+  async findAll(page: number = 1, limit: number = 100) {
+    const offset = (page - 1) * limit;
+
+    const data = await this.drizzle.db
       .select({
         id: staffProfiles.id,
         prefixTh: staffProfiles.prefixTh,
@@ -92,7 +94,24 @@ export class StaffService {
         adminPositions,
         eq(staffProfiles.adminPositionId, adminPositions.id),
       )
-      .orderBy(staffProfiles.sortOrder);
+      .orderBy(staffProfiles.sortOrder)
+      .limit(limit)
+      .offset(offset);
+
+    const countResult = await this.drizzle.db
+      .select({ count: sql<number>`count(*)` })
+      .from(staffProfiles);
+    const totalCount = Number(countResult[0].count);
+
+    return {
+      data,
+      meta: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    };
   }
 
   async findOne(id: string) {

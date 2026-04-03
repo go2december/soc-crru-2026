@@ -9,6 +9,31 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 > API design principles and decision-making for 2025.
 > **Learn to THINK, not copy fixed patterns.**
 
+## 📦 SOC CRRU Standard Pagination Architecture
+
+For this repository, any API that returns a list of items MUST be paginated strictly following this format:
+
+1. **Backend Response (`{ data, meta }`)**:
+   ```json
+   {
+     "data": [...items],
+     "meta": {
+       "total": 50,
+       "page": 1,
+       "limit": 10,
+       "totalPages": 5
+     }
+   }
+   ```
+2. **Backend NestJS Implementation**:
+   Inject `@Query('page')` and `@Query('limit')` in the Controller. In the Service, use Drizzle ORM `.limit()` and `.offset()`. Query the total count separately with `sql<number>count(*)`.
+3. **Frontend Admin Integration**:
+   Fetch `limit=500` (or appropriate high number) if you need **Client-Side search (filtered arrays)**, then apply array slicing locally `filteredData.slice(...)` and use the `<AdminPagination />` UI component.
+4. **Frontend Public Integration**:
+   Fetch standard limit or full list, access through `res.json().data`, and present using the sleek `<MinimalPagination />` component.
+
+---
+
 ## 🎯 Selective Reading Rule
 
 **Read ONLY files relevant to the request!** Check the content map, find what you need.

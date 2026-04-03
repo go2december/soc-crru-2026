@@ -78,22 +78,36 @@ export function formatFacultyNewsDate(date?: string | null): string {
   });
 }
 
-export async function fetchFacultyNewsList(category?: string, limit?: number): Promise<FacultyNewsItem[]> {
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
+export async function fetchFacultyNewsList(category?: string, page: number = 1, limit?: number): Promise<PaginatedResult<FacultyNewsItem>> {
   const apiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4001';
   let queryStr = '';
   const params = new URLSearchParams();
   if (category) params.append('category', category);
+  params.append('page', page.toString());
   if (limit) params.append('limit', limit.toString());
   
   if (params.toString()) queryStr = `?${params.toString()}`;
 
   try {
     const res = await fetch(`${apiUrl}/api/news${queryStr}`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    return res.json();
+    if (!res.ok) return { data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } };
+    const result = await res.json();
+    return result.data ? result : { data: result, meta: { total: result.length, page: 1, limit: 10, totalPages: 1 } };
   } catch (error) {
     console.error('Error fetching faculty news list:', error);
-    return [];
+    return { data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } };
   }
 }
 

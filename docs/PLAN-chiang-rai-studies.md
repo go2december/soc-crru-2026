@@ -1,5 +1,5 @@
 # Chiang Rai Studies Center Web Development Plan
-**Updated:** March 24, 2026
+**Updated:** April 3, 2026
 
 ศูนย์เชียงรายศึกษา — แหล่งรวบรวม อนุรักษ์ และต่อยอดองค์ความรู้อัตลักษณ์เชียงราย
 

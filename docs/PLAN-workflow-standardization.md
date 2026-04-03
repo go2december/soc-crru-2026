@@ -1,15 +1,16 @@
 # Workflow Standardization Plan: SOC-CRRU Web Application
-**Updated:** March 24, 2026
+**Updated:** April 3, 2026
 
 ---
 
 ## วัตถุประสงค์ (Purpose)
 
-This document defines how workflow, plan, and status artifacts must be organized for the SOC-CRRU Web Application so that written documentation in `docs/` stays aligned with executable workflows in `.windsurf/workflows/`.
+This document defines how workflow, plan, status, and task-routing artifacts must be organized for the SOC-CRRU Web Application so that written documentation in `docs/` stays aligned with Windsurf-native executable workflows in `.windsurf/workflows/` and local project skills in `.windsurf/skills/`.
 
 The goal is to eliminate ambiguity about:
 - where the canonical written plan lives,
 - where step-by-step execution workflows live,
+- where Windsurf task routing and local skill guidance live,
 - how current project status is tracked,
 - and how these artifacts must be updated after implementation.
 
@@ -30,7 +31,7 @@ Use plan documents for scope, architecture, phases, milestones, and pending work
   - Phase-based tracking for feature completion, polish, QA, and deployment
 
 - `docs/PLAN-workflow-standardization.md`
-  - Rules for maintaining consistency between plans and workflows
+  - Rules for maintaining consistency between plans and Windsurf-native workflows
   - Documentation governance for future contributors and agents
 
 ### B. Workflow Documents (`docs/WORKFLOW-*.md`)
@@ -49,7 +50,7 @@ Use workflow documents for human-readable operating procedures and implementatio
   - Authentication, CRUD, and operational notes for core faculty management
 
 ### C. Executable Workflows (`.windsurf/workflows/*.md`)
-Use executable workflows for task execution inside the IDE/agent environment.
+Use executable workflows for task execution inside the Windsurf IDE/agent environment.
 
 These files must contain:
 - YAML frontmatter with `description`
@@ -58,7 +59,7 @@ These files must contain:
 - no broad project history or duplicated architectural narration unless required for execution
 
 ### D. Local Skills (`.windsurf/skills/*`)
-Use local skills for project-specific implementation guidance, task routing, and surface-specific constraints.
+Use local skills for project-specific Windsurf implementation guidance, task routing, and surface-specific constraints.
 
 These files should:
 - map task types to the correct primary skill

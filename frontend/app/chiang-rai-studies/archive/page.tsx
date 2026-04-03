@@ -5,7 +5,7 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { Search, Filter, BookOpen, Users, Landmark, Loader2, ScrollText, Sparkles, ArrowRight, ImageIcon, Film, Images } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import ChiangRaiPagination from '@/components/chiang-rai/ChiangRaiPagination';
+import MinimalPagination from '@/components/MinimalPagination';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -295,7 +295,7 @@ function ArchiveContent() {
                             ))}
                         </div>
 
-                        <ChiangRaiPagination
+                        <MinimalPagination
                             currentPage={currentPage}
                             totalPages={totalPages}
                             onPageChange={(page) => {

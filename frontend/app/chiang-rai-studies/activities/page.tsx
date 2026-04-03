@@ -2,14 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-    ChevronLeft,
-    ChevronRight,
     Calendar,
     ArrowRight,
     Search,
     BookOpen
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import MinimalPagination from '@/components/MinimalPagination';
 
 export const metadata: Metadata = {
     title: 'กิจกรรมและข่าวสาร | ศูนย์เชียงรายศึกษา',
@@ -115,64 +113,11 @@ export default async function ActivitiesPage(props: {
                             ))}
                         </div>
 
-                        {/* Pagination */}
-                        {/* Pagination */}
-                        <div className="flex justify-center items-center gap-2 mt-12 pb-12">
-                            {page > 1 ? (
-                                <Link href={`/chiang-rai-studies/activities?page=${page - 1}`}>
-                                    <Button variant="outline" className="w-10 h-10 p-0 rounded-full border-purple-200 text-purple-700 hover:bg-purple-50">
-                                        <ChevronLeft size={16} />
-                                    </Button>
-                                </Link>
-                            ) : (
-                                <Button variant="outline" disabled className="w-10 h-10 p-0 rounded-full border-stone-200 text-stone-300">
-                                    <ChevronLeft size={16} />
-                                </Button>
-                            )}
-
-                            <div className="flex gap-2 mx-2">
-                                {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((p) => {
-                                    // Show only current, first, last, and surrounding pages if many pages
-                                    if (
-                                        p === 1 ||
-                                        p === meta.totalPages ||
-                                        (p >= page - 1 && p <= page + 1)
-                                    ) {
-                                        return (
-                                            <Link key={p} href={`/chiang-rai-studies/activities?page=${p}`}>
-                                                <Button
-                                                    variant={p === page ? 'default' : 'outline'}
-                                                    className={`w-10 h-10 p-0 rounded-full transition-all ${p === page
-                                                        ? 'bg-[#2e1065] hover:bg-[#1a0b3b] text-white shadow-lg shadow-purple-200'
-                                                        : 'border-purple-200 text-purple-700 hover:bg-purple-50'
-                                                        }`}
-                                                >
-                                                    {p}
-                                                </Button>
-                                            </Link>
-                                        );
-                                    } else if (
-                                        (p === page - 2 && p > 1) ||
-                                        (p === page + 2 && p < meta.totalPages)
-                                    ) {
-                                        return <span key={p} className="flex items-end px-1 text-stone-400">...</span>
-                                    }
-                                    return null;
-                                })}
-                            </div>
-
-                            {page < meta.totalPages ? (
-                                <Link href={`/chiang-rai-studies/activities?page=${page + 1}`}>
-                                    <Button variant="outline" className="w-10 h-10 p-0 rounded-full border-purple-200 text-purple-700 hover:bg-purple-50">
-                                        <ChevronRight size={16} />
-                                    </Button>
-                                </Link>
-                            ) : (
-                                <Button variant="outline" disabled className="w-10 h-10 p-0 rounded-full border-stone-200 text-stone-300">
-                                    <ChevronRight size={16} />
-                                </Button>
-                            )}
-                        </div>
+                        <MinimalPagination 
+                            currentPage={page}
+                            totalPages={meta.totalPages}
+                            basePath="/chiang-rai-studies/activities"
+                        />
                     </>
                 ) : (
                     <div className="text-center py-20 bg-white rounded-[3rem] shadow-sm">

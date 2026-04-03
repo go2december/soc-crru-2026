@@ -164,7 +164,8 @@ export default function StaffPage() {
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);
                 }
-                const data: Staff[] = await res.json();
+                const jsonArray = await res.json();
+                const data: Staff[] = jsonArray.data || [];
                 setStaffList(data);
 
                 // Extract unique departments for Academic staff only (for filtered list)

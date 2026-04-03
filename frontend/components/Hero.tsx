@@ -36,7 +36,7 @@ const slides: SlideData[] = [
         description: "เข้าร่วมครอบครัวสังคมศาสตร์ พร้อมทุนการศึกษาและโอกาสฝึกงานทั้งในและต่างประเทศ",
         image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
         buttons: [
-            { text: "สมัครเรียน (TCAS)", href: "/admissions", style: "primary" },
+            { text: "สมัครเรียนปริญญาตรี", href: "/admissions", style: "primary" },
             { text: "ดูเกณฑ์การรับสมัคร", href: "/admissions/requirements", style: "outline" }
         ]
     },

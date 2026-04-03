@@ -8,6 +8,7 @@ import {
     Users,
     Building2,
     Newspaper,
+    FlaskConical,
     GraduationCap,
     Settings,
     UserCircle,
@@ -127,6 +128,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             title: 'Content',
             items: [
                 { href: '/admin/news', label: 'ข่าวสาร', icon: Newspaper, minLevel: 2 },
+                { href: '/admin/research', label: 'งานวิจัย', icon: FlaskConical, minLevel: 2 },
                 { href: '/admin/programs', label: 'หลักสูตร', icon: GraduationCap, minLevel: 2 },
                 { href: '/admin/admissions', label: 'รับสมัคร', icon: CalendarDays, minLevel: 2 },
             ]

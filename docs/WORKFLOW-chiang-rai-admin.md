@@ -1,5 +1,5 @@
 # Chiang Rai Studies Admin Workflow
-**Updated:** March 24, 2026
+**Updated:** April 3, 2026
 
 ## ภาพรวมกระบวนการทำงาน
 
@@ -275,7 +275,7 @@ GET    /api/auth/profile
 
 1. **Content Population** - ข้อมูลจริงทุก section
 2. **Articles Detail** - ตรวจสอบ layout consistency
-3. **Responsive Audit** - Mobile/Tablet check
+3. **Responsive Polish & Audit** - ตรวจ homepage/list pages และ Mobile/Tablet coverage
 4. **Structured Data & Social Validation** - ตรวจ non-detail pages และ social cards บน production domain
 5. **Production Deploy** - Build verification
 

@@ -34,6 +34,14 @@ export class UploadController {
     return { url: imageUrl };
   }
 
+  @Post('research')
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadResearchImage(@UploadedFile() file: Express.Multer.File) {
+    const imageUrl = await this.uploadService.saveResearchImage(file);
+    return { url: imageUrl };
+  }
+
   @Post('news')
   @Roles('ADMIN', 'EDITOR', 'STAFF')
   @UseInterceptors(FileInterceptor('file'))
@@ -53,6 +61,13 @@ export class UploadController {
   @Roles('ADMIN', 'EDITOR', 'STAFF')
   async deleteChiangRaiImage(@Body('url') url: string) {
     const deleted = await this.uploadService.deleteChiangRaiImage(url);
+    return { deleted };
+  }
+
+  @Delete('research')
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  async deleteResearchImage(@Body('url') url: string) {
+    const deleted = await this.uploadService.deleteResearchImage(url);
     return { deleted };
   }
 

@@ -48,6 +48,15 @@ soc-crru-web/
 - Roles: `ADMIN`, `EDITOR`, `STAFF`, `GUEST`
 - Dev login: `GET /api/auth/dev/login` or `POST /api/auth/dev/token`
 
+### 📦 Standard Pagination Architecture
+When implementing listing features, both models and APIs MUST follow this pattern:
+1. **Backend API Response:** Return `{ data: [...items], meta: { total, page, limit, totalPages } }`.
+2. **Backend Controller:** Accept `@Query('page')` and `@Query('limit')`. Use `drizzle.db.select()` with `.limit()` and `.offset()`, and a separate `sql<number>count(*)` query for totals.
+3. **Frontend Dashboard (Admin):** 
+   - Fetch ALL raw data (`?limit=500` or higher) so Client-Side Search (e.g., `searchTerm` filtering) works across the entire dataset.
+   - Implement **Client-Side Pagination**: slice the array (`filteredItems.slice(...)`) into `paginatedItems` and pass `totalPages` to `<AdminPagination />`.
+4. **Frontend Public (User):** Use `<MinimalPagination />` for clean minimalist UI and fetch the `.data` property.
+
 ---
 
 ## 🏗️ Agent Kit Structure

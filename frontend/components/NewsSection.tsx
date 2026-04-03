@@ -9,7 +9,7 @@ import {
 } from '@/lib/faculty-news';
 
 export default async function NewsSection() {
-    const items = await fetchFacultyNewsList(4);
+    const { data: items } = await fetchFacultyNewsList(undefined, 1, 4);
     const featuredNews = items[0] || null;
     const newsList = featuredNews ? items.slice(1) : [];
 

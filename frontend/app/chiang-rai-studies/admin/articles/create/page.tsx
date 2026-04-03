@@ -12,7 +12,14 @@ import 'react-quill-new/dist/quill.snow.css';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-// ... (existing code: generateSlug function)
+function generateSlug(value: string) {
+    return value
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-ก-๙]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+}
 
 export default function CreateArticlePage() {
     const router = useRouter();
@@ -42,9 +49,47 @@ export default function CreateArticlePage() {
     const [autoSlug, setAutoSlug] = useState(true);
     const [externalLinkInput, setExternalLinkInput] = useState('');
 
-    // ... (existing code: useEffect user, resizeImage, deleteImageFromServer, extractImageUrls, quillModules, quillFormats, uploadImage helper)
+    useEffect(() => {
+        if (!user) return;
+    }, [user]);
 
-    // ... (existing code: handleTitleChange, handleSlugChange, handleThumbnailUpload)
+    const uploadImage = async (file: File): Promise<string | null> => {
+        const token = localStorage.getItem('admin_token');
+        const uploadForm = new FormData();
+        uploadForm.append('file', file);
+
+        try {
+            const res = await fetch(`${API_URL}/api/upload/chiang-rai`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: uploadForm,
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                return data.url || data.path;
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Upload error:', error);
+            return null;
+        }
+    };
+
+    const handleTitleChange = (value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            title: value,
+            ...(autoSlug ? { slug: generateSlug(value) } : {}),
+        }));
+    };
+
+    const getMediaType = (url: string): 'image' | 'video' | 'link' => {
+        if (url.includes('youtube.com') || url.includes('youtu.be') || /\.(mp4|webm|ogg)(\?.*)?$/i.test(url)) return 'video';
+        if (/\.(jpg|jpeg|png|gif|webp|svg|bmp|avif)(\?.*)?$/i.test(url) || url.startsWith('/uploads/')) return 'image';
+        return 'link';
+    };
 
     // Media images upload handler (multiple)
     const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

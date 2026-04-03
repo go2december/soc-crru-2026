@@ -48,7 +48,10 @@ export default function ProgramEditorPage() {
             try {
                 // Fetch Staff for Instructors Dropdown
                 const staffRes = await fetch(`${API_URL}/api/staff`);
-                if (staffRes.ok) setStaffList(await staffRes.json());
+                if (staffRes.ok) {
+                    const staffJson = await staffRes.json();
+                    setStaffList(staffJson.data || []);
+                }
 
                 // Fetch Program if not new
                 if (!isNew) {

@@ -35,16 +35,27 @@ export class NewsController {
 
   // Public: Get List
   @Get()
-  findAll(@Query('category') category?: string) {
-    return this.newsService.findAllPublic(category);
+  findAll(
+    @Query('category') category?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.newsService.findAllPublic(category, pageNum, limitNum);
   }
 
   // Admin: Get List (includes drafts)
   @Get('admin/all')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
-  findAllAdmin() {
-    return this.newsService.findAllAdmin();
+  findAllAdmin(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? Math.min(parseInt(limit, 10), 100) : 10;
+    return this.newsService.findAllAdmin(pageNum, limitNum);
   }
 
   // Public: Get by Slug

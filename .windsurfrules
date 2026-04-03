@@ -1,4 +1,4 @@
-# SOC-CRRU Windsurf & Antigravity Rules
+# SOC-CRRU Windsurf Rules
 
 ## Project Context
 - This repository is a full-stack web application for the Faculty of Social Sciences, Chiang Rai Rajabhat University.
@@ -13,7 +13,7 @@ Before making medium or large changes, review these files first in this order:
 3. `docs/PLAN-chiang-rai-studies.md`
 4. `docs/WORKFLOW-chiang-rai-admin.md`
 5. `docs/WORKFLOW-faculty-admin.md`
-6. `.windsurf/workflows/*.md` (or `.agent/workflows/*.md`)
+6. `.windsurf/workflows/*.md`
 
 If there is a conflict between current implementation notes and older documentation, update the outdated documentation as part of the task when appropriate.
 
@@ -67,7 +67,7 @@ If there is a conflict between current implementation notes and older documentat
   - Admin pages use professional slate theme with brand accent colors
 
 ## Local Skill Usage Rules
-- Use `.windsurf/skills/ui-ux-pro-max` (or `.agent/skills/ui-ux-pro-max`) when the task is primarily about UI polish, layout refinement, visual hierarchy, responsive refinement, or UX improvement.
+- Use `.windsurf/skills/ui-ux-pro-max` when the task is primarily about UI polish, layout refinement, visual hierarchy, responsive refinement, or UX improvement.
 - When using `ui-ux-pro-max`, always apply SOC-CRRU route constraints first:
   - public routes must stay on DaisyUI
   - admin routes must stay on shadcn/ui
@@ -139,7 +139,7 @@ Use this map to choose the primary skill first, then add companion skills when t
 - Primary: `soc-crru-docs-governance`
 - Add the implementation surface skill that changed project behavior or status
 - Add `soc-crru-seo-metadata` if public SEO behavior changed
-- Update `.windsurf/workflows/` (and `.agent/workflows/`) only when executable steps changed
+- Update `.windsurf/workflows/` only when executable steps changed
 
 ## API and Integration Rules
 - Frontend requests to backend endpoints should account for the `/api` prefix.
@@ -244,11 +244,11 @@ After any medium or large task:
 - update `docs/WORKFLOW-project-status.md` when project status changes
 - update the relevant `docs/PLAN-*.md` phase/checklist when feature status changes
 - update the relevant `docs/WORKFLOW-*.md` file when operational behavior changes
-- update `.windsurf/workflows/*.md` (and `.agent/workflows/*.md`) only when executable steps changed
+- update `.windsurf/workflows/*.md` only when executable steps changed
 
 When adding a new operational process:
 - document it in `docs/WORKFLOW-*.md`
-- add or update a matching executable workflow in `.windsurf/workflows/` (and `.agent/workflows/`)
+- add or update a matching executable workflow in `.windsurf/workflows/`
 
 ## Status Taxonomy
 Use only these labels in plan/status documents:

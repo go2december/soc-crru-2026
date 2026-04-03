@@ -3,7 +3,7 @@ import { DrizzleService } from '../drizzle/drizzle.service';
 import { news } from '../drizzle/schema';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { UpdateNewsDto } from './dto/update-news.dto';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, and, sql } from 'drizzle-orm';
 import slugify from 'slugify';
 import { UploadService } from '../upload/upload.service';
 
@@ -65,20 +65,61 @@ export class NewsService {
     return result[0];
   }
 
-  async findAllPublic(category?: string) {
+  async findAllPublic(category?: string, page: number = 1, limit: number = 10) {
     let whereCondition = eq(news.isPublished, true);
     if (category) {
       whereCondition = and(whereCondition, eq(news.category, category as any)) as any;
     }
-    return this.drizzle.db
+    
+    // Get total count
+    const totalRecordsResult = await this.drizzle.db
+      .select({ count: sql<number>`count(*)` })
+      .from(news)
+      .where(whereCondition);
+    const total = Number(totalRecordsResult[0].count);
+
+    // Get paginated data
+    const items = await this.drizzle.db
       .select()
       .from(news)
       .where(whereCondition)
-      .orderBy(desc(news.publishedAt), desc(news.createdAt));
+      .orderBy(desc(news.publishedAt), desc(news.createdAt))
+      .limit(limit)
+      .offset((page - 1) * limit);
+      
+    return {
+      data: items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
   }
 
-  async findAllAdmin() {
-    return this.drizzle.db.select().from(news).orderBy(desc(news.publishedAt), desc(news.createdAt));
+  async findAllAdmin(page: number = 1, limit: number = 10) {
+    const totalRecordsResult = await this.drizzle.db
+      .select({ count: sql<number>`count(*)` })
+      .from(news);
+    const total = Number(totalRecordsResult[0].count);
+
+    const items = await this.drizzle.db
+      .select()
+      .from(news)
+      .orderBy(desc(news.publishedAt), desc(news.createdAt))
+      .limit(limit)
+      .offset((page - 1) * limit);
+      
+    return {
+      data: items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
   }
 
   async findOne(id: string) {

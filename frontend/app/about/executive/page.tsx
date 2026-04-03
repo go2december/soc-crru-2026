@@ -141,7 +141,8 @@ export default function ExecutivePage() {
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);
                 }
-                const data: Staff[] = await res.json();
+                const jsonArray = await res.json();
+                const data: Staff[] = jsonArray.data || [];
 
                 // Filter only executives
                 const executives = data.filter(s => s.isExecutive);

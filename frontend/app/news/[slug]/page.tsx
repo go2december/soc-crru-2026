@@ -71,8 +71,9 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
   const heroImage = getFacultyNewsServerAssetUrl(newsItem.thumbnailUrl) || newsItem.thumbnailUrl;
   const galleryImages = (newsItem.mediaUrls || []).map((url) => getFacultyNewsServerAssetUrl(url) || url);
   const fixedContent = fixContentImageUrls(newsItem.content || '');
+  const attachments = newsItem.attachments || [];
 
-  const hasAttachments = newsItem.attachments && newsItem.attachments.length > 0;
+  const hasAttachments = attachments.length > 0;
 
   return (
     <div className="bg-base-100 min-h-screen pb-16 lg:pb-24">
@@ -114,7 +115,7 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
               {hasAttachments && (
                 <span className="inline-flex items-center gap-1.5 text-white/80">
                   <Paperclip className="h-4 w-4" />
-                  {newsItem.attachments.length} ไฟล์
+                  {attachments.length} ไฟล์
                 </span>
               )}
             </div>
@@ -149,7 +150,7 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
               </div>
               
               <div className="p-4 space-y-3">
-                {newsItem.attachments.map((attachment) => {
+                {attachments.map((attachment) => {
                   const href = getFacultyNewsServerAssetUrl(attachment.fileUrl) || attachment.fileUrl;
                   return (
                     <a

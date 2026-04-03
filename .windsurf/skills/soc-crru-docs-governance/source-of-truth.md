@@ -7,6 +7,6 @@
 3. `docs/PLAN-chiang-rai-studies.md`
 4. `docs/WORKFLOW-chiang-rai-admin.md`
 5. `docs/WORKFLOW-faculty-admin.md`
-6. `.windsurf/workflows/*.md` (or `.agent/workflows/*.md`)
+6. `.windsurf/workflows/*.md`
 
 If there is a conflict, update the older or less specific artifact.

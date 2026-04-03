@@ -2,6 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+interface PaginationMeta {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+
 export interface Staff {
     id: string;
     prefixTh: string | null;
@@ -47,12 +54,16 @@ export interface User {
     roles: string[];
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export function useStaffData() {
     const [staffList, setStaffList] = useState<Staff[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [academicPositions, setAcademicPositions] = useState<Position[]>([]);
     const [adminPositions, setAdminPositions] = useState<Position[]>([]);
+    const [meta, setMeta] = useState<PaginationMeta | null>(null);
+    const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -64,7 +75,7 @@ export function useStaffData() {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
             const [staffRes, deptRes, usersRes, academicRes, adminRes] = await Promise.all([
-                fetch(`${apiUrl}/api/staff`),
+                fetch(`${apiUrl}/api/staff?page=${page}&limit=${ITEMS_PER_PAGE}`),
                 fetch(`${apiUrl}/api/departments`),
                 fetch(`${apiUrl}/api/auth/users`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -77,25 +88,27 @@ export function useStaffData() {
             if (!deptRes.ok) throw new Error('Failed to fetch departments');
 
             // Users fetch might fail if not admin, but handled gracefully
-            const staffData = await staffRes.json();
+            const staffJson = await staffRes.json();
+            const staffData = staffJson.data || [];
             const deptData = await deptRes.json();
             const usersData = usersRes.ok ? await usersRes.json() : [];
             const academicData = academicRes.ok ? await academicRes.json() : [];
             const adminData = adminRes.ok ? await adminRes.json() : [];
 
             setStaffList(staffData);
+            setMeta(staffJson.meta || null);
             setDepartments(deptData);
             setUsers(usersData);
             setAcademicPositions(academicData);
             setAdminPositions(adminData);
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error fetching data:', err);
-            setError(err.message || 'An error occurred while fetching data');
+            setError(err instanceof Error ? err.message : 'An error occurred while fetching data');
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [page]);
 
     useEffect(() => {
         fetchData();
@@ -103,6 +116,9 @@ export function useStaffData() {
 
     return {
         staffList,
+        meta,
+        page,
+        setPage,
         departments,
         users,
         academicPositions,

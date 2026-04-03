@@ -1,5 +1,5 @@
 # 📋 Workflow & Plan - SOC-CRRU Web Application
-**Updated:** March 24, 2026
+**Updated:** April 3, 2026
 
 ---
 
@@ -392,7 +392,60 @@ GOOGLE_CLIENT_SECRET=...
 
 ## 📝 Changelog
 
-  ### March 23, 2026
+  ### April 3, 2026 (Afternoon) - Research Module Updates
+  
+  - **Scope**
+    - Updated `/research` module with enhanced admin interface and public pages
+    - Implemented cover image upload/replace/delete with backend cleanup
+    - Added SDG descriptions popup (SDG 1-17) in both admin and public
+    - Integrated staff member selection from existing staff data
+    - Removed organization/position fields from member flow
+    - Added Google Maps coordinate helper for project locations
+    - Linked member names to staff detail pages in public view
+  
+  - **Updated/New Files**
+    - `frontend/app/admin/(dashboard)/research/ResearchForm.tsx` - Enhanced form with upload, SDG popup, staff selection
+    - `frontend/components/ResearchSdgBadges.tsx` - New public SDG component with popup
+    - `frontend/app/research/database/[slug]/page.tsx` - Updated detail with member links and SDG popup
+    - `frontend/lib/research.ts` - Added SDG descriptions and staff formatting helpers
+    - `backend/src/upload/upload.service.ts` - Added research image save/delete
+    - `backend/src/upload/upload.controller.ts` - Added research upload endpoints
+    - `backend/src/research/research.service.ts` - Integrated cleanup and member changes
+    - `backend/src/research/dto/create-research-project.dto.ts` - Removed unused fields
+    - `backend/src/research/research.module.ts` - Added UploadModule import
+    - `.windsurf/workflows/research.md` - Created research workflow documentation
+  
+  - **Impact**
+    - Admin can now upload cover images instead of entering URLs
+    - SDG descriptions visible via popup click in both admin and public
+    - Staff members can be selected from existing faculty data
+    - External members stored as plain text names only
+    - Cover images auto-cleanup on replace/delete
+    - Public detail pages link to staff profiles
+
+  ### April 3, 2026
+
+ - **Scope**
+   - aligned active project governance from legacy Antigravity references to Windsurf-native rules, skills, task workflows, and plans
+   - normalized the docs-governance skill and project review workflow to maintain only `.windsurf` workflow references
+   - clarified README and workflow standardization guidance for Windsurf task routing and local skill usage
+
+ - **Updated/New Files**
+   - `.windsurfrules`
+   - `README.md`
+   - `docs/PLAN-workflow-standardization.md`
+   - `.windsurf/skills/soc-crru-docs-governance/SKILL.md`
+   - `.windsurf/skills/soc-crru-docs-governance/source-of-truth.md`
+   - `.windsurf/skills/soc-crru-docs-governance/update-rules.md`
+   - `.windsurf/workflows/project-status-review.md`
+   - `docs/WORKFLOW-project-status.md`
+
+ - **Impact**
+   - active project instructions now describe Windsurf as the authoritative task and workflow environment
+   - local skill, rule, workflow, and plan references are consistent across the current source-of-truth artifacts
+   - future documentation sync work is less likely to reintroduce legacy workflow paths into active guidance
+
+   ### March 23, 2026
 
 - **Scope**
   - standardized Windsurf project rules and executable workflow structure
@@ -464,5 +517,5 @@ GOOGLE_CLIENT_SECRET=...
 
 ---
 
- **Last Updated:** March 24, 2026
- **Next Review:** March 27, 2026
+ **Last Updated:** April 3, 2026
+ **Next Review:** April 10, 2026

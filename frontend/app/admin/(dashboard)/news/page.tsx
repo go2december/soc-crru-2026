@@ -19,6 +19,7 @@ import {
     FacultyNewsItem,
     formatFacultyNewsDate,
 } from '@/lib/faculty-news';
+import AdminPagination from '@/components/AdminPagination';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -26,20 +27,27 @@ export default function AdminNewsPage() {
     const [newsList, setNewsList] = useState<FacultyNewsItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [deleteTarget, setDeleteTarget] = useState<FacultyNewsItem | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         fetchNews();
-    }, []);
+    }, [currentPage]);
 
     const fetchNews = async () => {
         const token = localStorage.getItem('admin_token');
         try {
-            const res = await fetch(`${API_URL}/api/news/admin/all`, {
+            const res = await fetch(`${API_URL}/api/news/admin/all?page=${currentPage}&limit=10`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) {
                 const data = await res.json();
-                setNewsList(data);
+                if (data.data) {
+                    setNewsList(data.data);
+                    setTotalPages(data.meta.totalPages);
+                } else {
+                    setNewsList(data);
+                }
             }
         } catch (error) {
             console.error('Error:', error);
@@ -153,6 +161,12 @@ export default function AdminNewsPage() {
                     )}
                 </CardContent>
             </Card>
+
+            <AdminPagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+            />
 
             <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
                 <DialogContent>

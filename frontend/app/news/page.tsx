@@ -11,6 +11,7 @@ import {
   formatFacultyNewsDate,
   getFacultyNewsServerAssetUrl,
 } from '@/lib/faculty-news';
+import MinimalPagination from '@/components/MinimalPagination';
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -42,16 +43,22 @@ export async function generateMetadata(
 export default async function FacultyNewsPage(props: Props) {
   const resolvedParams = await props.searchParams;
   const currentCategory = resolvedParams.category as string | undefined;
+  const pageStr = resolvedParams.page as string | undefined;
+  const currentPage = pageStr ? parseInt(pageStr, 10) : 1;
   
-  const newsList = await fetchFacultyNewsList(currentCategory);
+  const { data: newsList, meta } = await fetchFacultyNewsList(currentCategory, currentPage, 12);
   
   const isFiltered = !!currentCategory;
 
-  const featured = !isFiltered ? newsList[0] || null : null;
-  const restItems = !isFiltered ? (featured ? newsList.slice(1) : []) : [];
-  const latestItems = !isFiltered ? restItems.slice(0, 4) : [];
-  // If filtered, olderItems holds ALL items in that category. If not, it holds items starting from index 5.
-  const gridItems = isFiltered ? newsList : restItems.slice(4);
+  // We only show "Featured" and "Latest" if we are on the first page and not filtered
+  const isFirstPageGeneral = !isFiltered && currentPage === 1;
+
+  const featured = isFirstPageGeneral ? newsList[0] || null : null;
+  const restItems = isFirstPageGeneral ? (featured ? newsList.slice(1) : []) : [];
+  const latestItems = isFirstPageGeneral ? restItems.slice(0, 4) : [];
+  
+  // If not first page general, the grid items are ALL the items returned
+  const gridItems = isFirstPageGeneral ? restItems.slice(4) : newsList;
 
   const categories = [
     { value: '', label: 'ทั้งหมด' },
@@ -102,7 +109,7 @@ export default async function FacultyNewsPage(props: Props) {
         </div>
       </section>
 
-      {!isFiltered && (
+      {isFirstPageGeneral && (
         <section className="container mx-auto px-4 py-10 lg:py-14">
           {featured ? (
             <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr] xl:gap-12">
@@ -273,6 +280,17 @@ export default async function FacultyNewsPage(props: Props) {
               </Link>
             </div>
           )
+        )}
+
+        {meta.totalPages > 1 && (
+          <MinimalPagination 
+            currentPage={meta.page}
+            totalPages={meta.totalPages}
+            basePath="/news"
+            searchParams={{
+              ...(currentCategory ? { category: currentCategory } : {})
+            }}
+          />
         )}
       </section>
     </div>

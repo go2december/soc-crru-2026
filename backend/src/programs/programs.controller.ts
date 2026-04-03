@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ProgramsService } from './programs.service';
 import { CreateProgramDto } from './dto/create-program.dto';
@@ -35,8 +36,13 @@ export class ProgramsController {
    * GET /programs - Get all programs
    */
   @Get()
-  findAll() {
-    return this.programsService.findAll();
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNumber = page ? parseInt(page, 10) : 1;
+    const limitNumber = limit ? parseInt(limit, 10) : 100;
+    return this.programsService.findAll(pageNumber, limitNumber);
   }
 
   /**

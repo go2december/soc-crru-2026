@@ -130,7 +130,7 @@ export default function AdminAdmissionsPage() {
         'สมัครออนไลน์',
         'สมัครด้วยตนเอง',
         'สมัครออนไลน์ / สมัครด้วยตนเอง',
-        'ผ่านระบบ TCAS',
+        'ระบบรับสมัครกลางมหาวิทยาลัย',
         'ติดต่อคณะโดยตรง',
     ];
 
@@ -321,7 +321,7 @@ export default function AdminAdmissionsPage() {
                         <CardTitle className="text-lg flex items-center gap-2">
                             <CalendarIcon className="w-5 h-5" /> ปฏิทินรับสมัครนักศึกษา
                         </CardTitle>
-                        <CardDescription>ข้อมูลรอบ TCAS และระดับอื่นๆ</CardDescription>
+                        <CardDescription>ข้อมูลรอบระดับปริญญาตรีและระดับอื่นๆ</CardDescription>
                     </div>
                     <Button onClick={() => { setEditingSchedule({ roundName: '', description: '', startDate: '', endDate: '', channel: 'สมัครออนไลน์', status: 'UPCOMING', sortOrder: 0 }); setScheduleOpen(true); }} size="sm" className="gap-1">
                         <Plus className="w-4 h-4" /> เพิ่มรอบ
@@ -424,7 +424,7 @@ export default function AdminAdmissionsPage() {
                     <form onSubmit={handleSaveSchedule} className="space-y-4 pt-4">
                         <div className="space-y-2">
                             <Label>รอบรับสมัคร (ชื่อ) *</Label>
-                            <Input required value={editingSchedule?.roundName || ''} onChange={e => setEditingSchedule({...editingSchedule, roundName: e.target.value})} placeholder="เช่น TCAS รอบที่ 1 Portfolio" />
+                            <Input required value={editingSchedule?.roundName || ''} onChange={e => setEditingSchedule({...editingSchedule, roundName: e.target.value})} placeholder="เช่น รอบที่ 1 Portfolio" />
                         </div>
                         <div className="space-y-2">
                             <Label>คำอธิบายย่อย</Label>
@@ -499,7 +499,7 @@ export default function AdminAdmissionsPage() {
                     <form onSubmit={handleSaveDoc} className="space-y-4 pt-4">
                         <div className="space-y-2">
                             <Label>ชื่อเอกสาร *</Label>
-                            <Input required value={editingDoc?.title || ''} onChange={e => setEditingDoc({...editingDoc, title: e.target.value})} placeholder="เช่น คู่มือการรับสมัคร TCAS" />
+                            <Input required value={editingDoc?.title || ''} onChange={e => setEditingDoc({...editingDoc, title: e.target.value})} placeholder="เช่น คู่มือการรับสมัครปริญญาตรี" />
                         </div>
                         <div className="space-y-2">
                             <Label>ไฟล์เอกสาร (URL) *</Label>

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BookOpen, Plus, Search, Edit3, Trash2, GraduationCap, AlertTriangle } from 'lucide-react';
+import AdminPagination from '@/components/AdminPagination';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,33 +24,50 @@ interface Program {
     isActive: boolean;
 }
 
+interface PaginationMeta {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+
+const ITEMS_PER_PAGE = 10;
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export default function AdminProgramsPage() {
     const router = useRouter();
     const [programs, setPrograms] = useState<Program[]>([]);
+    const [meta, setMeta] = useState<PaginationMeta | null>(null);
+    const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [programToDelete, setProgramToDelete] = useState<Program | null>(null);
     const [deleting, setDeleting] = useState(false);
 
-    const fetchPrograms = async () => {
+    const fetchPrograms = useCallback(async () => {
+        setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/api/programs`);
+            const res = await fetch(`${API_URL}/api/programs?page=${page}&limit=${ITEMS_PER_PAGE}`);
             if (res.ok) {
-                const data = await res.json();
-                setPrograms(data);
+                const jsonRes = await res.json();
+                setPrograms(jsonRes.data || []);
+                setMeta(jsonRes.meta || null);
             }
         } catch (error) {
             console.error('Fetch programs error:', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [page]);
 
     useEffect(() => {
         fetchPrograms();
-    }, []);
+    }, [fetchPrograms]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm]);
 
     const handleDelete = async () => {
         if (!programToDelete) return;
@@ -75,10 +93,16 @@ export default function AdminProgramsPage() {
         }
     };
 
-    const filteredPrograms = programs.filter(p => 
-        p.nameTh.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        p.code.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    const visiblePrograms = normalizedSearch
+        ? programs.filter((program) =>
+            program.nameTh.toLowerCase().includes(normalizedSearch) ||
+            program.code.toLowerCase().includes(normalizedSearch)
+        )
+        : programs;
+
+    const currentPage = meta?.page ?? page;
+    const totalPages = normalizedSearch ? 1 : (meta?.totalPages ?? 1);
 
     const degreeBadgeColor = (level: string) => {
         switch (level) {
@@ -154,9 +178,11 @@ export default function AdminProgramsPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredPrograms.map((prog, index) => (
+                                {visiblePrograms.map((prog, index) => {
+                                    const itemsPerPage = meta?.limit ?? (visiblePrograms.length || 1);
+                                    return (
                                     <tr key={prog.id} className="border-b align-middle hover:bg-muted/20">
-                                        <td className="px-4 py-3 text-center text-muted-foreground">{index + 1}</td>
+                                        <td className="px-4 py-3 text-center text-muted-foreground">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                         <td className="px-4 py-3">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-base">{prog.nameTh}</span>
@@ -197,8 +223,9 @@ export default function AdminProgramsPage() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
-                                {filteredPrograms.length === 0 && (
+                                    );
+                                })}
+                                {visiblePrograms.length === 0 && (
                                     <tr>
                                         <td colSpan={5} className="px-4 py-16 text-center text-muted-foreground">
                                             ไม่พบข้อมูลหลักสูตร
@@ -210,6 +237,16 @@ export default function AdminProgramsPage() {
                     </div>
                 </CardContent>
             </Card>
+
+            {!normalizedSearch && totalPages > 1 && (
+                <div className="flex justify-end mt-4">
+                    <AdminPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                    />
+                </div>
+            )}
 
             <Dialog open={!!programToDelete} onOpenChange={(open) => !open && setProgramToDelete(null)}>
                 <DialogContent>

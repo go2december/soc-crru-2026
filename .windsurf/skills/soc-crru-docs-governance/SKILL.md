@@ -17,13 +17,13 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 | File | Description | When to Read |
 |------|-------------|--------------|
 | `source-of-truth.md` | Canonical read order and artifact hierarchy | Before syncing docs |
-| `update-rules.md` | When to update status, plans, workflows, and rules | After medium/large tasks |
+| `update-rules.md` | When to update status, plans, and rules | After medium/large tasks |
 | `status-taxonomy.md` | Standard labels and checklist formatting | When editing docs |
 
 ## ✅ Checklist
 
 - [ ] Review source-of-truth docs in the correct order
 - [ ] Update project status if feature status changed
-- [ ] Update matching plan/workflow docs if behavior changed
-- [ ] Keep `.windsurf/workflows/` (and `.agent/workflows/`) aligned when execution steps changed
+- [ ] Update matching plan/docs if behavior changed
+- [ ] Keep `.windsurf/workflows/` aligned when execution steps changed
 - [ ] Use standard status labels and checklist formats only
