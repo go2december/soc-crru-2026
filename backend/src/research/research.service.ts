@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -52,6 +53,8 @@ interface AdminListParams {
   year?: number;
   status?: string;
   isPublished?: string;
+  isSocialService?: string;
+  isCommercial?: string;
   page: number;
   limit: number;
 }
@@ -158,7 +161,7 @@ export class ResearchService {
     }));
   }
 
-  private async cleanupResearchCoverImage(url?: string | null) {
+  private async cleanupResearchFile(url?: string | null) {
     if (!url || !url.startsWith('/uploads/research/')) return;
     await this.uploadService.deleteResearchImage(url);
   }
@@ -468,6 +471,8 @@ export class ResearchService {
         isSocialService: researchProjects.isSocialService,
         isCommercial: researchProjects.isCommercial,
         coverImageUrl: researchProjects.coverImageUrl,
+        publishedAt: researchProjects.publishedAt,
+        createdAt: researchProjects.createdAt,
       })
       .from(researchProjects)
       .where(finalCondition)
@@ -507,9 +512,13 @@ export class ResearchService {
     if (params.status) conditions.push(eq(researchProjects.status, params.status as any));
 
     const isPublished = this.parseBoolean(params.isPublished);
-    if (isPublished !== undefined) {
-      conditions.push(eq(researchProjects.isPublished, isPublished));
-    }
+    if (isPublished !== undefined) conditions.push(eq(researchProjects.isPublished, isPublished));
+
+    const isSocialService = this.parseBoolean(params.isSocialService);
+    if (isSocialService !== undefined) conditions.push(eq(researchProjects.isSocialService, isSocialService));
+
+    const isCommercial = this.parseBoolean(params.isCommercial);
+    if (isCommercial !== undefined) conditions.push(eq(researchProjects.isCommercial, isCommercial));
 
     const whereCondition =
       conditions.length === 0 ? undefined : conditions.length === 1 ? conditions[0] : and(...conditions);
@@ -537,6 +546,7 @@ export class ResearchService {
         isPublished: researchProjects.isPublished,
         publishedAt: researchProjects.publishedAt,
         updatedAt: researchProjects.updatedAt,
+        createdAt: researchProjects.createdAt,
       })
       .from(researchProjects);
 
@@ -560,14 +570,71 @@ export class ResearchService {
     return this.getProjectDetailByCondition(eq(researchProjects.id, id));
   }
 
+  async exportAll(params: { q?: string; year?: number; status?: string; isPublished?: string; isSocialService?: string; isCommercial?: string }) {
+    const conditions: any[] = [];
+    if (params.q?.trim()) {
+      const search = `%${params.q.trim()}%`;
+      conditions.push(sql`(${researchProjects.titleTh} ILIKE ${search} OR ${researchProjects.titleEn} ILIKE ${search})`);
+    }
+    if (params.year) conditions.push(eq(researchProjects.year, params.year));
+    if (params.status) conditions.push(eq(researchProjects.status, params.status as any));
+    const isPublished = this.parseBoolean(params.isPublished);
+    if (isPublished !== undefined) conditions.push(eq(researchProjects.isPublished, isPublished));
+    const isSocialService = this.parseBoolean(params.isSocialService);
+    if (isSocialService !== undefined) conditions.push(eq(researchProjects.isSocialService, isSocialService));
+    const isCommercial = this.parseBoolean(params.isCommercial);
+    if (isCommercial !== undefined) conditions.push(eq(researchProjects.isCommercial, isCommercial));
+
+    const whereCondition = conditions.length === 0 ? undefined : conditions.length === 1 ? conditions[0] : and(...conditions);
+
+    const rows = await (whereCondition
+      ? this.drizzle.db.select().from(researchProjects).where(whereCondition)
+      : this.drizzle.db.select().from(researchProjects)
+    ).orderBy(desc(researchProjects.year), desc(researchProjects.createdAt));
+
+    const enriched = await this.enrichProjectsForList(rows);
+
+    const columns = [
+      'ชื่อโครงการ (ไทย)', 'ชื่อโครงการ (อังกฤษ)', 'ปีงบประมาณ', 'สถานะ',
+      'แหล่งทุน', 'งบประมาณ', 'รับใช้สังคม', 'เชิงพาณิชย์', 'เผยแพร่', 'ทีมวิจัย', 'SDGs',
+      'ผลผลิต', 'ไฟล์แนบ',
+    ];
+
+    const escape = (v: any) => {
+      const s = String(v ?? '');
+      return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+
+    const csvRows = enriched.map((item: any) => [
+      escape(item.titleTh),
+      escape(item.titleEn || ''),
+      escape(item.year),
+      escape(item.status),
+      escape(item.fundingSource || ''),
+      escape(item.budget || ''),
+      escape(item.isSocialService ? 'ใช่' : 'ไม่'),
+      escape(item.isCommercial ? 'ใช่' : 'ไม่'),
+      escape(item.isPublished ? 'ใช่' : 'ไม่'),
+      escape(item.memberDisplay?.join('; ') || ''),
+      escape(item.sdgIds?.join(', ') || ''),
+      escape(item.outputCount ?? 0),
+      escape(item.attachmentCount ?? 0),
+    ].join(','));
+
+    const bom = '\uFEFF';
+    return bom + [columns.join(','), ...csvRows].join('\n');
+  }
+
   async getStats() {
-    const [totals, topSdgsRaw] = await Promise.all([
+    const [totals, topSdgsRaw, outputCountRow] = await Promise.all([
       this.drizzle.db
         .select({
           total: count(researchProjects.id),
           socialServiceCount: sql<number>`count(case when ${researchProjects.isSocialService} = true then 1 end)`,
           commercialCount: sql<number>`count(case when ${researchProjects.isCommercial} = true then 1 end)`,
           publishedCount: sql<number>`count(case when ${researchProjects.isPublished} = true then 1 end)`,
+          ongoingCount: sql<number>`count(case when ${researchProjects.status} = 'ONGOING' then 1 end)`,
+          totalBudget: sql<string>`coalesce(sum(case when ${researchProjects.budget} is not null then ${researchProjects.budget}::numeric else 0 end), 0)`,
         })
         .from(researchProjects),
       this.drizzle.db
@@ -576,18 +643,27 @@ export class ResearchService {
         .groupBy(projectSdgs.sdgId)
         .orderBy(desc(count(projectSdgs.projectId)))
         .limit(5),
+      this.drizzle.db
+        .select({ total: count(researchOutputs.id) })
+        .from(researchOutputs),
     ]);
 
     const total = Number(totals[0]?.total ?? 0);
     const socialServiceCount = Number(totals[0]?.socialServiceCount ?? 0);
     const commercialCount = Number(totals[0]?.commercialCount ?? 0);
     const publishedCount = Number(totals[0]?.publishedCount ?? 0);
+    const ongoingCount = Number(totals[0]?.ongoingCount ?? 0);
+    const totalBudget = Number(totals[0]?.totalBudget ?? 0);
+    const outputCount = Number(outputCountRow[0]?.total ?? 0);
 
     return {
       total,
       publishedCount,
+      ongoingCount,
       socialServiceCount,
       commercialCount,
+      outputCount,
+      totalBudget,
       socialServicePercent: total ? Math.round((socialServiceCount / total) * 100) : 0,
       commercialPercent: total ? Math.round((commercialCount / total) * 100) : 0,
       topSdgs: topSdgsRaw.map((item) => ({ sdgId: item.sdgId, count: Number(item.count) })),
@@ -663,11 +739,26 @@ export class ResearchService {
     const nextCoverImageUrl =
       dto.coverImageUrl !== undefined ? dto.coverImageUrl?.trim() || null : existing.coverImageUrl;
 
+    // Handle slug change
+    let nextSlug = existing.slug;
+    if (dto.slug !== undefined && dto.slug !== existing.slug) {
+      const conflict = await this.drizzle.db
+        .select({ id: researchProjects.id })
+        .from(researchProjects)
+        .where(eq(researchProjects.slug, dto.slug))
+        .limit(1);
+      if (conflict.length) {
+        throw new ConflictException(`Slug "${dto.slug}" ถูกใช้งานแล้วโดยโครงการอื่น`);
+      }
+      nextSlug = dto.slug;
+    }
+
     const result = await this.drizzle.db
       .update(researchProjects)
       .set({
         titleTh: dto.titleTh ?? existing.titleTh,
         titleEn: dto.titleEn !== undefined ? dto.titleEn?.trim() || null : existing.titleEn,
+        slug: nextSlug,
         abstractTh:
           dto.abstractTh !== undefined ? dto.abstractTh?.trim() || null : existing.abstractTh,
         abstractEn:
@@ -698,7 +789,16 @@ export class ResearchService {
     }
 
     if (dto.coverImageUrl !== undefined && existing.coverImageUrl !== nextCoverImageUrl) {
-      await this.cleanupResearchCoverImage(existing.coverImageUrl);
+      await this.cleanupResearchFile(existing.coverImageUrl);
+    }
+
+    if (dto.attachments) {
+      const newUrls = dto.attachments.map(a => a.fileUrl).filter(Boolean);
+      for (const old of existing.attachments || []) {
+        if (old.fileUrl && !newUrls.includes(old.fileUrl)) {
+          await this.cleanupResearchFile(old.fileUrl);
+        }
+      }
     }
 
     await this.syncNestedCollections(id, {
@@ -710,6 +810,20 @@ export class ResearchService {
     });
 
     return this.findOneAdmin(id);
+  }
+
+  async downloadAttachment(id: string) {
+    const result = await this.drizzle.db
+      .update(researchAttachments)
+      .set({ downloadCount: sql`${researchAttachments.downloadCount} + 1` })
+      .where(eq(researchAttachments.id, id))
+      .returning({ fileUrl: researchAttachments.fileUrl });
+
+    if (!result.length) {
+      throw new NotFoundException(`Attachment with ID ${id} not found`);
+    }
+
+    return { fileUrl: result[0].fileUrl };
   }
 
   async remove(id: string) {
@@ -724,7 +838,15 @@ export class ResearchService {
       throw new NotFoundException(`Research project with ID ${id} not found`);
     }
 
-    await this.cleanupResearchCoverImage(existing.coverImageUrl);
+    await this.cleanupResearchFile(existing.coverImageUrl);
+
+    if (existing.attachments?.length) {
+      for (const attachment of existing.attachments) {
+        if (attachment.fileUrl) {
+          await this.cleanupResearchFile(attachment.fileUrl);
+        }
+      }
+    }
 
     return { message: 'Deleted successfully', data: result[0] };
   }

@@ -1,0 +1,218 @@
+{
+  "main": {
+    "id": "b55eee508a7ef0ee",
+    "type": "split",
+    "children": [
+      {
+        "id": "e61b1d8f1b012204",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "960f7e735b8980a9",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "38c6f179e586d608",
+    "type": "split",
+    "children": [
+      {
+        "id": "d41eeab0afcc576b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "72a41e2f95c4b31b",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "10e426a7ded827bb",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "c197dae4f0cb467e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "d6d0b971cd82a71e",
+    "type": "split",
+    "children": [
+      {
+        "id": "04f02e2ff914ca86",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b3fb51ca219f8d41",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "0b6c436ad3b6ab87",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "7bfa04707e27cb1d",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "de051fb375062887",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "1ab039a3f5c3b414",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "960f7e735b8980a9",
+  "lastOpenFiles": [
+    "database/pgdata/18/docker/pg_logical/replorigin_checkpoint.tmp",
+    "backend/dist/tsconfig.build.tsbuildinfo",
+    "backend/dist/src/main.d.ts",
+    "backend/dist/src/main.js",
+    "backend/dist/src/main.js.map",
+    "backend/dist/src/app.module.d.ts",
+    "backend/dist/src/app.module.js",
+    "backend/dist/src/app.module.js.map",
+    "backend/dist/src/research/dto/update-research-project.dto.js.map",
+    "backend/dist/src/research/dto/update-research-project.dto.js",
+    "backend/dist/src/research/dto/update-research-project.dto.d.ts",
+    "backend/node_modules/bl/LICENSE.md",
+    "Untitled 1.canvas",
+    "docs/01_Active_Tasks/Current_Status.md",
+    "docs/03_Prompts_Rules/Available_AI_Skills.md",
+    "admin-programs-module.md",
+    "docs/03_Prompts_Rules/AI_Task_Template.md",
+    "docs/00_Dashboard.md",
+    "docs/PLAN-soc-crru-baseline.md",
+    "docs/99_Archive/PLAN-workflow-standardization.md",
+    "docs/99_Archive/PLAN-soc-crru-baseline.md",
+    "docs/99_Archive/PLAN-chiang-rai-studies.md",
+    "docs/99_Archive/WORKFLOW-project-status.md",
+    "docs/99_Archive/WORKFLOW-faculty-admin.md",
+    "docs/99_Archive/WORKFLOW-chiang-rai-admin.md",
+    "docs/99_Archive/MENU-INTEGRATION.md",
+    "docs/99_Archive/LEARNING-SITES-FEATURE.md",
+    "docs/99_Archive/FACULTY_NEWS_MANUAL_QA_CHECKLIST.md",
+    "docs/99_Archive/FACULTY_NEWS_DATABASE_IMPACT.md",
+    "docs/99_Archive/SCHEMA-SIMPLIFIED-BLOG.md",
+    "docs/99_Archive/SCHEMA-REFACTOR-SUMMARY.md",
+    "docs/99_Archive/IMPLEMENTATION-COMPLETE.md",
+    "docs/99_Archive/FRONTEND-ERROR-ARCHIVE-2026-04-03.md",
+    "Untitled.canvas",
+    "README.md",
+    "backend/node_modules/pgpass/README.md"
+  ]
+}

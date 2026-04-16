@@ -3,11 +3,13 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   Post,
   Put,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ResearchService } from './research.service';
@@ -51,6 +53,12 @@ export class ResearchController {
     return this.researchService.findBySlug(slug);
   }
 
+  @Get('attachments/:id/download')
+  async downloadAttachment(@Param('id') id: string, @Res() res: any) {
+    const result = await this.researchService.downloadAttachment(id);
+    return res.redirect(result.fileUrl);
+  }
+
   @Get('stats')
   getStats() {
     return this.researchService.getStats();
@@ -69,6 +77,8 @@ export class ResearchController {
     @Query('year') year?: string,
     @Query('status') status?: string,
     @Query('isPublished') isPublished?: string,
+    @Query('isSocialService') isSocialService?: string,
+    @Query('isCommercial') isCommercial?: string,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
   ) {
@@ -77,9 +87,36 @@ export class ResearchController {
       year: year ? Number(year) : undefined,
       status,
       isPublished,
+      isSocialService,
+      isCommercial,
       page: Number(page),
       limit: Number(limit),
     });
+  }
+
+  @Get('admin/export')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  @Header('Content-Type', 'text/csv; charset=utf-8')
+  @Header('Content-Disposition', 'attachment; filename="research-export.csv"')
+  async exportCsv(
+    @Query('q') q?: string,
+    @Query('year') year?: string,
+    @Query('status') status?: string,
+    @Query('isPublished') isPublished?: string,
+    @Query('isSocialService') isSocialService?: string,
+    @Query('isCommercial') isCommercial?: string,
+    @Res() res?: any,
+  ) {
+    const csv = await this.researchService.exportAll({
+      q,
+      year: year ? Number(year) : undefined,
+      status,
+      isPublished,
+      isSocialService,
+      isCommercial,
+    });
+    return res.send(csv);
   }
 
   @Get('admin/projects/:id')

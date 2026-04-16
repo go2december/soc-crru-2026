@@ -1,3 +1,5 @@
+import { formatStaffName } from './utils';
+
 export type ResearchProjectStatus = 'ONGOING' | 'COMPLETED' | 'PUBLISHED' | 'CANCELLED';
 export type ResearchMemberRole = 'HEAD' | 'CO_RESEARCHER' | 'ADVISOR' | 'ASSISTANT' | 'EXTERNAL_EXPERT';
 
@@ -7,6 +9,7 @@ export interface ResearchStaffOption {
   firstNameTh: string;
   lastNameTh: string;
   department?: string | null;
+  academicPosition?: string | null;
 }
 
 export interface ResearchProjectMember {
@@ -26,6 +29,8 @@ export interface ResearchProjectLocation {
   lat?: number;
   lng?: number;
 }
+
+export type ResearchAttachmentType = 'FULL_REPORT' | 'EXECUTIVE_SUMMARY' | 'ARTICLE' | 'PRESENTATION' | 'OTHER';
 
 export interface ResearchProjectOutput {
   id?: string;
@@ -112,6 +117,14 @@ export const RESEARCH_STATUS_LABELS: Record<ResearchProjectStatus, string> = {
   CANCELLED: 'ยกเลิก',
 };
 
+export const RESEARCH_ATTACHMENT_TYPE_LABELS: Record<ResearchAttachmentType, string> = {
+  FULL_REPORT: 'รายงานวิจัยฉบับสมบูรณ์',
+  EXECUTIVE_SUMMARY: 'บทสรุปผู้บริหาร',
+  ARTICLE: 'บทความวิจัยตีพิมพ์',
+  PRESENTATION: 'สไลด์นำเสนอ',
+  OTHER: 'อื่นๆ',
+};
+
 export const RESEARCH_MEMBER_ROLE_LABELS: Record<ResearchMemberRole, string> = {
   HEAD: 'หัวหน้าโครงการ',
   CO_RESEARCHER: 'ผู้ร่วมวิจัย',
@@ -157,7 +170,12 @@ export function getResearchMemberRoleOptions(): ResearchMemberRole[] {
 
 export function formatResearchStaffName(staff?: ResearchStaffOption | null): string {
   if (!staff) return '';
-  return [staff.prefixTh, staff.firstNameTh, staff.lastNameTh].filter(Boolean).join(' ').trim();
+  return formatStaffName({
+    academicPositionNameTh: staff.academicPosition,
+    prefixTh: staff.prefixTh,
+    firstNameTh: staff.firstNameTh,
+    lastNameTh: staff.lastNameTh,
+  });
 }
 
 export function getResearchPublicAssetUrl(url?: string | null): string | null {

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
+  AlertCircle,
   ExternalLink,
   FileText,
   FlaskConical,
@@ -37,6 +38,8 @@ import {
   RESEARCH_SDG_DESCRIPTIONS,
   RESEARCH_MEMBER_ROLE_LABELS,
   RESEARCH_STATUS_LABELS,
+  RESEARCH_ATTACHMENT_TYPE_LABELS,
+  ResearchAttachmentType,
   ResearchMemberRole,
   ResearchProjectAttachment,
   ResearchProjectDetail,
@@ -48,6 +51,7 @@ import {
 } from '@/lib/research';
 
 export type ResearchFormValues = {
+  slug: string;
   titleTh: string;
   titleEn: string;
   abstractTh: string;
@@ -76,6 +80,7 @@ interface ResearchFormProps {
 }
 
 const defaultValues: ResearchFormValues = {
+  slug: '',
   titleTh: '',
   titleEn: '',
   abstractTh: '',
@@ -167,6 +172,7 @@ function normalizeInitialData(initialData?: ResearchProjectDetail | null): Resea
   if (!initialData) return defaultValues;
 
   return {
+    slug: initialData.slug || '',
     titleTh: initialData.titleTh,
     titleEn: initialData.titleEn || '',
     abstractTh: initialData.abstractTh || '',
@@ -219,13 +225,16 @@ function normalizeInitialData(initialData?: ResearchProjectDetail | null): Resea
 
 export default function ResearchForm({ mode, initialData, onSubmit, submitting }: ResearchFormProps) {
   const [values, setValues] = useState<ResearchFormValues>(() => normalizeInitialData(initialData));
+  const [initialSlug] = useState(() => initialData?.slug || '');
   const [keywordInput, setKeywordInput] = useState('');
   const [sdgInput, setSdgInput] = useState('');
   const [activeSdgInfo, setActiveSdgInfo] = useState<number | null>(null);
+  const [showAllSdgInfo, setShowAllSdgInfo] = useState(false);
   const [staffOptions, setStaffOptions] = useState<ResearchStaffOption[]>([]);
   const [staffLoading, setStaffLoading] = useState(false);
   const [coverUploading, setCoverUploading] = useState(false);
   const [locationMapInputs, setLocationMapInputs] = useState<Record<number, string>>({});
+  const [attachmentUploading, setAttachmentUploading] = useState<Record<number, boolean>>({});
 
   const memberRoleOptions = useMemo(() => getResearchMemberRoleOptions(), []);
   const statusOptions = useMemo(() => getResearchStatusOptions(), []);
@@ -313,6 +322,61 @@ export default function ResearchForm({ mode, initialData, onSubmit, submitting }
     }
   };
 
+  const deleteResearchAttachment = async (url?: string | null) => {
+    if (!url || !url.startsWith('/uploads/research/')) return;
+    const token = localStorage.getItem('admin_token');
+    try {
+      await fetch(`${apiUrl}/api/upload/research`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ url }),
+      });
+    } catch (error) {
+      console.error('Failed to delete research attachment:', error);
+    }
+  };
+
+  const uploadResearchAttachment = async (file: File, index: number) => {
+    const token = localStorage.getItem('admin_token');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setAttachmentUploading((prev) => ({ ...prev, [index]: true }));
+    try {
+      const res = await fetch(`${apiUrl}/api/upload/research`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      const nextUrl = data.url as string;
+
+      const previousUrl = values.attachments[index]?.fileUrl;
+
+      if (
+        previousUrl &&
+        previousUrl.startsWith('/uploads/research/')
+      ) {
+        await deleteResearchAttachment(previousUrl);
+      }
+
+      updateAttachment(index, 'fileUrl', nextUrl);
+      if (!values.attachments[index]?.fileName) {
+         updateAttachment(index, 'fileName', file.name);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('อัปโหลดไฟล์เอกสารไม่สำเร็จ');
+    } finally {
+      setAttachmentUploading((prev) => ({ ...prev, [index]: false }));
+    }
+  };
+
   const updateMember = (index: number, field: keyof ResearchProjectMember, value: string | number) => {
     setValues((prev) => {
       const next = [...prev.members];
@@ -349,6 +413,7 @@ export default function ResearchForm({ mode, initialData, onSubmit, submitting }
     event.preventDefault();
     const payload: ResearchFormValues = {
       ...values,
+      slug: values.slug.trim() || '',
       members: values.members.map((member, index) => ({
         ...member,
         staffProfileId: member.staffProfileId?.trim() || undefined,
@@ -407,6 +472,41 @@ export default function ResearchForm({ mode, initialData, onSubmit, submitting }
                 <Label>ชื่อโครงการ (อังกฤษ)</Label>
                 <Input value={values.titleEn} onChange={(e) => setValues((prev) => ({ ...prev, titleEn: e.target.value }))} />
               </div>
+            </div>
+
+            {/* Slug management */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="slug-input">URL Slug</Label>
+                {mode === 'edit' && initialSlug && (
+                  <Link
+                    href={`/research/database/${initialSlug}`}
+                    target="_blank"
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                  >
+                    <ExternalLink className="h-3 w-3" /> ดูหน้าเว็บ
+                  </Link>
+                )}
+              </div>
+              <Input
+                id="slug-input"
+                value={values.slug}
+                onChange={(e) => setValues((prev) => ({ ...prev, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-') }))}
+                placeholder={mode === 'create' ? 'สร้างอัตโนมัติจากชื่อเมื่อบันทึก' : 'เช่น research-chiang-rai-2568'}
+                className={mode === 'edit' && values.slug && values.slug !== initialSlug ? 'border-amber-400 focus-visible:ring-amber-400' : ''}
+              />
+              <p className="text-xs text-muted-foreground">
+                URL: <code className="rounded bg-muted px-1">/research/database/{values.slug || '...'}</code>
+              </p>
+              {mode === 'edit' && values.slug && initialSlug && values.slug !== initialSlug && (
+                <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-800">
+                  <AlertCircle className="mt-0.5 h-4 w-4 flex-none text-amber-500" />
+                  <div className="text-sm">
+                    <p className="font-medium">คำเตือน: URL จะเปลี่ยนแปลง</p>
+                    <p className="mt-0.5 text-xs opacity-80">หากเคยแชร์ลิงก์ <code>{initialSlug}</code> ไปแล้ว ลิงก์เดิมจะใช้ไม่ได้ แนะให้ต้องการแน่ใจก่อนเปลี่ยน</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
@@ -557,8 +657,13 @@ export default function ResearchForm({ mode, initialData, onSubmit, submitting }
             <div className="space-y-3 rounded-lg border p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <Label>SDGs</Label>
-                  <p className="text-xs text-muted-foreground">กรอกหมายเลข 1-17 แล้วเพิ่ม จากนั้นกดไอคอนเพื่อดูคำอธิบาย</p>
+                  <div className="flex items-center gap-2">
+                    <Label>SDGs</Label>
+                    <button type="button" onClick={() => setShowAllSdgInfo(true)} className="text-muted-foreground hover:text-primary transition-colors" title="ดูรายละเอียด SDGs 1-17 ทั้งหมด">
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">กรอกหมายเลข 1-17 แล้วเพิ่ม หรือกดไอคอน (i) ดูรายละเอียดทั้งหมด</p>
                 </div>
                 <div className="flex gap-2">
                   <Input type="number" min={1} max={17} value={sdgInput} onChange={(e) => setSdgInput(e.target.value)} className="w-32" />
@@ -640,7 +745,7 @@ export default function ResearchForm({ mode, initialData, onSubmit, submitting }
                         <option value="">{staffLoading ? 'กำลังโหลดรายชื่อ...' : 'ไม่เลือก / ใช้สมาชิกภายนอก'}</option>
                         {staffOptions.map((staff) => (
                           <option key={staff.id} value={staff.id}>
-                            {formatResearchStaffName(staff)}{staff.department ? ` • ${staff.department}` : ''}
+                            {formatResearchStaffName(staff)}
                           </option>
                         ))}
                       </select>
@@ -864,7 +969,7 @@ export default function ResearchForm({ mode, initialData, onSubmit, submitting }
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="flex items-center gap-2 text-lg font-semibold"><FileText className="h-5 w-5 text-primary" />เอกสารแนบ</h2>
-                <p className="text-sm text-muted-foreground">ตอนนี้รองรับการกรอกชื่อไฟล์และ URL ก่อน ยังไม่ได้ผูก upload endpoint แยก</p>
+                <p className="text-sm text-muted-foreground">สามารถอัปโหลดไฟล์ลงเซิร์ฟเวอร์หรือวางลิงก์ภายนอกได้</p>
               </div>
               <Button type="button" variant="outline" className="gap-2" onClick={() => setValues((prev) => ({ ...prev, attachments: [...prev.attachments, emptyAttachment()] }))}>
                 <Plus className="h-4 w-4" /> เพิ่มเอกสาร
@@ -880,11 +985,41 @@ export default function ResearchForm({ mode, initialData, onSubmit, submitting }
                     </div>
                     <div className="space-y-2">
                       <Label>ประเภทไฟล์</Label>
-                      <Input value={attachment.fileType || ''} onChange={(e) => updateAttachment(index, 'fileType', e.target.value)} placeholder="FULL_REPORT" />
+                      <select
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        value={attachment.fileType || ''}
+                        onChange={(e) => updateAttachment(index, 'fileType', e.target.value as ResearchAttachmentType)}
+                      >
+                        <option value="">ไม่ระบุประเภท</option>
+                        {(Object.entries(RESEARCH_ATTACHMENT_TYPE_LABELS) as [ResearchAttachmentType, string][]).map(([key, label]) => (
+                          <option key={key} value={key}>{label}</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="space-y-2 lg:col-span-2">
-                      <Label>File URL</Label>
-                      <Input value={attachment.fileUrl} onChange={(e) => updateAttachment(index, 'fileUrl', e.target.value)} placeholder="/uploads/research/... หรือ external URL" />
+                      <Label>อัปโหลดเอกสาร / File URL</Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          value={attachment.fileUrl} 
+                          onChange={(e) => updateAttachment(index, 'fileUrl', e.target.value)} 
+                          placeholder="/uploads/research/... หรือ external URL"
+                          className="flex-1"
+                        />
+                        <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90">
+                          {attachmentUploading[index] ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                          <input
+                            type="file"
+                            className="hidden"
+                            disabled={attachmentUploading[index]}
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              await uploadResearchAttachment(file, index);
+                              e.currentTarget.value = '';
+                            }}
+                          />
+                        </label>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label>จำนวนดาวน์โหลดตั้งต้น</Label>
@@ -892,7 +1027,18 @@ export default function ResearchForm({ mode, initialData, onSubmit, submitting }
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <Button type="button" variant="ghost" className="gap-2 text-destructive hover:text-destructive" onClick={() => setValues((prev) => ({ ...prev, attachments: prev.attachments.filter((_, itemIndex) => itemIndex !== index) }))}>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      className="gap-2 text-destructive hover:text-destructive" 
+                      onClick={async () => {
+                        const attach = values.attachments[index];
+                        if (attach.fileUrl && attach.fileUrl.startsWith('/uploads/research/')) {
+                          await deleteResearchAttachment(attach.fileUrl);
+                        }
+                        setValues((prev) => ({ ...prev, attachments: prev.attachments.filter((_, itemIndex) => itemIndex !== index) }));
+                      }}
+                    >
                       <Trash2 className="h-4 w-4" /> ลบเอกสาร
                     </Button>
                   </div>
@@ -926,6 +1072,37 @@ export default function ResearchForm({ mode, initialData, onSubmit, submitting }
           </DialogHeader>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setActiveSdgInfo(null)}>ปิด</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAllSdgInfo} onOpenChange={setShowAllSdgInfo}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>รายละเอียด SDGs ทั้ง 17 เป้าหมาย</DialogTitle>
+            <DialogDescription>
+              เป้าหมายการพัฒนาที่ยั่งยืน (Sustainable Development Goals)
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {Object.entries(RESEARCH_SDG_DESCRIPTIONS).map(([id, sdg]) => (
+              <div key={id} className="flex gap-4 p-4 rounded-lg border bg-base-50/50">
+                <div className="flex-none">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
+                    {id}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-semibold text-base-content">{sdg.title}</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {sdg.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setShowAllSdgInfo(false)}>ปิด</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

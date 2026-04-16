@@ -428,7 +428,9 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
 
               <div className="p-4 space-y-3">
                 {attachments.map((attachment, index) => {
-                  const href = getResearchServerAssetUrl(attachment.fileUrl) || attachment.fileUrl;
+                  const directHref = getResearchServerAssetUrl(attachment.fileUrl) || attachment.fileUrl;
+                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+                  const href = attachment.id ? `${apiUrl}/api/research/attachments/${attachment.id}/download` : directHref;
                   return (
                     <a
                       key={`${attachment.fileUrl}-${index}`}
