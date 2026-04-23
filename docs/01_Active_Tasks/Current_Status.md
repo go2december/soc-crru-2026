@@ -1,6 +1,6 @@
 ---
 title: "Project Status Overview"
-updated: 2026-04-16
+updated: 2026-04-23
 tags: [status, overview]
 ---
 
@@ -21,29 +21,24 @@ tags: [status, overview]
 
 ---
 
-## ✅ งานที่เพิ่งเสร็จในรอบนี้ (2026-04-16)
-
-### 📁 Research Admin Module — CRUD Improvements
+### ✅ งานที่เพิ่งเสร็จในรอบนี้ (2026-04-23)
 
 | # | รายการ | รายละเอียด |
 | :--- | :--- | :--- |
-| 1 | **Attachment File Upload** | Upload ไฟล์เข้า server, Dropdown ประเภทเอกสาร, ลบไฟล์ต้นฉบับอัตโนมัติ |
-| 2 | **Download Count Tracking** | นับยอดดาวน์โหลดอัตโนมัติผ่าน `/api/research/attachments/:id/download` |
-| 3 | **SDG Info Popup** | ไอคอน (i) เปิด Dialog รายละเอียด SDGs 1-17 ทั้งหมด |
-| 4 | **Orphaned File Cleanup** | ลบไฟล์ต้นฉบับอัตโนมัติเมื่อลบโปรเจกต์หรือสับเปลี่ยนไฟล์ |
-| 5 | **Search/Filter ครบถ้วน** | Filter: สถานะ, ปี, การเผยแพร่, รับใช้สังคม, เชิงพาณิชย์ |
-| 6 | **Export CSV** | Export ข้อมูลตาม Filter ปัจจุบัน รองรับ UTF-8 BOM สำหรับ Excel |
-| 7 | **Slug Management** | แก้ Slug ได้จาก Form, Warning เมื่อ URL จะเปลี่ยน, ตรวจสอบ Unique |
-| 8 | **Dashboard Overview Stats** | Stat Cards + Progress Bar + Top 5 SDGs chart บน Admin หน้าแรก |
+| 1 | **Content Population (Phase 1)** | นำเนื้อหาจริง (ข่าวคณะ, บุคลากร, วิจัย) ลงฐานข้อมูลแทน Placeholder |
+| 2 | **Staff Prefix Fix** | แก้ไข Bug คำนำหน้าชื่อซ้ำซ้อน (ผศ.ดร. vs ผศ.ผศ.ดร.) ในหน้าบุคลากร |
+| 3 | **Research Data Seeding** | เพิ่มโครงการวิจัยตัวอย่างพร้อม SDGs และ Tags (Social Service/Commercial) |
+| 4 | **Responsive Typography** | ปรับขนาดฟอนต์หัวข้อหลักให้รองรับมือถือ (text-3xl) ทั่วทั้งระบบ |
 
 ---
 
 ## 🎯 งานที่กำลังดำเนินอยู่ (Active Priorities)
 
 ### 🔥 High Priority (ต้องทำตอนนี้)
-- [ ] **Content Population:** ใส่ข้อมูลจริงลงไปในทุกๆ Section ถอดข้อความจำลองออก
-- [ ] **Articles UI Polish:** ตรวจสอบหน้าเนื้อหาบทความ (Articles Detail Page) ให้การจัดหน้าปกและเนื้อหาแสดงผลสมบูรณ์
-- [ ] **Responsive Audit:** ไล่แก้ไขหน้าเว็บให้แสดงผลบน มือถือ/แท็บเล็ต ได้ 100%
+- [ ] **Articles & Learning Sites Polish:** ตรวจสอบหน้าเนื้อหาบทความ (Articles Detail Page) และแหล่งเรียนรู้ให้สมบูรณ์
+- [ ] **Admissions Center Updates:** ปรับปรุงหน้าตารางรับสมัครให้ดึงข้อมูลจาก DB และ UI สวยงาม
+- [ ] **Research Public Filter UI:** เพิ่ม Filter UI บนหน้าค้นหางานวิจัยสาธารณะ (ต่อยอดจากที่ทำ Admin ไป)
+- [ ] **Chiang Rai Artifacts Population:** นำข้อมูลคลังความรู้อัตลักษณ์ 5 มิติ เข้าสู่ระบบจริง
 
 ### ⚡ Medium Priority (คิวต่อไป)
 - [ ] **SEO Audit:** จัดการ OG Tags (แชร์ลง Social แล้วรูปขึ้น), ดัน `sitemap.xml` และ `robots.txt`

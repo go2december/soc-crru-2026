@@ -71,7 +71,7 @@ export default async function FacultyNewsPage(props: Props) {
         <div className="container mx-auto px-4 py-14 sm:py-16 lg:py-24">
           <div className="max-w-3xl space-y-5">
             <div className="badge badge-outline h-auto border-white/30 bg-white/10 px-4 py-3 text-center text-white backdrop-blur-sm">Faculty Newsroom</div>
-            <h1 className="text-3xl font-bold leading-tight sm:text-4xl md:text-5xl lg:text-6xl">
+            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold leading-tight">
               {isFiltered ? FACULTY_NEWS_CATEGORY_LABELS[currentCategory as FacultyNewsCategory] : 'ข่าวสาร กิจกรรม ประกาศ และสมัครงาน'}
             </h1>
             <p className="text-sm text-white/80 sm:text-base md:text-lg lg:text-xl">

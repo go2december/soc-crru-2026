@@ -147,7 +147,7 @@ export default function ResearchDatabaseClient() {
                     className="object-cover opacity-30"
                 />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                    <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-md">
+                    <h1 className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-md">
                         ฐานข้อมูลงานวิจัยและวิทยานิพนธ์
                     </h1>
                     <p className="text-white/80 text-lg max-w-2xl">
@@ -159,82 +159,102 @@ export default function ResearchDatabaseClient() {
             <div className="container mx-auto px-4 py-8 -mt-8 relative z-10">
                 <Breadcrumb items={[{ label: 'วิจัยและนวัตกรรม' }, { label: 'ฐานข้อมูลงานวิจัย' }]} />
 
-                <div className="bg-white rounded-xl shadow-lg p-6 mb-8 mt-6 border border-gray-100 space-y-4">
-                    <div className="grid gap-4 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="ค้นหางานวิจัย (ชื่อโครงการ, บทคัดย่อ)..."
-                                className="input input-bordered w-full pl-10 focus:border-scholar-accent focus:ring-1 focus:ring-scholar-accent"
-                                value={searchInput}
-                                onChange={(e) => setSearchInput(e.target.value)}
-                            />
-                            <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {/* Advanced Exposed Filter UI - Sharp & Professional */}
+                <div className="bg-white px-4 py-6 sm:p-6 mb-8 mt-6 border-y border-gray-200 lg:border lg:rounded-sm shadow-sm space-y-5">
+                    {/* Search Row */}
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
-
-                        <select
-                            className="select select-bordered w-full"
-                            value={selectedYear}
-                            onChange={(e) => {
-                                const nextValue = e.target.value;
-                                setSelectedYear(nextValue);
-                                setCurrentPage(1);
-                                updateUrl({ year: nextValue, page: 1 });
-                            }}
-                        >
-                            <option value="">ทุกปี</option>
-                            {yearOptions.map((year) => (
-                                <option key={year} value={String(year)}>{year}</option>
-                            ))}
-                        </select>
-
-                        <select
-                            className="select select-bordered w-full"
-                            value={selectedStatus}
-                            onChange={(e) => {
-                                const nextValue = e.target.value;
-                                setSelectedStatus(nextValue);
-                                setCurrentPage(1);
-                                updateUrl({ status: nextValue, page: 1 });
-                            }}
-                        >
-                            <option value="">ทุกสถานะ</option>
-                            {Object.entries(RESEARCH_STATUS_LABELS).map(([value, label]) => (
-                                <option key={value} value={value}>{label}</option>
-                            ))}
-                        </select>
-
-                        <select
-                            className="select select-bordered w-full"
-                            value={selectedSdg}
-                            onChange={(e) => {
-                                const nextValue = e.target.value;
-                                setSelectedSdg(nextValue);
-                                setCurrentPage(1);
-                                updateUrl({ sdg: nextValue, page: 1 });
-                            }}
-                        >
-                            <option value="">ทุก SDG</option>
-                            {Array.from({ length: 17 }, (_, index) => index + 1).map((sdg) => (
-                                <option key={sdg} value={String(sdg)}>SDG {sdg}</option>
-                            ))}
-                        </select>
-
-                        <div className="flex gap-2">
-                            <button
-                                className="btn bg-scholar-deep text-white hover:bg-scholar-deep/90 border-scholar-deep"
-                                onClick={() => {
+                        <input
+                            type="text"
+                            placeholder="ค้นหางานวิจัย (ชื่อโครงการ, บทคัดย่อ, นักวิจัย)..."
+                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-scholar-accent focus:border-scholar-accent focus:bg-white transition-colors"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
                                     setCurrentPage(1);
                                     setQuery(searchInput);
                                     updateUrl({ q: searchInput, page: 1 });
+                                }
+                            }}
+                        />
+                    </div>
+
+                    {/* Filter Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ปีงบประมาณ</label>
+                            <select
+                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-sm text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-scholar-accent focus:border-scholar-accent appearance-none"
+                                value={selectedYear}
+                                onChange={(e) => {
+                                    const nextValue = e.target.value;
+                                    setSelectedYear(nextValue);
+                                    setCurrentPage(1);
+                                    updateUrl({ year: nextValue, page: 1 });
                                 }}
+                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: `2.5rem` }}
                             >
-                                ค้นหา
-                            </button>
+                                <option value="">ทุกปีงบประมาณ</option>
+                                {yearOptions.map((year) => (
+                                    <option key={year} value={String(year)}>{year}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">สถานะโครงการ</label>
+                            <select
+                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-sm text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-scholar-accent focus:border-scholar-accent appearance-none"
+                                value={selectedStatus}
+                                onChange={(e) => {
+                                    const nextValue = e.target.value;
+                                    setSelectedStatus(nextValue);
+                                    setCurrentPage(1);
+                                    updateUrl({ status: nextValue, page: 1 });
+                                }}
+                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: `2.5rem` }}
+                            >
+                                <option value="">ทุกสถานะ</option>
+                                {Object.entries(RESEARCH_STATUS_LABELS).map(([value, label]) => (
+                                    <option key={value} value={value}>{label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">เป้าหมาย SDG</label>
+                            <select
+                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-sm text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-scholar-accent focus:border-scholar-accent appearance-none"
+                                value={selectedSdg}
+                                onChange={(e) => {
+                                    const nextValue = e.target.value;
+                                    setSelectedSdg(nextValue);
+                                    setCurrentPage(1);
+                                    updateUrl({ sdg: nextValue, page: 1 });
+                                }}
+                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: `2.5rem` }}
+                            >
+                                <option value="">ทุก SDG</option>
+                                {Array.from({ length: 17 }, (_, index) => index + 1).map((sdg) => (
+                                    <option key={sdg} value={String(sdg)}>SDG {sdg}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Action Row */}
+                    <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-gray-100 mt-2">
+                        <div className="text-sm font-medium text-gray-500">
+                            พบ {total} โครงการ <span className="mx-2 text-gray-300">|</span> หน้า {currentPage} จาก {Math.max(totalPages, 1)}
+                        </div>
+                        <div className="flex items-center gap-2">
                             <button
-                                className="btn btn-ghost"
+                                className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-sm transition-colors"
                                 onClick={() => {
                                     setSearchInput('');
                                     setQuery('');
@@ -245,15 +265,19 @@ export default function ResearchDatabaseClient() {
                                     updateUrl({ q: '', year: '', status: '', sdg: '', page: 1 });
                                 }}
                             >
-                                ล้าง
+                                ล้างตัวกรอง
+                            </button>
+                            <button
+                                className="px-6 py-2 text-sm font-bold text-white bg-scholar-deep hover:bg-scholar-deep/90 rounded-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-scholar-deep"
+                                onClick={() => {
+                                    setCurrentPage(1);
+                                    setQuery(searchInput);
+                                    updateUrl({ q: searchInput, page: 1 });
+                                }}
+                            >
+                                ค้นหางานวิจัย
                             </button>
                         </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-3 text-sm text-gray-500">
-                        <span>ทั้งหมด {total} รายการ</span>
-                        <span>•</span>
-                        <span>แสดงหน้า {currentPage} / {Math.max(totalPages, 1)}</span>
                     </div>
                 </div>
 

@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "e61b1d8f1b012204",
+        "id": "5158dbd1a16c5fbe",
         "type": "tabs",
         "children": [
           {
-            "id": "960f7e735b8980a9",
+            "id": "7e51de3009cef664",
             "type": "leaf",
             "state": {
-              "type": "graph",
+              "type": "empty",
               "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -176,8 +176,10 @@
       "bases:Create new base": false
     }
   },
-  "active": "960f7e735b8980a9",
+  "active": "72a41e2f95c4b31b",
   "lastOpenFiles": [
+    "database/pgdata/18/docker/pg_stat/pgstat.stat",
+    "database/pgdata/18/docker/pg_stat/pgstat.tmp",
     "database/pgdata/18/docker/pg_logical/replorigin_checkpoint.tmp",
     "backend/dist/tsconfig.build.tsbuildinfo",
     "backend/dist/src/main.d.ts",
@@ -187,8 +189,6 @@
     "backend/dist/src/app.module.js",
     "backend/dist/src/app.module.js.map",
     "backend/dist/src/research/dto/update-research-project.dto.js.map",
-    "backend/dist/src/research/dto/update-research-project.dto.js",
-    "backend/dist/src/research/dto/update-research-project.dto.d.ts",
     "backend/node_modules/bl/LICENSE.md",
     "Untitled 1.canvas",
     "docs/01_Active_Tasks/Current_Status.md",

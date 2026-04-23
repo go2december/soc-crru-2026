@@ -131,7 +131,7 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
         
         <div className="space-y-12">
           {/* Article text */}
-          <article className="prose prose-base sm:prose-lg max-w-none prose-headings:font-bold prose-headings:text-base-content prose-p:text-base-content/80 prose-a:text-primary hover:prose-a:text-primary/80 prose-img:rounded-3xl prose-img:shadow-md" dangerouslySetInnerHTML={{ __html: fixedContent }} />
+          <article className="prose prose-base sm:prose-lg max-w-none prose-headings:font-bold prose-headings:text-base-content prose-p:text-base-content/80 prose-a:text-primary hover:prose-a:text-primary/80 prose-img:rounded-sm prose-img:shadow-md" dangerouslySetInnerHTML={{ __html: fixedContent }} />
 
           {/* Gallery Section */}
           <NewsGalleryClient galleryImages={galleryImages} />
@@ -140,7 +140,7 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
         {/* Sidebar (Only shows if there are attachments) */}
         {hasAttachments && (
           <aside className="space-y-8 lg:sticky lg:top-[100px] lg:self-start">
-            <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm overflow-hidden text-base-content">
+            <div className="rounded-sm border border-base-300 bg-base-100 shadow-sm overflow-hidden text-base-content">
               {/* Header card */}
               <div className="bg-base-200/50 p-5 border-b border-base-300">
                 <h2 className="text-lg font-bold flex items-center gap-2">
@@ -159,7 +159,7 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
                       download
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex flex-col gap-2 rounded-2xl border border-base-300 bg-base-100 p-4 transition-all hover:border-primary/50 hover:bg-primary/5 hover:shadow-md"
+                      className="group flex flex-col gap-2 rounded-sm border border-base-300 bg-base-100 p-4 transition-all hover:border-primary/50 hover:bg-primary/5 hover:shadow-md"
                     >
                       <div className="flex items-start gap-3">
                         <div className="mt-0.5 rounded-full bg-base-200 p-2 text-base-content/70 transition-colors group-hover:bg-primary group-hover:text-primary-content">
@@ -170,7 +170,7 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
                             {attachment.originalName}
                           </p>
                           <div className="flex items-center gap-2 mt-2 text-xs font-medium text-base-content/50">
-                            <span className="uppercase tracking-wider px-2 py-0.5 bg-base-200 rounded-md">
+                            <span className="uppercase tracking-wider px-2 py-0.5 bg-base-200 rounded-sm">
                               {attachment.mimeType?.split('/')[1] || 'FILE'}
                             </span>
                             {typeof attachment.size === 'number' && (

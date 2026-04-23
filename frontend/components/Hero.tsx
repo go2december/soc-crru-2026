@@ -109,7 +109,7 @@ export default function Hero() {
                                     {slide.tag}
                                 </span>
                             )}
-                            <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
+                            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
                                 {slide.title}
                             </h1>
                             <p className="text-lg lg:text-xl text-gray-200 mb-8 leading-relaxed drop-shadow-md pr-10">

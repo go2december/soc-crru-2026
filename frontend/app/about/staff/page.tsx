@@ -49,6 +49,11 @@ const getFullName = (staff: Staff): string => {
     const prefix = staff.prefixTh || '';
     const name = `${staff.firstNameTh} ${staff.lastNameTh}`;
 
+    // ถ้า prefix มีตำแหน่งวิชาการอยู่แล้ว (เช่น "ผศ.ดร.") ไม่ต้องเติม acadPos ซ้ำ
+    if (acadPos && prefix.includes(acadPos)) {
+        return `${prefix}${name}`;
+    }
+
     if (acadPos && prefix) {
         return `${acadPos}${prefix}${name}`;
     } else if (acadPos) {
@@ -236,7 +241,7 @@ export default function StaffPage() {
                     <div className="px-3 py-1 bg-white/10 backdrop-blur-sm border-l-4 border-scholar-accent text-sm font-semibold mb-8 flex items-center gap-2 text-white">
                         <Users className="w-4 h-4" /> ทำเนียบบุคลากร
                     </div>
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight font-heading leading-[1.1] max-w-4xl">
+                    <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold mb-6 tracking-tight font-heading leading-[1.1] max-w-4xl">
                         บุคลากรคณะสังคมศาสตร์
                     </h1>
                     <p className="text-lg md:text-2xl text-blue-100/80 font-normal max-w-2xl leading-relaxed">
