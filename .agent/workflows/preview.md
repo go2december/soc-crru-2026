@@ -10,61 +10,72 @@ $ARGUMENTS
 
 ## Task
 
-Manage preview servers for SOC-CRRU Web project.
+Manage preview server: start, stop, status check.
 
-### Architecture
-
-| Service  | Port | Command              | Directory |
-| -------- | ---- | -------------------- | --------- |
-| Frontend | 4000 | `npm run dev`        | frontend/ |
-| Backend  | 4001 | `npm run start:dev`  | backend/  |
-
----
-
-## Sub-commands
+### Commands
 
 ```
 /preview           - Show current status
-/preview start     - Start both servers
-/preview frontend  - Start frontend only
-/preview backend   - Start backend only
-/preview stop      - Stop all servers
+/preview start     - Start server
+/preview stop      - Stop server
+/preview restart   - Restart
+/preview check     - Health check
 ```
 
 ---
 
-## Start Both Servers
+## Usage Examples
 
-// turbo-all
+### Start Server
+```
+/preview start
 
-1. Start backend (background)
-```powershell
-cd backend; npm run start:dev
+Response:
+🚀 Starting preview...
+   Port: 3000
+   Type: Next.js
+
+✅ Preview ready!
+   URL: http://localhost:3000
 ```
 
-2. Start frontend (background)
-```powershell
-cd frontend; npm run dev
+### Status Check
+```
+/preview
+
+Response:
+=== Preview Status ===
+
+🌐 URL: http://localhost:3000
+📁 Project: C:/projects/my-app
+🏷️ Type: nextjs
+💚 Health: OK
 ```
 
-3. Verify health
+### Port Conflict
 ```
-🚀 Preview ready!
-   Frontend: http://localhost:4000
-   Backend:  http://localhost:4001/api
-   Admin:    http://localhost:4000/admin
-   Dev Login: http://localhost:4001/api/auth/dev/login
+/preview start
+
+Response:
+⚠️ Port 3000 is in use.
+
+Options:
+1. Start on port 3001
+2. Close app on 3000
+3. Specify different port
+
+Which one? (default: 1)
 ```
 
 ---
 
-## Port Conflict Resolution
+## Technical
 
-```powershell
-# Find process on port
-netstat -ano | findstr :4000
-netstat -ano | findstr :4001
+Auto preview uses `auto_preview.py` script:
 
-# Kill process by PID
-taskkill /PID <PID> /F
+```bash
+python .agent/scripts/auto_preview.py start [port]
+python .agent/scripts/auto_preview.py stop
+python .agent/scripts/auto_preview.py status
 ```
+
