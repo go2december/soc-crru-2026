@@ -18,7 +18,8 @@ import {
     ExternalLink,
     ShieldCheck,
     Briefcase,
-    CalendarDays
+    CalendarDays,
+    BookOpen
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -129,6 +130,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             items: [
                 { href: '/admin/news', label: 'ข่าวสาร', icon: Newspaper, minLevel: 2 },
                 { href: '/admin/research', label: 'งานวิจัย', icon: FlaskConical, minLevel: 2 },
+                { href: '/admin/academic-services', label: 'บริการวิชาการ', icon: BookOpen, minLevel: 2 },
                 { href: '/admin/programs', label: 'หลักสูตร', icon: GraduationCap, minLevel: 2 },
                 { href: '/admin/admissions', label: 'รับสมัคร', icon: CalendarDays, minLevel: 2 },
             ]

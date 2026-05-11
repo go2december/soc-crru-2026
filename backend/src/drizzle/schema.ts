@@ -663,3 +663,21 @@ export const chiangRaiMediaTypeEnum = pgEnum('cr_media_type', [
   'AUDIO',
   'DOCUMENT',
 ]);
+
+// ------------------------------------------
+// 8. Academic Services (บริการวิชาการ)
+// ------------------------------------------
+
+export const academicServices = pgTable('academic_services', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'),
+  serviceType: varchar('service_type', { length: 50 }).notNull(), // SOCIAL_SERVICE, CONSULTING
+  area: varchar('area', { length: 255 }), 
+  status: varchar('status', { length: 50 }), // ONGOING, COMPLETED, RECRUITING
+  coverImageUrl: text('cover_image_url'),
+  isPublished: boolean('is_published').default(false),
+  publishedAt: timestamp('published_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
