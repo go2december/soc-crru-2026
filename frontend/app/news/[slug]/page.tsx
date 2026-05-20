@@ -8,7 +8,7 @@ import {
   Download,
   Paperclip,
 } from 'lucide-react';
-import NewsGalleryClient from './NewsGalleryClient';
+import GalleryClient from '@/components/GalleryClient';
 import {
   FACULTY_NEWS_CATEGORY_LABELS,
   FACULTY_NEWS_CATEGORY_STYLES,
@@ -134,7 +134,7 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
           <article className="prose prose-base sm:prose-lg max-w-none prose-headings:font-bold prose-headings:text-base-content prose-p:text-base-content/80 prose-a:text-primary hover:prose-a:text-primary/80 prose-img:rounded-sm prose-img:shadow-md" dangerouslySetInnerHTML={{ __html: fixedContent }} />
 
           {/* Gallery Section */}
-          <NewsGalleryClient galleryImages={galleryImages} />
+          <GalleryClient galleryImages={galleryImages} />
         </div>
 
         {/* Sidebar (Only shows if there are attachments) */}

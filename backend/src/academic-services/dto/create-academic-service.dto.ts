@@ -27,6 +27,10 @@ export class CreateAcademicServiceDto {
   @IsOptional()
   coverImageUrl?: string;
 
+  @IsString({ each: true })
+  @IsOptional()
+  galleryImages?: string[];
+
   @IsBoolean()
   @IsOptional()
   isPublished?: boolean;

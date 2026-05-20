@@ -21,6 +21,7 @@ export default function AcademicServiceForm({ initialData }: { initialData?: any
     area: '',
     status: 'ONGOING',
     coverImageUrl: '',
+    galleryImages: [] as string[],
     isPublished: true,
   });
 
@@ -33,6 +34,7 @@ export default function AcademicServiceForm({ initialData }: { initialData?: any
         area: initialData.area || '',
         status: initialData.status || 'ONGOING',
         coverImageUrl: initialData.coverImageUrl || '',
+        galleryImages: initialData.galleryImages || [],
         isPublished: initialData.isPublished ?? true,
       });
     }
@@ -81,6 +83,51 @@ export default function AcademicServiceForm({ initialData }: { initialData?: any
 
   const handleRemoveImage = () => {
     setFormData((prev) => ({ ...prev, coverImageUrl: '' }));
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const token = localStorage.getItem('admin_token');
+    
+    try {
+      const newImages: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const uploadData = new FormData();
+        uploadData.append('file', file);
+        
+        const res = await fetch(`${API_URL}/api/upload/news`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: uploadData,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          newImages.push(data.url);
+        }
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        galleryImages: [...(prev.galleryImages || []), ...newImages]
+      }));
+    } catch (err) {
+      console.error('Gallery upload error', err);
+      alert('Upload error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveGalleryImage = (indexToRemove: number) => {
+    setFormData(prev => ({
+      ...prev,
+      galleryImages: (prev.galleryImages || []).filter((_, i) => i !== indexToRemove)
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -205,6 +252,32 @@ export default function AcademicServiceForm({ initialData }: { initialData?: any
                     {uploading && <p className="text-xs text-muted-foreground mt-2">กำลังอัปโหลด...</p>}
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-2 md:col-span-2 border-t pt-6 mt-2">
+              <Label className="text-lg">แกลเลอรีรูปภาพ (Gallery Images)</Label>
+              <p className="text-sm text-muted-foreground mb-4">อัปโหลดรูปภาพเพิ่มเติมเพื่อแสดงเป็นแกลเลอรีในหน้าแสดงรายละเอียด (สามารถเลือกได้หลายไฟล์พร้อมกัน)</p>
+              
+              <div className="mb-4">
+                  <input type="file" accept="image/*" multiple onChange={handleGalleryUpload} disabled={uploading} className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-secondary file:text-secondary-foreground hover:file:bg-secondary/80" />
+              </div>
+
+              {formData.galleryImages && formData.galleryImages.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
+                  {formData.galleryImages.map((imgUrl, idx) => (
+                    <div key={idx} className="relative aspect-square rounded overflow-hidden border group">
+                      <img src={imgUrl} className="w-full h-full object-cover" alt={`Gallery ${idx + 1}`} />
+                      <button 
+                        type="button" 
+                        onClick={() => handleRemoveGalleryImage(idx)} 
+                        className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        X
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2 md:col-span-2 flex items-center gap-2">

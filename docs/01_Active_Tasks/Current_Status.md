@@ -1,12 +1,12 @@
 ---
 title: "Project Status Overview"
-updated: 2026-04-23
+updated: 2026-05-20
 tags: [status, overview]
 ---
 
 # 📊 สถานะโปรเจกต์ปัจจุบัน (Project Status)
 
-> [!info] สรุปภาพรวม (เมษายน 2026)
+> [!info] สรุปภาพรวม (พฤษภาคม 2026)
 > ระบบโครงสร้างและเครื่องยนต์หลังบ้าน (Infrastructure) เสร็จสมบูรณ์แล้ว งานที่เหลือในตอนนี้คือ **เฟสการขัดเกลา (Polish)** เช่น นำเนื้อหาจริงขึ้นเว็บ, ปรับหน้าจอให้รองรับมือถือ, และทำ SEO เพื่อเตรียมปล่อยของ!
 
 ## 🚀 ความคืบหน้าระบบหลัก (Core Systems)
@@ -16,19 +16,20 @@ tags: [status, overview]
 | **โครงสร้าง & ฐานข้อมูล** | `🟢 100%` | Docker Compose 4 service, PostgreSQL 18, Drizzle ORM รันได้ยอดเยี่ยม |
 | **ศูนย์เชียงรายศึกษา** | `🟡 90%` | ระบบหน้าบ้านและ Admin CRUD (ข่าว, แหล่งเรียนรู้, คลัง) ทำเสร็จแล้ว |
 | **Backend API** | `🟡 85%` | NestJS พร้อมใช้งาน แต่เหลือปรับจูนความเร็วและOptimization เล็กน้อย |
-| **เว็บคณะสังคมศาสตร์** | `🟢 90%` | Research Admin CRUD สมบูรณ์ครบถ้วน รวม File Upload, Stats Dashboard |
-| **ระบบวิจัย (Research Module)** | `🟢 95%` | CRUD, File Upload, Export CSV, Slug Mgmt, Dashboard Stats ครบแล้ว |
+| **เว็บคณะสังคมศาสตร์** | `🟢 95%` | ระบบจัดการบุคลากร ข่าวสาร และล่าสุดระบบบริการวิชาการ (Academic Services CRUD) เสร็จสมบูรณ์ |
+| **ระบบวิจัย (Research Module)** | `🟢 98%` | CRUD, File Upload, Export CSV, Slug Mgmt, Dashboard Stats และ Academic Services CRUD ครบถ้วน |
 
 ---
 
-### ✅ งานที่เพิ่งเสร็จในรอบนี้ (2026-04-23)
+### ✅ งานที่เพิ่งเสร็จในรอบนี้ (2026-05-20)
 
 | # | รายการ | รายละเอียด |
 | :--- | :--- | :--- |
-| 1 | **Content Population (Phase 1)** | นำเนื้อหาจริง (ข่าวคณะ, บุคลากร, วิจัย) ลงฐานข้อมูลแทน Placeholder |
-| 2 | **Staff Prefix Fix** | แก้ไข Bug คำนำหน้าชื่อซ้ำซ้อน (ผศ.ดร. vs ผศ.ผศ.ดร.) ในหน้าบุคลากร |
-| 3 | **Research Data Seeding** | เพิ่มโครงการวิจัยตัวอย่างพร้อม SDGs และ Tags (Social Service/Commercial) |
-| 4 | **Responsive Typography** | ปรับขนาดฟอนต์หัวข้อหลักให้รองรับมือถือ (text-3xl) ทั่วทั้งระบบ |
+| 1 | **Academic Services CRUD** | พัฒนาระบบจัดการบริการวิชาการครบชุด (Database, API, Admin Dashboard, Public page integration) |
+| 2 | **Content Population (Phase 1)** | นำเนื้อหาจริง (ข่าวคณะ, บุคลากร, วิจัย) ลงฐานข้อมูลแทน Placeholder |
+| 3 | **Staff Prefix Fix** | แก้ไข Bug คำนำหน้าชื่อซ้ำซ้อน (ผศ.ดร. vs ผศ.ผศ.ดร.) ในหน้าบุคลากร |
+| 4 | **Research Data Seeding** | เพิ่มโครงการวิจัยตัวอย่างพร้อม SDGs และ Tags (Social Service/Commercial) |
+| 5 | **Responsive Typography** | ปรับขนาดฟอนต์หัวข้อหลักให้รองรับมือถือ (text-3xl) ทั่วทั้งระบบ |
 
 ---
 

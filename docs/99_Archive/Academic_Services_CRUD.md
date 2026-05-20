@@ -1,7 +1,22 @@
+---
+title: Academic Services System Design & Task Plan
+status: ✅ COMPLETE
+tags:
+  - active-task
+  - academic-services
+  - feature
+aliases:
+  - Academic Services CRUD
+cssclasses: []
+---
+
 # Academic Services System Design & Task Plan
 
-> [!info] Status: Planning
-> ระบบบริหารจัดการ "บริการวิชาการ" สำหรับคณะสังคมศาสตร์
+> [!info] Status: ✅ COMPLETE (Review Date: May 20, 2026)
+> ระบบบริหารจัดการ "บริการวิชาการ" สำหรับคณะสังคมศาสตร์ - เสร็จสมบูรณ์แล้วและเปิดใช้งานเรียบร้อย ทั้งในส่วนฐานข้อมูล API หน้า Admin และ Public Page
+> 
+> > [!todo] Archive Status
+> > ย้ายระบบงานนี้เข้าสู่สถานะ ARCHIVE เรียบร้อยแล้ว
 
 ## 🎯 1. System Design (การออกแบบระบบ)
 

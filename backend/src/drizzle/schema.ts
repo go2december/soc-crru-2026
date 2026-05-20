@@ -676,6 +676,7 @@ export const academicServices = pgTable('academic_services', {
   area: varchar('area', { length: 255 }), 
   status: varchar('status', { length: 50 }), // ONGOING, COMPLETED, RECRUITING
   coverImageUrl: text('cover_image_url'),
+  galleryImages: text('gallery_images').array(),
   isPublished: boolean('is_published').default(false),
   publishedAt: timestamp('published_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

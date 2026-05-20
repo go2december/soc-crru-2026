@@ -1,5 +1,5 @@
 # Chiang Rai Studies Admin Workflow
-**Updated:** April 3, 2026
+**Updated:** May 20, 2026
 
 ## ภาพรวมกระบวนการทำงาน
 

@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "5158dbd1a16c5fbe",
+        "id": "227935e99f29ed9b",
         "type": "tabs",
         "children": [
           {
-            "id": "7e51de3009cef664",
+            "id": "cc3851c642cedbb2",
             "type": "leaf",
             "state": {
-              "type": "empty",
+              "type": "graph",
               "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -176,7 +176,7 @@
       "bases:Create new base": false
     }
   },
-  "active": "72a41e2f95c4b31b",
+  "active": "cc3851c642cedbb2",
   "lastOpenFiles": [
     "database/pgdata/18/docker/pg_stat/pgstat.stat",
     "database/pgdata/18/docker/pg_stat/pgstat.tmp",

@@ -1,5 +1,5 @@
 # Faculty Admin Workflow
-**Updated:** April 3, 2026
+**Updated:** May 20, 2026
 
 ## ภาพรวมกระบวนการทำงาน
 
@@ -106,6 +106,13 @@
 - **Category**: รองรับหมวด `สมัครงาน` เพิ่มเติมจากข่าว/กิจกรรม/ประกาศ
 - **Public Flow**: ควรตรวจความสอดคล้องกับหน้า public listing/detail เสมอเมื่อมีการเปลี่ยนแปลง
 
+### 6. Academic Services Management
+- **List**: ดูรายการบริการวิชาการทั้งหมด (Public/Admin)
+- **Create**: เพิ่มโครงการบริการวิชาการใหม่ พร้อมรูปภาพหน้าปก
+- **Edit**: แก้ไขโครงการบริการวิชาการ
+- **Delete**: ลบโครงการบริการวิชาการ
+- **Public Flow**: เชื่อมโยงกับหน้า public `/research/services` และลิงก์ภายนอกไปยัง Social Lab ได้ถูกต้อง
+
 ---
 
 ## แนวทางการจัดการรูปภาพ (Image Handling Guidance)
@@ -169,6 +176,14 @@ Upload:
   POST   /api/upload/news
   POST   /api/upload/news/attachment
   DELETE /api/upload/news
+
+Academic Services:
+  GET    /api/academic-services          -> โหลดรายการโครงการ (Public)
+  GET    /api/academic-services/:id      -> โหลดรายละเอียด (Public)
+  GET    /api/academic-services/admin    -> โหลดรายการโครงการ (Admin)
+  POST   /api/academic-services          -> สร้างโครงการ (Admin)
+  PUT    /api/academic-services/:id      -> อัปเดต (Admin)
+  DELETE /api/academic-services/:id      -> ลบโครงการ (Admin)
 ```
 
 ---

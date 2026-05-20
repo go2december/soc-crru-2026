@@ -1,5 +1,5 @@
 # 📋 Workflow & Plan - SOC-CRRU Web Application
-**Updated:** April 3, 2026
+**Updated:** May 20, 2026
 
 ---
 
@@ -7,7 +7,7 @@
 
 | Component | Status | Progress | Notes |
 |-----------|--------|----------|-------|
-| **เว็บคณะสังคมศาสตร์ (Faculty)** | 🔄 IN PROGRESS | ~80% | Public pages และ admin หลักพร้อมแล้ว รวมถึง news public/admin flow ใหม่ เหลือ SEO, responsive, content work, และ research search/filter |
+| **เว็บคณะสังคมศาสตร์ (Faculty)** | 🔄 IN PROGRESS | ~95% | ระบบจัดการบุคลากร ข่าวสาร และล่าสุดระบบบริการวิชาการ (Academic Services CRUD) เสร็จสมบูรณ์ เหลือ SEO, responsive, content work และ public research search/filter |
 | **ศูนย์เชียงรายศึกษา (CR Studies)** | 🔄 IN PROGRESS | ~90% | CRUD, SEO core, detail pages, และ admin surfaces พร้อมแล้ว เหลือ content population, responsive, และ deployment validation |
 | **Backend API** | 🔄 IN PROGRESS | ~85% | NestJS + Drizzle พร้อมใช้งาน แต่ยังมีงาน optimization และ release-readiness บางส่วน |
 | **Database** | ✅ COMPLETE | 100% | PostgreSQL 18 + Drizzle ORM |
@@ -176,10 +176,10 @@ Upload:
 - [x] Admin: Login/Auth, Dashboard, Staff CRUD, Departments, Positions, Users, News
 - [x] Faculty News admin: create/edit/delete พร้อมหมวด `สมัครงาน`, รูปหลายภาพ, เอกสารแนบ, และ cleanup ไฟล์ตอนลบ/แทนที่
 - [x] Navigation (Main navbar with dropdowns)
+- [x] Academic Services: ระบบจัดการบริการวิชาการครบชุด (Database, API, Admin Dashboard, Public page integration) (May 2026)
 
 ## 🔄 งานที่กำลังดำเนินการ: Faculty (In Progress)
-- [ ] Research database search/filter
-- [ ] E-service integrations (external links?)
+- [ ] Research database search/filter (Public UI)
 - [ ] Staff detail pages - verify data population
 
 ## 📋 งานที่รอดำเนินการ: Faculty (Pending)
