@@ -129,7 +129,7 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                             <div className="flex flex-wrap gap-2 mb-4">
                                 {site.tags.slice(0, 3).map(tag => (
                                     <Link key={tag} href={`/chiang-rai-studies/learning-sites?tag=${encodeURIComponent(tag)}`}
-                                        className="bg-orange-500/20 backdrop-blur-sm text-orange-300 border border-orange-400/40 px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide hover:bg-orange-500/40 transition-colors">
+                                        className="bg-orange-500/20 backdrop-blur-sm text-orange-300 border border-orange-400/40 px-3 py-1 rounded-sm text-[11px] font-semibold tracking-wide hover:bg-orange-500/40 transition-colors">
                                         {tag}
                                     </Link>
                                 ))}
@@ -175,14 +175,14 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                 )}
 
                 {/* Article body */}
-                <article className="bg-white rounded-2xl shadow-sm border border-purple-50 overflow-hidden mb-10">
+                <article className="bg-white rounded-sm shadow-sm border border-purple-50 overflow-hidden mb-10">
                     <div className="p-8 md:p-12">
                         <div
                             className="prose prose-lg max-w-none
                                 prose-headings:font-bold prose-headings:text-[#2e1065]
                                 prose-p:text-stone-700 prose-p:leading-[1.9]
                                 prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline
-                                prose-img:rounded-xl prose-img:shadow-md
+                                prose-img:rounded-sm prose-img:shadow-md
                                 prose-blockquote:border-l-orange-400 prose-blockquote:text-stone-600 prose-blockquote:not-italic
                                 prose-strong:text-[#2e1065]
                                 prose-li:text-stone-700 prose-li:leading-relaxed
@@ -196,7 +196,7 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                 {hasMedia && (
                     <section className="space-y-6 mb-10">
                         <h2 className="flex items-center gap-2.5 text-xl font-bold text-[#2e1065]">
-                            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-500">
+                            <span className="flex items-center justify-center w-8 h-8 rounded-sm bg-orange-100 text-orange-500">
                                 <Images size={18} />
                             </span>
                             สื่อประกอบ
@@ -211,7 +211,7 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                                 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
                             }`}>
                                 {photos.map((url, i) => (
-                                    <div key={i} className={`relative overflow-hidden rounded-2xl shadow group bg-stone-100 ${
+                                    <div key={i} className={`relative overflow-hidden rounded-sm shadow group bg-stone-100 ${
                                         photos.length === 1 ? 'aspect-video' : 'aspect-[4/3]'
                                     }`}>
                                         <Image src={url} alt={`ภาพประกอบ ${i + 1}`} fill unoptimized
@@ -228,7 +228,7 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                                 {videos.map((url, i) => {
                                     const ytId = getYouTubeId(url);
                                     return ytId ? (
-                                        <div key={i} className="relative rounded-2xl overflow-hidden shadow-lg aspect-video bg-stone-900">
+                                        <div key={i} className="relative rounded-sm overflow-hidden shadow-lg aspect-video bg-stone-900">
                                             <iframe
                                                 src={`https://www.youtube.com/embed/${ytId}?rel=0`}
                                                 className="absolute inset-0 w-full h-full"
@@ -239,8 +239,8 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                                         </div>
                                     ) : (
                                         <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                                            className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl hover:border-red-300 hover:shadow-sm transition group">
-                                            <span className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                                            className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-sm hover:border-red-300 hover:shadow-sm transition group">
+                                            <span className="flex-shrink-0 w-10 h-10 rounded-sm bg-red-100 flex items-center justify-center">
                                                 <Play size={16} className="text-red-600 ml-0.5" />
                                             </span>
                                             <div className="min-w-0">
@@ -258,8 +258,8 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                             <div className="space-y-2">
                                 {extLinks.map((url, i) => (
                                     <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                                        className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-xl hover:border-blue-300 hover:shadow-sm transition group">
-                                        <span className="flex-shrink-0 w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+                                        className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-sm hover:border-blue-300 hover:shadow-sm transition group">
+                                        <span className="flex-shrink-0 w-9 h-9 rounded-sm bg-blue-100 flex items-center justify-center">
                                             <ExternalLink size={15} className="text-blue-600" />
                                         </span>
                                         <div className="min-w-0">
@@ -279,7 +279,7 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                         <Tag size={15} className="text-stone-400 flex-shrink-0" />
                         {site.tags.map(tag => (
                             <Link key={tag} href={`/chiang-rai-studies/learning-sites?tag=${encodeURIComponent(tag)}`}
-                                className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full text-sm border border-purple-100 hover:bg-purple-100 transition">
+                                className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-sm text-sm border border-purple-100 hover:bg-purple-100 transition">
                                 #{tag}
                             </Link>
                         ))}
@@ -289,7 +289,7 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                 {/* Back to list */}
                 <div className="flex justify-center pb-8">
                     <Link href="/chiang-rai-studies/learning-sites"
-                        className="inline-flex items-center gap-2 bg-[#2e1065] text-white px-8 py-4 rounded-full font-bold hover:bg-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl text-sm group">
+                        className="inline-flex items-center gap-2 bg-[#2e1065] text-white px-8 py-4 rounded-sm font-bold hover:bg-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl text-sm group">
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         กลับไปหน้ารายการแหล่งเรียนรู้
                     </Link>

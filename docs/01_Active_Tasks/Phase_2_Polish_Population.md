@@ -6,10 +6,7 @@ After completing the initial content population for News, Staff, and Research, P
 ## 🎯 Active Tasks
 
 ### 1. Learning Sites UI Polish
-- [ ] Update `frontend/app/chiang-rai-studies/learning-sites/[slug]/page.tsx`
-    - Change `rounded-2xl`, `rounded-full`, `rounded-xl` to `rounded-sm`.
-    - Sharpen the hero section and media cards.
-    - Match the "Sharp & Professional" theme.
+- [x] Update `frontend/app/chiang-rai-studies/learning-sites/[slug]/page.tsx` and `page.tsx` (Change `rounded-2xl`, `rounded-full`, `rounded-xl`, `rounded-lg`, `rounded-md` to `rounded-sm`, sharpening the cards, buttons, badges, and layout components to match the "Sharp & Professional" theme).
 
 ### 2. Admissions Center Updates
 - [ ] Review `frontend/app/admissions/page.tsx`.

@@ -60,7 +60,7 @@ export default async function LearningSitesPage({ searchParams }: { searchParams
             <div className="bg-[#2e1065] text-white py-20 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:24px_24px]"></div>
                 <div className="container mx-auto px-4 text-center relative z-10">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-600/20 text-orange-400 text-[10px] font-bold tracking-widest uppercase mb-4 border border-orange-500/30 shadow-lg">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-orange-600/20 text-orange-400 text-[10px] font-bold tracking-widest uppercase mb-4 border border-orange-500/30 shadow-lg">
                         Cultural Learning Sites
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black mb-6 drop-shadow-md">แหล่งเรียนรู้ทางวัฒนธรรม</h1>
@@ -78,9 +78,9 @@ export default async function LearningSitesPage({ searchParams }: { searchParams
                 {activeTag && (
                     <div className="flex items-center justify-center gap-3 mb-10">
                         <span className="text-sm text-stone-500">กรองตามคำสำคัญ:</span>
-                        <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-800 px-4 py-1.5 rounded-full text-sm font-semibold border border-purple-200">
+                        <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-800 px-4 py-1.5 rounded-sm text-sm font-semibold border border-purple-200">
                             #{activeTag}
-                            <Link href="/chiang-rai-studies/learning-sites" className="ml-1 p-0.5 rounded-full hover:bg-purple-200 transition">
+                            <Link href="/chiang-rai-studies/learning-sites" className="ml-1 p-0.5 rounded-sm hover:bg-purple-200 transition">
                                 <X size={14} />
                             </Link>
                         </span>
@@ -93,11 +93,11 @@ export default async function LearningSitesPage({ searchParams }: { searchParams
                         {learningSites.map((site, index) => (
                             <div
                                 key={site.id}
-                                className="bg-white rounded-[2rem] p-6 shadow-sm border border-purple-100 hover:shadow-xl hover:border-orange-200 transition-all duration-300 flex flex-col md:flex-row gap-6 group animate-fade-in-up"
+                                className="bg-white rounded-sm p-6 shadow-sm border border-purple-100 hover:shadow-xl hover:border-orange-200 transition-all duration-300 flex flex-col md:flex-row gap-6 group animate-fade-in-up"
                                 style={{ animationDelay: `${index * 0.1}s` }}
                             >
                                 {/* Thumbnail */}
-                                <div className="w-full md:w-48 h-48 bg-purple-100 rounded-2xl overflow-hidden flex-shrink-0 relative">
+                                <div className="w-full md:w-48 h-48 bg-purple-100 rounded-sm overflow-hidden flex-shrink-0 relative">
                                     {site.thumbnailUrl ? (
                                         <Image
                                             src={site.thumbnailUrl!.startsWith('/') ? `${PUBLIC_URL}${site.thumbnailUrl}` : site.thumbnailUrl!}
@@ -115,7 +115,7 @@ export default async function LearningSitesPage({ searchParams }: { searchParams
                                     {site.tags && site.tags.length > 0 && (
                                         <div className="absolute top-3 left-3">
                                             <Link href={`/chiang-rai-studies/learning-sites?tag=${encodeURIComponent(site.tags[0])}`}
-                                                className="bg-white/90 backdrop-blur-sm text-purple-800 text-[10px] font-bold px-3 py-1 rounded-lg uppercase tracking-wide border border-purple-100 shadow-sm hover:bg-white transition">
+                                                className="bg-white/90 backdrop-blur-sm text-purple-800 text-[10px] font-bold px-3 py-1 rounded-sm uppercase tracking-wide border border-purple-100 shadow-sm hover:bg-white transition">
                                                 {site.tags[0]}
                                             </Link>
                                         </div>
@@ -126,13 +126,13 @@ export default async function LearningSitesPage({ searchParams }: { searchParams
                                 <div className="flex-1 flex flex-col">
                                     <div className="flex items-center gap-4 mb-3 text-xs text-stone-400 font-normal">
                                         {site.publishedAt && (
-                                            <div className="flex items-center gap-1.5 bg-stone-50 px-2 py-1 rounded-md">
+                                            <div className="flex items-center gap-1.5 bg-stone-50 px-2 py-1 rounded-sm">
                                                 <Calendar size={12} className="text-orange-500" />
                                                 {format(new Date(site.publishedAt), 'd MMM yyyy', { locale: th })}
                                             </div>
                                         )}
                                         {site.author && (
-                                            <div className="flex items-center gap-1.5 bg-stone-50 px-2 py-1 rounded-md">
+                                            <div className="flex items-center gap-1.5 bg-stone-50 px-2 py-1 rounded-sm">
                                                 <BookOpen size={12} className="text-purple-500" />
                                                 {site.author}
                                             </div>
@@ -150,7 +150,7 @@ export default async function LearningSitesPage({ searchParams }: { searchParams
                                     <div className="mt-auto">
                                         <Link
                                             href={`/chiang-rai-studies/learning-sites/${site.slug}`}
-                                            className="inline-flex items-center gap-2 text-[#2e1065] font-bold text-sm bg-purple-50 px-5 py-2.5 rounded-full hover:bg-[#2e1065] hover:text-white transition-all duration-300"
+                                            className="inline-flex items-center gap-2 text-[#2e1065] font-bold text-sm bg-purple-50 px-5 py-2.5 rounded-sm hover:bg-[#2e1065] hover:text-white transition-all duration-300"
                                         >
                                             อ่านบทความ <ArrowRight size={14} />
                                         </Link>
@@ -160,8 +160,8 @@ export default async function LearningSitesPage({ searchParams }: { searchParams
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-purple-100 max-w-4xl mx-auto px-10">
-                        <div className="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                    <div className="text-center py-32 bg-white rounded-sm border-2 border-dashed border-purple-100 max-w-4xl mx-auto px-10">
+                        <div className="w-24 h-24 bg-purple-50 rounded-sm flex items-center justify-center mx-auto mb-8 shadow-inner">
                             <BookOpen className="text-purple-200" size={48} />
                         </div>
                         <h3 className="text-2xl font-bold text-purple-900 mb-4">ยังไม่มีบทความ</h3>
