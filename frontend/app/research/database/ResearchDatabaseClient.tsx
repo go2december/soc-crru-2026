@@ -20,6 +20,7 @@ export default function ResearchDatabaseClient() {
     const searchParams = useSearchParams();
     const [projects, setProjects] = useState<ResearchProjectAdminItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [availableYears, setAvailableYears] = useState<number[]>([]);
     const [searchInput, setSearchInput] = useState(() => searchParams.get('q') || '');
     const [query, setQuery] = useState(() => searchParams.get('q') || '');
     const [selectedYear, setSelectedYear] = useState(() => searchParams.get('year') || '');
@@ -97,9 +98,27 @@ export default function ResearchDatabaseClient() {
         setCurrentPage(nextPage);
     }, [searchParams]);
 
+    useEffect(() => {
+        async function fetchFilters() {
+            try {
+                const res = await fetch(`${API_URL}/api/research/filters`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && Array.isArray(data.years)) {
+                        setAvailableYears(data.years);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching research filters:', error);
+            }
+        }
+        fetchFilters();
+    }, []);
+
     const yearOptions = useMemo(() => {
+        if (availableYears.length > 0) return availableYears;
         return Array.from(new Set(projects.map((item) => item.year))).sort((a, b) => b - a);
-    }, [projects]);
+    }, [availableYears, projects]);
 
     const fetchProjects = useCallback(async () => {
         setLoading(true);
@@ -281,7 +300,7 @@ export default function ResearchDatabaseClient() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-sm shadow-lg border border-gray-100 overflow-hidden">
                     <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-scholar-deep/5">
                         <h2 className="text-xl font-bold text-scholar-deep flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-scholar-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -350,7 +369,7 @@ export default function ResearchDatabaseClient() {
                                                 <span className="block text-xl font-bold text-scholar-deep">{item.attachmentCount}</span>
                                                 <span className="text-xs text-gray-400">ไฟล์เผยแพร่</span>
                                             </div>
-                                            <Link href={`/research/database/${item.slug}`} className="btn btn-sm btn-outline border-scholar-accent text-scholar-accent hover:bg-scholar-accent hover:text-white hover:border-scholar-accent rounded-full w-full lg:w-auto">
+                                            <Link href={`/research/database/${item.slug}`} className="btn btn-sm btn-outline border-scholar-accent text-scholar-accent hover:bg-scholar-accent hover:text-white hover:border-scholar-accent rounded-sm w-full lg:w-auto">
                                                 ดูรายละเอียด
                                             </Link>
                                         </div>

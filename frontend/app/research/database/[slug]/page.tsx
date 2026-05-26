@@ -230,13 +230,13 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
             <section className="space-y-5">
               <h2 className="text-2xl font-bold text-base-content">บทคัดย่อ</h2>
               {project.abstractTh && (
-                <div className="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm">
+                <div className="rounded-sm border border-base-300 bg-base-100 p-6 shadow-sm">
                   <p className="text-sm font-semibold text-primary mb-3">ภาษาไทย</p>
                   <p className="leading-8 text-base-content/80 whitespace-pre-line">{project.abstractTh}</p>
                 </div>
               )}
               {project.abstractEn && (
-                <div className="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-sm">
+                <div className="rounded-sm border border-base-300 bg-base-100 p-6 shadow-sm">
                   <p className="text-sm font-semibold text-secondary mb-3">English</p>
                   <p className="leading-8 text-base-content/80 whitespace-pre-line">{project.abstractEn}</p>
                 </div>
@@ -250,7 +250,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
             </h2>
             <div className="grid gap-4 md:grid-cols-2">
               {members.map((member, index) => (
-                <div key={`${member.displayName || member.externalName || member.staffProfileId || 'member'}-${index}`} className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm space-y-2">
+                <div key={`${member.displayName || member.externalName || member.staffProfileId || 'member'}-${index}`} className="rounded-sm border border-base-300 bg-base-100 p-5 shadow-sm space-y-2">
                   <div className="flex items-center justify-between gap-3">
                     {member.staffProfileId ? (
                       <Link
@@ -267,7 +267,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
                 </div>
               ))}
               {members.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-6 text-center text-base-content/60">
+                <div className="rounded-sm border border-dashed border-base-300 bg-base-100 p-6 text-center text-base-content/60">
                   ยังไม่มีข้อมูลทีมวิจัย
                 </div>
               )}
@@ -293,7 +293,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
             </h2>
             <div className="grid gap-4 md:grid-cols-2">
               {locations.map((location, index) => (
-                <div key={`${location.province || 'location'}-${index}`} className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm space-y-2">
+                <div key={`${location.province || 'location'}-${index}`} className="rounded-sm border border-base-300 bg-base-100 p-5 shadow-sm space-y-2">
                   <p className="font-semibold text-base-content">
                     {[location.subDistrict, location.district, location.province].filter(Boolean).join(' • ') || 'ไม่ระบุพื้นที่'}
                   </p>
@@ -305,7 +305,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
                 </div>
               ))}
               {locations.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-6 text-center text-base-content/60">
+                <div className="rounded-sm border border-dashed border-base-300 bg-base-100 p-6 text-center text-base-content/60">
                   ยังไม่มีข้อมูลพื้นที่ดำเนินการ
                 </div>
               )}
@@ -329,7 +329,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
             </h2>
             <div className="space-y-4">
               {outputs.map((output, index) => (
-                <div key={`${output.title}-${index}`} className="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm space-y-3">
+                <div key={`${output.title}-${index}`} className="rounded-sm border border-base-300 bg-base-100 p-6 shadow-sm space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
                     {output.outputType && <span className="badge badge-outline">{output.outputType}</span>}
                     {output.tier && <span className="badge badge-secondary badge-outline">{output.tier}</span>}
@@ -359,7 +359,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
                 </div>
               ))}
               {outputs.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-6 text-center text-base-content/60">
+                <div className="rounded-sm border border-dashed border-base-300 bg-base-100 p-6 text-center text-base-content/60">
                   ยังไม่มีข้อมูลผลผลิตวิชาการ
                 </div>
               )}
@@ -371,7 +371,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
               <h2 className="text-2xl font-bold text-base-content">นำทางงานวิจัย</h2>
               <div className="grid gap-4 md:grid-cols-2">
                 {previousProject ? (
-                  <Link href={`/research/database/${previousProject.slug}`} className="group rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm hover:border-primary/40 hover:bg-primary/5 transition-all">
+                  <Link href={`/research/database/${previousProject.slug}`} className="group rounded-sm border border-base-300 bg-base-100 p-5 shadow-sm hover:border-primary/40 hover:bg-primary/5 transition-all">
                     <div className="flex items-center gap-2 text-sm text-base-content/60 mb-2">
                       <ArrowLeft className="h-4 w-4" /> ก่อนหน้า
                     </div>
@@ -380,7 +380,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
                 ) : <div className="hidden md:block" />}
 
                 {nextProject ? (
-                  <Link href={`/research/database/${nextProject.slug}`} className="group rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm hover:border-primary/40 hover:bg-primary/5 transition-all text-left md:text-right">
+                  <Link href={`/research/database/${nextProject.slug}`} className="group rounded-sm border border-base-300 bg-base-100 p-5 shadow-sm hover:border-primary/40 hover:bg-primary/5 transition-all text-left md:text-right">
                     <div className="flex items-center justify-start md:justify-end gap-2 text-sm text-base-content/60 mb-2">
                       ถัดไป <ArrowRight className="h-4 w-4" />
                     </div>
@@ -396,7 +396,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
               <h2 className="text-2xl font-bold text-base-content">งานวิจัยที่เกี่ยวข้อง</h2>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {relatedProjects.map((item) => (
-                  <Link key={item.id} href={`/research/database/${item.slug}`} className="group rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm hover:border-primary/40 hover:bg-primary/5 transition-all">
+                  <Link key={item.id} href={`/research/database/${item.slug}`} className="group rounded-sm border border-base-300 bg-base-100 p-5 shadow-sm hover:border-primary/40 hover:bg-primary/5 transition-all">
                     <div className="space-y-3">
                       <div className="flex flex-wrap items-center gap-2 text-xs text-base-content/60">
                         <span className="badge badge-outline">{RESEARCH_STATUS_LABELS[item.status]}</span>
@@ -418,7 +418,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
 
         {attachments.length > 0 && (
           <aside className="space-y-8 lg:sticky lg:top-[100px] lg:self-start">
-            <div className="rounded-3xl border border-base-300 bg-base-100 shadow-sm overflow-hidden text-base-content">
+            <div className="rounded-sm border border-base-300 bg-base-100 shadow-sm overflow-hidden text-base-content">
               <div className="bg-base-200/50 p-5 border-b border-base-300">
                 <h2 className="text-lg font-bold flex items-center gap-2">
                   <FileText className="h-5 w-5 text-primary" /> เอกสารที่เกี่ยวข้อง
@@ -438,7 +438,7 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
                       download
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex flex-col gap-2 rounded-2xl border border-base-300 bg-base-100 p-4 transition-all hover:border-primary/50 hover:bg-primary/5 hover:shadow-md"
+                      className="group flex flex-col gap-2 rounded-sm border border-base-300 bg-base-100 p-4 transition-all hover:border-primary/50 hover:bg-primary/5 hover:shadow-md"
                     >
                       <div className="flex items-start gap-3">
                         <div className="mt-0.5 rounded-full bg-base-200 p-2 text-base-content/70 transition-colors group-hover:bg-primary group-hover:text-primary-content">

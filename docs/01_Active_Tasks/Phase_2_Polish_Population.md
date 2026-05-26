@@ -25,8 +25,8 @@ After completing the initial content population for News, Staff, and Research, P
     - Wisdom
 
 ### 4. Research Public Filter UI
-- [ ] Final verification of the filter interactions on `/research/database`.
-- [ ] Ensure responsive behavior is flawless.
+- [x] Final verification of the filter interactions on `/research/database` (Completed dynamic years selection from backend, verified responsive grid/flex layout).
+- [x] Ensure responsive behavior is flawless (Updated card and details roundings to match `rounded-sm` theme).
 
 ## 🛠️ Completed in Phase 1
 - [x] News Content Population
