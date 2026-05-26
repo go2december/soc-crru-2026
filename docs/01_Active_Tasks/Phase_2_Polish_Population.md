@@ -9,9 +9,9 @@ After completing the initial content population for News, Staff, and Research, P
 - [x] Update `frontend/app/chiang-rai-studies/learning-sites/[slug]/page.tsx` and `page.tsx` (Change `rounded-2xl`, `rounded-full`, `rounded-xl`, `rounded-lg`, `rounded-md` to `rounded-sm`, sharpening the cards, buttons, badges, and layout components to match the "Sharp & Professional" theme).
 
 ### 2. Admissions Center Updates
-- [ ] Review `frontend/app/admissions/page.tsx`.
-- [ ] Ensure it pulls real data from `admission_schedules` and `admission_config`.
-- [ ] Sharpen the UI components (Table, Buttons).
+- [x] Review `frontend/app/admissions/page.tsx` and verify backend integration (Ensured it calls `/api/admissions/config`, `/api/admissions/schedules`, and `/api/admissions/documents` properly).
+- [x] Ensure it pulls real data from database (Verified dynamic schedules and configurations loading successfully from PostgreSQL).
+- [x] Sharpen the UI components (Polished table header, borders, badges, buttons, and brochure thumbnail to match the `rounded-sm` theme).
 
 ### 3. Chiang Rai Artifacts Population
 - [ ] Populate `chiang_rai_artifacts` with real data for the 5 identities:

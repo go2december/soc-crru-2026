@@ -105,7 +105,7 @@ export default function AdmissionPage() {
                 <div className="absolute inset-0 flex items-center">
                     <div className="container mx-auto px-4">
                         <div className="max-w-2xl text-white space-y-5">
-                            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-scholar-accent/90 text-white font-semibold tracking-wider text-sm shadow-lg backdrop-blur-sm">
+                            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm bg-scholar-accent/90 text-white font-semibold tracking-wider text-sm shadow-lg backdrop-blur-sm">
                                 <Sparkles className="w-4 h-4" />
                                 ADMISSIONS 2569
                             </span>
@@ -120,12 +120,12 @@ export default function AdmissionPage() {
                             </p>
                             <div className="flex flex-wrap gap-3 pt-2">
                                 <Link href={bachelorLink} target="_blank"
-                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-scholar-accent text-white font-semibold shadow-lg hover:bg-scholar-accent/90 hover:scale-105 transition-all duration-200">
+                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-scholar-accent text-white font-semibold shadow-lg hover:bg-scholar-accent/90 hover:scale-105 transition-all duration-200">
                                     <GraduationCap className="w-5 h-5" />
                                     สมัครเรียนปริญญาตรี
                                 </Link>
                                 <Link href={graduateLink} target="_blank"
-                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/15 backdrop-blur-sm border border-white/30 text-white font-semibold hover:bg-white/25 hover:scale-105 transition-all duration-200">
+                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-white/15 backdrop-blur-sm border border-white/30 text-white font-semibold hover:bg-white/25 hover:scale-105 transition-all duration-200">
                                     <BookOpen className="w-5 h-5" />
                                     สมัครบัณฑิตศึกษา
                                 </Link>
@@ -141,37 +141,37 @@ export default function AdmissionPage() {
                 {/* ─── 2. QUICK LINKS (3 tracks) ─────────────────────── */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8">
                     <Link href={bachelorLink} target="_blank"
-                        className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center hover:shadow-xl hover:border-scholar-accent/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                        <div className="w-16 h-16 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-5 group-hover:bg-sky-100 group-hover:scale-110 transition-all">
+                        className="group bg-white rounded-sm shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center hover:shadow-xl hover:border-scholar-accent/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                        <div className="w-16 h-16 rounded-sm bg-sky-50 text-sky-600 flex items-center justify-center mb-5 group-hover:bg-sky-100 group-hover:scale-110 transition-all">
                             <GraduationCap className="w-8 h-8" />
                         </div>
                         <h2 className="text-xl font-bold text-scholar-deep mb-2 group-hover:text-scholar-accent transition-colors">ระดับปริญญาตรี</h2>
                         <p className="text-gray-500 text-sm mb-5 leading-relaxed">เปิดรับสมัครบุคคลเข้าศึกษาต่อ ระดับปริญญาตรี สำหรับ ม.6 / ปวช. หรือเทียบเท่า</p>
-                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-sky-600 text-white rounded-xl text-sm font-medium group-hover:bg-scholar-accent transition-colors">
+                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-sky-600 text-white rounded-sm text-sm font-medium group-hover:bg-scholar-accent transition-colors">
                             ไปที่ระบบรับสมัคร <ChevronRight className="w-4 h-4" />
                         </span>
                     </Link>
 
                     <Link href={graduateLink} target="_blank"
-                        className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center hover:shadow-xl hover:border-scholar-accent/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                        <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-5 group-hover:bg-indigo-100 group-hover:scale-110 transition-all">
+                        className="group bg-white rounded-sm shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center hover:shadow-xl hover:border-scholar-accent/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                        <div className="w-16 h-16 rounded-sm bg-indigo-50 text-indigo-600 flex items-center justify-center mb-5 group-hover:bg-indigo-100 group-hover:scale-110 transition-all">
                             <BookOpen className="w-8 h-8" />
                         </div>
                         <h2 className="text-xl font-bold text-scholar-deep mb-2 group-hover:text-scholar-accent transition-colors">ระดับบัณฑิตศึกษา</h2>
                         <p className="text-gray-500 text-sm mb-5 leading-relaxed">ปริญญาโท และ ปริญญาเอก (ภาคปกติ / ภาคพิเศษ)</p>
-                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium group-hover:bg-scholar-accent transition-colors">
+                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white rounded-sm text-sm font-medium group-hover:bg-scholar-accent transition-colors">
                             ไปที่ระบบบัณฑิต <ChevronRight className="w-4 h-4" />
                         </span>
                     </Link>
 
                     <Link href="/programs"
-                        className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center hover:shadow-xl hover:border-scholar-accent/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                        <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-5 group-hover:bg-amber-100 group-hover:scale-110 transition-all">
+                        className="group bg-white rounded-sm shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center hover:shadow-xl hover:border-scholar-accent/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                        <div className="w-16 h-16 rounded-sm bg-amber-50 text-amber-600 flex items-center justify-center mb-5 group-hover:bg-amber-100 group-hover:scale-110 transition-all">
                             <Sparkles className="w-8 h-8" />
                         </div>
                         <h2 className="text-xl font-bold text-scholar-deep mb-2 group-hover:text-scholar-accent transition-colors">หลักสูตรทั้งหมด</h2>
                         <p className="text-gray-500 text-sm mb-5 leading-relaxed">ดูรายละเอียดทุกหลักสูตรที่เปิดสอน พร้อมข้อมูลรายวิชา</p>
-                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-amber-500 text-white rounded-xl text-sm font-medium group-hover:bg-scholar-accent transition-colors">
+                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-amber-500 text-white rounded-sm text-sm font-medium group-hover:bg-scholar-accent transition-colors">
                             ดูหลักสูตร <ChevronRight className="w-4 h-4" />
                         </span>
                     </Link>
@@ -187,7 +187,7 @@ export default function AdmissionPage() {
                                 <PlayCircle className="w-6 h-6 text-scholar-accent" />
                                 <h3 className="text-xl font-bold text-scholar-deep">แนะนำคณะสังคมศาสตร์ CRRU</h3>
                             </div>
-                            <div className="relative aspect-video w-full rounded-2xl overflow-hidden shadow-xl bg-black ring-1 ring-black/5">
+                            <div className="relative aspect-video w-full rounded-sm overflow-hidden shadow-xl bg-black ring-1 ring-black/5">
                                 <iframe
                                     className="absolute inset-0 w-full h-full"
                                     src={videoUrl}
@@ -217,9 +217,9 @@ export default function AdmissionPage() {
 
                             {/* Download Documents from API */}
                             {loading ? (
-                                <div className="h-20 rounded-xl bg-gray-100 animate-pulse" />
+                                <div className="h-20 rounded-sm bg-gray-100 animate-pulse" />
                             ) : documents.length > 0 ? (
-                                <div className="bg-scholar-soft rounded-xl border border-scholar-gold/20 overflow-hidden">
+                                <div className="bg-scholar-soft rounded-sm border border-scholar-gold/20 overflow-hidden">
                                     <div className="px-4 py-3 border-b border-scholar-gold/20 flex items-center gap-2">
                                         <Download className="w-4 h-4 text-scholar-accent" />
                                         <span className="font-bold text-scholar-deep text-sm">ดาวน์โหลดเอกสาร</span>
@@ -241,7 +241,7 @@ export default function AdmissionPage() {
                                     </ul>
                                 </div>
                             ) : (
-                                <div className="bg-scholar-soft rounded-xl border border-scholar-gold/20 px-4 py-6 text-center text-sm text-gray-400">
+                                <div className="bg-scholar-soft rounded-sm border border-scholar-gold/20 px-4 py-6 text-center text-sm text-gray-400">
                                     ไม่มีเอกสารดาวน์โหลดในขณะนี้
                                 </div>
                             )}
@@ -252,7 +252,7 @@ export default function AdmissionPage() {
                 {/* ─── 4. SCHEDULE TABLE ──────────────────────────────── */}
                 <section className="mt-20 mb-12">
                     <div className="text-center mb-10">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-scholar-accent/10 text-scholar-accent text-sm font-semibold mb-3">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm bg-scholar-accent/10 text-scholar-accent text-sm font-semibold mb-3">
                             <CalendarDays className="w-4 h-4" />
                             ปฏิทินการรับสมัครนักศึกษา
                         </div>
@@ -265,22 +265,22 @@ export default function AdmissionPage() {
                     {loading ? (
                         <div className="space-y-3">
                             {[1,2,3].map(i => (
-                                <div key={i} className="h-16 rounded-xl bg-gray-100 animate-pulse" />
+                                <div key={i} className="h-16 rounded-sm bg-gray-100 animate-pulse" />
                             ))}
                         </div>
                     ) : schedules.length > 0 ? (
-                        <div className="overflow-x-auto bg-white rounded-2xl shadow-lg border border-gray-100">
+                        <div className="overflow-x-auto bg-white rounded-sm shadow-lg border border-gray-100">
                             <table className="w-full text-left">
                                 <thead className="bg-scholar-deep text-white">
                                     <tr>
-                                        <th className="px-6 py-4 rounded-tl-2xl font-semibold text-sm">รอบการรับสมัคร</th>
+                                        <th className="px-6 py-4 rounded-tl-sm font-semibold text-sm">รอบการรับสมัคร</th>
                                         <th className="px-6 py-4 font-semibold text-sm">
                                             <span className="flex items-center gap-2"><Clock className="w-4 h-4" />ช่วงเวลา</span>
                                         </th>
                                         <th className="px-6 py-4 font-semibold text-sm">
                                             <span className="flex items-center gap-2"><MapPin className="w-4 h-4" />ช่องทาง</span>
                                         </th>
-                                        <th className="px-6 py-4 rounded-tr-2xl font-semibold text-sm">สถานะ</th>
+                                        <th className="px-6 py-4 rounded-tr-sm font-semibold text-sm">สถานะ</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -306,7 +306,7 @@ export default function AdmissionPage() {
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${s.badge}`}>
+                                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-sm text-xs font-bold border ${s.badge}`}>
                                                         <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
                                                         {s.label}
                                                     </span>
@@ -319,7 +319,7 @@ export default function AdmissionPage() {
                         </div>
                     ) : (
                         // Fallback placeholder (static) when no data
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
+                        <div className="bg-white rounded-sm shadow-lg border border-gray-100 p-12 text-center">
                             <CalendarDays className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                             <p className="text-gray-400 font-medium">ยังไม่มีข้อมูลปฏิทินรับสมัคร</p>
                             <p className="text-gray-400 text-sm mt-1">ติดตามได้ที่ช่องทาง Facebook คณะสังคมศาสตร์</p>

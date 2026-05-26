@@ -34,7 +34,7 @@ export default function BrochureLightbox({ src, alt = 'เอกสารปร�
         <>
             {/* Thumbnail trigger */}
             <div
-                className="group relative rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-all cursor-pointer bg-gray-50"
+                className="group relative rounded-sm overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-all cursor-pointer bg-gray-50"
                 onClick={() => setOpen(true)}
             >
                 <Image
@@ -48,7 +48,7 @@ export default function BrochureLightbox({ src, alt = 'เอกสารปร�
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-scholar-deep/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                     <ZoomIn className="w-8 h-8 text-white drop-shadow-lg" />
-                    <span className="bg-white text-scholar-deep px-4 py-1.5 rounded-xl font-bold shadow-lg text-sm">
+                    <span className="bg-white text-scholar-deep px-4 py-1.5 rounded-sm font-bold shadow-lg text-sm">
                         ดูภาพขยาย
                     </span>
                 </div>
