@@ -4,17 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "227935e99f29ed9b",
+        "id": "6ad800854dc1bf2b",
         "type": "tabs",
         "children": [
           {
-            "id": "cc3851c642cedbb2",
+            "id": "84574fc06f4d530e",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "canvas",
+              "state": {
+                "file": "Untitled.canvas",
+                "viewState": {
+                  "x": 0,
+                  "y": 0,
+                  "zoom": 0
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "Untitled"
             }
           }
         ]
@@ -176,43 +183,48 @@
       "bases:Create new base": false
     }
   },
-  "active": "cc3851c642cedbb2",
+  "active": "84574fc06f4d530e",
   "lastOpenFiles": [
-    "database/pgdata/18/docker/pg_stat/pgstat.stat",
-    "database/pgdata/18/docker/pg_stat/pgstat.tmp",
-    "database/pgdata/18/docker/pg_logical/replorigin_checkpoint.tmp",
-    "backend/dist/tsconfig.build.tsbuildinfo",
-    "backend/dist/src/main.d.ts",
-    "backend/dist/src/main.js",
-    "backend/dist/src/main.js.map",
-    "backend/dist/src/app.module.d.ts",
-    "backend/dist/src/app.module.js",
-    "backend/dist/src/app.module.js.map",
-    "backend/dist/src/research/dto/update-research-project.dto.js.map",
-    "backend/node_modules/bl/LICENSE.md",
-    "Untitled 1.canvas",
-    "docs/01_Active_Tasks/Current_Status.md",
-    "docs/03_Prompts_Rules/Available_AI_Skills.md",
-    "admin-programs-module.md",
-    "docs/03_Prompts_Rules/AI_Task_Template.md",
-    "docs/00_Dashboard.md",
-    "docs/PLAN-soc-crru-baseline.md",
-    "docs/99_Archive/PLAN-workflow-standardization.md",
-    "docs/99_Archive/PLAN-soc-crru-baseline.md",
-    "docs/99_Archive/PLAN-chiang-rai-studies.md",
-    "docs/99_Archive/WORKFLOW-project-status.md",
-    "docs/99_Archive/WORKFLOW-faculty-admin.md",
-    "docs/99_Archive/WORKFLOW-chiang-rai-admin.md",
-    "docs/99_Archive/MENU-INTEGRATION.md",
-    "docs/99_Archive/LEARNING-SITES-FEATURE.md",
-    "docs/99_Archive/FACULTY_NEWS_MANUAL_QA_CHECKLIST.md",
-    "docs/99_Archive/FACULTY_NEWS_DATABASE_IMPACT.md",
-    "docs/99_Archive/SCHEMA-SIMPLIFIED-BLOG.md",
-    "docs/99_Archive/SCHEMA-REFACTOR-SUMMARY.md",
-    "docs/99_Archive/IMPLEMENTATION-COMPLETE.md",
-    "docs/99_Archive/FRONTEND-ERROR-ARCHIVE-2026-04-03.md",
+    "2026-06-18.md",
     "Untitled.canvas",
-    "README.md",
-    "backend/node_modules/pgpass/README.md"
+    "backend/node_modules/drizzle-orm/table.utils.js.map",
+    "backend/node_modules/drizzle-orm/errors.js.map",
+    "backend/node_modules/drizzle-orm/column-builder.d.cts",
+    "backend/node_modules/has-tostringtag/README.md",
+    "backend/node_modules/body-parser/README.md",
+    "backend/node_modules/cross-spawn/package.json",
+    "backend/node_modules/function-bind/README.md",
+    "backend/node_modules/es-errors/package.json",
+    "backend/node_modules/acorn-import-phases/LICENSE",
+    "backend/node_modules/acorn-jsx/LICENSE",
+    "backend/node_modules/ajv-keywords/package.json",
+    "backend/node_modules/ansi-colors/LICENSE",
+    "backend/node_modules/ansi-escapes/license",
+    "backend/node_modules/caniuse-lite/README.md",
+    "backend/node_modules/handlebars/release-notes.md",
+    "backend/node_modules/ajv/README.md",
+    "backend/node_modules/istanbul-reports/README.md",
+    "backend/node_modules/istanbul-reports/CHANGELOG.md",
+    "backend/node_modules/enhanced-resolve/README.md",
+    "backend/node_modules/jackspeak/README.md",
+    "backend/node_modules/esquery/README.md",
+    "backend/node_modules/consola/README.md",
+    "backend/node_modules/eslint-scope/README.md",
+    "backend/node_modules/fast-json-stable-stringify/README.md",
+    "backend/node_modules/es-define-property/README.md",
+    "backend/node_modules/asap/LICENSE.md",
+    "backend/node_modules/form-data/CHANGELOG.md",
+    "backend/node_modules/cjs-module-lexer/README.md",
+    "backend/node_modules/buffer/README.md",
+    "backend/node_modules/acorn-walk/README.md",
+    "backend/node_modules/color-convert/CHANGELOG.md",
+    "backend/node_modules/cors/CONTRIBUTING.md",
+    "backend/node_modules/bser/README.md",
+    "backend/nest-service/node_modules/find-up/readme.md",
+    "backend/nest-service/node_modules/cli-cursor/readme.md",
+    "backend/nest-service/node_modules/istanbul-reports/lib/html-spa/assets/sort-arrow-sprite.png",
+    "backend/nest-service/node_modules/istanbul-reports/lib/html/assets/sort-arrow-sprite.png",
+    "backend/nest-service/node_modules/istanbul-reports/lib/html/assets/favicon.png",
+    "Untitled 1.canvas"
   ]
 }

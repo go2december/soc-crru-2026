@@ -8,7 +8,7 @@ async function bootstrap() {
     await NestFactory.create<NestExpressApplication>(ApiGatewayModule);
 
   // Enable CORS for frontend
-  app.enableCors({
+  void app.enableCors({
     origin: true, // Allow all origins for development
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
