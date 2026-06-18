@@ -1,7 +1,8 @@
+version: '3.8'
+
 services:
   # -----------------------------------------------------------------
   # DATABASE: PostgreSQL 18 (Alpine)
-  # ใช้ Image แบบ Alpine เพื่อความเบาและรวดเร็ว
   # -----------------------------------------------------------------
   db:
     image: postgres:18-alpine
@@ -10,7 +11,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER:-soc_admin}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-soc_secure_pass}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Soc0903297444}
       POSTGRES_DB: ${DB_NAME:-soc_db}
     ports:
       - "${DB_PORT:-5433}:5432"
@@ -44,40 +45,191 @@ services:
         condition: service_healthy
 
   # -----------------------------------------------------------------
-  # BACKEND: Nest.js (Node 25)
+  # MICROSERVICE: API Gateway (Port 3000 -> Host BACKEND_PORT:-4001)
   # -----------------------------------------------------------------
-  backend:
+  api-gateway:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      target: development
-    container_name: soc_backend
-    restart: always
-    volumes:
-      - ./backend:/usr/src/app
-      - /usr/src/app/node_modules
-      - ./backend/uploads:/usr/src/app/uploads
+      args:
+        APP_NAME: api-gateway
+    container_name: soc_api_gateway
     ports:
       - "${BACKEND_PORT:-4001}:3000"
-    env_file:
-      - ./backend/.env
     environment:
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_USER: ${DB_USER:-soc_admin}
-      DATABASE_PASSWORD: ${DB_PASSWORD:-soc_secure_pass}
-      DATABASE_NAME: ${DB_NAME:-soc_db}
-      DATABASE_URL: postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-soc_secure_pass}@db:5432/${DB_NAME:-soc_db}?schema=public
-      # Dynamic URLs based on Port Configuration
-      FRONTEND_URL: http://localhost:${FRONTEND_PORT:-4000}
+      - PORT=3000
+      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
+      - JWT_SECRET=super-secret-key-change-this-in-production
+      - FRONTEND_URL=http://localhost:${FRONTEND_PORT:-4000}
+      - AUTH_SERVICE_HOST=auth-service
+      - NEWS_SERVICE_HOST=news-service
+      - CHIANG_RAI_SERVICE_HOST=chiang-rai-service
+      - PROGRAMS_SERVICE_HOST=programs-service
+      - STAFF_SERVICE_HOST=staff-service
+      - RESEARCH_SERVICE_HOST=research-service
+    volumes:
+      - ./backend/uploads:/usr/src/app/uploads
     networks:
       - soc-network
     depends_on:
       db:
         condition: service_healthy
+    restart: always
 
   # -----------------------------------------------------------------
-  # FRONTEND: Next.js (Node 25)
+  # MICROSERVICE: Auth Service (Port 3001)
+  # -----------------------------------------------------------------
+  auth-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: auth-service
+    container_name: soc_auth_service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
+      - JWT_SECRET=super-secret-key-change-this-in-production
+      - FRONTEND_URL=http://localhost:${FRONTEND_PORT:-4000}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CALLBACK_URL=http://localhost:${BACKEND_PORT:-4001}/api/auth/google/callback
+    networks:
+      - soc-network
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  # -----------------------------------------------------------------
+  # MICROSERVICE: News Service (Port 3002)
+  # -----------------------------------------------------------------
+  news-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: news-service
+    container_name: soc_news_service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
+      - JWT_SECRET=super-secret-key-change-this-in-production
+    volumes:
+      - ./backend/uploads:/usr/src/app/uploads
+    networks:
+      - soc-network
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  # -----------------------------------------------------------------
+  # MICROSERVICE: Chiang Rai Service (Port 3003)
+  # -----------------------------------------------------------------
+  chiang-rai-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: chiang-rai-service
+    container_name: soc_chiang_rai_service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
+      - JWT_SECRET=super-secret-key-change-this-in-production
+    volumes:
+      - ./backend/uploads:/usr/src/app/uploads
+    networks:
+      - soc-network
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  # -----------------------------------------------------------------
+  # MICROSERVICE: Programs Service (Port 3004)
+  # -----------------------------------------------------------------
+  programs-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: programs-service
+    container_name: soc_programs_service
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
+      - JWT_SECRET=super-secret-key-change-this-in-production
+    volumes:
+      - ./backend/uploads:/usr/src/app/uploads
+    networks:
+      - soc-network
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  # -----------------------------------------------------------------
+  # MICROSERVICE: Staff Service (Port 3005)
+  # -----------------------------------------------------------------
+  staff-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: staff-service
+    container_name: soc_staff_service
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
+      - JWT_SECRET=super-secret-key-change-this-in-production
+    volumes:
+      - ./backend/uploads:/usr/src/app/uploads
+    networks:
+      - soc-network
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  # -----------------------------------------------------------------
+  # MICROSERVICE: Research Service (Port 3006)
+  # -----------------------------------------------------------------
+  research-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: research-service
+    container_name: soc_research_service
+    ports:
+      - "3006:3006"
+    environment:
+      - PORT=3006
+      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
+      - JWT_SECRET=super-secret-key-change-this-in-production
+    volumes:
+      - ./backend/uploads:/usr/src/app/uploads
+    networks:
+      - soc-network
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  # -----------------------------------------------------------------
+  # FRONTEND: Next.js (Port 3000 -> Host FRONTEND_PORT:-4000)
   # -----------------------------------------------------------------
   frontend:
     build:
@@ -89,19 +241,16 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-      - ./frontend/.next:/app/.next # Mount build cache เพื่อความเร็ว
+      - ./frontend/.next:/app/.next
     ports:
       - "${FRONTEND_PORT:-4000}:3000"
     environment:
-      # Dynamic API URL based on Port Configuration
-      NEXT_PUBLIC_API_URL: ""
-      INTERNAL_API_URL: http://backend:3000
-      # WATCHPACK_POLLING: "true"  <-- Removed to improve performance
-
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4001}
+      INTERNAL_API_URL: http://api-gateway:3000
     networks:
       - soc-network
     depends_on:
-      - backend
+      - api-gateway
 
 networks:
   soc-network:

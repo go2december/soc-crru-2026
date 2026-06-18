@@ -1,0 +1,85 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  Query,
+} from '@nestjs/common';
+import { NewsService } from './news.service';
+import { CreateNewsDto } from './dto/create-news.dto';
+import { UpdateNewsDto } from './dto/update-news.dto';
+import { JwtAuthGuard, RolesGuard, Roles } from 'shared/shared';
+
+@Controller('news')
+export class NewsController {
+  constructor(private readonly newsService: NewsService) {}
+
+  // Create News (ADMIN, EDITOR)
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  create(@Body() createNewsDto: CreateNewsDto, @Req() req: any) {
+    // Automatically set authorId from logged in user if not provided
+    if (!createNewsDto.authorId) {
+      createNewsDto.authorId = req.user.id;
+    }
+    return this.newsService.create(createNewsDto);
+  }
+
+  // Public: Get List
+  @Get()
+  findAll(
+    @Query('category') category?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.newsService.findAllPublic(category, pageNum, limitNum);
+  }
+
+  // Admin: Get List (includes drafts)
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  findAllAdmin(@Query('page') page?: string, @Query('limit') limit?: string) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? Math.min(parseInt(limit, 10), 100) : 10;
+    return this.newsService.findAllAdmin(pageNum, limitNum);
+  }
+
+  // Public: Get by Slug
+  @Get('slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.newsService.findBySlug(slug);
+  }
+
+  // Admin: Get by ID
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  findOne(@Param('id') id: string) {
+    return this.newsService.findOne(id);
+  }
+
+  // Update News (ADMIN, EDITOR)
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  update(@Param('id') id: string, @Body() updateNewsDto: UpdateNewsDto) {
+    return this.newsService.update(id, updateNewsDto);
+  }
+
+  // Delete News (ADMIN, EDITOR)
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  remove(@Param('id') id: string) {
+    return this.newsService.remove(id);
+  }
+}

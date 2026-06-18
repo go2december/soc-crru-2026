@@ -1,8 +1,104 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/api-gateway/src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/api-gateway",
+  "projects": {
+    "api-gateway": {
+      "type": "application",
+      "root": "apps/api-gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/api-gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
+      }
+    },
+    "auth-service": {
+      "type": "application",
+      "root": "apps/auth-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/auth-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/auth-service/tsconfig.app.json"
+      }
+    },
+    "chiang-rai-service": {
+      "type": "application",
+      "root": "apps/chiang-rai-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/chiang-rai-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/chiang-rai-service/tsconfig.app.json"
+      }
+    },
+    "database": {
+      "type": "library",
+      "root": "libs/database",
+      "entryFile": "index",
+      "sourceRoot": "libs/database/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/database/tsconfig.lib.json"
+      }
+    },
+    "news-service": {
+      "type": "application",
+      "root": "apps/news-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/news-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/news-service/tsconfig.app.json"
+      }
+    },
+    "programs-service": {
+      "type": "application",
+      "root": "apps/programs-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/programs-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/programs-service/tsconfig.app.json"
+      }
+    },
+    "research-service": {
+      "type": "application",
+      "root": "apps/research-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/research-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/research-service/tsconfig.app.json"
+      }
+    },
+    "shared": {
+      "type": "library",
+      "root": "libs/shared",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared/tsconfig.lib.json"
+      }
+    },
+    "staff-service": {
+      "type": "application",
+      "root": "apps/staff-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/staff-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/staff-service/tsconfig.app.json"
+      }
+    },
+    "upload": {
+      "type": "library",
+      "root": "libs/upload",
+      "entryFile": "index",
+      "sourceRoot": "libs/upload/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/upload/tsconfig.lib.json"
+      }
+    }
   }
 }

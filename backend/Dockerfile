@@ -1,26 +1,17 @@
-# ---------------------------------------
-# Stage 1: Development
-# ---------------------------------------
-FROM node:25-alpine AS development
+FROM node:22-alpine AS builder
 
 WORKDIR /usr/src/app
 
-# Copy package files first to cache dependencies
 COPY package*.json ./
 
-# Install dependencies
 RUN npm install
 
-# Copy source code
 COPY . .
 
-# Run the development server with hot-reload
-CMD ["npm", "run", "start:dev"]
+ARG APP_NAME
+RUN npm run build ${APP_NAME}
 
-# ---------------------------------------
-# Stage 2: Production (Antigravity Mode)
-# ---------------------------------------
-FROM node:25-alpine AS production
+FROM node:22-alpine AS production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -29,12 +20,14 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-# Install only production dependencies to keep image small
+# Install only production dependencies
 RUN npm install --only=production
 
 COPY . .
 
-# Copy built files from development stage
-COPY --from=development /usr/src/app/dist ./dist
+# Copy build output for the specific app
+ARG APP_NAME
+COPY --from=builder /usr/src/app/dist/apps/${APP_NAME} ./dist/apps/${APP_NAME}
 
-CMD ["node", "dist/main"]
+ENV APP_NAME=${APP_NAME}
+CMD node dist/apps/${APP_NAME}/main.js

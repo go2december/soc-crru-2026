@@ -51,12 +51,11 @@ export interface Program {
 // Environment handling for Docker vs Local
 const getBaseUrl = () => {
     if (typeof window !== 'undefined') {
-        // Client-side: always use the exposed localhost URL
-        return 'http://localhost:3001';
+        // Client-side: use empty string to let Next.js rewrites proxy it (avoiding CORS and port issues)
+        return '';
     }
-    // Server-side: Try to use internal Docker URL if available (env var), otherwise fallback to localhost
-    // We default to soc_backend:3000 for Docker internal networking
-    return process.env.INTERNAL_API_URL || 'http://soc_backend:3000';
+    // Server-side: Use internal API URL if set, otherwise fallback to external gateway
+    return process.env.INTERNAL_API_URL || 'http://localhost:4001';
 };
 
 export async function fetchPrograms(): Promise<Program[]> {
@@ -69,10 +68,10 @@ export async function fetchPrograms(): Promise<Program[]> {
 
         if (!res.ok) {
             // If internal docker fail, try fallback to localhost (e.g. if running locally)
-            if (typeof window === 'undefined' && baseUrl.includes('soc_backend')) {
+            if (typeof window === 'undefined' && !baseUrl.includes('localhost')) {
                 console.warn(`[API] Internal fetch failed, retrying localhost...`);
                 try {
-                    const fallbackRes = await fetch(`http://localhost:3001/api/programs`, { cache: 'no-store' });
+                    const fallbackRes = await fetch(`http://localhost:4001/api/programs`, { cache: 'no-store' });
                     if (fallbackRes.ok) {
                         const fallbackJson = await fallbackRes.json();
                         return fallbackJson.data || [];
@@ -85,9 +84,9 @@ export async function fetchPrograms(): Promise<Program[]> {
         return resJson.data || [];
     } catch (error) {
         // If the first fetch completely failed (network error), try fallback for server-side hybrid dev
-        if (typeof window === 'undefined' && baseUrl.includes('soc_backend')) {
+        if (typeof window === 'undefined' && !baseUrl.includes('localhost')) {
             try {
-                const fallbackRes = await fetch(`http://localhost:3001/api/programs`, { cache: 'no-store' });
+                const fallbackRes = await fetch(`http://localhost:4001/api/programs`, { cache: 'no-store' });
                 if (fallbackRes.ok) {
                     const fallbackJson = await fallbackRes.json();
                     return fallbackJson.data || [];
@@ -110,9 +109,9 @@ export async function fetchProgramByCode(code: string): Promise<Program | null> 
         });
 
         if (!res.ok) {
-            if (typeof window === 'undefined' && baseUrl.includes('soc_backend')) {
+            if (typeof window === 'undefined' && !baseUrl.includes('localhost')) {
                 try {
-                    const fallbackRes = await fetch(`http://localhost:3001/api/programs/code/${code}`, { cache: 'no-store' });
+                    const fallbackRes = await fetch(`http://localhost:4001/api/programs/code/${code}`, { cache: 'no-store' });
                     if (fallbackRes.ok) return fallbackRes.json();
                 } catch (e) { }
             }
@@ -121,9 +120,9 @@ export async function fetchProgramByCode(code: string): Promise<Program | null> 
         }
         return res.json();
     } catch (error) {
-        if (typeof window === 'undefined' && baseUrl.includes('soc_backend')) {
+        if (typeof window === 'undefined' && !baseUrl.includes('localhost')) {
             try {
-                const fallbackRes = await fetch(`http://localhost:3001/api/programs/code/${code}`, { cache: 'no-store' });
+                const fallbackRes = await fetch(`http://localhost:4001/api/programs/code/${code}`, { cache: 'no-store' });
                 if (fallbackRes.ok) return fallbackRes.json();
                 if (fallbackRes.status === 404) return null;
             } catch (e) {

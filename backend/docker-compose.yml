@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: soc_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: soc_admin
+      POSTGRES_PASSWORD: Soc0903297444
+      POSTGRES_DB: soc_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: api-gateway
+    container_name: soc_api_gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgresql://soc_admin:Soc0903297444@db:5432/soc_db
+      - JWT_SECRET=super-secret-key-change-this-in-production
+      - FRONTEND_URL=http://localhost:4000
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+    depends_on:
+      - db
+    restart: always
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: auth-service
+    container_name: soc_auth_service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - DATABASE_URL=postgresql://soc_admin:Soc0903297444@db:5432/soc_db
+      - JWT_SECRET=super-secret-key-change-this-in-production
+      - FRONTEND_URL=http://localhost:4000
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+    depends_on:
+      - db
+    restart: always
+
+  news-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: news-service
+    container_name: soc_news_service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - DATABASE_URL=postgresql://soc_admin:Soc0903297444@db:5432/soc_db
+      - JWT_SECRET=super-secret-key-change-this-in-production
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+    depends_on:
+      - db
+    restart: always
+
+  chiang-rai-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: chiang-rai-service
+    container_name: soc_chiang_rai_service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - DATABASE_URL=postgresql://soc_admin:Soc0903297444@db:5432/soc_db
+      - JWT_SECRET=super-secret-key-change-this-in-production
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+    depends_on:
+      - db
+    restart: always
+
+  programs-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: programs-service
+    container_name: soc_programs_service
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - DATABASE_URL=postgresql://soc_admin:Soc0903297444@db:5432/soc_db
+      - JWT_SECRET=super-secret-key-change-this-in-production
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+    depends_on:
+      - db
+    restart: always
+
+  staff-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: staff-service
+    container_name: soc_staff_service
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - DATABASE_URL=postgresql://soc_admin:Soc0903297444@db:5432/soc_db
+      - JWT_SECRET=super-secret-key-change-this-in-production
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+    depends_on:
+      - db
+    restart: always
+
+  research-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: research-service
+    container_name: soc_research_service
+    ports:
+      - "3006:3006"
+    environment:
+      - PORT=3006
+      - DATABASE_URL=postgresql://soc_admin:Soc0903297444@db:5432/soc_db
+      - JWT_SECRET=super-secret-key-change-this-in-production
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+    depends_on:
+      - db
+    restart: always
+
+volumes:
+  pgdata:

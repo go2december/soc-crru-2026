@@ -20,6 +20,26 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "db/database": [
+        "libs/database/src"
+      ],
+      "db/database/*": [
+        "libs/database/src/*"
+      ],
+      "shared/shared": [
+        "libs/shared/src"
+      ],
+      "shared/shared/*": [
+        "libs/shared/src/*"
+      ],
+      "upload/upload": [
+        "libs/upload/src"
+      ],
+      "upload/upload/*": [
+        "libs/upload/src/*"
+      ]
+    }
   }
 }
