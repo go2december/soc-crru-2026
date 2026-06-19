@@ -228,30 +228,6 @@ services:
         condition: service_healthy
     restart: always
 
-  # -----------------------------------------------------------------
-  # MICROSERVICE: NestJS Service (Port 3007)
-  # -----------------------------------------------------------------
-  nest-service:
-    build:
-      context: ./backend/nest-service
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: nest-service
-    container_name: soc_nest_service
-    ports:
-      - "${NEST_SERVICE_PORT:-3007}:3007"
-    environment:
-      - PORT=3007
-      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
-      - JWT_SECRET=super-secret-key-change-this-in-production
-    volumes:
-      - ./backend/uploads:/usr/src/app/uploads
-    networks:
-      - soc-network
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
 
   # -----------------------------------------------------------------
   # FRONTEND: Next.js (Port 3000 -> Host FRONTEND_PORT:-4000)

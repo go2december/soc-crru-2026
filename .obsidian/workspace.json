@@ -178,6 +178,7 @@
   },
   "active": "84574fc06f4d530e",
   "lastOpenFiles": [
+    "database/pgdata/18/docker/pg_logical/replorigin_checkpoint.tmp",
     "Untitled.canvas",
     "2026-06-18.md",
     "backend/node_modules/drizzle-orm/table.utils.js.map",

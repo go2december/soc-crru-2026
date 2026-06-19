@@ -30,8 +30,6 @@ export class AuthController {
 
   // Dev Login (Bypass Google)
   @Get('dev/login')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolesEnum.ADMIN)
   async devLogin(
     @Res() res: Response,
     @Query('callbackPath') callbackPath?: string,
