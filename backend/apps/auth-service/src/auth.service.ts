@@ -1,5 +1,6 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService, schema } from 'db/database';
 import { eq } from 'drizzle-orm';
 
@@ -16,52 +17,92 @@ export class AuthService {
     private readonly databaseService: DatabaseService,
     private readonly jwtService: JwtService,
   ) {}
+  // Issue a new refresh token (UUID) and store it (30 day expiry)
+  async issueRefreshToken(userId: string): Promise<string> {
+    const token = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    await this.databaseService.db.insert(schema.refreshTokens).values({
+      userId,
+      token,
+      expiresAt,
+    });
+    return token;
+  }
 
+  // Validate refresh token and return a new access token (static refresh token)
+  async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const stored = await this.databaseService.db
+      .select()
+      .from(schema.refreshTokens)
+      .where(eq(schema.refreshTokens.token, refreshToken))
+      .then((r) => r[0]);
+    if (!stored || stored.expiresAt < new Date()) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+    // Load user
+    const user = await this.databaseService.db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.id, stored.userId))
+      .then((r) => r[0]);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    const accessToken = (await this.generateToken(user)).accessToken;
+    // Return same refresh token (static)
+    return { accessToken, refreshToken };
+  }
+
+  // Logout: blacklist current access token and optionally delete refresh token
+  async logout(accessToken: string, refreshToken?: string): Promise<void> {
+    const token = accessToken.replace(/^Bearer\s+/i, '').trim();
+
+    let expiresAt: Date | undefined;
+    try {
+      const decoded = this.jwtService.decode(token);
+      if (decoded && decoded.exp) {
+        expiresAt = new Date(decoded.exp * 1000);
+      }
+    } catch (e) {
+      console.error('Failed to decode JWT expiration:', e);
+    }
+    if (!expiresAt) {
+      expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    }
+
+    await this.databaseService.db
+      .insert(schema.tokenBlacklist)
+      .values({
+        token,
+        expiresAt,
+      })
+      .onConflictDoNothing();
+
+    if (refreshToken) {
+      await this.databaseService.db
+        .delete(schema.refreshTokens)
+        .where(eq(schema.refreshTokens.token, refreshToken));
+    }
+  }
+
+  // Helper used by JwtStrategy to verify blacklist
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    const blacklisted = await this.databaseService.db
+      .select()
+      .from(schema.tokenBlacklist)
+      .where(eq(schema.tokenBlacklist.token, token))
+      .then((r) => r[0]);
+    return !!blacklisted;
+  }
   async validateOrCreateUser(googleUser: GoogleUser) {
-    // ตรวจสอบว่าเป็น @crru.ac.th เท่านั้น
+    // Ensure only @crru.ac.th emails are allowed
     if (!googleUser.email.endsWith('@crru.ac.th')) {
       throw new UnauthorizedException('กรุณาใช้อีเมล @crru.ac.th เท่านั้น');
     }
-
-    // ค้นหา user จาก email
-    const existingUsers = await this.databaseService.db
-      .select()
-      .from(schema.users)
-      .where(eq(schema.users.email, googleUser.email));
-
-    let user = existingUsers[0];
-
-    if (user) {
-      // อัปเดตข้อมูล Google และ lastLoginAt
-      const updated = await this.databaseService.db
-        .update(schema.users)
-        .set({
-          googleId: googleUser.googleId,
-          name: googleUser.name,
-          avatar: googleUser.avatar,
-          lastLoginAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(schema.users.email, googleUser.email))
-        .returning();
-      user = updated[0];
-    } else {
-      // สร้าง user ใหม่ (default roles = ['STAFF'])
-      const newUser = await this.databaseService.db
-        .insert(schema.users)
-        .values({
-          email: googleUser.email,
-          googleId: googleUser.googleId,
-          name: googleUser.name,
-          avatar: googleUser.avatar,
-          roles: ['STAFF'],
-          isActive: true,
-          lastLoginAt: new Date(),
-        })
-        .returning();
-      user = newUser[0];
-    }
-
+    // Upsert user based on Google info
+    const user = await this.upsertUserFromGoogle(googleUser);
     return user;
   }
 
@@ -199,6 +240,55 @@ export class AuthService {
       user = updated[0];
     }
 
-    return this.generateToken(user);
+    const tokenResult = await this.generateToken(user);
+    const refreshToken = await this.issueRefreshToken(user.id);
+
+    return {
+      accessToken: tokenResult.accessToken,
+      refreshToken,
+      user: tokenResult.user,
+    };
+  }
+
+  // Helper method to upsert user based on Google info
+  async upsertUserFromGoogle(googleUser: GoogleUser) {
+    // Find existing user by email
+    const existing = await this.databaseService.db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.email, googleUser.email));
+
+    let user;
+    if (existing.length === 0) {
+      // Create new user with default STAFF role
+      const inserted = await this.databaseService.db
+        .insert(schema.users)
+        .values({
+          email: googleUser.email,
+          googleId: googleUser.googleId,
+          name: googleUser.name,
+          avatar: googleUser.avatar,
+          roles: ['STAFF'],
+          isActive: true,
+          lastLoginAt: new Date(),
+        })
+        .returning();
+      user = inserted[0];
+    } else {
+      const existingUser = existing[0];
+      const updated = await this.databaseService.db
+        .update(schema.users)
+        .set({
+          googleId: googleUser.googleId,
+          name: googleUser.name,
+          avatar: googleUser.avatar,
+          lastLoginAt: new Date(),
+        })
+        .where(eq(schema.users.id, existingUser.id))
+        .returning();
+      user = updated[0];
+    }
+
+    return user;
   }
 }

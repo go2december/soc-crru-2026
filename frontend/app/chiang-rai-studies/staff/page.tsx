@@ -2,7 +2,7 @@ import { Mail, Users, Crown, Shield } from 'lucide-react';
 import Image from 'next/image';
 import { Metadata } from 'next';
 
-const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
+const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4201';
 
 export const metadata: Metadata = {
     title: 'ทำเนียบบุคลากร | ศูนย์เชียงรายศึกษา',

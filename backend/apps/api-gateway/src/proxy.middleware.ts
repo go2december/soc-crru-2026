@@ -66,6 +66,14 @@ export class ProxyMiddleware implements NestMiddleware {
       });
     });
 
-    req.pipe(proxyReq, { end: true });
+    const methodsWithBody = ['POST', 'PUT', 'PATCH', 'DELETE'];
+    if (methodsWithBody.includes(req.method) && req.body !== undefined) {
+      const bodyData = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+      proxyReq.setHeader('content-length', Buffer.byteLength(bodyData));
+      proxyReq.write(bodyData);
+      proxyReq.end();
+    } else {
+      req.pipe(proxyReq, { end: true });
+    }
   }
 }

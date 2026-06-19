@@ -713,3 +713,24 @@ export const academicServices = pgTable('academic_services', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+// ------------------------------------------
+// 9. Authenticaton & Token Management
+// ------------------------------------------
+
+export const refreshTokens = pgTable('refresh_tokens', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  token: varchar('token', { length: 255 }).notNull().unique(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const tokenBlacklist = pgTable('token_blacklist', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  token: varchar('token', { length: 1000 }).notNull().unique(),
+  revokedAt: timestamp('revoked_at').defaultNow().notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+});

@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 async function getLatestActivities() {
     try {
         // Use service name in Docker network if available, fallback to localhost for local dev
-        const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:4001';
+        const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:4201';
         const res = await fetch(`${baseUrl}/api/chiang-rai/activities?limit=3`, {
             next: { revalidate: 60 }
         });

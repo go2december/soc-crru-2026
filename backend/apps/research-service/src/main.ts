@@ -23,4 +23,4 @@ async function bootstrap() {
     `🚀 Research & Academic Services Service is running on: http://localhost:${port}/api`,
   );
 }
-bootstrap();
+void bootstrap();

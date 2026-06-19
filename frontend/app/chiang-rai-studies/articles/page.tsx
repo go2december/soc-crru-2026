@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     },
 };
 
-const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
+const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4201';
 
 interface Article {
     id: string;

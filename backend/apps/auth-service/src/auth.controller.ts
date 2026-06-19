@@ -11,6 +11,7 @@ import {
   Delete as NestDelete,
   Query,
 } from '@nestjs/common';
+import { RolesEnum } from './roles.enum';
 import { AuthService } from './auth.service';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { JwtAuthGuard, RolesGuard, Roles } from 'shared/shared';
@@ -29,6 +30,8 @@ export class AuthController {
 
   // Dev Login (Bypass Google)
   @Get('dev/login')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolesEnum.ADMIN)
   async devLogin(
     @Res() res: Response,
     @Query('callbackPath') callbackPath?: string,
@@ -51,7 +54,29 @@ export class AuthController {
   @Post('dev/token')
   async devLoginToken() {
     const token = await this.authService.loginAsDevAdmin();
-    return { accessToken: token.accessToken };
+    return {
+      accessToken: token.accessToken,
+      refreshToken: token.refreshToken,
+    };
+  }
+
+  @Post('refresh')
+  async refresh(@Body('refreshToken') refreshToken: string) {
+    return this.authService.refreshAccessToken(refreshToken);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req: any, @Body('refreshToken') refreshToken?: string) {
+    const accessToken = req.headers.authorization;
+    await this.authService.logout(accessToken, refreshToken);
+    return { message: 'Logged out' };
+  }
+
+  @Post('blacklist/check')
+  async checkBlacklist(@Body('token') token: string) {
+    const isBlacklisted = await this.authService.isTokenBlacklisted(token);
+    return { isBlacklisted };
   }
 
   // Callback หลังจาก Google OAuth สำเร็จ
@@ -82,7 +107,7 @@ export class AuthController {
   // ดึงรายการ Users ทั้งหมด (Admin เท่านั้น)
   @Get('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles(RolesEnum.ADMIN)
   async getAllUsers() {
     return this.authService.getAllUsers();
   }
@@ -90,7 +115,7 @@ export class AuthController {
   // อัปเดต Roles ของ User (Admin เท่านั้น)
   @Patch('users/:id/role')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles(RolesEnum.ADMIN)
   async updateUserRole(
     @Param('id') id: string,
     @Body('roles') roles: string[],
@@ -101,7 +126,7 @@ export class AuthController {
   // เปิด/ปิดการใช้งาน User (Admin เท่านั้น)
   @Patch('users/:id/active')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles(RolesEnum.ADMIN)
   async toggleUserActive(
     @Param('id') id: string,
     @Body('isActive') isActive: boolean,
@@ -112,7 +137,7 @@ export class AuthController {
   // ลบผู้ใช้ (Admin เท่านั้น)
   @NestDelete('users/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles(RolesEnum.ADMIN)
   async deleteUser(@Param('id') id: string) {
     return this.authService.deleteUser(id);
   }

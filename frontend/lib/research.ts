@@ -190,14 +190,14 @@ export function getResearchPublicAssetUrl(url?: string | null): string | null {
 export function getResearchServerAssetUrl(url?: string | null): string | null {
   if (!url) return null;
   if (url.startsWith('/')) {
-    const baseUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+    const baseUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4201';
     return `${baseUrl}${url}`;
   }
   return url;
 }
 
 export async function fetchResearchBySlug(slug: string): Promise<ResearchProjectDetail | null> {
-  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4201';
 
   try {
     const res = await fetch(`${apiUrl}/api/research/projects/${slug}`, {
@@ -221,7 +221,7 @@ export async function fetchResearchList(params?: {
   page?: string | number;
   limit?: string | number;
 }): Promise<ResearchListResponse> {
-  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4201';
 
   try {
     const searchParams = new URLSearchParams();

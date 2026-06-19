@@ -55,7 +55,7 @@ const getBaseUrl = () => {
         return '';
     }
     // Server-side: Use internal API URL if set, otherwise fallback to external gateway
-    return process.env.INTERNAL_API_URL || 'http://localhost:4001';
+    return process.env.INTERNAL_API_URL || 'http://localhost:4201';
 };
 
 export async function fetchPrograms(): Promise<Program[]> {
@@ -71,7 +71,7 @@ export async function fetchPrograms(): Promise<Program[]> {
             if (typeof window === 'undefined' && !baseUrl.includes('localhost')) {
                 console.warn(`[API] Internal fetch failed, retrying localhost...`);
                 try {
-                    const fallbackRes = await fetch(`http://localhost:4001/api/programs`, { cache: 'no-store' });
+                    const fallbackRes = await fetch(`http://localhost:4201/api/programs`, { cache: 'no-store' });
                     if (fallbackRes.ok) {
                         const fallbackJson = await fallbackRes.json();
                         return fallbackJson.data || [];
@@ -86,7 +86,7 @@ export async function fetchPrograms(): Promise<Program[]> {
         // If the first fetch completely failed (network error), try fallback for server-side hybrid dev
         if (typeof window === 'undefined' && !baseUrl.includes('localhost')) {
             try {
-                const fallbackRes = await fetch(`http://localhost:4001/api/programs`, { cache: 'no-store' });
+                const fallbackRes = await fetch(`http://localhost:4201/api/programs`, { cache: 'no-store' });
                 if (fallbackRes.ok) {
                     const fallbackJson = await fallbackRes.json();
                     return fallbackJson.data || [];
@@ -111,7 +111,7 @@ export async function fetchProgramByCode(code: string): Promise<Program | null> 
         if (!res.ok) {
             if (typeof window === 'undefined' && !baseUrl.includes('localhost')) {
                 try {
-                    const fallbackRes = await fetch(`http://localhost:4001/api/programs/code/${code}`, { cache: 'no-store' });
+                    const fallbackRes = await fetch(`http://localhost:4201/api/programs/code/${code}`, { cache: 'no-store' });
                     if (fallbackRes.ok) return fallbackRes.json();
                 } catch (e) { }
             }
@@ -122,7 +122,7 @@ export async function fetchProgramByCode(code: string): Promise<Program | null> 
     } catch (error) {
         if (typeof window === 'undefined' && !baseUrl.includes('localhost')) {
             try {
-                const fallbackRes = await fetch(`http://localhost:4001/api/programs/code/${code}`, { cache: 'no-store' });
+                const fallbackRes = await fetch(`http://localhost:4201/api/programs/code/${code}`, { cache: 'no-store' });
                 if (fallbackRes.ok) return fallbackRes.json();
                 if (fallbackRes.status === 404) return null;
             } catch (e) {

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Breadcrumb from '@/components/Breadcrumb';
 import { AcademicServiceItem, getStatusLabel } from '@/lib/academic-services';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4201';
 
 async function getServices(): Promise<AcademicServiceItem[]> {
     try {

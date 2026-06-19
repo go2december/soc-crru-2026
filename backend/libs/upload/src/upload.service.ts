@@ -301,7 +301,7 @@ export class UploadService {
       await fs.promises.access(filepath);
       await fs.promises.unlink(filepath);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

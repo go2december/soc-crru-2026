@@ -29,7 +29,7 @@ export const dynamic = 'force-dynamic';
 
 async function getActivities(page = 1, limit = 9) {
     try {
-        const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:4001';
+        const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:4201';
         const res = await fetch(`${baseUrl}/api/chiang-rai/activities?page=${page}&limit=${limit}`, {
             cache: 'no-store'
         });

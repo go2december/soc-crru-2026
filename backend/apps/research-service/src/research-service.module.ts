@@ -4,6 +4,8 @@ import { PassportModule } from '@nestjs/passport';
 import { DatabaseModule } from 'db/database';
 import { UploadModule } from 'upload/upload';
 import { JwtStrategy } from 'shared/shared';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { ResearchModule } from './research/research.module';
 import { AcademicServicesModule } from './academic-services/academic-services.module';
 
@@ -13,10 +15,22 @@ import { AcademicServicesModule } from './academic-services/academic-services.mo
     DatabaseModule,
     UploadModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100, // 100 requests per minute
+      },
+    ]),
     ResearchModule,
     AcademicServicesModule,
   ],
   controllers: [],
-  providers: [JwtStrategy],
+  providers: [
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class ResearchServiceModule {}

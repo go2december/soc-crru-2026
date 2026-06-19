@@ -23,4 +23,4 @@ async function bootstrap() {
     `🚀 Programs Service is running on: http://localhost:${port}/api`,
   );
 }
-bootstrap();
+void bootstrap();

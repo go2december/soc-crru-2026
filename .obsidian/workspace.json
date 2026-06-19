@@ -11,17 +11,10 @@
             "id": "84574fc06f4d530e",
             "type": "leaf",
             "state": {
-              "type": "canvas",
-              "state": {
-                "file": "Untitled.canvas",
-                "viewState": {
-                  "x": 0,
-                  "y": 0,
-                  "zoom": 0
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "Untitled"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -185,8 +178,8 @@
   },
   "active": "84574fc06f4d530e",
   "lastOpenFiles": [
-    "2026-06-18.md",
     "Untitled.canvas",
+    "2026-06-18.md",
     "backend/node_modules/drizzle-orm/table.utils.js.map",
     "backend/node_modules/drizzle-orm/errors.js.map",
     "backend/node_modules/drizzle-orm/column-builder.d.cts",
@@ -221,7 +214,6 @@
     "backend/node_modules/cors/CONTRIBUTING.md",
     "backend/node_modules/bser/README.md",
     "backend/nest-service/node_modules/find-up/readme.md",
-    "backend/nest-service/node_modules/cli-cursor/readme.md",
     "backend/nest-service/node_modules/istanbul-reports/lib/html-spa/assets/sort-arrow-sprite.png",
     "backend/nest-service/node_modules/istanbul-reports/lib/html/assets/sort-arrow-sprite.png",
     "backend/nest-service/node_modules/istanbul-reports/lib/html/assets/favicon.png",

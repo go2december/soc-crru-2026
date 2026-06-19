@@ -21,4 +21,4 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
   console.log(`🚀 Staff Service is running on: http://localhost:${port}/api`);
 }
-bootstrap();
+void bootstrap();

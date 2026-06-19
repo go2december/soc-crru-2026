@@ -91,7 +91,7 @@ export interface PaginatedResult<T> {
 }
 
 export async function fetchFacultyNewsList(category?: string, page: number = 1, limit?: number): Promise<PaginatedResult<FacultyNewsItem>> {
-  const apiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4001';
+  const apiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4201';
   let queryStr = '';
   const params = new URLSearchParams();
   if (category) params.append('category', category);
@@ -112,7 +112,7 @@ export async function fetchFacultyNewsList(category?: string, page: number = 1, 
 }
 
 export async function fetchFacultyNewsBySlug(slug: string): Promise<FacultyNewsItem | null> {
-  const apiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4001';
+  const apiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4201';
 
   try {
     const res = await fetch(`${apiUrl}/api/news/slug/${slug}`, { cache: 'no-store' });
