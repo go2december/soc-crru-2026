@@ -275,7 +275,7 @@ export default function AdminResearchPage() {
               label="ผลผลิตวิชาการรวม"
               value={stats.outputCount}
               sub="บทความ / งานตีพิมพ์ทั้งหมด"
-              color="bg-violet-500"
+              color="bg-cyan-500"
             />
             <StatCard
               icon={TrendingUp}
@@ -338,7 +338,7 @@ export default function AdminResearchPage() {
                     {stats.topSdgs.map((sdg, i) => {
                       const sdgColors = [
                         'bg-red-500', 'bg-amber-500', 'bg-green-500',
-                        'bg-blue-500', 'bg-violet-500',
+                        'bg-blue-500', 'bg-teal-500',
                       ];
                       const maxCount = stats.topSdgs[0]?.count || 1;
                       const pct = Math.round((sdg.count / maxCount) * 100);

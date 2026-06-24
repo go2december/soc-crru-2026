@@ -151,7 +151,10 @@ async function main() {
             status: 'ONGOING' as const,
             isSocialService: true,
             isPublished: true,
-            sdgIds: [11, 13]
+            sdgIds: [11, 13],
+            locations: [
+                { subDistrict: 'เวียงพางคำ', district: 'แม่สาย', province: 'เชียงราย', lat: 20.4272, lng: 99.8789 }
+            ]
         },
         {
             slug: 'lanna-rice-nutrition-dev',
@@ -164,20 +167,27 @@ async function main() {
             status: 'COMPLETED' as const,
             isCommercial: true,
             isPublished: true,
-            sdgIds: [2, 9]
+            sdgIds: [2, 9],
+            locations: [
+                { subDistrict: 'บ้านดู่', district: 'เมืองเชียงราย', province: 'เชียงราย', lat: 19.9806, lng: 99.8519 }
+            ]
         },
         {
             slug: 'social-impact-tourism-hilltribe',
             titleTh: 'ผลกระทบทางสังคมจากการท่องเที่ยวเชิงชาติพันธุ์ต่อวิถีชีวิตกลุ่มชาติพันธุ์บนดอยแม่สลอง',
             titleEn: 'Social Impacts of Ethnic Tourism on the Livelihoods of Ethnic Groups in Doi Mae Salong',
             abstractTh: 'งานวิจัยเชิงมานุษยวิทยาเพื่อศึกษาการเปลี่ยนแปลงทางสังคมและวัฒนธรรมของชาวอาข่าและลาหู่จากการขยายตัวของการท่องเที่ยวในพื้นที่สูง',
+            abstractEn: 'An anthropological study to investigate the socio-cultural changes of Akha and Lahu ethnic groups resulting from the expansion of ethnic tourism in the highland areas of Doi Mae Salong.',
             year: 2568,
             budget: '180000.00',
             fundingSource: 'กองทุนส่งเสริมวิทยาศาสตร์ วิจัยและนวัตกรรม (สวพ.)',
-            status: 'ONGOING' as const,
+            status: 'PUBLISHED' as const,
             isSocialService: true,
             isPublished: true,
-            sdgIds: [8, 10]
+            sdgIds: [8, 10],
+            locations: [
+                { subDistrict: 'แม่สลองนอก', district: 'แม่ฟ้าหลวง', province: 'เชียงราย', lat: 20.1636, lng: 99.6228 }
+            ]
         }
     ];
 
@@ -211,30 +221,51 @@ async function main() {
         // Research
         console.log('\n🧪 Seeding Research Projects...');
         for (const item of researchProjectsData) {
-            const { sdgIds, ...project } = item;
+            const { sdgIds, locations, ...project } = item;
             const existing = await db.select().from(schema.researchProjects).where(eq(schema.researchProjects.slug, project.slug));
             
             let projectId;
             if (existing.length === 0) {
                 const inserted = await db.insert(schema.researchProjects).values(project).returning({ id: schema.researchProjects.id });
                 projectId = inserted[0].id;
-                console.log(`  ✅ ${project.titleTh}`);
-                
-                // Add SDGs
-                for (const sdgId of sdgIds) {
-                    await db.insert(schema.projectSdgs).values({ projectId, sdgId });
-                }
+                console.log(`  ✅ Created project: ${project.titleTh}`);
+            } else {
+                await db.update(schema.researchProjects).set(project).where(eq(schema.researchProjects.slug, project.slug));
+                projectId = existing[0].id;
+                console.log(`  🔄 Updated project: ${project.titleTh}`);
+            }
 
-                // Add Mock Members (Randomly pick some staff)
-                const allStaff = await db.select().from(schema.staffProfiles).limit(3);
-                if (allStaff.length > 0) {
-                    await db.insert(schema.projectMembers).values({
+            // Sync SDGs
+            await db.delete(schema.projectSdgs).where(eq(schema.projectSdgs.projectId, projectId));
+            for (const sdgId of sdgIds) {
+                await db.insert(schema.projectSdgs).values({ projectId, sdgId });
+            }
+
+            // Sync Locations
+            await db.delete(schema.projectLocations).where(eq(schema.projectLocations.projectId, projectId));
+            if (locations) {
+                for (const loc of locations) {
+                    await db.insert(schema.projectLocations).values({
                         projectId,
-                        staffProfileId: allStaff[0].id,
-                        role: 'HEAD' as const,
-                        sortOrder: 1
+                        subDistrict: loc.subDistrict,
+                        district: loc.district,
+                        province: loc.province,
+                        lat: loc.lat,
+                        lng: loc.lng
                     });
                 }
+            }
+
+            // Sync Members (Mock)
+            await db.delete(schema.projectMembers).where(eq(schema.projectMembers.projectId, projectId));
+            const allStaff = await db.select().from(schema.staffProfiles).limit(3);
+            if (allStaff.length > 0) {
+                await db.insert(schema.projectMembers).values({
+                    projectId,
+                    staffProfileId: allStaff[0].id,
+                    role: 'HEAD' as const,
+                    sortOrder: 1
+                });
             }
         }
 

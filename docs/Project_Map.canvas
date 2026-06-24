@@ -1,0 +1,116 @@
+{
+  "nodes": [
+    {
+      "id": "e000000000000000",
+      "type": "text",
+      "text": "# 🗺️ SOC-CRRU Vault Map & Architecture\nนี่คือแผนผังความเชื่อมโยงไฟล์สำคัญต่าง ๆ ใน Obsidian Vault นี้เพื่อใช้ในการบริหารจัดการโปรเจกต์และนำทาง",
+      "x": 0,
+      "y": -200,
+      "width": 800,
+      "height": 120,
+      "color": "#10B981"
+    },
+    {
+      "id": "e000000000000001",
+      "type": "file",
+      "file": "docs/00_Dashboard.md",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 600,
+      "color": "#10B981"
+    },
+    {
+      "id": "e000000000000002",
+      "type": "file",
+      "file": "docs/01_Active_Tasks/Current_Status.md",
+      "x": 500,
+      "y": 0,
+      "width": 450,
+      "height": 600,
+      "color": "#EF4444"
+    },
+    {
+      "id": "e000000000000003",
+      "type": "file",
+      "file": "docs/01_Active_Tasks/Phase_2_Polish_Population.md",
+      "x": 1050,
+      "y": 0,
+      "width": 450,
+      "height": 600,
+      "color": "#F59E0B"
+    },
+    {
+      "id": "e000000000000004",
+      "type": "file",
+      "file": "docs/02_Architecture/CR-STD-Structure.txt",
+      "x": 500,
+      "y": 700,
+      "width": 450,
+      "height": 600,
+      "color": "#3B82F6"
+    },
+    {
+      "id": "e000000000000005",
+      "type": "file",
+      "file": "docs/03_Prompts_Rules/Available_AI_Skills.md",
+      "x": 0,
+      "y": 700,
+      "width": 400,
+      "height": 600,
+      "color": "#8B5CF6"
+    },
+    {
+      "id": "e000000000000006",
+      "type": "file",
+      "file": "docs/99_Archive/Academic_Services_CRUD.md",
+      "x": 1050,
+      "y": 700,
+      "width": 450,
+      "height": 600,
+      "color": "#6B7280"
+    }
+  ],
+  "edges": [
+    {
+      "id": "ea00000000000001",
+      "fromNode": "e000000000000001",
+      "fromSide": "right",
+      "toNode": "e000000000000002",
+      "toSide": "left",
+      "color": "#10B981"
+    },
+    {
+      "id": "ea00000000000002",
+      "fromNode": "e000000000000002",
+      "fromSide": "right",
+      "toNode": "e000000000000003",
+      "toSide": "left",
+      "color": "#EF4444"
+    },
+    {
+      "id": "ea00000000000003",
+      "fromNode": "e000000000000001",
+      "fromSide": "bottom",
+      "toNode": "e000000000000005",
+      "toSide": "top",
+      "color": "#8B5CF6"
+    },
+    {
+      "id": "ea00000000000004",
+      "fromNode": "e000000000000001",
+      "fromSide": "bottom",
+      "toNode": "e000000000000004",
+      "toSide": "top",
+      "color": "#3B82F6"
+    },
+    {
+      "id": "ea00000000000005",
+      "fromNode": "e000000000000003",
+      "fromSide": "bottom",
+      "toNode": "e000000000000006",
+      "toSide": "top",
+      "color": "#6B7280"
+    }
+  ]
+}

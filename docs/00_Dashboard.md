@@ -13,6 +13,7 @@ aliases: ["Index", "Home"]
 
 ## 🚀 1. Active Space (พื้นที่ทำงานปัจจุบัน)
 โฟลเดอร์นี้ใช้เป็นจุดพักไฟล์สำหรับฟีเจอร์หรือบัคที่เรากำลังแก้อยู่ **(ห้ามเก็บของเก่าไว้เด็ดขาด)**
+- `[[Project_Map.canvas|🗺️ Project Visual Map]]` (แผนที่เชื่อมโยงโปรเจกต์เชิงภาพ)
 - `[[01_Active_Tasks/Phase_2_Polish_Population.md]]` (งานปัจจุบัน: ขัดเกลา UI และเพิ่มเนื้อหา Phase 2)
 - `[[01_Active_Tasks/Current_Status.md]]` (ภาพรวมสถานะล่าสุด)
 - **วิธีสั่ง AI:** "เข้าไปอ่านรายละเอียดที่ 01_Active_Tasks/Phase_2_Polish_Population.md แล้วเริ่มทำงานได้เลย"

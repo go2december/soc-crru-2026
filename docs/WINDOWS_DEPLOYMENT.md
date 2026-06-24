@@ -7,7 +7,7 @@
 ## 📋 สิ่งที่ต้องจัดเตรียมและติดตั้งใน Windows Server
 
 ### 1. ติดตั้ง Node.js
-1. ดาวน์โหลด **Node.js v22.x LTS** (Windows Installer `.msi`) จาก [Node.js Official Site](https://nodejs.org/)
+1. ดาวน์โหลด **Node.js v26.x** (หรือเวอร์ชันที่ระบุในไฟล์ `.nvmrc`) (Windows Installer `.msi`) จาก [Node.js Official Site](https://nodejs.org/)
 2. ทำการติดตั้งตามปกติ และตรวจสอบเวอร์ชันผ่าน Command Prompt (cmd) หรือ PowerShell:
    ```cmd
    node -v

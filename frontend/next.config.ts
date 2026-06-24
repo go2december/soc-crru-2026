@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '4201',
+        port: '4501',
         pathname: '/**',
       },
       {
@@ -48,7 +48,7 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: 'soc_backend',
-        port: '4201',
+        port: '4501',
         pathname: '/**',
       },
       {
@@ -78,7 +78,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const internalApiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4201';
+    const internalApiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4501';
     return [
       {
         source: '/api/:path*',

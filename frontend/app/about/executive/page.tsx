@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Breadcrumb from '@/components/Breadcrumb';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Crown, Users, UserCircle2, UserX } from 'lucide-react';
+import { Crown, UserCircle2, UserX } from 'lucide-react';
 
 // Types ตาม Backend Schema ใหม่
 interface Staff {
@@ -87,17 +87,17 @@ const executiveTiers = [
 ];
 
 const StaffCard = ({ staff }: { staff: Staff }) => (
-    <Link href={`/about/staff/${staff.id}`} className="bg-white rounded-2xl shadow-sm border border-gray-100 border-scholar-accent/20 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden flex flex-col relative w-full block">
+    <Link href={`/about/staff/${staff.id}`} className="bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(15,23,42,0.06)] hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden flex flex-col relative w-full block">
 
         {/* Executive Badge */}
         <div className="absolute top-4 right-4 z-10">
-            <div className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-sm text-amber-500 flex items-center justify-center shadow-lg border border-amber-100">
+            <div className="w-9 h-9 rounded-full bg-white/95 text-scholar-accent flex items-center justify-center shadow-md border border-slate-100/50">
                 <Crown className="w-5 h-5" />
             </div>
         </div>
 
-        <div className="pt-6 px-6 bg-gradient-to-b from-gray-50/50 to-white flex justify-center">
-            <figure className="aspect-[3/4] w-[70%] bg-gray-100 relative overflow-hidden flex-shrink-0 rounded-2xl shadow-sm border border-gray-100/50 group-hover:shadow-md transition-shadow duration-300">
+        <div className="pt-6 px-6 bg-slate-50/50 flex justify-center">
+            <figure className="aspect-[3/4] w-[75%] bg-slate-100 relative overflow-hidden flex-shrink-0 rounded-xl border border-slate-100 group-hover:scale-103 transition-transform duration-500">
                 {staff.imageUrl ? (
                     <Image
                         src={getImageUrl(staff.imageUrl)}
@@ -107,22 +107,21 @@ const StaffCard = ({ staff }: { staff: Staff }) => (
                         className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
                 ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-100/50">
-                        <UserCircle2 className="w-16 h-16 md:w-20 md:h-20 mb-2 text-gray-300" strokeWidth={1} />
+                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-100">
+                        <UserCircle2 className="w-16 h-16 md:w-20 md:h-20 mb-2 text-slate-300" strokeWidth={1} />
                     </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </figure>
         </div>
 
-        <div className="p-5 flex flex-col items-center text-center flex-grow relative bg-white">
-            <h3 className="text-lg font-bold text-gray-900 mb-1.5 leading-snug group-hover:text-scholar-deep transition-colors line-clamp-2">
+        <div className="p-6 flex flex-col items-center text-center flex-grow relative bg-white">
+            <h3 className="text-base font-bold text-slate-800 mb-2 leading-snug group-hover:text-scholar-accent transition-colors duration-200 line-clamp-2">
                 {getFullName(staff)}
             </h3>
 
-            <p className="text-sm font-medium leading-relaxed line-clamp-3 text-scholar-accent">
+            <p className="text-xs font-semibold text-slate-400 leading-relaxed line-clamp-3">
                 {staff.adminPosition || staff.academicPosition || ''}
-                {staff.adminPosition && (staff.adminPosition.includes('ประธานสาขา') || staff.adminPosition.includes('ประธานแขนง')) && staff.department ? `${staff.department.replace(/สาขาวิชา|แขนงวิชา/g, '').trim()}` : ''}
+                {staff.adminPosition && (staff.adminPosition.includes('ประธานสาขา') || staff.adminPosition.includes('ประธานแขนง')) && staff.department ? ` - ${staff.department.replace(/สาขาวิชา|แขนงวิชา/g, '').trim()}` : ''}
             </p>
         </div>
     </Link>
@@ -159,19 +158,17 @@ export default function ExecutivePage() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-gray-50 pb-20 font-sans">
+        <main className="min-h-screen bg-slate-50 pb-20 font-sans">
             {/* Hero Header */}
-            <section className="bg-scholar-deep text-white pt-20 pb-24 px-4 relative overflow-hidden border-b border-scholar-deep/10">
-                <div className="absolute inset-0 opacity-5 bg-[url('/images/pattern.png')] bg-repeat"></div>
-
+            <section className="bg-scholar-deep text-white pt-20 pb-24 px-4 relative overflow-hidden border-b-4 border-scholar-accent/20">
                 <div className="relative z-10 container mx-auto flex flex-col items-start text-left">
-                    <div className="px-3 py-1 bg-white/10 backdrop-blur-sm border-l-4 border-amber-500 text-sm font-semibold mb-8 flex items-center gap-2 text-white">
-                        <Crown className="w-4 h-4 text-amber-500" /> คณะผู้บริหาร
+                    <div className="px-4 py-1 bg-white/10 text-white backdrop-blur-sm border border-white/20 rounded-full text-xs font-semibold tracking-wide mb-8 flex items-center gap-2">
+                        <Crown className="w-4 h-4 text-scholar-accent" /> คณะผู้บริหาร / EXECUTIVE BOARD
                     </div>
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight font-heading leading-[1.1] max-w-4xl">
-                        คณะผู้บริหารคณะสังคมศาสตร์
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight font-heading leading-none max-w-4xl">
+                        คณะผู้บริหาร
                     </h1>
-                    <p className="text-lg md:text-2xl text-blue-100/80 font-normal max-w-2xl leading-relaxed">
+                    <p className="text-lg md:text-xl text-slate-300 font-normal max-w-2xl leading-relaxed">
                         Executive Board of the Faculty of Social Sciences
                     </p>
                 </div>
@@ -192,11 +189,11 @@ export default function ExecutivePage() {
                     </div>
                 ) : error ? (
                     <div className="text-center py-20">
-                        <div className="text-6xl mb-4">⚠️</div>
-                        <p className="text-xl text-red-500">{error}</p>
+                        <div className="text-4xl mb-4">⚠️</div>
+                        <p className="text-lg font-bold text-scholar-error">{error}</p>
                     </div>
                 ) : staffList.length > 0 ? (
-                    <div className="flex flex-col space-y-12 md:space-y-16">
+                    <div className="flex flex-col space-y-16">
                         {executiveTiers
                             .map((tier) => {
                                 const tierStaff = staffList.filter(s => s.adminPositionId !== null && tier.ids.includes(s.adminPositionId));
@@ -211,9 +208,19 @@ export default function ExecutivePage() {
 
                                 return (
                                     <div key={tier.level} className="flex flex-col items-center relative animate-fade-in w-full">
+                                        {/* Tier Heading */}
+                                        <div className="w-full border-b border-slate-200/80 pb-4 mb-10 flex items-end justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <span className="w-1.5 h-6 bg-scholar-accent rounded-full"></span>
+                                                <h2 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight font-heading">
+                                                    {tier.title}
+                                                </h2>
+                                            </div>
+                                            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">LEVEL 0{tier.level}</span>
+                                        </div>
                                         <div className="flex flex-wrap justify-center gap-6 lg:gap-8 w-full">
                                             {tierStaff.map(staff => (
-                                                <div key={staff.id} className="w-full max-w-[300px]">
+                                                <div key={staff.id} className="w-full max-w-[280px]">
                                                     <StaffCard staff={staff} />
                                                 </div>
                                             ))}
@@ -226,17 +233,17 @@ export default function ExecutivePage() {
                                 <React.Fragment key={index}>
                                     {section}
                                     {index < array.length - 1 && (
-                                        <div className="w-full max-w-4xl mx-auto border-t border-dashed border-gray-300 my-8"></div>
+                                        <div className="w-full border-t border-slate-200/60 my-16"></div>
                                     )}
                                 </React.Fragment>
                             ))}
                     </div>
                 ) : (
-                    <div className="text-center py-24 bg-gray-50/50 rounded-3xl border border-gray-100/50 backdrop-blur-sm">
-                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-gray-100">
-                            <UserX className="w-10 h-10 text-gray-300" />
+                    <div className="text-center py-24 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.02)]">
+                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-100">
+                            <UserX className="w-10 h-10 text-slate-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-700 mb-2">ไม่พบข้อมูลคณะผู้บริหาร</h3>
+                        <h3 className="text-xl font-bold text-slate-700 mb-2">ไม่พบข้อมูลคณะผู้บริหาร</h3>
                     </div>
                 )}
             </section>
