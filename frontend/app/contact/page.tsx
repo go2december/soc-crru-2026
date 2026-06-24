@@ -81,9 +81,9 @@ export default function ContactPage() {
               </h3>
 
               <div className="space-y-4">
-                {/* Telephone */}
+                {/* Telephone 1 */}
                 <a
-                  href="tel:053776000"
+                  href="tel:053776000,1211"
                   className="flex items-center justify-between p-4 rounded-xl bg-slate-50/50 hover:bg-slate-50 border border-slate-50 hover:border-slate-100 transition-all duration-200 group"
                 >
                   <div className="flex items-center gap-4">
@@ -91,8 +91,25 @@ export default function ContactPage() {
                       <Phone size={18} />
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Telephone</span>
-                      <span className="text-sm font-bold text-scholar-deep group-hover:text-scholar-accent transition-colors">053-776-000 ต่อ 1500</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Telephone (เบอร์หลัก)</span>
+                      <span className="text-sm font-bold text-scholar-deep group-hover:text-scholar-accent transition-colors">053-776-000 ต่อ 1211</span>
+                    </div>
+                  </div>
+                  <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+                </a>
+
+                {/* Telephone 2 */}
+                <a
+                  href="tel:053702870"
+                  className="flex items-center justify-between p-4 rounded-xl bg-slate-50/50 hover:bg-slate-50 border border-slate-50 hover:border-slate-100 transition-all duration-200 group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                      <Phone size={18} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Telephone (เบอร์ตรง)</span>
+                      <span className="text-sm font-bold text-scholar-deep group-hover:text-scholar-accent transition-colors">053-702-870</span>
                     </div>
                   </div>
                   <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
