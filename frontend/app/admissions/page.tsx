@@ -120,12 +120,12 @@ export default function AdmissionPage() {
                             </p>
                             <div className="flex flex-wrap gap-3 pt-2">
                                 <Link href={bachelorLink} target="_blank"
-                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-scholar-accent text-white font-semibold shadow-lg hover:bg-scholar-accent/90 hover:scale-105 transition-all duration-200">
+                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-scholar-accent text-white font-semibold shadow-lg [@media(hover:hover)]:hover:bg-scholar-accent/90 [@media(hover:hover)]:hover:scale-103 btn-press-active transition-[background-color,transform,box-shadow] duration-150">
                                     <GraduationCap className="w-5 h-5" />
                                     สมัครเรียนปริญญาตรี
                                 </Link>
                                 <Link href={graduateLink} target="_blank"
-                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-white/15 backdrop-blur-sm border border-white/30 text-white font-semibold hover:bg-white/25 hover:scale-105 transition-all duration-200">
+                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-white/15 backdrop-blur-sm border border-white/30 text-white font-semibold [@media(hover:hover)]:hover:bg-white/25 [@media(hover:hover)]:hover:scale-103 btn-press-active transition-[background-color,transform] duration-150">
                                     <BookOpen className="w-5 h-5" />
                                     สมัครบัณฑิตศึกษา
                                 </Link>
@@ -141,37 +141,37 @@ export default function AdmissionPage() {
                 {/* ─── 2. QUICK LINKS (3 tracks) ─────────────────────── */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8">
                     <Link href={bachelorLink} target="_blank"
-                        className="group bg-white rounded-sm shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center hover:shadow-xl hover:border-scholar-accent/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                        <div className="w-16 h-16 rounded-sm bg-sky-50 text-sky-600 flex items-center justify-center mb-5 group-hover:bg-sky-100 group-hover:scale-110 transition-all">
+                        className="group bg-white rounded-sm shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center card-hover [@media(hover:hover)]:hover:border-scholar-accent/40 btn-press-active cursor-pointer">
+                        <div className="w-16 h-16 rounded-sm bg-sky-50 text-sky-600 flex items-center justify-center mb-5 [@media(hover:hover)]:group-hover:bg-sky-100 [@media(hover:hover)]:group-hover:scale-110 transition-[background-color,transform] duration-200 ease-out">
                             <GraduationCap className="w-8 h-8" />
                         </div>
-                        <h2 className="text-xl font-bold text-scholar-deep mb-2 group-hover:text-scholar-accent transition-colors">ระดับปริญญาตรี</h2>
+                        <h2 className="text-xl font-bold text-scholar-deep mb-2 [@media(hover:hover)]:group-hover:text-scholar-accent transition-colors duration-150">ระดับปริญญาตรี</h2>
                         <p className="text-gray-500 text-sm mb-5 leading-relaxed">เปิดรับสมัครบุคคลเข้าศึกษาต่อ ระดับปริญญาตรี สำหรับ ม.6 / ปวช. หรือเทียบเท่า</p>
-                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-sky-600 text-white rounded-sm text-sm font-medium group-hover:bg-scholar-accent transition-colors">
+                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-sky-600 text-white rounded-sm text-sm font-medium [@media(hover:hover)]:group-hover:bg-scholar-accent transition-colors duration-150">
                             ไปที่ระบบรับสมัคร <ChevronRight className="w-4 h-4" />
                         </span>
                     </Link>
 
                     <Link href={graduateLink} target="_blank"
-                        className="group bg-white rounded-sm shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center hover:shadow-xl hover:border-scholar-accent/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                        <div className="w-16 h-16 rounded-sm bg-indigo-50 text-indigo-600 flex items-center justify-center mb-5 group-hover:bg-indigo-100 group-hover:scale-110 transition-all">
+                        className="group bg-white rounded-sm shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center card-hover [@media(hover:hover)]:hover:border-scholar-accent/40 btn-press-active cursor-pointer">
+                        <div className="w-16 h-16 rounded-sm bg-indigo-50 text-indigo-600 flex items-center justify-center mb-5 [@media(hover:hover)]:group-hover:bg-indigo-100 [@media(hover:hover)]:group-hover:scale-110 transition-[background-color,transform] duration-200 ease-out">
                             <BookOpen className="w-8 h-8" />
                         </div>
-                        <h2 className="text-xl font-bold text-scholar-deep mb-2 group-hover:text-scholar-accent transition-colors">ระดับบัณฑิตศึกษา</h2>
+                        <h2 className="text-xl font-bold text-scholar-deep mb-2 [@media(hover:hover)]:group-hover:text-scholar-accent transition-colors duration-150">ระดับบัณฑิตศึกษา</h2>
                         <p className="text-gray-500 text-sm mb-5 leading-relaxed">ปริญญาโท และ ปริญญาเอก (ภาคปกติ / ภาคพิเศษ)</p>
-                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white rounded-sm text-sm font-medium group-hover:bg-scholar-accent transition-colors">
+                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white rounded-sm text-sm font-medium [@media(hover:hover)]:group-hover:bg-scholar-accent transition-colors duration-150">
                             ไปที่ระบบบัณฑิต <ChevronRight className="w-4 h-4" />
                         </span>
                     </Link>
 
                     <Link href="/programs"
-                        className="group bg-white rounded-sm shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center hover:shadow-xl hover:border-scholar-accent/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                        <div className="w-16 h-16 rounded-sm bg-amber-50 text-amber-600 flex items-center justify-center mb-5 group-hover:bg-amber-100 group-hover:scale-110 transition-all">
+                        className="group bg-white rounded-sm shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center card-hover [@media(hover:hover)]:hover:border-scholar-accent/40 btn-press-active cursor-pointer">
+                        <div className="w-16 h-16 rounded-sm bg-amber-50 text-amber-600 flex items-center justify-center mb-5 [@media(hover:hover)]:group-hover:bg-amber-100 [@media(hover:hover)]:group-hover:scale-110 transition-[background-color,transform] duration-200 ease-out">
                             <Sparkles className="w-8 h-8" />
                         </div>
-                        <h2 className="text-xl font-bold text-scholar-deep mb-2 group-hover:text-scholar-accent transition-colors">หลักสูตรทั้งหมด</h2>
+                        <h2 className="text-xl font-bold text-scholar-deep mb-2 [@media(hover:hover)]:group-hover:text-scholar-accent transition-colors duration-150">หลักสูตรทั้งหมด</h2>
                         <p className="text-gray-500 text-sm mb-5 leading-relaxed">ดูรายละเอียดทุกหลักสูตรที่เปิดสอน พร้อมข้อมูลรายวิชา</p>
-                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-amber-500 text-white rounded-sm text-sm font-medium group-hover:bg-scholar-accent transition-colors">
+                        <span className="mt-auto inline-flex items-center gap-1.5 px-5 py-2 bg-amber-500 text-white rounded-sm text-sm font-medium [@media(hover:hover)]:group-hover:bg-scholar-accent transition-colors duration-150">
                             ดูหลักสูตร <ChevronRight className="w-4 h-4" />
                         </span>
                     </Link>

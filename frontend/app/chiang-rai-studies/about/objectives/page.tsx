@@ -29,8 +29,8 @@ export default function ObjectivesPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
                         {/* Obj 1 */}
-                        <div className="bg-white p-8 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-100 group">
-                            <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform">
+                        <div className="bg-white p-8 rounded-[2rem] border border-stone-100/50 card-hover group">
+                            <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 mb-6 [@media(hover:hover)]:group-hover:scale-110 transition-transform duration-200 ease-out">
                                 <Database size={28} />
                             </div>
                             <h3 className="text-xl font-bold text-[#2e1065] mb-3">1. ศูนย์กลางข้อมูลองค์ความรู้</h3>
@@ -40,8 +40,8 @@ export default function ObjectivesPage() {
                         </div>
 
                         {/* Obj 2 */}
-                        <div className="bg-white p-8 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-100 group">
-                            <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 mb-6 group-hover:scale-110 transition-transform">
+                        <div className="bg-white p-8 rounded-[2rem] border border-stone-100/50 card-hover group">
+                            <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 mb-6 [@media(hover:hover)]:group-hover:scale-110 transition-transform duration-200 ease-out">
                                 <Search size={28} />
                             </div>
                             <h3 className="text-xl font-bold text-[#2e1065] mb-3">2. รวบรวม อนุรักษ์ และเผยแพร่</h3>
@@ -51,8 +51,8 @@ export default function ObjectivesPage() {
                         </div>
 
                         {/* Obj 3 */}
-                        <div className="bg-white p-8 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-100 group">
-                            <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform">
+                        <div className="bg-white p-8 rounded-[2rem] border border-stone-100/50 card-hover group">
+                            <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 mb-6 [@media(hover:hover)]:group-hover:scale-110 transition-transform duration-200 ease-out">
                                 <BookOpenCheck size={28} />
                             </div>
                             <h3 className="text-xl font-bold text-[#2e1065] mb-3">3. ส่งเสริมการวิจัยและการศึกษา</h3>
@@ -62,8 +62,8 @@ export default function ObjectivesPage() {
                         </div>
 
                         {/* Obj 4 */}
-                        <div className="bg-white p-8 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-100 group lg:col-span-2 lg:w-3/4 lg:mx-auto">
-                            <div className="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:scale-110 transition-transform">
+                        <div className="bg-white p-8 rounded-[2rem] border border-stone-100/50 card-hover group lg:col-span-2 lg:w-3/4 lg:mx-auto">
+                            <div className="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center text-rose-600 mb-6 [@media(hover:hover)]:group-hover:scale-110 transition-transform duration-200 ease-out">
                                 <Heart size={28} />
                             </div>
                             <h3 className="text-xl font-bold text-[#2e1065] mb-3">4. สร้างความตระหนักและภาคภูมิใจ</h3>
@@ -73,8 +73,8 @@ export default function ObjectivesPage() {
                         </div>
 
                         {/* Obj 5 */}
-                        <div className="bg-white p-8 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-100 group lg:col-span-1">
-                            <div className="w-14 h-14 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-600 mb-6 group-hover:scale-110 transition-transform">
+                        <div className="bg-white p-8 rounded-[2rem] border border-stone-100/50 card-hover group lg:col-span-1">
+                            <div className="w-14 h-14 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-600 mb-6 [@media(hover:hover)]:group-hover:scale-110 transition-transform duration-200 ease-out">
                                 <Network size={28} />
                             </div>
                             <h3 className="text-xl font-bold text-[#2e1065] mb-3">5. ศูนย์กลางประสานงานเครือข่าย</h3>

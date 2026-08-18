@@ -87,7 +87,7 @@ const executiveTiers = [
 ];
 
 const StaffCard = ({ staff }: { staff: Staff }) => (
-    <Link href={`/about/staff/${staff.id}`} className="bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(15,23,42,0.06)] hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden flex flex-col relative w-full block">
+    <Link href={`/about/staff/${staff.id}`} className="bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] card-hover btn-press-active group overflow-hidden flex flex-col relative w-full block">
 
         {/* Executive Badge */}
         <div className="absolute top-4 right-4 z-10">
@@ -97,14 +97,14 @@ const StaffCard = ({ staff }: { staff: Staff }) => (
         </div>
 
         <div className="pt-6 px-6 bg-slate-50/50 flex justify-center">
-            <figure className="aspect-[3/4] w-[75%] bg-slate-100 relative overflow-hidden flex-shrink-0 rounded-xl border border-slate-100 group-hover:scale-103 transition-transform duration-500">
+            <figure className="aspect-[3/4] w-[75%] bg-slate-100 relative overflow-hidden flex-shrink-0 rounded-xl border border-slate-100 [@media(hover:hover)]:group-hover:scale-103 transition-transform duration-200 ease-out">
                 {staff.imageUrl ? (
                     <Image
                         src={getImageUrl(staff.imageUrl)}
                         alt={getFullName(staff)}
                         fill
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        className="object-cover transition-transform duration-200 ease-out [@media(hover:hover)]:group-hover:scale-105"
                     />
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-100">
@@ -115,7 +115,7 @@ const StaffCard = ({ staff }: { staff: Staff }) => (
         </div>
 
         <div className="p-6 flex flex-col items-center text-center flex-grow relative bg-white">
-            <h3 className="text-base font-bold text-slate-800 mb-2 leading-snug group-hover:text-scholar-accent transition-colors duration-200 line-clamp-2">
+            <h3 className="text-base font-bold text-slate-800 mb-2 leading-snug [@media(hover:hover)]:group-hover:text-scholar-accent transition-colors duration-200 line-clamp-2">
                 {getFullName(staff)}
             </h3>
 

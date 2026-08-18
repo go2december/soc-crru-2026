@@ -42,6 +42,11 @@
   /* Fonts */
   --font-sans: "Inter", "Kanit", ui-sans-serif, system-ui, sans-serif;
   --font-heading: "Kanit", "Inter", ui-sans-serif, sans-serif;
+
+  /* Custom Easing Timing Functions (Design Engineering) */
+  --ease-out-craft: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-craft: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer-craft: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* ==========================================
@@ -106,12 +111,25 @@
 
 /* Card hover effect */
 .card-hover {
-  transition: all 0.3s ease;
+  transition: transform 200ms var(--ease-out-craft), box-shadow 200ms var(--ease-out-craft);
+  will-change: transform, box-shadow;
 }
 
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+@media (hover: hover) and (pointer: fine) {
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+  }
+}
+
+/* Button press active state */
+.btn-press-active {
+  transition: transform 160ms var(--ease-out-craft);
+  will-change: transform;
+}
+
+.btn-press-active:active {
+  transform: scale(0.97);
 }
 
 /* Smooth scrolling */

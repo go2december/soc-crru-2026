@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # -----------------------------------------------------------------
   # DATABASE: PostgreSQL 18 (Alpine)
@@ -257,17 +255,6 @@ services:
     depends_on:
       - api-gateway
 
-  # -----------------------------------------------------------------
-  # PROXY: Headroom Proxy (Port 8787)
-  # -----------------------------------------------------------------
-  headroom:
-    image: ghcr.io/chopratejas/headroom:latest
-    container_name: soc_headroom
-    ports:
-      - "8787:8787"
-    networks:
-      - soc-network
-    restart: always
 
 networks:
   soc-network:

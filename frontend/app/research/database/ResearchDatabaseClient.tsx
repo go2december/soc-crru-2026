@@ -321,16 +321,16 @@ export default function ResearchDatabaseClient() {
                                     <div className="flex flex-col lg:flex-row justify-between gap-4">
                                         <div className="space-y-3 flex-grow">
                                             <div className="flex flex-wrap items-center gap-2 mb-1">
-                                                <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${RESEARCH_STATUS_STYLES[item.status]}`}>
+                                                <span className={`px-2 py-0.5 rounded-sm border text-[10px] font-bold uppercase tracking-wider ${RESEARCH_STATUS_STYLES[item.status]}`}>
                                                     {RESEARCH_STATUS_LABELS[item.status]}
                                                 </span>
                                                 {item.isSocialService && (
-                                                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">
+                                                    <span className="px-2 py-0.5 rounded-sm bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-200">
                                                         Social Service
                                                     </span>
                                                 )}
                                                 {item.isCommercial && (
-                                                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wider">
+                                                    <span className="px-2 py-0.5 rounded-sm bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wider border border-amber-200">
                                                         Commercial
                                                     </span>
                                                 )}
@@ -355,7 +355,7 @@ export default function ResearchDatabaseClient() {
 
                                             <div className="flex flex-wrap gap-2">
                                                 {item.sdgIds.length > 0 ? item.sdgIds.map((sdgId) => (
-                                                    <span key={sdgId} className="px-2 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium">
+                                                    <span key={sdgId} className="px-2 py-0.5 rounded-sm bg-gray-100 text-gray-700 text-xs font-medium border border-gray-200">
                                                         SDG {sdgId}
                                                     </span>
                                                 )) : (

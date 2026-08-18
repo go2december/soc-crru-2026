@@ -87,9 +87,9 @@ export default async function AcademicServicesPage() {
                                 href={service.href}
                                 target={service.isExternal ? "_blank" : undefined}
                                 rel={service.isExternal ? "noopener noreferrer" : undefined}
-                                className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:border-scholar-gold transition-all text-center group block"
+                                className="bg-white p-8 rounded-sm shadow-lg border border-gray-100 hover:border-scholar-gold transition-all text-center group block"
                             >
-                                <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 ${service.color} group-hover:scale-110 transition-transform`}>
+                                <div className={`w-20 h-20 mx-auto rounded-sm flex items-center justify-center mb-6 ${service.color} group-hover:scale-105 transition-transform`}>
                                     {service.icon}
                                 </div>
                                 <h3 className="text-xl font-bold text-scholar-deep mb-3 flex items-center justify-center gap-2">
@@ -115,13 +115,13 @@ export default async function AcademicServicesPage() {
                     </h2>
                     
                     {projects.length === 0 ? (
-                        <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-100">
+                        <div className="text-center py-12 bg-gray-50 rounded-sm border border-gray-100">
                             <p className="text-gray-500">ยังไม่มีโครงการในขณะนี้</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {projects.map((project) => (
-                                <Link href={`/research/services/${project.id}`} key={project.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow border border-gray-100 block group">
+                                <Link href={`/research/services/${project.id}`} key={project.id} className="bg-white rounded-sm shadow-md overflow-hidden hover:shadow-xl transition-shadow border border-gray-100 block group">
                                     <div className="relative h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
                                         {project.coverImageUrl ? (
                                             <Image
@@ -135,7 +135,7 @@ export default async function AcademicServicesPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                         )}
-                                        <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-scholar-deep shadow-sm">
+                                        <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-3 py-1 rounded-sm text-xs font-bold text-scholar-deep shadow-sm border border-gray-100">
                                             {getStatusLabel(project.status || 'ONGOING')}
                                         </div>
                                     </div>
@@ -158,7 +158,7 @@ export default async function AcademicServicesPage() {
                 </section>
 
                 {/* Request Service Form / CTA */}
-                <div className="bg-scholar-deep text-white rounded-3xl p-10 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+                <div className="bg-scholar-deep text-white rounded-sm p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
                     <div className="absolute inset-0 bg-scholar-accent/10"></div>
                     <div className="relative z-10 max-w-xl">
                         <h2 className="text-2xl font-bold mb-3">ต้องการขอรับบริการวิชาการ?</h2>
@@ -167,12 +167,9 @@ export default async function AcademicServicesPage() {
                             สามารถส่งแบบคำร้องได้ที่นี่
                         </p>
                     </div>
-                    <div className="relative z-10 flex gap-4">
-                        <Link href="/downloads" className="btn bg-white text-scholar-deep border-none hover:bg-gray-100 font-bold px-8 py-3 rounded-full shadow-lg text-center inline-block">
-                            ดาวน์โหลดแบบฟอร์ม
-                        </Link>
-                        <Link href="/contact" className="btn bg-scholar-accent text-white border-none hover:bg-[#D9341C] font-bold px-8 py-3 rounded-full shadow-lg text-center inline-block">
-                            ติดต่อเรา
+                    <div className="relative z-10 flex flex-wrap gap-4">
+                        <Link href="/contact" className="btn bg-white text-scholar-deep border-none hover:bg-gray-100 font-bold px-8 py-3 rounded-sm shadow-md text-center inline-block transition-colors">
+                            ดาวน์โหลดแบบฟอร์ม / ติดต่อเรา
                         </Link>
                     </div>
                 </div>

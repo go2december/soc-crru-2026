@@ -4,7 +4,20 @@ import {
   IsBoolean,
   IsDateString,
   MaxLength,
+  IsArray,
+  IsNumber,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class AcademicServiceMemberDto {
+  @IsString()
+  staffId: string;
+
+  @IsString()
+  @IsOptional()
+  role?: string;
+}
 
 export class CreateAcademicServiceDto {
   @IsString()
@@ -44,4 +57,28 @@ export class CreateAcademicServiceDto {
   @IsDateString()
   @IsOptional()
   publishedAt?: string;
+
+  @IsString()
+  @IsOptional()
+  budget?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  fundingSource?: string;
+
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @IsOptional()
+  sdgIds?: number[];
+
+  @IsString()
+  @IsOptional()
+  documentUrl?: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AcademicServiceMemberDto)
+  @IsOptional()
+  members?: AcademicServiceMemberDto[];
 }

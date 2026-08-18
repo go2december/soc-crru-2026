@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import ResearchDatabaseClient from './ResearchDatabaseClient';
 
@@ -22,5 +23,11 @@ export const metadata: Metadata = {
 };
 
 export default function ResearchDatabasePage() {
-    return <ResearchDatabaseClient />;
+    return (
+        <Suspense fallback={
+            <div className="container mx-auto px-4 py-12 text-center text-slate-500">กำลังโหลดฐานข้อมูลงานวิจัย...</div>
+        }>
+            <ResearchDatabaseClient />
+        </Suspense>
+    );
 }

@@ -27,6 +27,9 @@ export interface Staff {
     shortBios: string[] | null;
     imageUrl: string | null;
     contactEmail: string | null;
+    googleScholarUrl: string | null;
+    orcidId: string | null;
+    scopusAuthorId: string | null;
     department: string | null;
     departmentId: number | null;
     sortOrder: number;

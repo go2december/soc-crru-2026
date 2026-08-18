@@ -70,6 +70,19 @@ export class CreateStaffDto {
   @IsOptional()
   contactEmail?: string;
 
+  // เชื่อมโยงข้อมูลนักวิจัยและผลงานวิชาการ
+  @IsString()
+  @IsOptional()
+  googleScholarUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  orcidId?: string;
+
+  @IsString()
+  @IsOptional()
+  scopusAuthorId?: string;
+
   // ข้อมูลเพิ่มเติม
   @IsArray()
   @IsString({ each: true })

@@ -269,6 +269,52 @@ async function main() {
             }
         }
 
+        // Academic Services
+        console.log('\n🤝 Seeding Academic Services...');
+        const academicServicesData = [
+            {
+                title: 'โครงการยกระดับเศรษฐกิจและสังคมรายตำบลแบบบูรณาการ (1 ตำบล 1 มหาวิทยาลัย)',
+                description: 'การถ่ายทอดเทคโนโลยีแปรรูปสมุนไพรและส่งเสริมการท่องเที่ยวเชิงวัฒนธรรมในชุมชนแม่ข้าวต้ม เพื่อสร้างรายได้และเสริมสร้างความเข้มแข็งของเศรษฐกิจฐานราก',
+                serviceType: 'SOCIAL_SERVICE',
+                area: 'ต.แม่ข้าวต้ม อ.เมือง จ.เชียงราย',
+                status: 'COMPLETED',
+                coverImageUrl: 'https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=2070&auto=format&fit=crop',
+                isPublished: true,
+                publishedAt: new Date('2026-03-01'),
+            },
+            {
+                title: 'โครงการอบรมเชิงปฏิบัติการการใช้ระบบสารสนเทศภูมิศาสตร์ (GIS) เพื่อการจัดการภัยพิบัติชุมชน',
+                description: 'บริการถ่ายทอดองค์ความรู้และคำปรึกษาแก่เจ้าหน้าที่องค์กรปกครองส่วนท้องถิ่นในการจัดทำแผนที่เสี่ยงภัยและระบบแจ้งเตือนภัยน้ำท่วมในพื้นที่ลุ่มน้ำแม่สาย',
+                serviceType: 'CONSULTING',
+                area: 'ต.เวียงพางคำ อ.แม่สาย จ.เชียงราย',
+                status: 'ONGOING',
+                coverImageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?q=80&w=2006&auto=format&fit=crop',
+                isPublished: true,
+                publishedAt: new Date('2026-04-10'),
+            },
+            {
+                title: 'ศูนย์บริการให้คำปรึกษาทางสังคมศาสตร์และพัฒนาศักยภาพองค์กรปกครองส่วนท้องถิ่น',
+                description: 'ให้บริการประเมินผลโครงการ ให้คำปรึกษาการจัดทำแผนพัฒนาท้องถิ่น และพัฒนาศักยภาพบุคลากรภาครัฐและเอกชนในพื้นที่ภาคเหนือตอนบน',
+                serviceType: 'CONSULTING',
+                area: 'จ.เชียงราย และจังหวัดใกล้เคียง',
+                status: 'RECRUITING',
+                coverImageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop',
+                isPublished: true,
+                publishedAt: new Date('2026-04-25'),
+            },
+        ];
+
+        for (const item of academicServicesData) {
+            const existing = await db.select().from(schema.academicServices).where(eq(schema.academicServices.title, item.title));
+            if (existing.length === 0) {
+                await db.insert(schema.academicServices).values(item);
+                console.log(`  ✅ Created Academic Service: ${item.title}`);
+            } else {
+                await db.update(schema.academicServices).set(item).where(eq(schema.academicServices.title, item.title));
+                console.log(`  🔄 Updated Academic Service: ${item.title}`);
+            }
+        }
+
         console.log('\n🏁 Faculty content seeding completed!');
     } catch (error) {
         console.error('❌ Error seeding data:', error);

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
     Search, UserX, GraduationCap, Users,
-    Building2, UserCircle2
+    Building2, UserCircle2, Globe, Fingerprint, BookOpen
 } from 'lucide-react';
 
 // Types ตาม Backend Schema ใหม่
@@ -27,6 +27,9 @@ interface Staff {
     expertise: string[] | null;
     imageUrl: string | null;
     contactEmail: string | null;
+    googleScholarUrl: string | null;
+    orcidId: string | null;
+    scopusAuthorId: string | null;
     sortOrder: number;
     department: string | null;
     departmentEn: string | null;
@@ -88,17 +91,17 @@ const getImageUrl = (url: string | null): string => {
 };
 
 const StaffCard = ({ staff }: { staff: Staff }) => (
-    <Link href={`/about/staff/${staff.id}`} className="bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(15,23,42,0.06)] hover:-translate-y-1.5 transition-all duration-300 group overflow-hidden w-full flex flex-col relative block">
+    <Link href={`/about/staff/${staff.id}`} className="bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] card-hover btn-press-active group overflow-hidden w-full flex flex-col relative block">
 
         <div className="pt-6 px-6 bg-slate-50/50 flex justify-center">
-            <figure className="aspect-[3/4] w-[75%] bg-slate-100 relative overflow-hidden flex-shrink-0 rounded-xl border border-slate-100 group-hover:scale-103 transition-transform duration-500">
+            <figure className="aspect-[3/4] w-[75%] bg-slate-100 relative overflow-hidden flex-shrink-0 rounded-xl border border-slate-100 [@media(hover:hover)]:group-hover:scale-103 transition-transform duration-200 ease-out">
                 {staff.imageUrl ? (
                     <Image
                         src={getImageUrl(staff.imageUrl)}
                         alt={getFullName(staff)}
                         fill
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        className="object-cover transition-transform duration-200 ease-out [@media(hover:hover)]:group-hover:scale-105"
                     />
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-100">
@@ -118,7 +121,7 @@ const StaffCard = ({ staff }: { staff: Staff }) => (
                 </span>
             </div>
 
-            <h3 className="text-sm font-bold text-slate-800 mb-1.5 leading-snug group-hover:text-scholar-accent transition-colors duration-200 line-clamp-2">
+            <h3 className="text-sm font-bold text-slate-800 mb-1.5 leading-snug [@media(hover:hover)]:group-hover:text-scholar-accent transition-colors duration-200 line-clamp-2">
                 {getFullName(staff)}
             </h3>
 
@@ -143,6 +146,27 @@ const StaffCard = ({ staff }: { staff: Staff }) => (
                     </div>
                 );
             })()}
+
+            {/* Researcher Profile Indicators (Scholar / ORCID / Scopus) */}
+            {(staff.googleScholarUrl || staff.orcidId || staff.scopusAuthorId) && (
+                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-center gap-1.5 w-full">
+                    {staff.googleScholarUrl && (
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-blue-50 text-blue-600 border border-blue-100/80" title="Google Scholar Profile">
+                            <Globe className="w-3.5 h-3.5" />
+                        </span>
+                    )}
+                    {staff.orcidId && (
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100/80" title="ORCID ID">
+                            <Fingerprint className="w-3.5 h-3.5" />
+                        </span>
+                    )}
+                    {staff.scopusAuthorId && (
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-orange-50 text-orange-600 border border-orange-100/80" title="Scopus Author ID">
+                            <BookOpen className="w-3.5 h-3.5" />
+                        </span>
+                    )}
+                </div>
+            )}
         </div>
     </Link>
 );
@@ -262,17 +286,17 @@ export default function StaffPage() {
                         <div className="flex flex-wrap justify-center sm:justify-start gap-2 bg-slate-50/50 p-1.5 rounded-2xl">
                             <button
                                 onClick={() => { setActiveTab('DEPARTMENTS'); setActiveExpertise(null); }}
-                                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-medium transition-all duration-300 ${activeTab === 'DEPARTMENTS'
-                                    ? 'bg-scholar-deep text-white shadow-sm scale-[1.01]'
-                                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'}`}
+                                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-medium transition-colors duration-150 btn-press-active ${activeTab === 'DEPARTMENTS'
+                                    ? 'bg-scholar-deep text-white shadow-sm'
+                                    : 'text-slate-500 [@media(hover:hover)]:hover:text-slate-800 [@media(hover:hover)]:hover:bg-slate-100/50'}`}
                             >
                                 <GraduationCap className={`w-5 h-5 ${activeTab === 'DEPARTMENTS' ? 'text-scholar-accent' : ''}`} /> สาขาวิชา
                             </button>
                             <button
                                 onClick={() => { setActiveTab('SUPPORT'); setActiveDept('ทั้งหมด'); setActiveExpertise(null); }}
-                                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-medium transition-all duration-300 ${activeTab === 'SUPPORT'
-                                    ? 'bg-scholar-deep text-white shadow-sm scale-[1.01]'
-                                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'}`}
+                                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-medium transition-colors duration-150 btn-press-active ${activeTab === 'SUPPORT'
+                                    ? 'bg-scholar-deep text-white shadow-sm'
+                                    : 'text-slate-500 [@media(hover:hover)]:hover:text-slate-800 [@media(hover:hover)]:hover:bg-slate-100/50'}`}
                             >
                                 <Building2 className={`w-5 h-5 ${activeTab === 'SUPPORT' ? 'text-teal-500' : ''}`} /> สายสนับสนุน
                             </button>
@@ -287,9 +311,9 @@ export default function StaffPage() {
                                             <button
                                                 key={dept}
                                                 onClick={() => { setActiveDept(dept); setActiveExpertise(null); }}
-                                                className={`px-4 py-1.5 rounded-full whitespace-nowrap text-xs font-semibold transition-colors duration-200 border ${activeDept === dept
+                                                className={`px-4 py-1.5 rounded-full whitespace-nowrap text-xs font-semibold transition-colors duration-150 btn-press-active border ${activeDept === dept
                                                     ? 'bg-scholar-accent border-scholar-accent text-white shadow-sm'
-                                                    : 'bg-white border-slate-200 text-slate-600 hover:border-scholar-accent hover:text-scholar-accent'}`}
+                                                    : 'bg-white border-slate-200 text-slate-600 [@media(hover:hover)]:hover:border-scholar-accent [@media(hover:hover)]:hover:text-scholar-accent'}`}
                                             >
                                                 {dept}
                                             </button>
@@ -308,11 +332,11 @@ export default function StaffPage() {
                                 <input
                                     type="text"
                                     placeholder="ค้นหาชื่อ หรือตำแหน่ง..."
-                                    className="input input-bordered w-full lg:w-80 pl-11 h-11 rounded-xl bg-slate-50/50 border-slate-200 focus:border-scholar-accent focus:bg-white focus:ring-2 focus:ring-scholar-accent/10 transition-all shadow-sm placeholder-slate-400 text-sm"
+                                    className="input input-bordered w-full lg:w-80 pl-11 h-11 rounded-xl bg-slate-50/50 border-slate-200 focus:border-scholar-accent focus:bg-white focus:ring-2 focus:ring-scholar-accent/10 transition-colors duration-150 shadow-sm placeholder-slate-400 text-sm"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
-                                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-scholar-accent transition-colors" />
+                                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 [@media(hover:hover)]:group-focus-within:text-scholar-accent transition-colors duration-150" />
                             </div>
                         </div>
 

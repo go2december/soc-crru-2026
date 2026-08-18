@@ -41,13 +41,13 @@ export default function CreditBankPage() {
                             <div className="flex flex-wrap gap-4">
                                 <Link
                                     href="/register"
-                                    className="btn border-none bg-gradient-to-r from-scholar-accent to-red-600 text-white rounded-full px-8 hover:shadow-lg hover:shadow-red-600/30 transition-all transform hover:-translate-y-1"
+                                    className="btn border-none bg-gradient-to-r from-scholar-accent to-red-600 text-white rounded-full px-8 [@media(hover:hover)]:hover:shadow-lg [@media(hover:hover)]:hover:shadow-red-600/30 [@media(hover:hover)]:hover:-translate-y-0.5 btn-press-active transition-[transform,box-shadow] duration-150"
                                 >
                                     สมัครสมาชิกคลังหน่วยกิต
                                 </Link>
                                 <a
                                     href="#how-it-works"
-                                    className="btn btn-outline text-white border-white/30 hover:bg-white hover:text-scholar-deep rounded-full px-8"
+                                    className="btn btn-outline text-white border-white/30 [@media(hover:hover)]:hover:bg-white [@media(hover:hover)]:hover:text-scholar-deep btn-press-active rounded-full px-8 transition-[background-color,color] duration-150"
                                 >
                                     ขั้นตอนการใช้งาน
                                 </a>
@@ -105,14 +105,14 @@ export default function CreditBankPage() {
                             { step: '03', title: 'ประเมินผล', desc: 'ผ่านการวัดผลหรือเทียบโอนประสบการณ์การทำงาน (RPL)', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
                             { step: '04', title: 'รับใบรับรอง', desc: 'เมื่อสะสมหน่วยกิตครบตามเกณฑ์ สามารถขอรับปริญญาบัตรได้ทันที', icon: 'M12 14l9-5-9-5-9 5 9 5z' }
                         ].map((item, index) => (
-                            <div key={index} className="group relative bg-white p-8 rounded-3xl shadow-lg border border-gray-100 hover:border-scholar-gold/30 hover:shadow-2xl transition-all duration-300">
-                                <div className="absolute top-0 right-0 p-6 opacity-10 font-black text-6xl text-scholar-deep group-hover:opacity-20 transition-opacity select-none">
+                            <div key={index} className="group relative bg-white p-8 rounded-3xl border border-gray-100 card-hover btn-press-active [@media(hover:hover)]:hover:border-scholar-gold/30">
+                                <div className="absolute top-0 right-0 p-6 opacity-10 font-black text-6xl text-scholar-deep [@media(hover:hover)]:group-hover:opacity-20 transition-opacity duration-200 select-none">
                                     {item.step}
                                 </div>
-                                <div className="w-14 h-14 rounded-2xl bg-scholar-deep/5 text-scholar-deep flex items-center justify-center mb-6 group-hover:bg-scholar-deep group-hover:text-white transition-colors duration-300">
+                                <div className="w-14 h-14 rounded-2xl bg-scholar-deep/5 text-scholar-deep flex items-center justify-center mb-6 [@media(hover:hover)]:group-hover:bg-scholar-deep [@media(hover:hover)]:group-hover:text-white transition-colors duration-200 ease-out">
                                     <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} /></svg>
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-scholar-accent transition-colors">{item.title}</h3>
+                                <h3 className="text-xl font-bold text-gray-900 mb-3 [@media(hover:hover)]:group-hover:text-scholar-accent transition-colors duration-150">{item.title}</h3>
                                 <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
                             </div>
                         ))}
@@ -126,7 +126,7 @@ export default function CreditBankPage() {
                 <div className="container mx-auto px-4">
                     <div className="flex flex-col lg:flex-row gap-16 items-center">
                         <div className="lg:w-1/2 relative">
-                            <div className="relative rounded-3xl overflow-hidden shadow-2xl transform lg:rotate-2 hover:rotate-0 transition-transform duration-500">
+                            <div className="relative rounded-3xl overflow-hidden shadow-2xl transform lg:rotate-2 [@media(hover:hover)]:hover:rotate-0 transition-transform duration-250 ease-out">
                                 <Image
                                     src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1742&auto=format&fit=crop"
                                     alt="Benefits of Credit Bank"
@@ -177,7 +177,7 @@ export default function CreditBankPage() {
                             <div>
                                 <Link
                                     href="/academics/short-courses"
-                                    className="inline-flex items-center gap-3 text-white bg-scholar-deep hover:bg-scholar-deep/90 px-8 py-4 rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 font-medium"
+                                    className="inline-flex items-center gap-3 text-white bg-scholar-deep [@media(hover:hover)]:hover:bg-scholar-deep/90 px-8 py-4 rounded-full [@media(hover:hover)]:hover:shadow-xl [@media(hover:hover)]:hover:-translate-y-0.5 btn-press-active transition-[background-color,transform,box-shadow] duration-150 shadow-lg font-medium"
                                 >
                                     <span>ค้นหาหลักสูตรที่เปิดรับ</span>
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>

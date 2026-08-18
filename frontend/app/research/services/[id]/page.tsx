@@ -48,7 +48,7 @@ export default async function AcademicServiceDetailPage(props: { params: Promise
                 )}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
                     <div className="mb-4">
-                        <span className="bg-white/20 backdrop-blur px-4 py-1.5 rounded-full text-sm font-bold text-white shadow-sm border border-white/30">
+                        <span className="bg-white/20 backdrop-blur px-4 py-1.5 rounded-sm text-sm font-bold text-white shadow-sm border border-white/30">
                             {getStatusLabel(project.status || 'ONGOING')}
                         </span>
                     </div>
@@ -59,10 +59,10 @@ export default async function AcademicServiceDetailPage(props: { params: Promise
             <div className="container mx-auto px-4 py-12 -mt-8 relative z-10">
                 <Breadcrumb items={[{ label: 'วิจัยและนวัตกรรม' }, { label: 'บริการวิชาการ', href: '/research/services' }, { label: project.title }]} />
 
-                <div className="max-w-4xl mx-auto mt-8 bg-white p-8 md:p-10 rounded-2xl shadow-lg border border-gray-100">
+                <div className="max-w-4xl mx-auto mt-8 bg-white p-8 md:p-10 rounded-sm shadow-lg border border-gray-100">
                     <div className="mb-8">
                         <h2 className="text-2xl font-bold text-scholar-deep mb-4 border-l-4 border-scholar-accent pl-4">ข้อมูลโครงการ</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 bg-gray-50 p-6 rounded-xl">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 bg-gray-50 p-6 rounded-sm">
                             <div>
                                 <strong className="block text-gray-500 text-sm mb-1">พื้นที่ดำเนินการ</strong>
                                 <span>{project.area || 'ไม่ระบุพื้นที่'}</span>

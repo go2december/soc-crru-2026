@@ -6,6 +6,7 @@ import {
   integer,
   boolean,
   decimal,
+  numeric,
   timestamp,
   pgEnum,
   jsonb,
@@ -136,6 +137,11 @@ export const staffProfiles = pgTable('staff_profiles', {
 
   // ข้อมูลติดต่อ
   contactEmail: varchar('contact_email', { length: 255 }),
+
+  // เชื่อมโยงข้อมูลนักวิจัยและผลงานวิชาการ
+  googleScholarUrl: varchar('google_scholar_url', { length: 500 }),
+  orcidId: varchar('orcid_id', { length: 100 }),
+  scopusAuthorId: varchar('scopus_author_id', { length: 100 }),
 
   // ข้อมูลเพิ่มเติม
   expertise: text('expertise').array(),
@@ -710,8 +716,24 @@ export const academicServices = pgTable('academic_services', {
   galleryImages: text('gallery_images').array(),
   isPublished: boolean('is_published').default(false),
   publishedAt: timestamp('published_at'),
+  budget: numeric('budget', { precision: 12, scale: 2 }),
+  fundingSource: varchar('funding_source', { length: 255 }),
+  sdgIds: integer('sdg_ids').array(),
+  documentUrl: text('document_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const academicServiceMembers = pgTable('academic_service_members', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  academicServiceId: uuid('academic_service_id')
+    .notNull()
+    .references(() => academicServices.id, { onDelete: 'cascade' }),
+  staffId: uuid('staff_id')
+    .notNull()
+    .references(() => staffProfiles.id, { onDelete: 'cascade' }),
+  role: varchar('role', { length: 50 }).default('MEMBER'), // LEADER, MEMBER
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 // ------------------------------------------

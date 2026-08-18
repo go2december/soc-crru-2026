@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Staff, Department, User, Position } from '../hooks/useStaffData';
-import { Link2, GraduationCap, Lightbulb, X } from 'lucide-react';
+import { Link2, GraduationCap, Lightbulb, X, Globe, Fingerprint, BookOpen, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,6 +39,9 @@ export default function StaffForm({ initialData, departments, users, academicPos
         academicPositionId: '',
         adminPositionId: '',
         contactEmail: '',
+        googleScholarUrl: '',
+        orcidId: '',
+        scopusAuthorId: '',
         departmentId: '',
         userId: '',
         isExecutive: false,
@@ -70,6 +73,9 @@ export default function StaffForm({ initialData, departments, users, academicPos
                 academicPositionId: initialData.academicPositionId?.toString() || '',
                 adminPositionId: initialData.adminPositionId?.toString() || '',
                 contactEmail: initialData.contactEmail || '',
+                googleScholarUrl: initialData.googleScholarUrl || '',
+                orcidId: initialData.orcidId || '',
+                scopusAuthorId: initialData.scopusAuthorId || '',
                 departmentId: initialData.departmentId ? initialData.departmentId.toString() : '',
                 userId: initialData.userId || '',
                 isExecutive: initialData.isExecutive || false,
@@ -150,6 +156,9 @@ export default function StaffForm({ initialData, departments, users, academicPos
             lastNameEn: cleanString(formData.lastNameEn),
             adminPositionId: formData.adminPositionId ? parseInt(formData.adminPositionId) : null,
             contactEmail: cleanString(formData.contactEmail),
+            googleScholarUrl: cleanString(formData.googleScholarUrl),
+            orcidId: cleanString(formData.orcidId),
+            scopusAuthorId: cleanString(formData.scopusAuthorId),
             imageUrl: cleanString(formData.imageUrl),
             education: eduList,
             expertise: expertiseList,
@@ -461,6 +470,104 @@ export default function StaffForm({ initialData, departments, users, academicPos
                             </div>
                         </div>
 
+                    </div>
+                </div>
+            </section>
+
+            {/* 4. Researcher & Academic Profiles (Webometrics / Scholar) */}
+            <section className="rounded-xl border bg-card p-5 shadow-sm">
+                <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xl font-medium">
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">4</span> ข้อมูลนักวิจัยและผลงานวิชาการ (Researcher Profiles)
+                    </div>
+                    <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-md">Webometrics & Openness</span>
+                </div>
+                <div className="rounded-xl border bg-background p-4 space-y-4">
+                    <p className="text-xs text-muted-foreground">
+                        กรอกข้อมูลเพื่อเชื่อมโยงผลงานวิชาการและโปรไฟล์นักวิจัยเข้าสู่ฐานข้อมูลสากล (ระบบจะแสดงผลเฉพาะช่องที่มีข้อมูลเท่านั้น)
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Google Scholar */}
+                        <div className="space-y-2 rounded-xl border border-blue-100 bg-blue-50/30 p-4">
+                            <div className="flex items-center justify-between">
+                                <Label className="font-bold text-blue-950 flex items-center gap-1.5 text-xs">
+                                    <Globe className="w-4 h-4 text-blue-600" /> Google Scholar Profile
+                                </Label>
+                                {formData.googleScholarUrl && (
+                                    <a
+                                        href={formData.googleScholarUrl.startsWith('http') ? formData.googleScholarUrl : `https://scholar.google.com/citations?user=${formData.googleScholarUrl}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[11px] text-blue-600 hover:underline flex items-center gap-0.5"
+                                    >
+                                        เปิดดู <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                )}
+                            </div>
+                            <Input
+                                type="text"
+                                value={formData.googleScholarUrl}
+                                onChange={e => setFormData({ ...formData, googleScholarUrl: e.target.value })}
+                                placeholder="https://scholar.google.com/citations?user=..."
+                                className="text-xs bg-white"
+                            />
+                            <p className="text-[11px] text-muted-foreground">ใส่ URL เต็ม หรือ Citation User ID ของ Google Scholar</p>
+                        </div>
+
+                        {/* ORCID */}
+                        <div className="space-y-2 rounded-xl border border-emerald-100 bg-emerald-50/30 p-4">
+                            <div className="flex items-center justify-between">
+                                <Label className="font-bold text-emerald-950 flex items-center gap-1.5 text-xs">
+                                    <Fingerprint className="w-4 h-4 text-emerald-600" /> ORCID ID
+                                </Label>
+                                {formData.orcidId && (
+                                    <a
+                                        href={formData.orcidId.startsWith('http') ? formData.orcidId : `https://orcid.org/${formData.orcidId.replace(/^https?:\/\/orcid\.org\//, '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[11px] text-emerald-600 hover:underline flex items-center gap-0.5"
+                                    >
+                                        เปิดดู <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                )}
+                            </div>
+                            <Input
+                                type="text"
+                                value={formData.orcidId}
+                                onChange={e => setFormData({ ...formData, orcidId: e.target.value })}
+                                placeholder="0000-0002-1825-0097"
+                                className="text-xs bg-white"
+                            />
+                            <p className="text-[11px] text-muted-foreground">ใส่เลข 16 หลัก เช่น 0000-0002-1825-0097 หรือ URL</p>
+                        </div>
+
+                        {/* Scopus Author ID */}
+                        <div className="space-y-2 rounded-xl border border-orange-100 bg-orange-50/30 p-4">
+                            <div className="flex items-center justify-between">
+                                <Label className="font-bold text-orange-950 flex items-center gap-1.5 text-xs">
+                                    <BookOpen className="w-4 h-4 text-orange-600" /> Scopus Author ID
+                                </Label>
+                                {formData.scopusAuthorId && (
+                                    <a
+                                        href={formData.scopusAuthorId.startsWith('http') ? formData.scopusAuthorId : `https://www.scopus.com/authid/detail.uri?authorId=${formData.scopusAuthorId}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[11px] text-orange-600 hover:underline flex items-center gap-0.5"
+                                    >
+                                        เปิดดู <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                )}
+                            </div>
+                            <Input
+                                type="text"
+                                value={formData.scopusAuthorId}
+                                onChange={e => setFormData({ ...formData, scopusAuthorId: e.target.value })}
+                                placeholder="57200000000"
+                                className="text-xs bg-white"
+                            />
+                            <p className="text-[11px] text-muted-foreground">รหัส Author ID ในฐานข้อมูล Scopus (เช่น 57200000000)</p>
+                        </div>
                     </div>
                 </div>
             </section>

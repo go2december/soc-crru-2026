@@ -37,7 +37,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -178,13 +180,14 @@
   },
   "active": "84574fc06f4d530e",
   "lastOpenFiles": [
-    "database/pgdata/18/docker/pg_stat/pgstat.stat",
+    "database/pgdata/18/docker/pg_logical/replorigin_checkpoint.tmp",
     "database/pgdata/18/docker/base/16384/pg_internal.init",
-    "database/pgdata/18/docker/global/pg_internal.init",
     "database/pgdata/18/docker/global/pg_internal.init.42",
     "database/pgdata/18/docker/postmaster.pid",
+    "database/pgdata/18/docker/pg_stat/pgstat.stat",
+    "database/pgdata/18/docker/base/16384/pg_internal.init.47",
+    "database/pgdata/18/docker/global/pg_internal.init",
     "database/pgdata/18/docker/pg_stat/pgstat.tmp",
-    "database/pgdata/18/docker/pg_logical/replorigin_checkpoint.tmp",
     "Untitled.canvas",
     "2026-06-18.md",
     "backend/node_modules/drizzle-orm/table.utils.js.map",
@@ -192,7 +195,6 @@
     "backend/node_modules/drizzle-orm/column-builder.d.cts",
     "backend/node_modules/has-tostringtag/README.md",
     "backend/node_modules/body-parser/README.md",
-    "backend/node_modules/cross-spawn/package.json",
     "backend/node_modules/function-bind/README.md",
     "backend/node_modules/caniuse-lite/README.md",
     "backend/node_modules/handlebars/release-notes.md",
