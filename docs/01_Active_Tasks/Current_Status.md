@@ -37,15 +37,14 @@ tags: [status, overview]
 ## 🎯 งานที่กำลังดำเนินอยู่ (Active Priorities)
 
 ### 🔥 High Priority (ต้องทำตอนนี้)
+- [x] **Research Public Filter & SDGs Explorer UI:** ระบบค้นหางานวิจัยสาธารณะขั้นสูง ตัวกรอง 17 SDGs แบบ Visual Explorer, Type pills (รับใช้สังคม/เชิงพาณิชย์), และ Grid/List view switcher (เสร็จสมบูรณ์ 2026-08-19)
 - [ ] **Articles & Learning Sites Polish:** ตรวจสอบหน้าเนื้อหาบทความ (Articles Detail Page) และแหล่งเรียนรู้ให้สมบูรณ์
 - [ ] **Admissions Center Updates:** ปรับปรุงหน้าตารางรับสมัครให้ดึงข้อมูลจาก DB และ UI สวยงาม
-- [ ] **Research Public Filter UI:** เพิ่ม Filter UI บนหน้าค้นหางานวิจัยสาธารณะ (ต่อยอดจากที่ทำ Admin ไป)
 - [ ] **Chiang Rai Artifacts Population:** นำข้อมูลคลังความรู้อัตลักษณ์ 5 มิติ เข้าสู่ระบบจริง
 
 ### ⚡ Medium Priority (คิวต่อไป)
-- [ ] **SEO Audit:** จัดการ OG Tags (แชร์ลง Social แล้วรูปขึ้น), ดัน `sitemap.xml` และ `robots.txt`
+- [x] **SEO Audit & Meta Citation:** ติดตั้ง Sitemap.xml, Robots.txt, JSON-LD Schema.org, Highwire Press Meta Tags และ Academic Citation Tool (เสร็จสมบูรณ์ 2026-08-18)
 - [ ] **Faculty Validation:** ตรวจสอบระบบเพิ่มข่าวของคณะ และเช็คข้อมูลบุคลากรให้เป๊ะ
-- [ ] **Research Public Filter UI:** เพิ่ม Filter UI บนหน้าค้นหางานวิจัยสาธารณะ
 
 ### 💤 Low Priority (รอให้ระบบนิ่งก่อน)
 - [ ] **Full-text search:** ปรับปรุงระบบค้นหาให้ไวขึ้น

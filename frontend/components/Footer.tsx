@@ -68,7 +68,7 @@ export default function Footer() {
                             <li><Link href="/academics/credit-bank" className="hover:text-white transition-colors">ระบบคลังหน่วยกิต (Credit Bank)</Link></li>
                             <li><Link href="/academics/short-courses" className="hover:text-white transition-colors">คอร์สฝึกอบรมระยะสั้น</Link></li>
                             <li><Link href="/research/database" className="hover:text-white transition-colors">ฐานข้อมูลงานวิจัย</Link></li>
-                            <li><Link href="/eservice/student" className="hover:text-white transition-colors">บริการนักศึกษา (Student Service)</Link></li>
+                            <li><Link href="/eservice/procurement" className="text-scholar-gold hover:text-white transition-colors">ประกาศจัดซื้อจัดจ้าง (ITA)</Link></li>
                             <li><Link href="/contact" className="hover:text-white transition-colors">ติดต่อเรา</Link></li>
                         </ul>
                     </div>

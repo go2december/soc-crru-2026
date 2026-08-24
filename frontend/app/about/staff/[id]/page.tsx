@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ArrowLeft, Mail, GraduationCap, Briefcase, Award, Crown, UserCircle2, Bookmark, Lightbulb, Globe, Fingerprint, BookOpen, ExternalLink } from 'lucide-react';
+import JsonLd from '@/components/seo/JsonLd';
 
 // Types ตาม Backend Schema
 interface Staff {
@@ -149,8 +150,30 @@ export default function StaffProfilePage() {
 
     const hasResearcherProfiles = Boolean(staff.googleScholarUrl || staff.orcidId || staff.scopusAuthorId);
 
+    const personSchema = {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": `${staff.prefixTh || ''} ${staff.firstNameTh} ${staff.lastNameTh}`.trim(),
+        "alternateName": `${staff.prefixEn || ''} ${staff.firstNameEn || ''} ${staff.lastNameEn || ''}`.trim(),
+        "jobTitle": staff.adminPosition || staff.academicPosition || 'อาจารย์ประจำคณะสังคมศาสตร์',
+        "worksFor": {
+            "@type": "EducationalOrganization",
+            "name": "คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
+            "url": "https://soc.crru.ac.th"
+        },
+        "email": staff.contactEmail || undefined,
+        "image": staff.imageUrl ? `https://soc.crru.ac.th${getImageUrl(staff.imageUrl)}` : undefined,
+        "knowsAbout": staff.expertise && staff.expertise.length > 0 ? staff.expertise : undefined,
+        "sameAs": [
+            staff.googleScholarUrl ? getGoogleScholarLink(staff.googleScholarUrl) : null,
+            staff.orcidId ? getOrcidLink(staff.orcidId) : null,
+            staff.scopusAuthorId ? getScopusLink(staff.scopusAuthorId) : null,
+        ].filter(Boolean),
+    };
+
     return (
         <main className="min-h-screen bg-gray-50 pb-20 font-sans">
+            <JsonLd data={personSchema} />
             {/* Header Area that is shorter than hero */}
             <section className="bg-scholar-deep text-white pt-20 pb-24 px-4 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-5 bg-[url('/images/pattern.png')] bg-repeat"></div>

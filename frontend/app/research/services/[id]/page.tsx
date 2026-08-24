@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import Breadcrumb from '@/components/Breadcrumb';
 import { getStatusLabel } from '@/lib/academic-services';
 import GalleryClient from '@/components/GalleryClient';
+import JsonLd from '@/components/seo/JsonLd';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
@@ -27,8 +28,24 @@ export default async function AcademicServiceDetailPage(props: { params: Promise
 
     const galleryImages = project.galleryImages || [];
 
+    const serviceSchema = {
+        "@context": "https://schema.org",
+        "@type": "ResearchProject",
+        "name": project.title,
+        "description": project.description,
+        "location": project.location || "จังหวัดเชียงราย",
+        "funder": {
+            "@type": "EducationalOrganization",
+            "name": "คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
+            "url": "https://soc.crru.ac.th"
+        },
+        "startDate": project.startDate || undefined,
+        "endDate": project.endDate || undefined,
+    };
+
     return (
         <div className="bg-white min-h-screen font-sans">
+            <JsonLd data={serviceSchema} />
             {/* Hero Header */}
             <div className="relative h-[300px] w-full bg-scholar-deep overflow-hidden">
                 {project.coverImageUrl ? (

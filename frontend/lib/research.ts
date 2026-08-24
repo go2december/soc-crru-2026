@@ -160,6 +160,26 @@ export const RESEARCH_STATUS_STYLES: Record<ResearchProjectStatus, string> = {
   CANCELLED: 'bg-rose-50 text-rose-700 border-rose-200',
 };
 
+export const SDG_COLORS: Record<number, { hex: string; bg: string; text: string; border: string }> = {
+  1: { hex: '#E5243B', bg: 'bg-[#E5243B]/10', text: 'text-[#E5243B]', border: 'border-[#E5243B]/30' },
+  2: { hex: '#DDA63A', bg: 'bg-[#DDA63A]/10', text: 'text-[#DDA63A]', border: 'border-[#DDA63A]/30' },
+  3: { hex: '#4C9F38', bg: 'bg-[#4C9F38]/10', text: 'text-[#4C9F38]', border: 'border-[#4C9F38]/30' },
+  4: { hex: '#C5192D', bg: 'bg-[#C5192D]/10', text: 'text-[#C5192D]', border: 'border-[#C5192D]/30' },
+  5: { hex: '#FF3A21', bg: 'bg-[#FF3A21]/10', text: 'text-[#FF3A21]', border: 'border-[#FF3A21]/30' },
+  6: { hex: '#26BDE2', bg: 'bg-[#26BDE2]/10', text: 'text-[#26BDE2]', border: 'border-[#26BDE2]/30' },
+  7: { hex: '#FCC30B', bg: 'bg-[#FCC30B]/10', text: 'text-[#FCC30B]', border: 'border-[#FCC30B]/30' },
+  8: { hex: '#A21942', bg: 'bg-[#A21942]/10', text: 'text-[#A21942]', border: 'border-[#A21942]/30' },
+  9: { hex: '#FD6925', bg: 'bg-[#FD6925]/10', text: 'text-[#FD6925]', border: 'border-[#FD6925]/30' },
+  10: { hex: '#DD1367', bg: 'bg-[#DD1367]/10', text: 'text-[#DD1367]', border: 'border-[#DD1367]/30' },
+  11: { hex: '#FD9D24', bg: 'bg-[#FD9D24]/10', text: 'text-[#FD9D24]', border: 'border-[#FD9D24]/30' },
+  12: { hex: '#BF8B2E', bg: 'bg-[#BF8B2E]/10', text: 'text-[#BF8B2E]', border: 'border-[#BF8B2E]/30' },
+  13: { hex: '#3F7E44', bg: 'bg-[#3F7E44]/10', text: 'text-[#3F7E44]', border: 'border-[#3F7E44]/30' },
+  14: { hex: '#0A97D9', bg: 'bg-[#0A97D9]/10', text: 'text-[#0A97D9]', border: 'border-[#0A97D9]/30' },
+  15: { hex: '#56C02B', bg: 'bg-[#56C02B]/10', text: 'text-[#56C02B]', border: 'border-[#56C02B]/30' },
+  16: { hex: '#00689D', bg: 'bg-[#00689D]/10', text: 'text-[#00689D]', border: 'border-[#00689D]/30' },
+  17: { hex: '#19486A', bg: 'bg-[#19486A]/10', text: 'text-[#19486A]', border: 'border-[#19486A]/30' },
+};
+
 export function getResearchStatusOptions(): ResearchProjectStatus[] {
   return ['ONGOING', 'COMPLETED', 'PUBLISHED', 'CANCELLED'];
 }

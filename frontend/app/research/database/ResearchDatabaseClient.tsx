@@ -4,10 +4,29 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { 
+    Search, 
+    RotateCcw, 
+    LayoutGrid, 
+    List, 
+    Users, 
+    ExternalLink, 
+    Sparkles, 
+    HeartHandshake, 
+    TrendingUp, 
+    CheckCircle2, 
+    Clock, 
+    FolderKanban,
+    Globe2,
+    BookOpen
+} from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
+import CiteModal from '@/components/research/CiteModal';
 import {
     RESEARCH_STATUS_LABELS,
     RESEARCH_STATUS_STYLES,
+    RESEARCH_SDG_DESCRIPTIONS,
+    SDG_COLORS,
     ResearchListResponse,
     ResearchProjectAdminItem,
 } from '@/lib/research';
@@ -18,6 +37,7 @@ export default function ResearchDatabaseClient() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+
     const [projects, setProjects] = useState<ResearchProjectAdminItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [availableYears, setAvailableYears] = useState<number[]>([]);
@@ -26,6 +46,12 @@ export default function ResearchDatabaseClient() {
     const [selectedYear, setSelectedYear] = useState(() => searchParams.get('year') || '');
     const [selectedStatus, setSelectedStatus] = useState(() => searchParams.get('status') || '');
     const [selectedSdg, setSelectedSdg] = useState(() => searchParams.get('sdg') || '');
+    const [selectedType, setSelectedType] = useState<'all' | 'social' | 'commercial'>(() => {
+        const type = searchParams.get('type');
+        return type === 'social' || type === 'commercial' ? type : 'all';
+    });
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
     const [currentPage, setCurrentPage] = useState(() => {
         const page = Number(searchParams.get('page') || '1');
         return Number.isNaN(page) || page < 1 ? 1 : page;
@@ -38,44 +64,34 @@ export default function ResearchDatabaseClient() {
         year?: string;
         status?: string;
         sdg?: string;
+        type?: string;
         page?: number;
     }) => {
         const params = new URLSearchParams(searchParams.toString());
 
         if (next.q !== undefined) {
-            if (next.q) {
-                params.set('q', next.q);
-            } else {
-                params.delete('q');
-            }
+            if (next.q) params.set('q', next.q);
+            else params.delete('q');
         }
         if (next.year !== undefined) {
-            if (next.year) {
-                params.set('year', next.year);
-            } else {
-                params.delete('year');
-            }
+            if (next.year) params.set('year', next.year);
+            else params.delete('year');
         }
         if (next.status !== undefined) {
-            if (next.status) {
-                params.set('status', next.status);
-            } else {
-                params.delete('status');
-            }
+            if (next.status) params.set('status', next.status);
+            else params.delete('status');
         }
         if (next.sdg !== undefined) {
-            if (next.sdg) {
-                params.set('sdg', next.sdg);
-            } else {
-                params.delete('sdg');
-            }
+            if (next.sdg) params.set('sdg', next.sdg);
+            else params.delete('sdg');
+        }
+        if (next.type !== undefined) {
+            if (next.type && next.type !== 'all') params.set('type', next.type);
+            else params.delete('type');
         }
         if (next.page !== undefined) {
-            if (next.page > 1) {
-                params.set('page', String(next.page));
-            } else {
-                params.delete('page');
-            }
+            if (next.page > 1) params.set('page', String(next.page));
+            else params.delete('page');
         }
 
         const queryString = params.toString();
@@ -87,6 +103,7 @@ export default function ResearchDatabaseClient() {
         const nextYear = searchParams.get('year') || '';
         const nextStatus = searchParams.get('status') || '';
         const nextSdg = searchParams.get('sdg') || '';
+        const nextType = searchParams.get('type');
         const nextPageRaw = Number(searchParams.get('page') || '1');
         const nextPage = Number.isNaN(nextPageRaw) || nextPageRaw < 1 ? 1 : nextPageRaw;
 
@@ -95,6 +112,7 @@ export default function ResearchDatabaseClient() {
         setSelectedYear(nextYear);
         setSelectedStatus(nextStatus);
         setSelectedSdg(nextSdg);
+        setSelectedType(nextType === 'social' || nextType === 'commercial' ? nextType : 'all');
         setCurrentPage(nextPage);
     }, [searchParams]);
 
@@ -125,13 +143,15 @@ export default function ResearchDatabaseClient() {
         try {
             const params = new URLSearchParams({
                 page: String(currentPage),
-                limit: '9',
+                limit: viewMode === 'list' ? '12' : '9',
             });
 
             if (query.trim()) params.set('q', query.trim());
             if (selectedYear) params.set('year', selectedYear);
             if (selectedStatus) params.set('status', selectedStatus);
             if (selectedSdg) params.set('sdg', selectedSdg);
+            if (selectedType === 'social') params.set('isSocialService', 'true');
+            if (selectedType === 'commercial') params.set('isCommercial', 'true');
 
             const res = await fetch(`${API_URL}/api/research/projects?${params.toString()}`);
             if (!res.ok) {
@@ -150,65 +170,269 @@ export default function ResearchDatabaseClient() {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, query, selectedSdg, selectedStatus, selectedYear]);
+    }, [currentPage, query, selectedSdg, selectedStatus, selectedType, selectedYear, viewMode]);
 
     useEffect(() => {
         fetchProjects();
     }, [fetchProjects]);
 
+    const handleResetFilters = () => {
+        setSearchInput('');
+        setQuery('');
+        setSelectedYear('');
+        setSelectedStatus('');
+        setSelectedSdg('');
+        setSelectedType('all');
+        setCurrentPage(1);
+        updateUrl({ q: '', year: '', status: '', sdg: '', type: 'all', page: 1 });
+    };
+
+    const handleSdgClick = (sdgNum: number) => {
+        const sdgStr = String(sdgNum);
+        const nextVal = selectedSdg === sdgStr ? '' : sdgStr;
+        setSelectedSdg(nextVal);
+        setCurrentPage(1);
+        updateUrl({ sdg: nextVal, page: 1 });
+    };
+
     return (
-        <div className="bg-gray-50 min-h-screen font-sans">
-            <div className="relative h-[300px] w-full bg-scholar-deep overflow-hidden">
+        <div className="bg-slate-50 min-h-screen font-sans text-slate-800 pb-20">
+            {/* ── Banner / Hero Section ── */}
+            <div className="relative h-[280px] md:h-[320px] w-full bg-scholar-deep overflow-hidden">
                 <Image
                     src="/images/research-banner.png"
                     alt="Research Banner"
                     fill
-                    className="object-cover opacity-30"
+                    className="object-cover opacity-25"
+                    priority
                 />
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                    <h1 className="text-3xl lg:text-5xl font-bold text-white mb-4 drop-shadow-md">
+                <div className="absolute inset-0 bg-gradient-to-t from-scholar-deep via-transparent to-transparent" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-scholar-accent/20 border border-scholar-accent/30 text-white text-xs font-bold tracking-wider uppercase mb-3 backdrop-blur-sm">
+                        <Sparkles className="w-3.5 h-3.5 text-scholar-accent" />
+                        Research & SDGs Repository
+                    </span>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-3 tracking-tight">
                         ฐานข้อมูลงานวิจัยและวิทยานิพนธ์
                     </h1>
-                    <p className="text-white/80 text-lg max-w-2xl">
-                        คลังความรู้ทางสังคมศาสตร์ เพื่อการพัฒนาท้องถิ่น ยุทธศาสตร์สังคม และผลกระทบเชิงพื้นที่ในจังหวัดเชียงราย
+                    <p className="text-slate-200 text-sm md:text-base max-w-2xl font-light">
+                        คลังผลงานวิจัย นวัตกรรม และบริการวิชาการเพื่อการพัฒนาสังคมและยกระดับคุณภาพชีวิตในพื้นที่จังหวัดเชียงราย
                     </p>
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 py-8 -mt-8 relative z-10">
+            <div className="container mx-auto px-4 py-8 -mt-10 relative z-10 max-w-7xl space-y-6">
                 <Breadcrumb items={[{ label: 'วิจัยและนวัตกรรม' }, { label: 'ฐานข้อมูลงานวิจัย' }]} />
 
-                {/* Advanced Exposed Filter UI - Sharp & Professional */}
-                <div className="bg-white px-4 py-6 sm:p-6 mb-8 mt-6 border-y border-gray-200 lg:border lg:rounded-sm shadow-sm space-y-5">
-                    {/* Search Row */}
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                {/* ── Strategic Impact Stats HUD ── */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                    <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3">
+                        <div className="p-3 bg-scholar-deep/10 text-scholar-deep rounded-lg">
+                            <FolderKanban className="w-5 h-5" />
                         </div>
-                        <input
-                            type="text"
-                            placeholder="ค้นหางานวิจัย (ชื่อโครงการ, บทคัดย่อ, นักวิจัย)..."
-                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-scholar-accent focus:border-scholar-accent focus:bg-white transition-colors"
-                            value={searchInput}
-                            onChange={(e) => setSearchInput(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    setCurrentPage(1);
-                                    setQuery(searchInput);
-                                    updateUrl({ q: searchInput, page: 1 });
-                                }
-                            }}
-                        />
+                        <div>
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">ผลงานวิจัยทั้งหมด</span>
+                            <span className="text-xl md:text-2xl font-extrabold text-slate-800">{total} โครงการ</span>
+                        </div>
                     </div>
 
-                    {/* Filter Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ปีงบประมาณ</label>
+                    <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3">
+                        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                            <Clock className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">กำลังดำเนินการ</span>
+                            <span className="text-xl md:text-2xl font-extrabold text-slate-800">
+                                {projects.filter(p => p.status === 'ONGOING').length} โครงการ
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3">
+                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <CheckCircle2 className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">เสร็จสิ้น / เผยแพร่</span>
+                            <span className="text-xl md:text-2xl font-extrabold text-slate-800">
+                                {projects.filter(p => p.status === 'COMPLETED' || p.status === 'PUBLISHED').length} โครงการ
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3">
+                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <Globe2 className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">เป้าหมาย SDGs</span>
+                            <span className="text-xl md:text-2xl font-extrabold text-slate-800">17 เป้าหมาย</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── 17 SDGs Visual Explorer Bar ── */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Globe2 className="w-4 h-4 text-scholar-accent" />
+                            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                                สำรวจตามเป้าหมายการพัฒนาที่ยั่งยืน (SDGs Visual Explorer)
+                            </h2>
+                        </div>
+                        {selectedSdg && (
+                            <button
+                                onClick={() => handleSdgClick(Number(selectedSdg))}
+                                className="text-xs font-bold text-scholar-accent hover:underline flex items-center gap-1 cursor-pointer"
+                            >
+                                ล้างเป้าหมาย (ดูทั้งหมด)
+                            </button>
+                        )}
+                    </div>
+
+                    {/* SDGs Badges Grid */}
+                    <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-9 lg:grid-cols-17 gap-1.5 pt-1">
+                        {Array.from({ length: 17 }, (_, i) => i + 1).map((sdgNum) => {
+                            const isSelected = selectedSdg === String(sdgNum);
+                            const color = SDG_COLORS[sdgNum] || { hex: '#4B5563', bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-300' };
+                            const desc = RESEARCH_SDG_DESCRIPTIONS[sdgNum];
+
+                            return (
+                                <button
+                                    key={sdgNum}
+                                    type="button"
+                                    onClick={() => handleSdgClick(sdgNum)}
+                                    title={`SDG ${sdgNum}: ${desc?.title || ''}`}
+                                    className={`relative group flex flex-col items-center justify-center p-2 rounded-xl text-center transition-all cursor-pointer border ${
+                                        isSelected
+                                            ? 'ring-2 ring-offset-2 ring-slate-900 shadow-md font-bold text-white'
+                                            : 'hover:shadow-sm hover:scale-105 bg-slate-50/80 border-slate-200/70 text-slate-700'
+                                    }`}
+                                    style={isSelected ? { backgroundColor: color.hex, borderColor: color.hex } : undefined}
+                                >
+                                    <span
+                                        className={`text-[10px] font-black uppercase ${
+                                            isSelected ? 'text-white' : ''
+                                        }`}
+                                        style={!isSelected ? { color: color.hex } : undefined}
+                                    >
+                                        SDG {sdgNum}
+                                    </span>
+                                    <span className={`text-[9px] truncate max-w-full block font-medium mt-0.5 ${
+                                        isSelected ? 'text-white/90' : 'text-slate-500'
+                                    }`}>
+                                        {desc?.title ? desc.title.split(' ')[0] : `SDG ${sdgNum}`}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* ── Main Filter & Search Control Bar ── */}
+                <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                    {/* Search & View Switcher */}
+                    <div className="flex flex-col md:flex-row gap-3 items-center">
+                        <div className="relative flex-1 w-full">
+                            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            <input
+                                type="text"
+                                placeholder="ค้นหางานวิจัย (ชื่อโครงการ, คำสำคัญ, ชื่ออาจารย์/นักวิจัย)..."
+                                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-scholar-deep/20 focus:border-scholar-deep focus:bg-white transition-all"
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        setCurrentPage(1);
+                                        setQuery(searchInput);
+                                        updateUrl({ q: searchInput, page: 1 });
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        {/* Research Type Pills */}
+                        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl self-stretch md:self-auto">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectedType('all');
+                                    setCurrentPage(1);
+                                    updateUrl({ type: 'all', page: 1 });
+                                }}
+                                className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                                    selectedType === 'all'
+                                        ? 'bg-white text-slate-900 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-900'
+                                }`}
+                            >
+                                ทั้งหมด
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectedType('social');
+                                    setCurrentPage(1);
+                                    updateUrl({ type: 'social', page: 1 });
+                                }}
+                                className={`inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                                    selectedType === 'social'
+                                        ? 'bg-emerald-600 text-white shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-900'
+                                }`}
+                            >
+                                <HeartHandshake className="w-3.5 h-3.5" />
+                                <span>รับใช้สังคม</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectedType('commercial');
+                                    setCurrentPage(1);
+                                    updateUrl({ type: 'commercial', page: 1 });
+                                }}
+                                className={`inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                                    selectedType === 'commercial'
+                                        ? 'bg-indigo-600 text-white shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-900'
+                                }`}
+                            >
+                                <TrendingUp className="w-3.5 h-3.5" />
+                                <span>เชิงพาณิชย์</span>
+                            </button>
+                        </div>
+
+                        {/* View Switcher */}
+                        <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('grid')}
+                                className={`p-1.5 rounded-lg transition-all ${
+                                    viewMode === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'
+                                }`}
+                                title="Grid View"
+                            >
+                                <LayoutGrid className="w-4 h-4" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('list')}
+                                className={`p-1.5 rounded-lg transition-all ${
+                                    viewMode === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'
+                                }`}
+                                title="List View"
+                            >
+                                <List className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Secondary Filters Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100">
+                        <div>
+                            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">ปีงบประมาณ</label>
                             <select
-                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-sm text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-scholar-accent focus:border-scholar-accent appearance-none"
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-scholar-deep"
                                 value={selectedYear}
                                 onChange={(e) => {
                                     const nextValue = e.target.value;
@@ -216,7 +440,6 @@ export default function ResearchDatabaseClient() {
                                     setCurrentPage(1);
                                     updateUrl({ year: nextValue, page: 1 });
                                 }}
-                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: `2.5rem` }}
                             >
                                 <option value="">ทุกปีงบประมาณ</option>
                                 {yearOptions.map((year) => (
@@ -225,10 +448,10 @@ export default function ResearchDatabaseClient() {
                             </select>
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">สถานะโครงการ</label>
+                        <div>
+                            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">สถานะโครงการ</label>
                             <select
-                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-sm text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-scholar-accent focus:border-scholar-accent appearance-none"
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-scholar-deep"
                                 value={selectedStatus}
                                 onChange={(e) => {
                                     const nextValue = e.target.value;
@@ -236,7 +459,6 @@ export default function ResearchDatabaseClient() {
                                     setCurrentPage(1);
                                     updateUrl({ status: nextValue, page: 1 });
                                 }}
-                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: `2.5rem` }}
                             >
                                 <option value="">ทุกสถานะ</option>
                                 {Object.entries(RESEARCH_STATUS_LABELS).map(([value, label]) => (
@@ -245,187 +467,258 @@ export default function ResearchDatabaseClient() {
                             </select>
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">เป้าหมาย SDG</label>
-                            <select
-                                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-sm text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-scholar-accent focus:border-scholar-accent appearance-none"
-                                value={selectedSdg}
-                                onChange={(e) => {
-                                    const nextValue = e.target.value;
-                                    setSelectedSdg(nextValue);
-                                    setCurrentPage(1);
-                                    updateUrl({ sdg: nextValue, page: 1 });
-                                }}
-                                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right 0.5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: `2.5rem` }}
-                            >
-                                <option value="">ทุก SDG</option>
-                                {Array.from({ length: 17 }, (_, index) => index + 1).map((sdg) => (
-                                    <option key={sdg} value={String(sdg)}>SDG {sdg}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Action Row */}
-                    <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-gray-100 mt-2">
-                        <div className="text-sm font-medium text-gray-500">
-                            พบ {total} โครงการ <span className="mx-2 text-gray-300">|</span> หน้า {currentPage} จาก {Math.max(totalPages, 1)}
-                        </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-end gap-2">
                             <button
-                                className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-sm transition-colors"
-                                onClick={() => {
-                                    setSearchInput('');
-                                    setQuery('');
-                                    setSelectedYear('');
-                                    setSelectedStatus('');
-                                    setSelectedSdg('');
-                                    setCurrentPage(1);
-                                    updateUrl({ q: '', year: '', status: '', sdg: '', page: 1 });
-                                }}
+                                type="button"
+                                onClick={handleResetFilters}
+                                className="flex-1 py-2 px-3 text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex items-center justify-center gap-1.5"
                             >
-                                ล้างตัวกรอง
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                <span>ล้างตัวกรอง</span>
                             </button>
                             <button
-                                className="px-6 py-2 text-sm font-bold text-white bg-scholar-deep hover:bg-scholar-deep/90 rounded-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-scholar-deep"
+                                type="button"
                                 onClick={() => {
                                     setCurrentPage(1);
                                     setQuery(searchInput);
                                     updateUrl({ q: searchInput, page: 1 });
                                 }}
+                                className="flex-1 py-2 px-4 text-xs font-bold text-white bg-scholar-deep hover:bg-opacity-90 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
                             >
-                                ค้นหางานวิจัย
+                                <Search className="w-3.5 h-3.5" />
+                                <span>ค้นหา</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-sm shadow-lg border border-gray-100 overflow-hidden">
-                    <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-scholar-deep/5">
-                        <h2 className="text-xl font-bold text-scholar-deep flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-scholar-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            ผลการค้นหา ({projects.length} รายการ)
-                        </h2>
+                {/* ── Content Grid / List View ── */}
+                {loading ? (
+                    <div className="py-20 text-center">
+                        <span className="loading loading-spinner loading-lg text-scholar-deep"></span>
+                        <p className="text-sm font-medium text-slate-400 mt-4">กำลังโหลดข้อมูลงานวิจัย...</p>
                     </div>
-
-                    {loading ? (
-                        <div className="p-12 flex justify-center">
-                            <div className="h-10 w-10 animate-spin rounded-full border-4 border-scholar-deep/20 border-t-scholar-deep" />
-                        </div>
-                    ) : projects.length > 0 ? (
-                        <div className="divide-y divide-gray-100">
-                            {projects.map((item) => (
-                                <div key={item.id} className="p-6 hover:bg-blue-50/30 transition-colors group">
-                                    <div className="flex flex-col lg:flex-row justify-between gap-4">
-                                        <div className="space-y-3 flex-grow">
-                                            <div className="flex flex-wrap items-center gap-2 mb-1">
-                                                <span className={`px-2 py-0.5 rounded-sm border text-[10px] font-bold uppercase tracking-wider ${RESEARCH_STATUS_STYLES[item.status]}`}>
-                                                    {RESEARCH_STATUS_LABELS[item.status]}
-                                                </span>
-                                                {item.isSocialService && (
-                                                    <span className="px-2 py-0.5 rounded-sm bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-200">
-                                                        Social Service
-                                                    </span>
-                                                )}
-                                                {item.isCommercial && (
-                                                    <span className="px-2 py-0.5 rounded-sm bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-wider border border-amber-200">
-                                                        Commercial
-                                                    </span>
-                                                )}
-                                                <span className="text-gray-500 text-sm">ปีงบประมาณ: {item.year}</span>
-                                            </div>
-
-                                            <h3 className="text-lg font-bold text-gray-800 group-hover:text-scholar-accent transition-colors">
-                                                <Link href={`/research/database/${item.slug}`}>
-                                                    {item.titleTh}
-                                                </Link>
-                                            </h3>
-
-                                            <p className="text-gray-600 text-sm">
-                                                นักวิจัย: {item.memberDisplay.length > 0 ? item.memberDisplay.join(', ') : 'ยังไม่ระบุ'}
-                                            </p>
-
-                                            <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                                                {item.fundingSource && <span>แหล่งทุน: {item.fundingSource}</span>}
-                                                <span>ผลผลิต: {item.outputCount}</span>
-                                                <span>เอกสาร: {item.attachmentCount}</span>
-                                            </div>
-
-                                            <div className="flex flex-wrap gap-2">
-                                                {item.sdgIds.length > 0 ? item.sdgIds.map((sdgId) => (
-                                                    <span key={sdgId} className="px-2 py-0.5 rounded-sm bg-gray-100 text-gray-700 text-xs font-medium border border-gray-200">
-                                                        SDG {sdgId}
-                                                    </span>
-                                                )) : (
-                                                    <span className="text-xs text-gray-400">ยังไม่ระบุ SDGs</span>
-                                                )}
-                                            </div>
+                ) : projects.length === 0 ? (
+                    <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-4 shadow-sm">
+                        <BookOpen className="w-12 h-12 text-slate-300 mx-auto" />
+                        <h3 className="text-lg font-bold text-slate-800">ไม่พบข้อมูลโครงการวิจัยที่ตรงกับเงื่อนไข</h3>
+                        <p className="text-sm text-slate-500 max-w-md mx-auto">
+                            ลองปรับคำค้นหา หรือเลือกตัวกรองปีงบประมาณ / เป้าหมาย SDGs อื่น
+                        </p>
+                        <button
+                            onClick={handleResetFilters}
+                            className="px-5 py-2 text-xs font-bold text-white bg-scholar-deep rounded-xl hover:bg-opacity-90 transition-all shadow-sm"
+                        >
+                            ล้างตัวกรองทั้งหมด
+                        </button>
+                    </div>
+                ) : viewMode === 'grid' ? (
+                    /* ── Card Grid View ── */
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {projects.map((project) => (
+                            <article
+                                key={project.id}
+                                className="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-scholar-accent/40 transition-all duration-300 flex flex-col overflow-hidden group"
+                            >
+                                {/* Card Header Image / Placeholder */}
+                                <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
+                                    {project.coverImageUrl ? (
+                                        <Image
+                                            src={project.coverImageUrl}
+                                            alt={project.titleTh}
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-scholar-deep/90 via-slate-800 to-slate-900 flex items-center justify-center p-6 text-center">
+                                            <span className="text-white/30 text-xs font-mono uppercase tracking-widest">Faculty of Social Sciences</span>
                                         </div>
+                                    )}
 
-                                        <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between gap-4 min-w-[160px]">
-                                            <div className="text-center lg:text-right">
-                                                <span className="block text-xl font-bold text-scholar-deep">{item.attachmentCount}</span>
-                                                <span className="text-xs text-gray-400">ไฟล์เผยแพร่</span>
-                                            </div>
-                                            <Link href={`/research/database/${item.slug}`} className="btn btn-sm btn-outline border-scholar-accent text-scholar-accent hover:bg-scholar-accent hover:text-white hover:border-scholar-accent rounded-sm w-full lg:w-auto">
-                                                ดูรายละเอียด
-                                            </Link>
-                                        </div>
+                                    {/* Status Badge */}
+                                    <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border backdrop-blur-sm ${
+                                            RESEARCH_STATUS_STYLES[project.status] || 'bg-slate-100 text-slate-700'
+                                        }`}>
+                                            {RESEARCH_STATUS_LABELS[project.status]}
+                                        </span>
+                                        {project.isSocialService && (
+                                            <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-500/90 text-white backdrop-blur-sm">
+                                                รับใช้สังคม
+                                            </span>
+                                        )}
+                                        {project.isCommercial && (
+                                            <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-500/90 text-white backdrop-blur-sm">
+                                                เชิงพาณิชย์
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Year Badge */}
+                                    <div className="absolute top-3 right-3">
+                                        <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-black/60 text-white backdrop-blur-sm">
+                                            พ.ศ. {project.year}
+                                        </span>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="p-12 text-center text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p className="text-lg">ไม่พบข้อมูลงานวิจัยที่ค้นหา</p>
-                            <button className="btn btn-ghost text-scholar-accent mt-2" onClick={() => {
-                                setSearchInput('');
-                                setQuery('');
-                                setSelectedYear('');
-                                setSelectedStatus('');
-                                setSelectedSdg('');
-                                setCurrentPage(1);
-                                updateUrl({ q: '', year: '', status: '', sdg: '', page: 1 });
-                            }}>
-                                ล้างคำค้นหา
-                            </button>
-                        </div>
-                    )}
 
-                    <div className="p-4 border-t border-gray-100 flex justify-center">
-                        <div className="join">
-                            <button className="join-item btn btn-sm" disabled={currentPage <= 1} onClick={() => {
-                                const nextPage = Math.max(currentPage - 1, 1);
-                                setCurrentPage(nextPage);
-                                updateUrl({ page: nextPage });
-                            }}>«</button>
-                            {Array.from({ length: totalPages || 1 }, (_, index) => index + 1)
-                                .slice(Math.max(currentPage - 2, 0), Math.max(currentPage - 2, 0) + 5)
-                                .map((page) => (
-                                    <button
-                                        key={page}
-                                        className={`join-item btn btn-sm ${currentPage === page ? 'btn-active bg-scholar-deep text-white border-scholar-deep' : ''}`}
-                                        onClick={() => {
-                                            setCurrentPage(page);
-                                            updateUrl({ page });
-                                        }}
-                                    >
-                                        {page}
-                                    </button>
-                                ))}
-                            <button className="join-item btn btn-sm" disabled={currentPage >= totalPages} onClick={() => {
-                                const nextPage = Math.min(currentPage + 1, totalPages);
-                                setCurrentPage(nextPage);
-                                updateUrl({ page: nextPage });
-                            }}>»</button>
-                        </div>
+                                {/* Card Body */}
+                                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                                    <div className="space-y-3">
+                                        {/* SDGs Badges */}
+                                        {project.sdgIds && project.sdgIds.length > 0 && (
+                                            <div className="flex flex-wrap gap-1">
+                                                {project.sdgIds.slice(0, 4).map((sdgId) => {
+                                                    const color = SDG_COLORS[sdgId] || { hex: '#4B5563', bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200' };
+                                                    return (
+                                                        <span
+                                                            key={sdgId}
+                                                            className="px-2 py-0.5 rounded-md text-[10px] font-bold"
+                                                            style={{ backgroundColor: `${color.hex}15`, color: color.hex }}
+                                                        >
+                                                            SDG {sdgId}
+                                                        </span>
+                                                    );
+                                                })}
+                                                {project.sdgIds.length > 4 && (
+                                                    <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-500">
+                                                        +{project.sdgIds.length - 4}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Title */}
+                                        <Link href={`/research/database/${project.slug}`}>
+                                            <h3 className="text-base font-bold text-slate-900 group-hover:text-scholar-accent transition-colors line-clamp-2 leading-snug">
+                                                {project.titleTh}
+                                            </h3>
+                                        </Link>
+
+                                        {/* Researchers */}
+                                        {project.memberDisplay && project.memberDisplay.length > 0 && (
+                                            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                                                <Users className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                                                <span className="truncate">{project.memberDisplay.join(', ')}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Card Footer Actions */}
+                                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                                        <CiteModal
+                                            title={project.titleTh}
+                                            authors={project.memberDisplay}
+                                            year={project.year}
+                                            url={`https://soc.crru.ac.th/research/database/${project.slug}`}
+                                        />
+                                        <Link
+                                            href={`/research/database/${project.slug}`}
+                                            className="inline-flex items-center gap-1 text-xs font-bold text-scholar-deep hover:text-scholar-accent transition-colors group-hover:translate-x-0.5"
+                                        >
+                                            <span>ดูรายละเอียด</span>
+                                            <ExternalLink className="w-3.5 h-3.5" />
+                                        </Link>
+                                    </div>
+                                </div>
+                            </article>
+                        ))}
                     </div>
-                </div>
+                ) : (
+                    /* ── Academic List / Table View ── */
+                    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden divide-y divide-slate-100">
+                        {projects.map((project) => (
+                            <div
+                                key={project.id}
+                                className="p-5 hover:bg-slate-50/80 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                            >
+                                <div className="space-y-2 flex-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
+                                            RESEARCH_STATUS_STYLES[project.status] || 'bg-slate-100 text-slate-700'
+                                        }`}>
+                                            {RESEARCH_STATUS_LABELS[project.status]}
+                                        </span>
+                                        <span className="text-xs font-bold text-slate-500">พ.ศ. {project.year}</span>
+                                        {project.sdgIds && project.sdgIds.map((sdgId) => {
+                                            const color = SDG_COLORS[sdgId] || { hex: '#4B5563' };
+                                            return (
+                                                <span
+                                                    key={sdgId}
+                                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold"
+                                                    style={{ backgroundColor: `${color.hex}15`, color: color.hex }}
+                                                >
+                                                    SDG {sdgId}
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <Link href={`/research/database/${project.slug}`}>
+                                        <h3 className="text-base font-bold text-slate-900 hover:text-scholar-accent transition-colors leading-snug">
+                                            {project.titleTh}
+                                        </h3>
+                                    </Link>
+
+                                    {project.memberDisplay && project.memberDisplay.length > 0 && (
+                                        <p className="text-xs text-slate-500 font-medium">
+                                            คณะผู้วิจัย: {project.memberDisplay.join(', ')}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center gap-3 self-end md:self-center flex-shrink-0">
+                                    <CiteModal
+                                        title={project.titleTh}
+                                        authors={project.memberDisplay}
+                                        year={project.year}
+                                        url={`https://soc.crru.ac.th/research/database/${project.slug}`}
+                                    />
+                                    <Link
+                                        href={`/research/database/${project.slug}`}
+                                        className="px-4 py-2 bg-scholar-deep text-white text-xs font-bold rounded-xl hover:bg-opacity-90 transition-all shadow-sm inline-flex items-center gap-1"
+                                    >
+                                        <span>ดูรายงาน</span>
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                    </Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* ── Pagination ── */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 pt-6">
+                        <button
+                            type="button"
+                            disabled={currentPage <= 1}
+                            onClick={() => {
+                                const prev = Math.max(currentPage - 1, 1);
+                                setCurrentPage(prev);
+                                updateUrl({ page: prev });
+                            }}
+                            className="px-4 py-2 text-xs font-bold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-all shadow-sm"
+                        >
+                            ก่อนหน้า
+                        </button>
+                        <span className="text-xs font-bold text-slate-500 px-3">
+                            หน้า {currentPage} / {totalPages}
+                        </span>
+                        <button
+                            type="button"
+                            disabled={currentPage >= totalPages}
+                            onClick={() => {
+                                const next = Math.min(currentPage + 1, totalPages);
+                                setCurrentPage(next);
+                                updateUrl({ page: next });
+                            }}
+                            className="px-4 py-2 text-xs font-bold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none transition-all shadow-sm"
+                        >
+                            ถัดไป
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

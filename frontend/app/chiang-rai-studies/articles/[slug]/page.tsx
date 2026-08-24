@@ -6,6 +6,8 @@ import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 
 import ArticleActions from './ArticleActions';
+import CiteModal from '@/components/research/CiteModal';
+import JsonLd from '@/components/seo/JsonLd';
 
 interface Article {
     id: string;
@@ -72,13 +74,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             locale: 'th_TH',
             type: 'article',
             authors: article.author ? [article.author] : [],
-            publishedTime: article.publishedAt,
+            publishedTime: article.publishedAt || undefined,
         },
         twitter: {
             card: 'summary_large_image',
             title,
             description,
             images: ogImage ? [ogImage] : [],
+        },
+        other: {
+            'citation_title': article.title,
+            ...(article.author ? { 'citation_author': [article.author] } : {}),
+            ...(article.publishedAt ? { 'citation_publication_date': new Date(article.publishedAt).toISOString().split('T')[0].replace(/-/g, '/') } : {}),
+            'citation_publisher': 'ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
         },
     };
 }
@@ -125,10 +133,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
     return (
         <div className="min-h-screen bg-[#FAF5FF] pb-20 font-kanit">
             {/* JSON-LD Script */}
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
+            <JsonLd data={jsonLd} />
 
             {/* Header Image / Pattern */}
             <div className="h-64 md:h-80 bg-[#2e1065] relative overflow-hidden">
@@ -189,7 +194,14 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
                                     <span className="font-medium">{article.author}</span>
                                 </div>
                             )}
-                            <div className="flex items-center gap-6 ml-auto md:ml-0 border-l border-stone-200 pl-6">
+                            <div className="flex flex-wrap items-center gap-3 ml-auto md:ml-0 border-l border-stone-200 pl-6">
+                                <CiteModal
+                                    title={article.title}
+                                    authors={article.author ? [article.author] : []}
+                                    year={article.publishedAt ? new Date(article.publishedAt).getFullYear() : new Date().getFullYear()}
+                                    publisher="ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย"
+                                    url={`https://soc.crru.ac.th/chiang-rai-studies/articles/${article.slug}`}
+                                />
                                 <ArticleActions title={article.title} description={article.abstract || undefined} />
                             </div>
                         </div>

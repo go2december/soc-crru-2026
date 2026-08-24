@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
                     '/chiang-rai-studies/admin/',
                     '/debug-env/',
                     '/api/',
+                    '/_next/',
                 ],
             },
         ],

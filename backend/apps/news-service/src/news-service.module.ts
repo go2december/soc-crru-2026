@@ -8,12 +8,14 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { NewsController } from './news.controller';
 import { NewsService } from './news.service';
+import { ProcurementModule } from './procurement/procurement.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     UploadModule,
+    ProcurementModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     ThrottlerModule.forRoot([
       {

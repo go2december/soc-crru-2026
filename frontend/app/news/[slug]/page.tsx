@@ -9,6 +9,7 @@ import {
   Paperclip,
 } from 'lucide-react';
 import GalleryClient from '@/components/GalleryClient';
+import JsonLd from '@/components/seo/JsonLd';
 import {
   FACULTY_NEWS_CATEGORY_LABELS,
   FACULTY_NEWS_CATEGORY_STYLES,
@@ -75,8 +76,37 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
 
   const hasAttachments = attachments.length > 0;
 
+  const newsArticleSchema = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": newsItem.title,
+    "description": newsItem.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200),
+    "image": heroImage ? [heroImage.startsWith('http') ? heroImage : `https://soc.crru.ac.th${heroImage}`] : undefined,
+    "datePublished": newsItem.publishedAt || newsItem.createdAt,
+    "dateModified": newsItem.updatedAt || newsItem.publishedAt || newsItem.createdAt,
+    "author": [{
+      "@type": "Organization",
+      "name": "คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
+      "url": "https://soc.crru.ac.th"
+    }],
+    "publisher": {
+      "@type": "EducationalOrganization",
+      "name": "คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
+      "url": "https://soc.crru.ac.th",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://soc.crru.ac.th/images/logo.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://soc.crru.ac.th/news/${params.slug}`
+    }
+  };
+
   return (
     <div className="bg-base-100 min-h-screen pb-16 lg:pb-24">
+      <JsonLd data={newsArticleSchema} />
       {/* Immersive Magazine Hero Section */}
       <section className="relative w-full h-[60vh] sm:h-[70vh] min-h-[400px] max-h-[700px] flex items-end">
         {heroImage ? (

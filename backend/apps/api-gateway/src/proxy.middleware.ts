@@ -12,7 +12,10 @@ export class ProxyMiddleware implements NestMiddleware {
     if (url.startsWith('/api/auth')) {
       targetPort = 3001;
       targetHost = process.env.AUTH_SERVICE_HOST || 'localhost';
-    } else if (url.startsWith('/api/news')) {
+    } else if (
+      url.startsWith('/api/news') ||
+      url.startsWith('/api/procurement')
+    ) {
       targetPort = 3002;
       targetHost = process.env.NEWS_SERVICE_HOST || 'localhost';
     } else if (url.startsWith('/api/chiang-rai')) {

@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
 import ResearchSdgBadges from '@/components/ResearchSdgBadges';
+import JsonLd from '@/components/seo/JsonLd';
+import CiteModal from '@/components/research/CiteModal';
 import {
   fetchResearchList,
   fetchResearchBySlug,
@@ -55,6 +57,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = `${project.titleTh} | ฐานข้อมูลงานวิจัย`;
   const description = (project.abstractTh || project.abstractEn || project.titleTh).slice(0, 160);
   const ogImage = getResearchServerAssetUrl(project.coverImageUrl) || undefined;
+  const pdfAttachment = (project.attachments || []).find((a) => a.fileType?.includes('pdf') || a.fileUrl?.endsWith('.pdf') || a.fileName?.endsWith('.pdf'));
+  const pdfUrl = pdfAttachment ? getResearchServerAssetUrl(pdfAttachment.fileUrl) : undefined;
+  const primaryOutput = (project.outputs || [])[0];
+  const authorNames = (project.members || []).map((m) => m.displayName || m.externalName).filter(Boolean) as string[];
 
   return {
     title,
@@ -76,6 +82,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title,
       description,
       images: ogImage ? [ogImage] : [],
+    },
+    other: {
+      'citation_title': project.titleTh,
+      ...(authorNames.length > 0 ? { 'citation_author': authorNames } : {}),
+      ...(project.publishedAt ? { 'citation_publication_date': new Date(project.publishedAt).toISOString().split('T')[0].replace(/-/g, '/') } : {}),
+      ...(pdfUrl ? { 'citation_pdf_url': pdfUrl.startsWith('http') ? pdfUrl : `https://soc.crru.ac.th${pdfUrl}` } : {}),
+      ...(primaryOutput?.doiUrl ? { 'citation_doi': primaryOutput.doiUrl } : {}),
+      ...(primaryOutput?.journalName ? { 'citation_journal_title': primaryOutput.journalName } : {}),
+      ...(primaryOutput?.volume ? { 'citation_volume': primaryOutput.volume } : {}),
+      ...(primaryOutput?.issue ? { 'citation_issue': primaryOutput.issue } : {}),
+      ...(primaryOutput?.pages ? { 'citation_firstpage': primaryOutput.pages.split('-')[0] } : {}),
+      'citation_publisher': 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
     },
   };
 }
@@ -139,12 +157,11 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
     })),
   };
 
+  const primaryOutput = outputs[0];
+
   return (
     <div className="bg-slate-50 min-h-screen pb-16 lg:pb-24 font-sans text-slate-800">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
 
       {/* ── Typographic Header Section ── */}
       <header className="bg-white border-b border-slate-200 pt-6 pb-12 lg:py-16">
@@ -155,7 +172,20 @@ export default async function ResearchDetailPage(props: { params: Promise<{ slug
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                 กลับไปฐานข้อมูลงานวิจัย
               </Link>
-              <Breadcrumb items={[{ label: 'วิจัยและนวัตกรรม' }, { label: 'ฐานข้อมูลงานวิจัย', href: '/research/database' }, { label: project.titleTh }]} />
+              <div className="flex flex-wrap items-center gap-3">
+                <CiteModal
+                  title={project.titleTh}
+                  authors={members.map((m) => m.displayName || m.externalName).filter(Boolean) as string[]}
+                  year={project.year}
+                  url={`https://soc.crru.ac.th/research/database/${project.slug}`}
+                  doi={primaryOutput?.doiUrl}
+                  journal={primaryOutput?.journalName}
+                  volume={primaryOutput?.volume}
+                  issue={primaryOutput?.issue}
+                  pages={primaryOutput?.pages}
+                />
+                <Breadcrumb items={[{ label: 'วิจัยและนวัตกรรม' }, { label: 'ฐานข้อมูลงานวิจัย', href: '/research/database' }, { label: project.titleTh }]} />
+              </div>
             </div>
 
             <div className={heroImage ? "grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-8 items-start" : "max-w-4xl"}>

@@ -114,7 +114,14 @@ export default function Navbar() {
                         <li><Link href="/admissions">รับสมัคร</Link></li>
                         <li><Link href="/research">วิจัยและนวัตกรรม</Link></li>
                         <li><Link href="/chiang-rai-studies" className="text-scholar-gold">ศูนย์เชียงรายศึกษา</Link></li>
-                        <li><Link href="/eservice" className="text-yellow-400">ระบบสารสนเทศ</Link></li>
+                        <li><span className="text-yellow-400 font-bold">ระบบสารสนเทศ</span>
+                            <ul>
+                                <li><Link href="/eservice/student">สำหรับนักศึกษา (Student)</Link></li>
+                                <li><Link href="/eservice/staff">สำหรับบุคลากร (Staff)</Link></li>
+                                <li><Link href="/eservice/procurement" className="text-scholar-gold font-semibold">จัดซื้อจัดจ้าง (Procurement)</Link></li>
+                                <li><Link href="/eservice/calendar">ปฏิทินวิชาการ</Link></li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
                 <Link href="/" className="btn btn-ghost text-xl font-bold tracking-wider flex items-center gap-3 hover:bg-transparent group">
@@ -215,6 +222,7 @@ export default function Navbar() {
                         <NavItem href="/eservice/student" title="สำหรับนักศึกษา (Student)" />
                         <NavItem href="/eservice/staff" title="สำหรับบุคลากร (Staff)" />
                         <div className="divider my-1 border-white/10"></div>
+                        <NavItem href="/eservice/procurement" title="จัดซื้อจัดจ้าง (Procurement)" />
                         <NavItem href="/eservice/calendar" title="ปฏิทินวิชาการ" />
                     </DropdownMenu>
 

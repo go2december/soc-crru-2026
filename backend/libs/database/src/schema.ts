@@ -756,3 +756,93 @@ export const tokenBlacklist = pgTable('token_blacklist', {
   revokedAt: timestamp('revoked_at').defaultNow().notNull(),
   expiresAt: timestamp('expires_at').notNull(),
 });
+
+// ------------------------------------------
+// 10. Procurement & Supplies (จัดซื้อจัดจ้าง)
+// ------------------------------------------
+
+export const procurementTypeEnum = pgEnum('procurement_type', [
+  'PRICE_CHECK', // ตรวจสอบราคา / สอบราคา
+  'SPECIFIC_METHOD', // เฉพาะเจาะจง
+  'E_BIDDING', // ประกวดราคาอิเล็กทรอนิกส์ (e-bidding)
+  'E_MARKET', // ตลาดอิเล็กทรอนิกส์ (e-market)
+]);
+
+export const procurementCategoryEnum = pgEnum('procurement_category', [
+  'GOODS', // ซื้อ/พัสดุ
+  'EQUIPMENT', // ครุภัณฑ์
+  'CONSTRUCTION', // จ้างก่อสร้าง
+  'SERVICE', // จ้างบริการ/จ้างเหมา
+]);
+
+export const procurementStatusEnum = pgEnum('procurement_status', [
+  'PLANNING', // จัดทำแผน/ร่าง TOR
+  'IN_PROGRESS', // อยู่ระหว่างดำเนินการ/ประกาศ
+  'COMPLETED', // สิ้นสุด/ส่งมอบเรียบร้อย
+  'CANCELLED', // ยกเลิก
+]);
+
+export const procurementDocTypeEnum = pgEnum('procurement_doc_type', [
+  'TOR', // ขอบเขตงาน / TOR
+  'ANNOUNCEMENT', // ประกาศจัดซื้อจัดจ้าง
+  'RESULT', // ประกาศผลผู้ชนะ / ผู้ได้รับการคัดเลือก
+  'CONTRACT', // สัญญา / สรุปสาระสำคัญของสัญญา
+  'RECEIPT', // การตรวจรับพัสดุ / ใบเสร็จ
+  'OTHER', // เอกสารอื่นๆ
+]);
+
+export const procurementRecords = pgTable(
+  'procurement_records',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    fiscalYear: integer('fiscal_year').notNull(), // ปีงบประมาณ เช่น 2568
+    title: varchar('title', { length: 500 }).notNull(), // ชื่อโครงการ/รายการ
+    procurementType: procurementTypeEnum('procurement_type').notNull(),
+    category: procurementCategoryEnum('category').notNull(),
+    budget: numeric('budget', { precision: 12, scale: 2 }).notNull(), // วงเงินงบประมาณ (บาท)
+    contractAmount: numeric('contract_amount', { precision: 12, scale: 2 }), // วงเงินตามสัญญา / ราคากลาง
+    vendorName: varchar('vendor_name', { length: 255 }), // ผู้ชนะการเสนอราคา / คู่สัญญา
+    approvedAt: timestamp('approved_at'), // วันที่อนุมัติ / ประกาศ
+    completedAt: timestamp('completed_at'), // วันที่สิ้นสุดสัญญา
+    status: procurementStatusEnum('status').default('PLANNING').notNull(),
+    isPublished: boolean('is_published').default(true).notNull(),
+    createdBy: uuid('created_by').references(() => users.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      fiscalYearIdx: index('procurement_records_fiscal_year_idx').on(table.fiscalYear),
+      procurementTypeIdx: index('procurement_records_type_idx').on(table.procurementType),
+      categoryIdx: index('procurement_records_category_idx').on(table.category),
+      statusIdx: index('procurement_records_status_idx').on(table.status),
+      isPublishedIdx: index('procurement_records_is_published_idx').on(table.isPublished),
+    };
+  },
+);
+
+export const procurementDocuments = pgTable(
+  'procurement_documents',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    procurementId: uuid('procurement_id')
+      .notNull()
+      .references(() => procurementRecords.id, { onDelete: 'cascade' }),
+    documentType: procurementDocTypeEnum('document_type').default('OTHER').notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    fileUrl: varchar('file_url', { length: 500 }),
+    externalUrl: varchar('external_url', { length: 500 }),
+    originalName: varchar('original_name', { length: 255 }),
+    mimeType: varchar('mime_type', { length: 100 }).default('application/pdf'),
+    fileSize: integer('file_size'),
+    sortOrder: integer('sort_order').default(0).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      procurementIdx: index('procurement_docs_procurement_id_idx').on(table.procurementId),
+      sortOrderIdx: index('procurement_docs_sort_order_idx').on(table.sortOrder),
+    };
+  },
+);
+

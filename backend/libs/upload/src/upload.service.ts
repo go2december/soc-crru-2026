@@ -12,6 +12,7 @@ export class UploadService {
   private readonly newsAttachmentUploadDir = './uploads/news/attachments';
   private readonly programsUploadDir = './uploads/programs';
   private readonly researchUploadDir = './uploads/research';
+  private readonly procurementUploadDir = './uploads/procurement';
 
   constructor() {
     // Ensure upload directories exist
@@ -32,6 +33,9 @@ export class UploadService {
     }
     if (!fs.existsSync(this.researchUploadDir)) {
       fs.mkdirSync(this.researchUploadDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.procurementUploadDir)) {
+      fs.mkdirSync(this.procurementUploadDir, { recursive: true });
     }
   }
 
@@ -302,6 +306,57 @@ export class UploadService {
       await fs.promises.unlink(filepath);
       return true;
     } catch {
+      return false;
+    }
+  }
+
+  async saveProcurementFile(file: Express.Multer.File): Promise<{
+    originalName: string;
+    fileUrl: string;
+    mimeType: string;
+    size: number;
+  }> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    if (!file.mimetype.includes('pdf')) {
+      throw new BadRequestException('Only PDF files are allowed for procurement documents');
+    }
+
+    const utf8OriginalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    const sanitizedOriginalName = utf8OriginalName.replace(/[^a-zA-Z0-9ก-๙._-]/g, '_');
+    const filename = `${uuidv4()}-${sanitizedOriginalName}`;
+    const filepath = path.join(this.procurementUploadDir, filename);
+
+    try {
+      await fs.promises.writeFile(filepath, file.buffer);
+      return {
+        originalName: utf8OriginalName,
+        fileUrl: `/uploads/procurement/${filename}`,
+        mimeType: file.mimetype,
+        size: file.size,
+      };
+    } catch (error) {
+      console.error('Procurement file save error:', error);
+      throw new BadRequestException('Failed to save procurement document');
+    }
+  }
+
+  async deleteProcurementFile(fileUrl: string): Promise<boolean> {
+    if (!fileUrl || !fileUrl.startsWith('/uploads/procurement/')) {
+      return false;
+    }
+
+    const relativePath = fileUrl.replace(/^\/uploads\//, '');
+    const filepath = path.join(process.cwd(), 'uploads', relativePath);
+
+    try {
+      await fs.promises.access(filepath);
+      await fs.promises.unlink(filepath);
+      return true;
+    } catch (error) {
+      console.error('Delete procurement file error:', error);
       return false;
     }
   }

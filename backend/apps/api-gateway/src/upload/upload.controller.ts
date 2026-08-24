@@ -90,4 +90,18 @@ export class UploadController {
     const deleted = await this.uploadService.deleteProgramsFile(url);
     return { deleted };
   }
+
+  @Post('procurement')
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProcurementFile(@UploadedFile() file: Express.Multer.File) {
+    return this.uploadService.saveProcurementFile(file);
+  }
+
+  @Delete('procurement')
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  async deleteProcurementFile(@Body('url') url: string) {
+    const deleted = await this.uploadService.deleteProcurementFile(url);
+    return { deleted };
+  }
 }
