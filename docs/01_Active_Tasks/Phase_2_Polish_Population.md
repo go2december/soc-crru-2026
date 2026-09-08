@@ -14,12 +14,7 @@ After completing the initial content population for News, Staff, and Research, P
 - [x] Sharpen the UI components (Polished table header, borders, badges, buttons, and brochure thumbnail to match the `rounded-sm` theme).
 
 ### 3. Chiang Rai Artifacts Population
-- [ ] Populate `chiang_rai_artifacts` with real data for the 5 identities:
-    - History
-    - Archaeology
-    - Culture
-    - Arts
-    - Wisdom
+- [x] Populate `chiang_rai_artifacts` with real data for the 5 identities (History, Archaeology, Culture, Arts, Wisdom) — ระบบมี Lazy Seeding จำนวน 25 รายการฝังอยู่ใน `chiang-rai.service.ts` พร้อมทำงานอัตโนมัติเมื่อเรียกดูข้อมูล
 
 ### 4. Research Public Filter UI
 - [x] Final verification of the filter interactions on `/research/database` (Completed dynamic years selection from backend, verified responsive grid/flex layout).

@@ -16,7 +16,6 @@ aliases: ["Index", "Home"]
 - `[[Project_Map.canvas|🗺️ Project Visual Map]]` (แผนที่เชื่อมโยงโปรเจกต์เชิงภาพ)
 - `[[01_Active_Tasks/Phase_2_Polish_Population.md]]` (งานปัจจุบัน: ขัดเกลา UI และเพิ่มเนื้อหา Phase 2)
 - `[[01_Active_Tasks/Current_Status.md]]` (ภาพรวมสถานะล่าสุด)
-- `[[01_Active_Tasks/Webometrics_Audit_SOC_CRRU.md|🔍 Webometrics Audit & Action Tracker]]` (งานตรวจสอบมาตรฐาน Webometrics)
 - **วิธีสั่ง AI:** "เข้าไปอ่านรายละเอียดที่ 01_Active_Tasks/Phase_2_Polish_Population.md แล้วเริ่มทำงานได้เลย"
 
 ---
@@ -50,6 +49,7 @@ aliases: ["Index", "Home"]
 ## 🗄️ 5. Archive (กรุสมบัติ / เอกสารที่ประมวลผลเสร็จแล้ว)
 เพื่อไม่ให้ AI หลอนข้อมูลซ้ำซ้อน ไฟล์ `PLAN` หรือบัคที่แก้เสร็จแล้ว ให้โยนเข้ามาหมกไว้ที่นี่ทั้งหมด
 - `[[99_Archive/Academic_Services_CRUD.md]]` (ระบบบริหารจัดการบริการวิชาการ - ✅ เสร็จสมบูรณ์เมื่อ May 11, 2026)
+- `[[99_Archive/Webometrics_Audit_SOC_CRRU.md]]` (งานตรวจสอบและติดตั้งมาตรฐาน Webometrics - ✅ เสร็จสมบูรณ์เมื่อ August 18, 2026)
 - เข้าไปดูไฟล์เก่า: `[[99_Archive/]]`
 
 ---
