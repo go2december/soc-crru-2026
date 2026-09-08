@@ -1,6 +1,6 @@
 ---
 title: "Project Status Overview"
-updated: 2026-05-20
+updated: 2026-09-08
 tags: [status, overview]
 ---
 
@@ -38,8 +38,9 @@ tags: [status, overview]
 
 ### 🔥 High Priority (ต้องทำตอนนี้)
 - [x] **Research Public Filter & SDGs Explorer UI:** ระบบค้นหางานวิจัยสาธารณะขั้นสูง ตัวกรอง 17 SDGs แบบ Visual Explorer, Type pills (รับใช้สังคม/เชิงพาณิชย์), และ Grid/List view switcher (เสร็จสมบูรณ์ 2026-08-19)
+- [x] **Admissions Center Updates:** ปรับปรุงหน้าตารางรับสมัครให้ดึงข้อมูลจาก DB และ UI สวยงาม (เสร็จสมบูรณ์ใน Phase 2)
+- [x] **Dependencies & Security Updates:** อัปเดตแพ็กเกจไลบรารี Frontend & Backend, ปิดช่องโหว่ความปลอดภัย, ย้ายไฟล์สำรองเข้า database/backups และแก้ไข React 19 Linting (เสร็จสมบูรณ์ 2026-09-08)
 - [ ] **Articles & Learning Sites Polish:** ตรวจสอบหน้าเนื้อหาบทความ (Articles Detail Page) และแหล่งเรียนรู้ให้สมบูรณ์
-- [ ] **Admissions Center Updates:** ปรับปรุงหน้าตารางรับสมัครให้ดึงข้อมูลจาก DB และ UI สวยงาม
 - [ ] **Chiang Rai Artifacts Population:** นำข้อมูลคลังความรู้อัตลักษณ์ 5 มิติ เข้าสู่ระบบจริง
 
 ### ⚡ Medium Priority (คิวต่อไป)

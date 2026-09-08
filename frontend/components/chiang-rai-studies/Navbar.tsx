@@ -33,10 +33,12 @@ export default function ChiangRaiNavbar() {
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close mobile menu on route change
-    useEffect(() => {
+    const [prevPathname, setPrevPathname] = useState(pathname);
+    if (prevPathname !== pathname) {
+        setPrevPathname(pathname);
         setIsOpen(false);
         setOpenSubmenu(null);
-    }, [pathname]);
+    }
 
     // Close dropdown when clicking outside
     useEffect(() => {

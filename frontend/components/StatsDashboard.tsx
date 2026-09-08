@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
+import Link from 'next/link';
 
 // Hook สำหรับทำ Count Up Animation
 const useCountUp = (end: number, duration: number = 2000) => {
@@ -114,10 +115,10 @@ export default function StatsDashboard() {
 
                 {/* Optional: Learn More Button */}
                 <div className="text-center mt-12">
-                    <a href="/about/strategy" className="inline-flex items-center text-white hover:text-scholar-accent transition-colors font-semibold border-b border-transparent hover:border-scholar-accent pb-1">
+                    <Link href="/about/strategy" className="inline-flex items-center text-white hover:text-scholar-accent transition-colors font-semibold border-b border-transparent hover:border-scholar-accent pb-1">
                         ดูแผนยุทธศาสตร์และตัวชี้วัดทั้งหมด
                         <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                    </a>
+                    </Link>
                 </div>
             </div>
         </section>
