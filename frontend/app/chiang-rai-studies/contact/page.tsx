@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Facebook, Clock, ArrowRight, ExternalLink, GraduationCap } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, ArrowRight, ExternalLink, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
@@ -94,7 +94,7 @@ export default function ContactPage() {
                             <a href="https://www.facebook.com/social.crru" target="_blank" className="flex items-center justify-between p-4 hover:bg-blue-50 transition-colors group">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
-                                        <Facebook size={18} />
+                                        <svg className="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
                                     </div>
                                     <span className="text-sm font-bold text-stone-600 group-hover:text-blue-700">Social Science CRRU</span>
                                 </div>

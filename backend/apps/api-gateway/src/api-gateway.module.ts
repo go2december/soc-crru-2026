@@ -4,7 +4,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { DatabaseModule } from 'db/database';
 import { UploadModule } from 'upload/upload';
-import { PassportModule } from '@nestjs/passport';
 import { SharedModule } from 'shared/shared';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
