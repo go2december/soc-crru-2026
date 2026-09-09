@@ -3,8 +3,10 @@
 Welcome to the official web application repository for the Faculty of Social Sciences, Chiang Rai Rajabhat University. This platform is designed to serve students, staff, and the general public with modern, responsive, and user-centric features.
 
 ![Project Status](https://img.shields.io/badge/Status-In%20Development-yellow?style=flat-square)
-![Next.js](https://img.shields.io/badge/Next.js-16.1-black?style=flat-square&logo=next.js)
-![NestJS](https://img.shields.io/badge/NestJS-10+-E0234E?style=flat-square&logo=nestjs)
+![Next.js](https://img.shields.io/badge/Next.js-16.3-black?style=flat-square&logo=next.js)
+![NestJS](https://img.shields.io/badge/NestJS-12.0-E0234E?style=flat-square&logo=nestjs)
+![Node.js](https://img.shields.io/badge/Node.js-26-339933?style=flat-square&logo=node.js)
+![Rspack](https://img.shields.io/badge/Rspack-Rust-orange?style=flat-square)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18.0-336791?style=flat-square&logo=postgresql)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker)
 
@@ -31,7 +33,7 @@ This project utilizes a modern Full-Stack Dockerized environment:
 | **Frontend** | **Next.js 16+** | React Framework with App Router & Server Components |
 | **Styling** | **Tailwind CSS v4** | Utility-first CSS framework |
 | **UI Library** | **DaisyUI 5** | Component library for Tailwind |
-| **Backend** | **NestJS** | Progressive Node.js framework for scalable server-side apps |
+| **Backend** | **NestJS 12 (Modular Monolith)** | High-performance unified backend built with Rust-based Rspack |
 | **Database** | **PostgreSQL 18** | Powerful, open source object-relational database system |
 | **DevOps** | **Docker Compose** | Container orchestration for unified development environment |
 

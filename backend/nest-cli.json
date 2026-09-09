@@ -4,7 +4,7 @@
   "sourceRoot": "apps/api-gateway/src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "webpack": true,
+    "builder": "rspack",
     "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
   },
   "monorepo": true,
@@ -19,24 +19,6 @@
         "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
       }
     },
-    "auth-service": {
-      "type": "application",
-      "root": "apps/auth-service",
-      "entryFile": "main",
-      "sourceRoot": "apps/auth-service/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/auth-service/tsconfig.app.json"
-      }
-    },
-    "chiang-rai-service": {
-      "type": "application",
-      "root": "apps/chiang-rai-service",
-      "entryFile": "main",
-      "sourceRoot": "apps/chiang-rai-service/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/chiang-rai-service/tsconfig.app.json"
-      }
-    },
     "database": {
       "type": "library",
       "root": "libs/database",
@@ -46,33 +28,6 @@
         "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
     },
-    "news-service": {
-      "type": "application",
-      "root": "apps/news-service",
-      "entryFile": "main",
-      "sourceRoot": "apps/news-service/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/news-service/tsconfig.app.json"
-      }
-    },
-    "programs-service": {
-      "type": "application",
-      "root": "apps/programs-service",
-      "entryFile": "main",
-      "sourceRoot": "apps/programs-service/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/programs-service/tsconfig.app.json"
-      }
-    },
-    "research-service": {
-      "type": "application",
-      "root": "apps/research-service",
-      "entryFile": "main",
-      "sourceRoot": "apps/research-service/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/research-service/tsconfig.app.json"
-      }
-    },
     "shared": {
       "type": "library",
       "root": "libs/shared",
@@ -80,15 +35,6 @@
       "sourceRoot": "libs/shared/src",
       "compilerOptions": {
         "tsConfigPath": "libs/shared/tsconfig.lib.json"
-      }
-    },
-    "staff-service": {
-      "type": "application",
-      "root": "apps/staff-service",
-      "entryFile": "main",
-      "sourceRoot": "apps/staff-service/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/staff-service/tsconfig.app.json"
       }
     },
     "upload": {
