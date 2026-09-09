@@ -28,6 +28,8 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port, '0.0.0.0');
-  console.log(`🚀 SOC-CRRU Backend (Modular Monolith) is running on: http://localhost:${port}/api`);
+  console.log(
+    `🚀 SOC-CRRU Backend (Modular Monolith) is running on: http://localhost:${port}/api`,
+  );
 }
 void bootstrap();

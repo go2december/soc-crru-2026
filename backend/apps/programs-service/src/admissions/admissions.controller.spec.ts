@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { PassportModule } from '@nestjs/passport';
 import { AdmissionsController } from './admissions.controller';
 import { AdmissionsService } from './admissions.service';
 import { DatabaseService } from 'db/database';
@@ -8,6 +9,7 @@ describe('AdmissionsController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [PassportModule.register({ defaultStrategy: 'jwt' })],
       controllers: [AdmissionsController],
       providers: [
         AdmissionsService,

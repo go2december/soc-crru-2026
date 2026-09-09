@@ -5,7 +5,7 @@ import { join } from 'path';
 import { DatabaseModule } from 'db/database';
 import { UploadModule } from 'upload/upload';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from 'shared/shared';
+import { SharedModule } from 'shared/shared';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { UploadController } from './upload/upload.controller';
@@ -22,13 +22,13 @@ import { ResearchServiceModule } from '../../research-service/src/research-servi
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
+    SharedModule,
     // Serve static files from /uploads on Port 3000
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
     }),
     UploadModule,
-    PassportModule.register({ defaultStrategy: 'jwt' }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -46,7 +46,6 @@ import { ResearchServiceModule } from '../../research-service/src/research-servi
   ],
   controllers: [UploadController],
   providers: [
-    JwtStrategy,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

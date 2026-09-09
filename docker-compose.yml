@@ -36,6 +36,8 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
+    profiles:
+      - tools
     networks:
       - soc-network
     depends_on:
@@ -43,7 +45,7 @@ services:
         condition: service_healthy
 
   # -----------------------------------------------------------------
-  # MICROSERVICE: API Gateway (Port 3000 -> Host BACKEND_PORT:-4001)
+  # MODULAR MONOLITH BACKEND: API Gateway & All Modules (Port 3000 -> Host BACKEND_PORT:-4001)
   # -----------------------------------------------------------------
   api-gateway:
     build:
@@ -57,166 +59,12 @@ services:
     environment:
       - PORT=3000
       - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
-      - JWT_SECRET=super-secret-key-change-this-in-production
-      - FRONTEND_URL=http://localhost:${FRONTEND_PORT:-4000}
-      - AUTH_SERVICE_HOST=auth-service
-      - NEWS_SERVICE_HOST=news-service
-      - CHIANG_RAI_SERVICE_HOST=chiang-rai-service
-      - PROGRAMS_SERVICE_HOST=programs-service
-      - STAFF_SERVICE_HOST=staff-service
-      - RESEARCH_SERVICE_HOST=research-service
-    volumes:
-      - ./backend/uploads:/usr/src/app/uploads
-    networks:
-      - soc-network
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
-
-  # -----------------------------------------------------------------
-  # MICROSERVICE: Auth Service (Port 3001)
-  # -----------------------------------------------------------------
-  auth-service:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: auth-service
-    container_name: soc_auth_service
-    ports:
-      - "3001:3001"
-    environment:
-      - PORT=3001
-      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
-      - JWT_SECRET=super-secret-key-change-this-in-production
+      - JWT_SECRET=${JWT_SECRET:-super-secret-key-change-this-in-production}
       - FRONTEND_URL=http://localhost:${FRONTEND_PORT:-4000}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_CALLBACK_URL=http://localhost:${BACKEND_PORT:-4001}/api/auth/google/callback
-    networks:
-      - soc-network
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
-
-  # -----------------------------------------------------------------
-  # MICROSERVICE: News Service (Port 3002)
-  # -----------------------------------------------------------------
-  news-service:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: news-service
-    container_name: soc_news_service
-    ports:
-      - "3002:3002"
-    environment:
-      - PORT=3002
-      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
-      - JWT_SECRET=super-secret-key-change-this-in-production
-    volumes:
-      - ./backend/uploads:/usr/src/app/uploads
-    networks:
-      - soc-network
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
-
-  # -----------------------------------------------------------------
-  # MICROSERVICE: Chiang Rai Service (Port 3003)
-  # -----------------------------------------------------------------
-  chiang-rai-service:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: chiang-rai-service
-    container_name: soc_chiang_rai_service
-    ports:
-      - "3003:3003"
-    environment:
-      - PORT=3003
-      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
-      - JWT_SECRET=super-secret-key-change-this-in-production
-    volumes:
-      - ./backend/uploads:/usr/src/app/uploads
-    networks:
-      - soc-network
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
-
-  # -----------------------------------------------------------------
-  # MICROSERVICE: Programs Service (Port 3004)
-  # -----------------------------------------------------------------
-  programs-service:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: programs-service
-    container_name: soc_programs_service
-    ports:
-      - "3004:3004"
-    environment:
-      - PORT=3004
-      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
-      - JWT_SECRET=super-secret-key-change-this-in-production
-    volumes:
-      - ./backend/uploads:/usr/src/app/uploads
-    networks:
-      - soc-network
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
-
-  # -----------------------------------------------------------------
-  # MICROSERVICE: Staff Service (Port 3005)
-  # -----------------------------------------------------------------
-  staff-service:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: staff-service
-    container_name: soc_staff_service
-    ports:
-      - "3005:3005"
-    environment:
-      - PORT=3005
-      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
-      - JWT_SECRET=super-secret-key-change-this-in-production
-    volumes:
-      - ./backend/uploads:/usr/src/app/uploads
-    networks:
-      - soc-network
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
-
-  # -----------------------------------------------------------------
-  # MICROSERVICE: Research Service (Port 3006)
-  # -----------------------------------------------------------------
-  research-service:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      args:
-        APP_NAME: research-service
-    container_name: soc_research_service
-    ports:
-      - "3006:3006"
-    environment:
-      - PORT=3006
-      - DATABASE_URL=postgresql://${DB_USER:-soc_admin}:${DB_PASSWORD:-Soc0903297444}@db:5432/${DB_NAME:-soc_db}
-      - JWT_SECRET=super-secret-key-change-this-in-production
+      - NODE_OPTIONS=--max-old-space-size=256
     volumes:
       - ./backend/uploads:/usr/src/app/uploads
     networks:
