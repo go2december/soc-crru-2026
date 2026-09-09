@@ -321,11 +321,18 @@ export class UploadService {
     }
 
     if (!file.mimetype.includes('pdf')) {
-      throw new BadRequestException('Only PDF files are allowed for procurement documents');
+      throw new BadRequestException(
+        'Only PDF files are allowed for procurement documents',
+      );
     }
 
-    const utf8OriginalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
-    const sanitizedOriginalName = utf8OriginalName.replace(/[^a-zA-Z0-9ก-๙._-]/g, '_');
+    const utf8OriginalName = Buffer.from(file.originalname, 'latin1').toString(
+      'utf8',
+    );
+    const sanitizedOriginalName = utf8OriginalName.replace(
+      /[^a-zA-Z0-9ก-๙._-]/g,
+      '_',
+    );
     const filename = `${uuidv4()}-${sanitizedOriginalName}`;
     const filepath = path.join(this.procurementUploadDir, filename);
 

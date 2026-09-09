@@ -20,6 +20,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
     this.pool = new Pool({
       connectionString: databaseUrl,
+      max: 10, // Modular Monolith single-process shared connection pool
+      idleTimeoutMillis: 30000,
     });
 
     this.db = drizzle(this.pool, { schema });

@@ -1,7 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Optional } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { Request } from 'express';
+import { DatabaseService, schema } from 'db/database';
+import { eq } from 'drizzle-orm';
 
 export interface JwtPayload {
   sub: string; // user id
@@ -12,7 +14,7 @@ export interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor() {
+  constructor(@Optional() private readonly databaseService?: DatabaseService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -23,28 +25,21 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   async validate(req: Request, payload: JwtPayload) {
     const token = req.headers.authorization?.replace(/^Bearer\s+/i, '').trim();
-    if (token) {
-      const authServiceHost = process.env.AUTH_SERVICE_HOST || 'localhost';
+    if (token && this.databaseService) {
       try {
-        const response = await fetch(
-          `http://${authServiceHost}:3001/auth/blacklist/check`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token }),
-          },
-        );
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.isBlacklisted) {
-            throw new UnauthorizedException('Token has been revoked');
-          }
+        const blacklisted = await this.databaseService.db
+          .select()
+          .from(schema.tokenBlacklist)
+          .where(eq(schema.tokenBlacklist.token, token))
+          .then((r) => r[0]);
+        if (blacklisted) {
+          throw new UnauthorizedException('Token has been revoked');
         }
       } catch (err) {
         if (err instanceof UnauthorizedException) {
           throw err;
         }
-        console.error('Error checking token blacklist:', err);
+        console.error('Error checking token blacklist in DB:', err);
       }
     }
 

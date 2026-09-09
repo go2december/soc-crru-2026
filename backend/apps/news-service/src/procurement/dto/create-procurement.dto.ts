@@ -17,7 +17,8 @@ export class ProcurementDocumentInputDto {
 
   @IsNotEmpty()
   @IsEnum(['TOR', 'ANNOUNCEMENT', 'RESULT', 'CONTRACT', 'RECEIPT', 'OTHER'])
-  documentType: 'TOR' | 'ANNOUNCEMENT' | 'RESULT' | 'CONTRACT' | 'RECEIPT' | 'OTHER';
+  documentType:
+    'TOR' | 'ANNOUNCEMENT' | 'RESULT' | 'CONTRACT' | 'RECEIPT' | 'OTHER';
 
   @IsNotEmpty()
   @IsString()

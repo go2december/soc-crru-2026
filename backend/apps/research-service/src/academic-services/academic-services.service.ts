@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DatabaseService, academicServices, academicServiceMembers, staffProfiles } from 'db/database';
+import {
+  DatabaseService,
+  academicServices,
+  academicServiceMembers,
+  staffProfiles,
+} from 'db/database';
 import { CreateAcademicServiceDto } from './dto/create-academic-service.dto';
 import { UpdateAcademicServiceDto } from './dto/update-academic-service.dto';
 import { eq, desc } from 'drizzle-orm';
@@ -15,9 +20,7 @@ export class AcademicServicesService {
       .insert(academicServices)
       .values({
         ...data,
-        publishedAt: data.publishedAt
-          ? new Date(data.publishedAt)
-          : undefined,
+        publishedAt: data.publishedAt ? new Date(data.publishedAt) : undefined,
       })
       .returning();
 
@@ -53,7 +56,10 @@ export class AcademicServicesService {
             lastNameTh: staffProfiles.lastNameTh,
           })
           .from(academicServiceMembers)
-          .innerJoin(staffProfiles, eq(academicServiceMembers.staffId, staffProfiles.id))
+          .innerJoin(
+            staffProfiles,
+            eq(academicServiceMembers.staffId, staffProfiles.id),
+          )
           .where(eq(academicServiceMembers.academicServiceId, service.id));
         return { ...service, members };
       }),
@@ -78,7 +84,10 @@ export class AcademicServicesService {
             lastNameTh: staffProfiles.lastNameTh,
           })
           .from(academicServiceMembers)
-          .innerJoin(staffProfiles, eq(academicServiceMembers.staffId, staffProfiles.id))
+          .innerJoin(
+            staffProfiles,
+            eq(academicServiceMembers.staffId, staffProfiles.id),
+          )
           .where(eq(academicServiceMembers.academicServiceId, service.id));
         return { ...service, members };
       }),
@@ -107,7 +116,10 @@ export class AcademicServicesService {
         lastNameEn: staffProfiles.lastNameEn,
       })
       .from(academicServiceMembers)
-      .innerJoin(staffProfiles, eq(academicServiceMembers.staffId, staffProfiles.id))
+      .innerJoin(
+        staffProfiles,
+        eq(academicServiceMembers.staffId, staffProfiles.id),
+      )
       .where(eq(academicServiceMembers.academicServiceId, id));
 
     return {
@@ -125,9 +137,7 @@ export class AcademicServicesService {
       .update(academicServices)
       .set({
         ...data,
-        publishedAt: data.publishedAt
-          ? new Date(data.publishedAt)
-          : undefined,
+        publishedAt: data.publishedAt ? new Date(data.publishedAt) : undefined,
         updatedAt: new Date(),
       })
       .where(eq(academicServices.id, id))

@@ -812,11 +812,17 @@ export const procurementRecords = pgTable(
   },
   (table) => {
     return {
-      fiscalYearIdx: index('procurement_records_fiscal_year_idx').on(table.fiscalYear),
-      procurementTypeIdx: index('procurement_records_type_idx').on(table.procurementType),
+      fiscalYearIdx: index('procurement_records_fiscal_year_idx').on(
+        table.fiscalYear,
+      ),
+      procurementTypeIdx: index('procurement_records_type_idx').on(
+        table.procurementType,
+      ),
       categoryIdx: index('procurement_records_category_idx').on(table.category),
       statusIdx: index('procurement_records_status_idx').on(table.status),
-      isPublishedIdx: index('procurement_records_is_published_idx').on(table.isPublished),
+      isPublishedIdx: index('procurement_records_is_published_idx').on(
+        table.isPublished,
+      ),
     };
   },
 );
@@ -828,7 +834,9 @@ export const procurementDocuments = pgTable(
     procurementId: uuid('procurement_id')
       .notNull()
       .references(() => procurementRecords.id, { onDelete: 'cascade' }),
-    documentType: procurementDocTypeEnum('document_type').default('OTHER').notNull(),
+    documentType: procurementDocTypeEnum('document_type')
+      .default('OTHER')
+      .notNull(),
     title: varchar('title', { length: 255 }).notNull(),
     fileUrl: varchar('file_url', { length: 500 }),
     externalUrl: varchar('external_url', { length: 500 }),
@@ -840,9 +848,12 @@ export const procurementDocuments = pgTable(
   },
   (table) => {
     return {
-      procurementIdx: index('procurement_docs_procurement_id_idx').on(table.procurementId),
-      sortOrderIdx: index('procurement_docs_sort_order_idx').on(table.sortOrder),
+      procurementIdx: index('procurement_docs_procurement_id_idx').on(
+        table.procurementId,
+      ),
+      sortOrderIdx: index('procurement_docs_sort_order_idx').on(
+        table.sortOrder,
+      ),
     };
   },
 );
-

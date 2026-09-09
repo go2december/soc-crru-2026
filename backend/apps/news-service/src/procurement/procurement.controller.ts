@@ -11,7 +11,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { ProcurementService } from './procurement.service';
-import { CreateProcurementDto, ProcurementDocumentInputDto } from './dto/create-procurement.dto';
+import {
+  CreateProcurementDto,
+  ProcurementDocumentInputDto,
+} from './dto/create-procurement.dto';
 import { UpdateProcurementDto } from './dto/update-procurement.dto';
 import { QueryProcurementDto } from './dto/query-procurement.dto';
 import { JwtAuthGuard, RolesGuard, Roles } from 'shared/shared';
@@ -80,10 +83,7 @@ export class ProcurementController {
   @Delete(':id/documents/:docId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR', 'STAFF')
-  removeDocument(
-    @Param('id') id: string,
-    @Param('docId') docId: string,
-  ) {
+  removeDocument(@Param('id') id: string, @Param('docId') docId: string) {
     return this.procurementService.removeDocument(id, docId);
   }
 }
