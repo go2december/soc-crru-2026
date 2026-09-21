@@ -104,9 +104,9 @@ export default function Footer() {
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/40">
                     <p>© 2026 Faculty of Social Sciences, Chiang Rai Rajabhat University. All rights reserved.</p>
                     <div className="flex gap-6">
-                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-                        <Link href="/sitemap" className="hover:text-white transition-colors">Sitemap</Link>
+                        <Link href="/contact" className="hover:text-white transition-colors">นโยบายความเป็นส่วนตัว</Link>
+                        <Link href="/contact" className="hover:text-white transition-colors">ข้อกำหนดการใช้งาน</Link>
+                        <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Sitemap</a>
                     </div>
                 </div>
             </div>

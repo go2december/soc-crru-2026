@@ -27,9 +27,11 @@ backend/dist/
 # ----- Database -----
 database/pgdata/
 
-# ----- IDE / Editor -----
+# ----- IDE / Editor / Python -----
 .idea/
 .vscode/
+.venv/
+venv/
 *.swp
 *.swo
 *~

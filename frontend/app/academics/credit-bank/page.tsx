@@ -40,7 +40,7 @@ export default function CreditBankPage() {
                             </p>
                             <div className="flex flex-wrap gap-4">
                                 <Link
-                                    href="/register"
+                                    href="/admissions"
                                     className="btn border-none bg-gradient-to-r from-scholar-accent to-red-600 text-white rounded-full px-8 [@media(hover:hover)]:hover:shadow-lg [@media(hover:hover)]:hover:shadow-red-600/30 [@media(hover:hover)]:hover:-translate-y-0.5 btn-press-active transition-[transform,box-shadow] duration-150"
                                 >
                                     สมัครสมาชิกคลังหน่วยกิต

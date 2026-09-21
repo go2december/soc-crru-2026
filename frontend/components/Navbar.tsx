@@ -116,8 +116,8 @@ export default function Navbar() {
                         <li><span className="text-scholar-gold font-bold">การจัดการศึกษา</span>
                             <ul>
                                 <li><Link href="/academics/overview">ภาพรวมวิชาการ</Link></li>
-                                <li><Link href="/academics/bachelor">ปริญญาตรี (5 สาขา)</Link></li>
-                                <li><Link href="/academics/graduate">บัณฑิตศึกษา</Link></li>
+                                <li><Link href="/programs">หลักสูตรปริญญาตรี</Link></li>
+                                <li><Link href="/programs">หลักสูตรบัณฑิตศึกษา</Link></li>
                             </ul>
                         </li>
                         <li><Link href="/admissions">รับสมัคร</Link></li>
@@ -204,11 +204,16 @@ export default function Navbar() {
                             </a>
                         </li>
                         <div className="divider my-1 border-white/10"></div>
-                        <NavItem href="/admissions/short-course" title="สมัครเรียนหลักสูตรระยะสั้น" onClose={closeDropdown} />
+                        <NavItem href="/academics/short-courses" title="สมัครเรียนหลักสูตรระยะสั้น" onClose={closeDropdown} />
                     </DropdownMenu>
 
                     {/* D. วิจัยและนวัตกรรม */}
                     <DropdownMenu name="research" title="วิจัยและนวัตกรรม" isOpen={openDropdown === 'research'} onToggle={toggleDropdown}>
+                        <li className="mb-2 pb-2 border-b border-white/10">
+                            <Link href="/research" className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-scholar-gold hover:text-white hover:bg-scholar-accent rounded-md transition-all" onClick={closeDropdown}>
+                                ศูนย์รวมงานวิจัยและบริการวิชาการ
+                            </Link>
+                        </li>
                         <NavItem href="/research/database" title="ฐานข้อมูลงานวิจัย" onClose={closeDropdown} />
                         <NavItem href="/research/startups" title="นวัตกรรมชุมชน (Local Startups)" onClose={closeDropdown} />
                         <NavItem href="/research/services" title="บริการวิชาการ" onClose={closeDropdown} />
