@@ -4,8 +4,9 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { Search, Filter, BookOpen, Users, Landmark, Loader2, ScrollText, Sparkles, ArrowRight, ImageIcon, Film, Images } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import MinimalPagination from '@/components/MinimalPagination';
+import { getAssetUrl } from '@/lib/api-config';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -31,6 +32,7 @@ interface Artifact {
 
 function ArchiveContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const initialCategory = searchParams.get('category') || 'ALL';
     const [selectedCategory, setSelectedCategory] = useState(initialCategory.toUpperCase());
     const [searchQuery, setSearchQuery] = useState('');
@@ -39,6 +41,20 @@ function ArchiveContent() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const ITEMS_PER_PAGE = 12;
+
+    const handleCategorySelect = (catId: string) => {
+        setSelectedCategory(catId);
+        setCurrentPage(1);
+        const params = new URLSearchParams(window.location.search);
+        if (catId === 'ALL') {
+            params.delete('category');
+        } else {
+            params.set('category', catId);
+        }
+        params.delete('page');
+        const qs = params.toString();
+        router.replace(`/chiang-rai-studies/archive${qs ? `?${qs}` : ''}`, { scroll: false });
+    };
 
     // Debounce search query
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -82,22 +98,22 @@ function ArchiveContent() {
                 const json = await res.json();
 
                 if (json.data && Array.isArray(json.data)) {
-                    // Convert relative thumbnail URLs to absolute URLs
                     const processedData = json.data.map((artifact: Artifact) => ({
                         ...artifact,
-                        thumbnailUrl: artifact.thumbnailUrl && !artifact.thumbnailUrl.startsWith('http')
-                            ? `${API_URL}${artifact.thumbnailUrl}`
-                            : artifact.thumbnailUrl,
+                        thumbnailUrl: artifact.thumbnailUrl ? getAssetUrl(artifact.thumbnailUrl) : null,
+                        mediaUrls: artifact.mediaUrls && Array.isArray(artifact.mediaUrls)
+                            ? artifact.mediaUrls.map(u => getAssetUrl(u))
+                            : [],
                     }));
                     setArtifacts(processedData);
                     setTotalPages(json.meta?.totalPages || 1);
                 } else if (Array.isArray(json)) {
-                    // Convert relative thumbnail URLs to absolute URLs
                     const processedData = json.map((artifact: Artifact) => ({
                         ...artifact,
-                        thumbnailUrl: artifact.thumbnailUrl && !artifact.thumbnailUrl.startsWith('http')
-                            ? `${API_URL}${artifact.thumbnailUrl}`
-                            : artifact.thumbnailUrl,
+                        thumbnailUrl: artifact.thumbnailUrl ? getAssetUrl(artifact.thumbnailUrl) : null,
+                        mediaUrls: artifact.mediaUrls && Array.isArray(artifact.mediaUrls)
+                            ? artifact.mediaUrls.map(u => getAssetUrl(u))
+                            : [],
                     }));
                     setArtifacts(processedData);
                     setTotalPages(1);
@@ -151,7 +167,7 @@ function ArchiveContent() {
                             {categories.map((cat) => (
                                 <button
                                     key={cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
+                                    onClick={() => handleCategorySelect(cat.id)}
                                     className={`px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-300 flex items-center gap-2
                                         ${selectedCategory === cat.id
                                             ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/30 -translate-y-0.5'
@@ -217,7 +233,7 @@ function ArchiveContent() {
                                 <Link
                                     key={item.id}
                                     href={`/chiang-rai-studies/archive/${item.id}`}
-                                    className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-purple-50 flex flex-col h-full animate-fade-in-up"
+                                    className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-purple-50 flex flex-col h-full animate-fade-in-up"
                                     style={{ animationDelay: `${idx * 0.05}s` }}
                                 >
                                     {/* Thumbnail */}
@@ -227,6 +243,9 @@ function ArchiveContent() {
                                             src={item.thumbnailUrl || 'https://placehold.co/800x600/702963/white?text=Chiang+Rai+Identity'}
                                             alt={item.title}
                                             className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = 'https://placehold.co/800x600/702963/white?text=Chiang+Rai+Identity';
+                                            }}
                                         />
                                         <div className="absolute top-4 right-4 bg-white/95 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-purple-900 shadow-sm z-20 uppercase tracking-widest border border-purple-100">
                                             {categories.find(c => c.id === item.category)?.title || 'ทั่วไป'}
@@ -237,16 +256,21 @@ function ArchiveContent() {
                                                 <span>{item.mediaUrls.length} Galleries</span>
                                             </div>
                                         )}
-                                        {item.mediaUrls && item.mediaUrls.filter(u => !u.includes('youtube.com')).length > 1 && (
+                                        {item.mediaUrls && item.mediaUrls.filter(u => !u.includes('youtube.com') && !u.includes('youtu.be')).length > 1 && (
                                             <div className="absolute bottom-4 right-4 flex -space-x-2 z-20">
-                                                {item.mediaUrls.filter(u => !u.includes('youtube.com')).slice(0, 3).map((url, i) => (
+                                                {item.mediaUrls.filter(u => !u.includes('youtube.com') && !u.includes('youtu.be')).slice(0, 3).map((url, i) => (
                                                     <div key={i} className="w-8 h-8 rounded-lg border-2 border-white overflow-hidden shadow-md">
-                                                        <img src={url} alt="" className="w-full h-full object-cover" />
+                                                        <img
+                                                            src={getAssetUrl(url)}
+                                                            alt=""
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                        />
                                                     </div>
                                                 ))}
-                                                {item.mediaUrls.filter(u => !u.includes('youtube.com')).length > 3 && (
+                                                {item.mediaUrls.filter(u => !u.includes('youtube.com') && !u.includes('youtu.be')).length > 3 && (
                                                     <div className="w-8 h-8 rounded-lg border-2 border-white bg-purple-900/80 text-white flex items-center justify-center text-[10px] font-bold shadow-md">
-                                                        +{item.mediaUrls.filter(u => !u.includes('youtube.com')).length - 3}
+                                                        +{item.mediaUrls.filter(u => !u.includes('youtube.com') && !u.includes('youtu.be')).length - 3}
                                                     </div>
                                                 )}
                                             </div>

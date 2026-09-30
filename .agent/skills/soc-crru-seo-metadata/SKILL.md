@@ -1,49 +1,71 @@
 ---
 name: soc-crru-seo-metadata
-description: Directives for Next.js Metadata API, sitemap structures, Open Graph tags, and search engine optimization rules.
+description: Directives for Next.js Metadata API, sitemap structures, Open Graph tags, and Webometrics search engine optimization rules.
 ---
 
-# SOC-CRRU SEO & Metadata Standards
+# SOC-CRRU SEO & Metadata Standards (Webometrics Aligned)
 
-This guide outlines rules for managing meta tags, dynamic header information, sitemaps, and Open Graph configs for search engine discovery and social sharing preview optimization.
+This guide defines rules for Next.js Metadata APIs, Open Graph protocols, structured data (JSON-LD), sitemaps, and **Webometrics Ranking** compliance for the Faculty of Social Sciences, CRRU.
 
 ---
 
-## 🏷️ 1. Next.js Metadata API
+## 🏛️ 1. Webometrics 3-Dimension Alignment
 
-For all public page routes in Next.js, leverage the native Next.js Metadata API.
+All metadata and indexing strategies support the university's Webometrics ranking metrics (refer to `[[docs/04_Webometrics_Guidelines/04_Webometrics_Core_Indicators]]`):
 
-### Static Metadata
-Defined at the top of static pages:
+| Webometrics Dimension | Weight | SEO / Technical Requirement |
+|---|---|---|
+| **1. Visibility (Impact)** | 50% | Shareable permanent URLs, canonical tags, high-resolution Open Graph images for social sharing, rich preview metadata. |
+| **2. Openness (Transparency)** | 10% | Staff profiles with `Person` JSON-LD schema linking **Google Scholar**, **ORCID**, and ResearchGate URLs. Public downloadable PDF metadata. |
+| **3. Excellence** | 40% | Research publication pages with `ScholarlyArticle` JSON-LD schema (DOI, Scopus Author ID, citations, journal volume/issue). |
+
+---
+
+## 🏷️ 2. Next.js Metadata API Standards
+
+### 2.1 Metadata Base
+Always configure `metadataBase` in the root layout (`frontend/app/layout.tsx`):
 ```typescript
-import { Metadata } from 'next';
-
 export const metadata: Metadata = {
-  title: 'หลักสูตรการศึกษา | คณะสังคมศาสตร์ มร.ชร.',
-  description: 'หลักสูตรปริญญาตรี ปริญญาโท และปริญญาเอก คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://soc.crru.ac.th'),
+  title: {
+    default: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    template: '%s | คณะสังคมศาสตร์ มร.ชร.',
+  },
+  description: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย Faculty of Social Sciences, Chiang Rai Rajabhat University',
 };
 ```
 
-### Dynamic Metadata
-For dynamic pages (e.g. news detail, article detail):
+### 2.2 Dynamic Metadata Generation
+For dynamic detail pages (news, research, staff, Chiang Rai studies):
 ```typescript
 import { Metadata } from 'next';
 
-interface Props {
-  params: { slug: string };
-}
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const staff = await getStaffById(id);
+  if (!staff) return { title: 'ไม่พบบุคลากร' };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const article = await getArticleBySlug(params.slug);
-  if (!article) return {};
+  const fullName = `${staff.academicPosition || ''} ${staff.firstNameTh} ${staff.lastNameTh}`.trim();
+  const title = `${fullName} | บุคลากรคณะสังคมศาสตร์ มร.ชร.`;
+  const description = `${fullName} ${staff.position || ''} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`;
 
   return {
-    title: `${article.titleTh} | คณะสังคมศาสตร์ มร.ชร.`,
-    description: article.summaryTh || article.contentTh.slice(0, 160),
+    title,
+    description,
+    alternates: {
+      canonical: `/about/staff/${id}`,
+    },
     openGraph: {
-      title: article.titleTh,
-      description: article.summaryTh,
-      images: article.coverImage ? [{ url: article.coverImage }] : [],
+      title,
+      description,
+      url: `/about/staff/${id}`,
+      images: staff.avatarUrl ? [{ url: staff.avatarUrl, width: 800, height: 1066, alt: fullName }] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
     },
   };
 }
@@ -51,20 +73,60 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 ---
 
-## 🌐 2. Open Graph (OG) & Social Card Compliance
+## 🧩 3. Structured Data (JSON-LD Schemas)
 
-* Every public-facing page should include descriptive OG tags:
-  * `og:title` -> descriptive, clean page title.
-  * `og:description` -> snippet under 160 characters.
-  * `og:image` -> absolute image link to prevent blank previews on Facebook, Line, or Twitter.
-  * `og:url` -> canonical page address.
-* Twitter/X: Configure `twitter:card: 'summary_large_image'`.
+Inject JSON-LD schemas using `<script type="application/ld+json">` for rich search engine snippets:
+
+### 3.1 Staff Profile (`Person` Schema - Openness Metric)
+```tsx
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: fullName,
+  jobTitle: staff.position,
+  worksFor: {
+    '@type': 'EducationalOrganization',
+    name: 'Chiang Rai Rajabhat University',
+    url: 'https://soc.crru.ac.th',
+  },
+  sameAs: [
+    staff.orcidUrl,
+    staff.googleScholarUrl,
+    staff.researchGateUrl,
+  ].filter(Boolean),
+};
+
+return (
+  <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+    />
+    {/* Page Content */}
+  </>
+);
+```
+
+### 3.2 Research Publication (`ScholarlyArticle` - Excellence Metric)
+```tsx
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ScholarlyArticle',
+  headline: research.titleTh,
+  author: research.authors?.map((a: string) => ({ '@type': 'Person', name: a })),
+  datePublished: research.publishedAt,
+  description: research.abstractTh,
+  sameAs: research.doi ? `https://doi.org/${research.doi}` : undefined,
+};
+```
 
 ---
 
-## 🗺️ 3. Sitemaps & robots.txt
+## 🗺️ 4. Sitemaps & robots.txt
 
-* Ensure `sitemap.xml` dynamic generators parse new articles, academic programs, and learning sites.
-* Maintain `robots.txt` configuration:
-  * Allow all crawler robots (`User-agent: *`) on public paths.
-  * Disallow crawling on administrative panels (e.g. `/admin/` and `/chiang-rai-studies/admin/`).
+* **`frontend/app/sitemap.ts`**:
+  - Dynamically index static core routes, news, announcements, research outputs, staff profiles, curricula, and Chiang Rai studies archives.
+  - Set appropriate `changeFrequency` (`daily` for news, `monthly` for staff/programs) and `priority` (`1.0` for home, `0.8` for research and news).
+* **`frontend/app/robots.ts`**:
+  - Allow all search crawlers (`User-agent: *`) on public paths.
+  - Disallow admin panels: `/admin/` and `/chiang-rai-studies/admin/`.

@@ -14,11 +14,8 @@ export class NewsService {
   ) {}
 
   private generateSlug(title: string): string {
-    return (
-      slugify(title, { lower: true, strict: true }) +
-      '-' +
-      Date.now().toString().slice(-4)
-    );
+    const base = slugify(title, { lower: true, strict: true }) || 'news';
+    return `${base}-${Date.now().toString().slice(-6)}`;
   }
 
   private collectManagedUrls(item: {

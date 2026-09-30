@@ -33,8 +33,18 @@ thing, dead flags and config, hand-rolled stdlib.
 One line per finding, ranked: `<tag> <what to cut>. <replacement>. [path]`.
 End with `net: -<N> lines, -<M> deps possible.` Nothing to cut: `Lean already. Ship.`
 
+## 📓 Obsidian Vault Persistence (`obsidian-pkm`)
+
+If the user explicitly requests to persist or document the audit report:
+Save to `docs/01_Active_Tasks/Overengineering_Audit.md` following Obsidian conventions:
+1. **Frontmatter:** `tags: [audit, over-engineering, ponytail]`, `title: "Over-engineering Audit"`
+2. **Callout:** `> [!tip] Potential Savings: -<N> lines, -<M> dependencies`
+3. **Wikilinks:** Link to `[[00_Dashboard|Back to Dashboard]]`
+4. **Atomicity:** Keep under 150-200 lines to preserve token efficiency.
+
 ## Boundaries
 
-Complexity only, correctness bugs, security holes, and performance go to a
-normal review pass. Lists findings, applies nothing. One-shot.
+Scope: over-engineering and complexity only. Correctness bugs, security holes,
+and performance are explicitly out of scope. Route them to a normal review
+pass. Lists findings, applies nothing. One-shot.
 "stop ponytail-audit" or "normal mode" to revert.

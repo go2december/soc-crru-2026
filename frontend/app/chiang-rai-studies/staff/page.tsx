@@ -1,8 +1,9 @@
 import { Mail, Users, Crown, Shield } from 'lucide-react';
 import Image from 'next/image';
 import { Metadata } from 'next';
+import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
 
-const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4201';
+const API_URL = getApiBaseUrl();
 
 export const metadata: Metadata = {
     title: 'ทำเนียบบุคลากร | ศูนย์เชียงรายศึกษา',
@@ -51,7 +52,14 @@ async function getStaff(): Promise<StaffData> {
             next: { revalidate: 60 }
         });
         if (!res.ok) throw new Error('Failed to fetch staff');
-        return res.json();
+        const data = await res.json();
+        const sanitizeStaff = (list: StaffMember[] = []) =>
+            list.map(s => ({ ...s, imageUrl: getAssetUrl(s.imageUrl) }));
+        return {
+            advisors: sanitizeStaff(data?.advisors),
+            executives: sanitizeStaff(data?.executives),
+            committee: sanitizeStaff(data?.committee),
+        };
     } catch (error) {
         console.error('Error fetching staff:', error);
         return { advisors: [], executives: [], committee: [] };

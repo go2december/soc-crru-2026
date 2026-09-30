@@ -47,10 +47,17 @@ End with the only metric that matters: `net: -<N> lines possible.`
 
 If there is nothing to cut, say `Lean already. Ship.` and stop.
 
+## 📓 Obsidian Documentation Review (`obsidian-pkm`)
+
+When reviewing Markdown files or documentation changes (`docs/`):
+- `yagni:` Monolithic docs > 150-200 lines or duplicate information already in `docs/00_Dashboard.md` or existing architecture notes.
+- Flag unrequested documentation additions that violate token economy.
+
 ## Boundaries
 
-Complexity only, correctness bugs, security holes, and performance go to a
-normal review pass, not this one. A single smoke test or `assert`-based
+Scope: over-engineering and complexity only. Correctness bugs, security holes,
+and performance are explicitly out of scope. Route them to a normal review
+pass, not this one. A single smoke test or `assert`-based
 self-check is the ponytail minimum, not bloat, never flag it for deletion.
 Does not apply the fixes, only lists them.
 "stop ponytail-review" or "normal mode": revert to verbose review style.

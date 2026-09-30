@@ -5,8 +5,9 @@ import { ArrowLeft, Calendar, User, Share2, Printer, AlertTriangle, ScrollText, 
 import { notFound } from 'next/navigation';
 import ImageLightbox from './ImageLightbox';
 import SharePrintButton from '@/components/chiang-rai/SharePrintButton';
+import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
 
-const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
+const API_URL = getApiBaseUrl();
 
 // Type Definition
 interface Artifact {
@@ -58,14 +59,12 @@ async function getArtifact(id: string): Promise<Artifact | null> {
         }
 
         const artifact = await res.json();
-        // Convert relative URLs to absolute URLs
-        if (artifact.thumbnailUrl && !artifact.thumbnailUrl.startsWith('http')) {
-            artifact.thumbnailUrl = `${API_URL}${artifact.thumbnailUrl}`;
+        // Normalize thumbnail and media URLs
+        if (artifact.thumbnailUrl) {
+            artifact.thumbnailUrl = getAssetUrl(artifact.thumbnailUrl);
         }
         if (artifact.mediaUrls && Array.isArray(artifact.mediaUrls)) {
-            artifact.mediaUrls = artifact.mediaUrls.map((url: string) =>
-                url.startsWith('/') ? `${API_URL}${url}` : url
-            );
+            artifact.mediaUrls = artifact.mediaUrls.map((url: string) => getAssetUrl(url));
         }
         return artifact;
     } catch (error) {
@@ -225,6 +224,7 @@ export default async function ArtifactDetailPage({ params }: { params: Promise<{
                         alt={artifact.title}
                         fill
                         priority
+                        unoptimized
                         className="object-cover transition-transform duration-700 hover:scale-105"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
                     />

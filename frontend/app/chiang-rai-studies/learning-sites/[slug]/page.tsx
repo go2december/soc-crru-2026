@@ -5,8 +5,12 @@ import { ArrowLeft, Calendar, User2, Tag, ExternalLink, Play, Clock, ChevronRigh
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 
-const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
-const PUBLIC_URL = process.env.NEXT_PUBLIC_API_URL || '';
+import JsonLd from '@/components/seo/JsonLd';
+import CiteModal from '@/components/research/CiteModal';
+import ArticleActions from '../../articles/[slug]/ArticleActions';
+import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
+
+const API_URL = getApiBaseUrl();
 
 interface LearningSite {
     id: string;
@@ -40,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     if (!site) return { title: 'ไม่พบแหล่งเรียนรู้' };
     const title = `${site.title} | ศูนย์เชียงรายศึกษา`;
     const description = site.description || site.title;
-    const ogImage = site.thumbnailUrl || (site.mediaUrls && site.mediaUrls.length > 0 ? site.mediaUrls[0] : null);
+    const ogImage = site.thumbnailUrl ? getAssetUrl(site.thumbnailUrl) : (site.mediaUrls && site.mediaUrls.length > 0 ? getAssetUrl(site.mediaUrls[0]) : null);
     return {
         title,
         description,
@@ -63,6 +67,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             title,
             description,
             images: ogImage ? [ogImage] : [],
+        },
+        other: {
+            'citation_title': site.title,
+            ...(site.author ? { 'citation_author': [site.author] } : {}),
+            ...(site.publishedAt ? { 'citation_publication_date': new Date(site.publishedAt).toISOString().split('T')[0].replace(/-/g, '/') } : {}),
+            'citation_publisher': 'ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
         },
     };
 }
@@ -89,9 +99,8 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
 
     if (!site) notFound();
 
-    const toPublicUrl = (url: string) => url.startsWith('/') ? `${PUBLIC_URL}${url}` : url;
-    const processedThumbnail = site.thumbnailUrl ? toPublicUrl(site.thumbnailUrl) : null;
-    const allMediaUrls = (site.mediaUrls || []).map((u: string) => toPublicUrl(u));
+    const processedThumbnail = site.thumbnailUrl ? getAssetUrl(site.thumbnailUrl) : null;
+    const allMediaUrls = (site.mediaUrls || []).map((u: string) => getAssetUrl(u));
     const processedContent = fixContentImageUrls(site.content);
     const readTime = calcReadTime(site.content || '');
 
@@ -100,8 +109,31 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
     const extLinks = allMediaUrls.filter(u => u.startsWith('http') && !u.includes('youtube') && !u.includes('youtu.be') && !u.includes('vimeo'));
     const hasMedia = photos.length > 0 || videos.length > 0 || extLinks.length > 0;
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: site.title,
+        description: site.description || site.title,
+        image: processedThumbnail || (allMediaUrls.length > 0 ? allMediaUrls[0] : ''),
+        datePublished: site.publishedAt || site.createdAt,
+        author: {
+            '@type': 'Person',
+            name: site.author || 'ศูนย์เชียงรายศึกษา',
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'ศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)',
+            logo: {
+                '@type': 'ImageObject',
+                url: 'https://soc.crru.ac.th/images/soc-logo.png',
+            },
+        },
+    };
+
     return (
         <div className="min-h-screen bg-[#F8F4FF] font-kanit">
+            {/* JSON-LD Structured Data */}
+            <JsonLd data={jsonLd} />
 
             {/* ─── HERO ─── */}
             <section className="relative h-[60vh] min-h-[420px] overflow-hidden">
@@ -166,6 +198,25 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
 
             {/* ─── BODY ─── */}
             <div className="container mx-auto px-4 py-12 max-w-5xl">
+
+                {/* Top Action Toolbar */}
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b border-stone-200">
+                    <div className="flex items-center gap-2 text-stone-500 text-xs">
+                        <Link href="/chiang-rai-studies/learning-sites" className="hover:text-[#702963] inline-flex items-center gap-1 font-medium transition-colors">
+                            <ArrowLeft size={14} /> กลับไปหน้ารวมแหล่งเรียนรู้
+                        </Link>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <CiteModal
+                            title={site.title}
+                            authors={site.author ? [site.author] : []}
+                            year={site.publishedAt ? new Date(site.publishedAt).getFullYear() : new Date().getFullYear()}
+                            publisher="ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย"
+                            url={`https://soc.crru.ac.th/chiang-rai-studies/learning-sites/${site.slug}`}
+                        />
+                        <ArticleActions title={site.title} description={site.description || undefined} />
+                    </div>
+                </div>
 
                 {/* Description / Abstract */}
                 {site.description && (
@@ -286,13 +337,23 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                     </div>
                 )}
 
-                {/* Back to list */}
-                <div className="flex justify-center pb-8">
+                {/* Back to list & Bottom Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-8 border-t border-stone-200">
                     <Link href="/chiang-rai-studies/learning-sites"
-                        className="inline-flex items-center gap-2 bg-[#2e1065] text-white px-8 py-4 rounded-sm font-bold hover:bg-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl text-sm group">
+                        className="inline-flex items-center gap-2 bg-[#2e1065] text-white px-6 py-3.5 rounded-sm font-bold hover:bg-orange-600 transition-all duration-300 shadow-md hover:shadow-lg text-sm group">
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         กลับไปหน้ารายการแหล่งเรียนรู้
                     </Link>
+                    <div className="flex items-center gap-3">
+                        <CiteModal
+                            title={site.title}
+                            authors={site.author ? [site.author] : []}
+                            year={site.publishedAt ? new Date(site.publishedAt).getFullYear() : new Date().getFullYear()}
+                            publisher="ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย"
+                            url={`https://soc.crru.ac.th/chiang-rai-studies/learning-sites/${site.slug}`}
+                        />
+                        <ArticleActions title={site.title} description={site.description || undefined} />
+                    </div>
                 </div>
             </div>
         </div>

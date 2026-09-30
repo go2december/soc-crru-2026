@@ -30,6 +30,18 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
+        port: '4001',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'api-gateway',
+        port: '3000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
         port: '4501',
         pathname: '/**',
       },
@@ -78,7 +90,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const internalApiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4501';
+    const internalApiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4001';
     return [
       {
         source: '/api/:path*',

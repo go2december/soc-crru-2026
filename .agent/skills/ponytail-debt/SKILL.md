@@ -26,7 +26,7 @@ the convention out of the ledger.
 
 One row per marker, grouped by file:
 
-`<file>:<line> — <what was simplified>. ceiling: <the limit named>. upgrade: <the trigger to revisit>.`
+`<file>:<line>, <what was simplified>. ceiling: <the limit named>. upgrade: <the trigger to revisit>.`
 
 The convention is `ponytail: <ceiling>, <upgrade path>`, so pull the ceiling
 and the trigger straight from the comment. Want an owner per row too? add
@@ -37,8 +37,28 @@ trigger gets a `no-trigger` tag, those are the ones that silently rot.
 
 End with `<N> markers, <M> with no trigger.` Nothing found: `No ponytail: debt. Clean ledger.`
 
+## 📓 Obsidian Vault Persistence (`obsidian-pkm`)
+
+When asked to persist the debt ledger to disk, DO NOT write a loose `PONYTAIL-DEBT.md` in the project root.
+Instead, write to the Obsidian Vault under `docs/01_Active_Tasks/Ponytail_Debt_Ledger.md` formatted as an Obsidian Atomic Note:
+
+1. **Frontmatter:**
+   ```yaml
+   ---
+   title: "Ponytail Debt Ledger"
+   tags: [tech-debt, ponytail, active-task]
+   aliases: ["Debt Ledger"]
+   ---
+   ```
+2. **Obsidian Callout:**
+   Use `> [!warning] Rot Risk` to highlight items with `no-trigger`.
+3. **Wikilinks:**
+   Include `[[00_Dashboard|Back to MOC]]` and relevant feature notes `[[01_Active_Tasks/...]]`.
+4. **Atomicity:**
+   Keep the note under 150-200 lines. If the ledger exceeds 200 lines, group by microservice/package into sub-notes.
+
 ## Boundaries
 
 Reads and reports only, changes nothing. To persist it, ask and it writes the
-ledger to a file (e.g. `PONYTAIL-DEBT.md`). One-shot. "stop ponytail-debt" or
+ledger to `docs/01_Active_Tasks/Ponytail_Debt_Ledger.md`. One-shot. "stop ponytail-debt" or
 "normal mode" to revert.

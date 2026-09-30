@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useStaffData, Staff } from './hooks/useStaffData';
 import StaffForm from './components/StaffForm';
-import { Users, Edit3, Plus, Search, Trash2, Link2, Crown, UserX, AlertTriangle } from 'lucide-react';
+import { Users, Edit3, Plus, Search, Trash2, Link2, Crown, UserX, AlertTriangle, Globe, Fingerprint, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -219,6 +219,29 @@ export default function AdminStaffPage() {
                                                                 <span className="text-success font-medium flex items-center gap-0.5" title={`Linked to ${linkedUser.email}`}>
                                                                     <Link2 className="w-3 h-3" />
                                                                     Linked
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {/* Webometrics Status Pills */}
+                                                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                            {staff.googleScholarUrl ? (
+                                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-medium" title={`Scholar: ${staff.googleScholarUrl}`}>
+                                                                    <Globe className="w-3 h-3" /> Scholar
+                                                                </span>
+                                                            ) : null}
+                                                            {staff.orcidId ? (
+                                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-medium font-mono" title={`ORCID: ${staff.orcidId}`}>
+                                                                    <Fingerprint className="w-3 h-3" /> ORCID
+                                                                </span>
+                                                            ) : null}
+                                                            {staff.scopusAuthorId ? (
+                                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-medium font-mono" title={`Scopus: ${staff.scopusAuthorId}`}>
+                                                                    <BookOpen className="w-3 h-3" /> Scopus
+                                                                </span>
+                                                            ) : null}
+                                                            {staff.staffType === 'ACADEMIC' && !staff.googleScholarUrl && !staff.orcidId && !staff.scopusAuthorId && (
+                                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-slate-100 text-slate-400 border border-slate-200 text-[10px]" title="ยังไม่ได้เชื่อมต่อข้อมูล Webometrics">
+                                                                    ยังไม่ระบุ Webometrics
                                                                 </span>
                                                             )}
                                                         </div>

@@ -8,6 +8,7 @@ import {
     BookOpen
 } from 'lucide-react';
 import MinimalPagination from '@/components/MinimalPagination';
+import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
 
 export const metadata: Metadata = {
     title: 'กิจกรรมและข่าวสาร | ศูนย์เชียงรายศึกษา',
@@ -23,13 +24,11 @@ export const metadata: Metadata = {
     },
 };
 
-const PUBLIC_URL = process.env.NEXT_PUBLIC_API_URL || '';
-
 export const dynamic = 'force-dynamic';
 
 async function getActivities(page = 1, limit = 9) {
     try {
-        const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:4201';
+        const baseUrl = getApiBaseUrl();
         const res = await fetch(`${baseUrl}/api/chiang-rai/activities?page=${page}&limit=${limit}`, {
             cache: 'no-store'
         });
@@ -77,7 +76,7 @@ export default async function ActivitiesPage(props: {
                                     <div className="h-56 bg-stone-200 relative overflow-hidden">
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10"></div>
                                         <Image
-                                            src={item.thumbnailUrl ? (item.thumbnailUrl.startsWith('/') ? `${PUBLIC_URL}${item.thumbnailUrl}` : item.thumbnailUrl) : `https://placehold.co/600x400/purple/white?text=No+Image`}
+                                            src={getAssetUrl(item.thumbnailUrl) || `https://placehold.co/600x400/purple/white?text=No+Image`}
                                             alt={item.title}
                                             fill
                                             unoptimized

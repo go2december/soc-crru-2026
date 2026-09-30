@@ -2,8 +2,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Breadcrumb from '@/components/Breadcrumb';
 import { AcademicServiceItem, getStatusLabel } from '@/lib/academic-services';
+import { getApiBaseUrl } from '@/lib/api-config';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4201';
+const API_URL = getApiBaseUrl();
 
 async function getServices(): Promise<AcademicServiceItem[]> {
     try {
@@ -35,7 +36,7 @@ const SERVICES = [
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
         ),
-        color: "bg-purple-50 text-purple-600",
+        color: "bg-teal-50 text-teal-700",
         href: "/contact"
     },
     {
@@ -68,7 +69,7 @@ export default async function AcademicServicesPage() {
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
                     <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">บริการวิชาการแก่สังคม</h1>
                     <p className="text-white/80 text-lg max-w-2xl">
-                        "พันธกิจสัมพันธ์เพื่อสังคม" (Social Engagement)
+                        &ldquo;พันธกิจสัมพันธ์เพื่อสังคม&rdquo; (Social Engagement)
                         นำองค์ความรู้สู่ชุมชน เพื่อการพัฒนาที่ยั่งยืน
                     </p>
                 </div>

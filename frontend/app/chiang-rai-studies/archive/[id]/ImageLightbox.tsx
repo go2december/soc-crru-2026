@@ -102,6 +102,7 @@ export default function ImageLightbox({ images }: ImageLightboxProps) {
                                 src={url}
                                 alt={`Gallery ${i + 1}`}
                                 fill
+                                unoptimized
                                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
                                 sizes="(max-width: 768px) 50vw, 400px"
                             />
@@ -127,6 +128,7 @@ export default function ImageLightbox({ images }: ImageLightboxProps) {
                                 src={url}
                                 alt={`Gallery ${i + 1}`}
                                 fill
+                                unoptimized
                                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
                                 sizes={i === 0 && images.length >= 3 ? "(max-width: 768px) 100vw, 600px" : "(max-width: 768px) 50vw, 300px"}
                             />
@@ -270,6 +272,7 @@ export default function ImageLightbox({ images }: ImageLightboxProps) {
                                                     src={url}
                                                     alt=""
                                                     fill
+                                                    unoptimized
                                                     className="object-cover"
                                                     sizes="100px"
                                                 />

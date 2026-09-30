@@ -1,4 +1,5 @@
 import { formatStaffName } from './utils';
+import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
 
 export type ResearchProjectStatus = 'ONGOING' | 'COMPLETED' | 'PUBLISHED' | 'CANCELLED';
 export type ResearchMemberRole = 'HEAD' | 'CO_RESEARCHER' | 'ADVISOR' | 'ASSISTANT' | 'EXTERNAL_EXPERT';
@@ -200,24 +201,16 @@ export function formatResearchStaffName(staff?: ResearchStaffOption | null): str
 
 export function getResearchPublicAssetUrl(url?: string | null): string | null {
   if (!url) return null;
-  if (url.startsWith('/')) {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
-    return `${baseUrl}${url}`;
-  }
-  return url;
+  return getAssetUrl(url);
 }
 
 export function getResearchServerAssetUrl(url?: string | null): string | null {
   if (!url) return null;
-  if (url.startsWith('/')) {
-    const baseUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4201';
-    return `${baseUrl}${url}`;
-  }
-  return url;
+  return getAssetUrl(url);
 }
 
 export async function fetchResearchBySlug(slug: string): Promise<ResearchProjectDetail | null> {
-  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4201';
+  const apiUrl = getApiBaseUrl();
 
   try {
     const res = await fetch(`${apiUrl}/api/research/projects/${slug}`, {
@@ -241,7 +234,7 @@ export async function fetchResearchList(params?: {
   page?: string | number;
   limit?: string | number;
 }): Promise<ResearchListResponse> {
-  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4201';
+  const apiUrl = getApiBaseUrl();
 
   try {
     const searchParams = new URLSearchParams();

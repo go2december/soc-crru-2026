@@ -226,6 +226,15 @@ export default function NewsForm({ mode, initialData, onSubmit, submitting }: Ne
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!values.title.trim()) {
+      alert('กรุณากรอกหัวข้อข่าว');
+      return;
+    }
+    const cleanContent = values.content.replace(/<[^>]+>/g, '').trim();
+    if (!cleanContent && !values.content.includes('<img')) {
+      alert('กรุณากรอกเนื้อหาข่าว');
+      return;
+    }
     await onSubmit(values);
   };
 

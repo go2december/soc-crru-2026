@@ -1,3 +1,5 @@
+import { getApiBaseUrl } from '@/lib/api-config';
+
 export type ProcurementType = 'PRICE_CHECK' | 'SPECIFIC_METHOD' | 'E_BIDDING' | 'E_MARKET';
 export type ProcurementCategory = 'GOODS' | 'EQUIPMENT' | 'CONSTRUCTION' | 'SERVICE';
 export type ProcurementStatus = 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
@@ -160,10 +162,7 @@ export async function fetchProcurementList(params: {
   page?: number;
   limit?: number;
 }): Promise<ProcurementListResponse> {
-  const isServer = typeof window === 'undefined';
-  const apiUrl = isServer
-    ? process.env.INTERNAL_API_URL || 'http://localhost:4201'
-    : process.env.NEXT_PUBLIC_API_URL || '';
+  const apiUrl = getApiBaseUrl();
 
   const queryParams = new URLSearchParams();
   if (params.fiscalYear) queryParams.append('fiscalYear', params.fiscalYear.toString());
@@ -189,10 +188,7 @@ export async function fetchProcurementList(params: {
 }
 
 export async function fetchProcurementById(id: string): Promise<ProcurementRecord | null> {
-  const isServer = typeof window === 'undefined';
-  const apiUrl = isServer
-    ? process.env.INTERNAL_API_URL || 'http://localhost:4201'
-    : process.env.NEXT_PUBLIC_API_URL || '';
+  const apiUrl = getApiBaseUrl();
 
   try {
     const res = await fetch(`${apiUrl}/api/procurement/${id}`, { cache: 'no-store' });

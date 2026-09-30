@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
+import { getApiBaseUrl } from '@/lib/api-config';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://soc.crru.ac.th';
-const API_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_URL = getApiBaseUrl();
 
 type DynamicSitemapItem = {
     id?: string;

@@ -8,6 +8,7 @@ import { th } from 'date-fns/locale';
 import ArticleActions from './ArticleActions';
 import CiteModal from '@/components/research/CiteModal';
 import JsonLd from '@/components/seo/JsonLd';
+import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
 
 interface Article {
     id: string;
@@ -25,7 +26,7 @@ interface Article {
     createdAt: string;
 }
 
-const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
+const API_URL = getApiBaseUrl();
 
 async function getArticle(slug: string): Promise<Article | null> {
     try {
@@ -34,14 +35,12 @@ async function getArticle(slug: string): Promise<Article | null> {
         });
         if (!res.ok) return null;
         const article = await res.json();
-        // Convert relative URLs to absolute URLs
-        if (article.thumbnailUrl && !article.thumbnailUrl.startsWith('http')) {
-            article.thumbnailUrl = `${API_URL}${article.thumbnailUrl}`;
+        // Normalize URLs
+        if (article.thumbnailUrl) {
+            article.thumbnailUrl = getAssetUrl(article.thumbnailUrl);
         }
         if (article.mediaUrls && Array.isArray(article.mediaUrls)) {
-            article.mediaUrls = article.mediaUrls.map((url: string) =>
-                url.startsWith('/') ? `${API_URL}${url}` : url
-            );
+            article.mediaUrls = article.mediaUrls.map((url: string) => getAssetUrl(url));
         }
         return article;
     } catch (error) {
@@ -99,14 +98,9 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
         notFound();
     }
 
-    // Process media URLs for display (handle relative paths)
-    const processedMediaUrls = article.mediaUrls?.map(url =>
-        url.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL ?? ''}${url}` : url
-    ) || [];
-
-    const processedThumbnail = article.thumbnailUrl?.startsWith('/')
-        ? `${process.env.NEXT_PUBLIC_API_URL ?? ''}${article.thumbnailUrl}`
-        : article.thumbnailUrl;
+    // Process media URLs for display
+    const processedMediaUrls = article.mediaUrls?.map(url => getAssetUrl(url)) || [];
+    const processedThumbnail = article.thumbnailUrl ? getAssetUrl(article.thumbnailUrl) : null;
 
     // JSON-LD Structured Data
     const jsonLd = {
@@ -159,22 +153,23 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
 
                     {/* Article Header */}
                     <div className="p-8 md:p-12 border-b border-stone-100">
-                        {/* Breadcrumb / Back */}
-                        <Link
-                            href="/chiang-rai-studies/articles"
-                            className="inline-flex items-center gap-2 text-stone-500 hover:text-[#702963] mb-6 transition-colors text-sm font-medium"
-                        >
-                            <ArrowLeft size={16} /> กลับไปหน้ารวมบทความ
-                        </Link>
+                        {/* Breadcrumb */}
+                        <nav className="flex items-center gap-1.5 text-stone-500 text-xs mb-6 flex-wrap">
+                            <Link href="/chiang-rai-studies" className="hover:text-[#702963] transition-colors">ศูนย์เชียงรายศึกษา</Link>
+                            <span className="text-stone-300">/</span>
+                            <Link href="/chiang-rai-studies/articles" className="hover:text-[#702963] transition-colors">บทความวิชาการ</Link>
+                            <span className="text-stone-300">/</span>
+                            <span className="text-stone-700 font-medium truncate max-w-[200px] md:max-w-xs">{article.title}</span>
+                        </nav>
 
                         {/* Badges */}
                         <div className="flex flex-wrap gap-3 mb-6">
-                            <span className="px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-bold uppercase tracking-wider border border-orange-100">
+                            <span className="px-3 py-1 rounded-sm bg-orange-50 text-orange-600 text-xs font-bold uppercase tracking-wider border border-orange-200">
                                 {article.category || 'Article'}
                             </span>
                             {article.publishedAt && (
-                                <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 text-stone-600 text-xs font-medium">
-                                    <Calendar size={12} />
+                                <span className="flex items-center gap-1.5 px-3 py-1 rounded-sm bg-stone-100 text-stone-600 text-xs font-medium border border-stone-200">
+                                    <Calendar size={12} className="text-orange-500" />
                                     {format(new Date(article.publishedAt), 'd MMMM yyyy', { locale: th })}
                                 </span>
                             )}
@@ -188,10 +183,10 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
                         <div className="flex flex-wrap items-center gap-6 text-stone-500 text-sm">
                             {article.author && (
                                 <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                    <div className="w-8 h-8 rounded-sm bg-purple-50 border border-purple-100 flex items-center justify-center text-[#702963]">
                                         <User size={16} />
                                     </div>
-                                    <span className="font-medium">{article.author}</span>
+                                    <span className="font-medium text-stone-700">{article.author}</span>
                                 </div>
                             )}
                             <div className="flex flex-wrap items-center gap-3 ml-auto md:ml-0 border-l border-stone-200 pl-6">
@@ -327,17 +322,39 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
 
                         {/* Tags */}
                         {article.tags && article.tags.length > 0 && (
-                            <div className="mt-12 pt-8 border-t border-stone-100 flex flex-wrap gap-2">
+                            <div className="mt-12 pt-8 border-t border-stone-100 flex flex-wrap items-center gap-2">
                                 <span className="flex items-center gap-1 text-sm font-bold text-stone-400 uppercase tracking-wider mr-2">
                                     <Tag size={16} /> Tags:
                                 </span>
                                 {article.tags.map((tag, idx) => (
-                                    <span key={idx} className="px-3 py-1 bg-white border border-stone-200 text-stone-600 rounded-full text-sm hover:bg-[#702963] hover:text-white hover:border-[#702963] transition-colors cursor-pointer">
+                                    <span key={idx} className="px-3 py-1 bg-stone-50 border border-stone-200 text-stone-600 rounded-sm text-sm hover:bg-[#702963] hover:text-white hover:border-[#702963] transition-colors cursor-pointer">
                                         #{tag}
                                     </span>
                                 ))}
                             </div>
                         )}
+
+                        {/* Bottom Actions / Back */}
+                        <div className="mt-12 pt-8 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <Link
+                                href="/chiang-rai-studies/articles"
+                                className="inline-flex items-center gap-2 bg-[#2e1065] text-white px-6 py-3 rounded-sm font-bold hover:bg-orange-600 transition-all duration-300 shadow-md hover:shadow-lg text-sm group"
+                            >
+                                <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                                กลับไปหน้ารวมบทความ
+                            </Link>
+
+                            <div className="flex items-center gap-3">
+                                <CiteModal
+                                    title={article.title}
+                                    authors={article.author ? [article.author] : []}
+                                    year={article.publishedAt ? new Date(article.publishedAt).getFullYear() : new Date().getFullYear()}
+                                    publisher="ศูนย์เชียงรายศึกษา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย"
+                                    url={`https://soc.crru.ac.th/chiang-rai-studies/articles/${article.slug}`}
+                                />
+                                <ArticleActions title={article.title} description={article.abstract || undefined} />
+                            </div>
+                        </div>
                     </div>
 
                 </div>

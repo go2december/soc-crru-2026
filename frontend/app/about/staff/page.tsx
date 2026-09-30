@@ -36,36 +36,7 @@ interface Staff {
     isExecutive: boolean;
 }
 
-// Helper: Extract abbreviation for academic titles
-const getAcademicAbbr = (position: string | null): string => {
-    if (!position) return '';
-    if (position.includes('ผู้ช่วยศาสตราจารย์')) return 'ผศ.';
-    if (position.includes('รองศาสตราจารย์')) return 'รศ.';
-    if (position.includes('ศาสตราจารย์')) return 'ศ.';
-    if (position.includes('อาจารย์')) return 'อาจารย์';
-    return position;
-};
-
-// Helper: สร้างชื่อเต็มพร้อมตำแหน่งวิชาการ
-const getFullName = (staff: Staff): string => {
-    const acadPos = getAcademicAbbr(staff.academicPosition);
-    const prefix = staff.prefixTh || '';
-    const name = `${staff.firstNameTh} ${staff.lastNameTh}`;
-
-    // ถ้า prefix มีตำแหน่งวิชาการอยู่แล้ว (เช่น "ผศ.ดร.") ไม่ต้องเติม acadPos ซ้ำ
-    if (acadPos && prefix.includes(acadPos)) {
-        return `${prefix}${name}`;
-    }
-
-    if (acadPos && prefix) {
-        return `${acadPos}${prefix}${name}`;
-    } else if (acadPos) {
-        return `${acadPos}${name}`;
-    } else if (prefix) {
-        return `${prefix}${name}`;
-    }
-    return name;
-};
+import { getFullName } from '@/lib/staff';
 
 // Helper: ใช้สำหรับ Search Text
 const getSearchPositionString = (staff: Staff): string => {
@@ -91,10 +62,10 @@ const getImageUrl = (url: string | null): string => {
 };
 
 const StaffCard = ({ staff }: { staff: Staff }) => (
-    <Link href={`/about/staff/${staff.id}`} className="bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] card-hover btn-press-active group overflow-hidden w-full flex flex-col relative block">
+    <Link href={`/about/staff/${staff.id}`} className="bg-white rounded-sm border border-slate-200 shadow-2xs card-hover btn-press-active group overflow-hidden w-full flex flex-col relative block">
 
         <div className="pt-6 px-6 bg-slate-50/50 flex justify-center">
-            <figure className="aspect-[3/4] w-[75%] bg-slate-100 relative overflow-hidden flex-shrink-0 rounded-xl border border-slate-100 [@media(hover:hover)]:group-hover:scale-103 transition-transform duration-200 ease-out">
+            <figure className="aspect-[3/4] w-[75%] bg-slate-100 relative overflow-hidden flex-shrink-0 rounded-sm border border-slate-200 [@media(hover:hover)]:group-hover:scale-103 transition-transform duration-200 ease-out">
                 {staff.imageUrl ? (
                     <Image
                         src={getImageUrl(staff.imageUrl)}
@@ -113,15 +84,15 @@ const StaffCard = ({ staff }: { staff: Staff }) => (
 
         <div className="p-5 flex flex-col items-center text-center flex-grow relative bg-white">
             <div className="mb-2.5">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border ${staff.staffType === 'ACADEMIC'
-                    ? 'bg-blue-50/50 text-blue-700 border-blue-100'
-                    : 'bg-teal-50/50 text-teal-700 border-teal-100'
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[10px] font-bold tracking-wider uppercase border ${staff.staffType === 'ACADEMIC'
+                    ? 'bg-blue-50/50 text-blue-700 border-blue-200'
+                    : 'bg-teal-50/50 text-teal-700 border-teal-200'
                     }`}>
                     {staff.department || 'ไม่ระบุสังกัด'}
                 </span>
             </div>
 
-            <h3 className="text-sm font-bold text-slate-800 mb-1.5 leading-snug [@media(hover:hover)]:group-hover:text-scholar-accent transition-colors duration-200 line-clamp-2">
+            <h3 className="text-sm font-bold text-slate-900 mb-1.5 leading-snug [@media(hover:hover)]:group-hover:text-scholar-accent transition-colors duration-200 line-clamp-2">
                 {getFullName(staff)}
             </h3>
 
@@ -137,7 +108,7 @@ const StaffCard = ({ staff }: { staff: Staff }) => (
                         ) : (
                             <>
                                 {staff.adminPosition && (
-                                    <p className="text-[11px] font-medium text-slate-400 text-center line-clamp-2 mt-0.5 px-1">
+                                    <p className="text-[11px] font-medium text-slate-500 text-center line-clamp-2 mt-0.5 px-1">
                                         {staff.adminPosition}
                                     </p>
                                 )}
@@ -151,17 +122,17 @@ const StaffCard = ({ staff }: { staff: Staff }) => (
             {(staff.googleScholarUrl || staff.orcidId || staff.scopusAuthorId) && (
                 <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-center gap-1.5 w-full">
                     {staff.googleScholarUrl && (
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-blue-50 text-blue-600 border border-blue-100/80" title="Google Scholar Profile">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-sm bg-blue-50 text-blue-600 border border-blue-200" title="Google Scholar Profile">
                             <Globe className="w-3.5 h-3.5" />
                         </span>
                     )}
                     {staff.orcidId && (
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100/80" title="ORCID ID">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-sm bg-emerald-50 text-emerald-600 border border-emerald-200" title="ORCID ID">
                             <Fingerprint className="w-3.5 h-3.5" />
                         </span>
                     )}
                     {staff.scopusAuthorId && (
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-orange-50 text-orange-600 border border-orange-100/80" title="Scopus Author ID">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-sm bg-amber-50 text-amber-700 border border-amber-200" title="Scopus Author ID">
                             <BookOpen className="w-3.5 h-3.5" />
                         </span>
                     )}

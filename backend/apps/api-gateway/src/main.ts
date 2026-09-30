@@ -26,6 +26,22 @@ async function bootstrap() {
   // Set global prefix for API Gateway controllers (e.g. /api/upload)
   app.setGlobalPrefix('api');
 
+  // Root route handler: redirect browsers to frontend or return API status
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.get('/', (req: any, res: any) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
+    if (req.accepts && req.accepts('html')) {
+      return res.redirect(frontendUrl);
+    }
+    return res.json({
+      name: 'SOC-CRRU API Gateway',
+      status: 'online',
+      message: `This is the backend API service. For the website frontend, visit ${frontendUrl}`,
+      frontendUrl,
+      apiPrefix: '/api',
+    });
+  });
+
   const port = process.env.PORT ?? 3000;
   await app.listen(port, '0.0.0.0');
   console.log(

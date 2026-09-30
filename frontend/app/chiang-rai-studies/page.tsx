@@ -13,6 +13,7 @@ import {
     Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,8 +41,7 @@ export const metadata: Metadata = {
 
 async function getLatestActivities() {
     try {
-        // Use service name in Docker network if available, fallback to localhost for local dev
-        const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:4201';
+        const baseUrl = getApiBaseUrl();
         const res = await fetch(`${baseUrl}/api/chiang-rai/activities?limit=3`, {
             next: { revalidate: 60 }
         });
@@ -50,12 +50,10 @@ async function getLatestActivities() {
 
         const json = await res.json();
         const activities = json.data || [];
-        // Convert relative thumbnail URLs to absolute URLs
+        // Normalize thumbnail URLs to relative/accessible paths
         return activities.map((item: any) => ({
             ...item,
-            thumbnailUrl: item.thumbnailUrl && !item.thumbnailUrl.startsWith('http')
-                ? `${baseUrl}${item.thumbnailUrl}`
-                : item.thumbnailUrl,
+            thumbnailUrl: item.thumbnailUrl ? getAssetUrl(item.thumbnailUrl) : null,
         }));
     } catch (error) {
         console.error('Failed to fetch activities:', error);
@@ -65,7 +63,7 @@ async function getLatestActivities() {
 
 async function getStats() {
     try {
-        const baseUrl = process.env.INTERNAL_API_URL || 'http://soc_backend:4000';
+        const baseUrl = getApiBaseUrl();
         const res = await fetch(`${baseUrl}/api/chiang-rai/stats`, {
             next: { revalidate: 60 }
         });
@@ -81,7 +79,7 @@ async function getStats() {
 
 async function getConfig() {
     try {
-        const baseUrl = process.env.INTERNAL_API_URL || 'http://soc_backend:4000';
+        const baseUrl = getApiBaseUrl();
         const res = await fetch(`${baseUrl}/api/chiang-rai/config`, {
             next: { revalidate: 0 } // Disable cache to reflect admin changes immediately
         });

@@ -15,9 +15,9 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
+import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
 
-const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4001';
-const PUBLIC_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_URL = getApiBaseUrl();
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
     const title = `${activity.title} | กิจกรรมศูนย์เชียงรายศึกษา`;
     const description = activity.description || activity.content?.replace(/<[^>]*>?/gm, '').slice(0, 160) || '';
-    const ogImage = activity.thumbnailUrl || null;
+    const ogImage = activity.thumbnailUrl ? getAssetUrl(activity.thumbnailUrl) : null;
 
     return {
         title,
@@ -106,13 +106,12 @@ export default async function ActivityDetailPage(props: { params: Promise<{ slug
 
     if (!activity) notFound();
 
-    const toPublicUrl = (url: string) => url.startsWith('/') ? `${PUBLIC_URL}${url}` : url;
-    const processedThumbnail = activity.thumbnailUrl ? toPublicUrl(activity.thumbnailUrl) : null;
+    const processedThumbnail = activity.thumbnailUrl ? getAssetUrl(activity.thumbnailUrl) : null;
     const processedContent = fixContentImageUrls(activity.content || '');
     const readTime = calcReadTime(activity.content || '');
     const eventDateStr = formatEventDate(activity.eventDate, activity.eventEndDate);
 
-    const allMediaUrls = (activity.mediaUrls || []).map((u: string) => toPublicUrl(u));
+    const allMediaUrls = (activity.mediaUrls || []).map((u: string) => getAssetUrl(u));
     const photos = allMediaUrls.filter((u: string) => !u.includes('youtube') && !u.includes('youtu.be') && !u.includes('vimeo') && !u.startsWith('http'));
     const videos = allMediaUrls.filter((u: string) => u.includes('youtube') || u.includes('youtu.be') || u.includes('vimeo'));
     const extLinks = allMediaUrls.filter((u: string) => u.startsWith('http') && !u.includes('youtube') && !u.includes('youtu.be') && !u.includes('vimeo'));

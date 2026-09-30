@@ -31,30 +31,7 @@ interface Staff {
 }
 
 // Helper: Extract abbreviation for academic titles
-const getAcademicAbbr = (position: string | null): string => {
-    if (!position) return '';
-    if (position.includes('ผู้ช่วยศาสตราจารย์')) return 'ผศ.';
-    if (position.includes('รองศาสตราจารย์')) return 'รศ.';
-    if (position.includes('ศาสตราจารย์')) return 'ศ.';
-    if (position.includes('อาจารย์')) return 'อาจารย์';
-    return position;
-};
-
-// Helper: สร้างชื่อเต็มพร้อมตำแหน่งวิชาการ
-const getFullName = (staff: Staff): string => {
-    const acadPos = getAcademicAbbr(staff.academicPosition);
-    const prefix = staff.prefixTh || '';
-    const name = `${staff.firstNameTh} ${staff.lastNameTh}`;
-
-    if (acadPos && prefix) {
-        return `${acadPos}${prefix}${name}`;
-    } else if (acadPos) {
-        return `${acadPos}${name}`;
-    } else if (prefix) {
-        return `${prefix}${name}`;
-    }
-    return name;
-};
+import { getFullName } from '@/lib/staff';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 

@@ -51,7 +51,7 @@ export default function StartupsPage() {
                     className="object-cover opacity-60"
                 />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                    <span className="inline-block px-4 py-1.5 rounded-full bg-scholar-accent text-white font-bold tracking-wider text-xs mb-4 animate-pulse">
+                    <span className="inline-block px-4 py-1.5 rounded-sm bg-scholar-accent text-white font-bold tracking-wider text-xs mb-4 animate-pulse">
                         WISH : SOCIAL INNOVATION
                     </span>
                     <h1 className="text-4xl lg:text-6xl font-black text-white mb-6 uppercase tracking-tight leading-none">
@@ -59,7 +59,7 @@ export default function StartupsPage() {
                         Innovators
                     </h1>
                     <p className="text-gray-200 text-lg max-w-2xl font-light">
-                        พื้นทีปล่อยของสำหรับ "นวัตกรสังคม" เปลี่ยนไอเดีย เป็นพลังขับเคลื่อนชุมชนเชียงราย
+                        พื้นทีปล่อยของสำหรับ &ldquo;นวัตกรสังคม&rdquo; เปลี่ยนไอเดีย เป็นพลังขับเคลื่อนชุมชนเชียงราย
                     </p>
                 </div>
             </div>
@@ -80,7 +80,7 @@ export default function StartupsPage() {
                 {/* Startup Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {STARTUPS.map((startup) => (
-                        <div key={startup.id} className="group bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col">
+                        <div key={startup.id} className="group bg-white rounded-sm overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 flex flex-col">
 
                             {/* Image Area */}
                             <div className="relative h-64 overflow-hidden">
@@ -88,9 +88,9 @@ export default function StartupsPage() {
                                     src={startup.image}
                                     alt={startup.name}
                                     fill
-                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
-                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-scholar-deep shadow-sm">
+                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-sm text-xs font-bold text-scholar-deep shadow-sm">
                                     {startup.category}
                                 </div>
                             </div>
@@ -120,7 +120,7 @@ export default function StartupsPage() {
                 </div>
 
                 {/* Call to Action: Join Incubator */}
-                <div className="mt-20 bg-gradient-to-r from-scholar-deep to-blue-900 rounded-3xl p-10 lg:p-16 text-center text-white relative overflow-hidden">
+                <div className="mt-20 bg-gradient-to-r from-scholar-deep to-blue-900 rounded-sm p-10 lg:p-16 text-center text-white relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-scholar-accent/20 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
 
@@ -129,7 +129,7 @@ export default function StartupsPage() {
                         ศูนย์บ่มเพาะนวัตกรรมทางสังคม (Social Innovation Incubator) เปิดรับสมัครทีมคนรุ่นใหม่
                         ที่พร้อมลุยแก้ปัญหาชุมชน พร้อมทุนสนับสนุนและพี่เลี้ยงมืออาชีพ
                     </p>
-                    <button className="btn btn-lg bg-scholar-gold text-scholar-deep border-none shadow-xl hover:bg-white hover:scale-105 relative z-10 px-10 rounded-full font-bold">
+                    <button className="btn btn-lg bg-scholar-gold text-scholar-deep border-none shadow-md hover:bg-white relative z-10 px-8 rounded-sm font-bold">
                         เสนอโครงการ (Pitching Deck)
                     </button>
                 </div>

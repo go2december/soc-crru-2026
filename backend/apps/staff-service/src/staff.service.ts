@@ -9,12 +9,14 @@ import {
   departments,
   academicPositions,
   adminPositions,
+  researchProjects,
+  projectMembers,
 } from 'db/database';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { CreatePositionDto, UpdatePositionDto } from './dto/position.dto';
 import { UploadService } from 'upload/upload';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, and, desc } from 'drizzle-orm';
 
 @Injectable()
 export class StaffService {
@@ -163,7 +165,39 @@ export class StaffService {
     if (result.length === 0) {
       throw new NotFoundException(`Staff profile with ID ${id} not found`);
     }
-    return result[0];
+
+    const projects = await this.drizzle.db
+      .select({
+        id: researchProjects.id,
+        slug: researchProjects.slug,
+        titleTh: researchProjects.titleTh,
+        titleEn: researchProjects.titleEn,
+        year: researchProjects.year,
+        status: researchProjects.status,
+        fundingSource: researchProjects.fundingSource,
+        isSocialService: researchProjects.isSocialService,
+        isCommercial: researchProjects.isCommercial,
+        coverImageUrl: researchProjects.coverImageUrl,
+        role: projectMembers.role,
+        positionTitle: projectMembers.positionTitle,
+      })
+      .from(projectMembers)
+      .innerJoin(
+        researchProjects,
+        eq(projectMembers.projectId, researchProjects.id),
+      )
+      .where(
+        and(
+          eq(projectMembers.staffProfileId, id),
+          eq(researchProjects.isPublished, true),
+        ),
+      )
+      .orderBy(desc(researchProjects.year));
+
+    return {
+      ...result[0],
+      researchProjects: projects,
+    };
   }
 
   async update(id: string, updateStaffDto: UpdateStaffDto) {

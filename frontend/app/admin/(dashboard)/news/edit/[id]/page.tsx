@@ -74,11 +74,15 @@ export default function EditNewsPage() {
       if (res.ok) {
         router.push('/admin/news');
       } else {
-        alert('เกิดข้อผิดพลาดในการแก้ไขข่าว');
+        const errorData = await res.json().catch(() => null);
+        const message = errorData?.message
+          ? (Array.isArray(errorData.message) ? errorData.message.join('\n') : errorData.message)
+          : 'เกิดข้อผิดพลาดในการแก้ไขข่าว';
+        alert(message);
       }
     } catch (error) {
       console.error(error);
-      alert('เกิดข้อผิดพลาดในการแก้ไขข่าว');
+      alert('ไม่สามารถเชื่อมต่อกับระบบเพื่อแก้ไขข่าวได้');
     } finally {
       setSubmitting(false);
     }

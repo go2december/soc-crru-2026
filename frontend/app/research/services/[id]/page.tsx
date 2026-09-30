@@ -5,8 +5,9 @@ import Breadcrumb from '@/components/Breadcrumb';
 import { getStatusLabel } from '@/lib/academic-services';
 import GalleryClient from '@/components/GalleryClient';
 import JsonLd from '@/components/seo/JsonLd';
+import { getApiBaseUrl } from '@/lib/api-config';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_URL = getApiBaseUrl();
 
 async function getServiceById(id: string) {
     try {

@@ -76,7 +76,7 @@ export default function ResearchHubPage() {
                     />
 
                     <div className="max-w-3xl mt-8">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-scholar-gold/20 border border-scholar-gold/30 text-scholar-gold text-xs font-semibold uppercase tracking-wider mb-4 backdrop-blur-sm">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-scholar-gold/20 border border-scholar-gold/30 text-scholar-gold text-xs font-semibold uppercase tracking-wider mb-4 backdrop-blur-sm">
                             <span className="w-2 h-2 rounded-full bg-scholar-gold animate-pulse" />
                             Research & Academic Services
                         </div>
@@ -98,7 +98,7 @@ export default function ResearchHubPage() {
                             const IconComponent = stat.icon;
                             return (
                                 <div key={idx} className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-scholar-gold shrink-0">
+                                    <div className="w-10 h-10 rounded-sm bg-white/10 flex items-center justify-center text-scholar-gold shrink-0">
                                         <IconComponent size={20} />
                                     </div>
                                     <div>
@@ -121,14 +121,14 @@ export default function ResearchHubPage() {
                             <Link
                                 key={idx}
                                 href={pillar.href}
-                                className={`group bg-white rounded-2xl p-8 border shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 ${pillar.accentColor}`}
+                                className={`group bg-white rounded-sm p-8 border shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 ${pillar.accentColor}`}
                             >
                                 <div>
                                     <div className="flex items-center justify-between mb-6">
-                                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${pillar.iconBg}`}>
-                                            <IconComponent size={28} />
+                                        <div className={`w-12 h-12 rounded-sm flex items-center justify-center ${pillar.iconBg}`}>
+                                            <IconComponent size={24} />
                                         </div>
-                                        <span className={`text-xs px-3 py-1 rounded-full font-medium border ${pillar.badgeColor}`}>
+                                        <span className={`text-xs px-2.5 py-0.5 rounded-sm font-medium border ${pillar.badgeColor}`}>
                                             {pillar.badge}
                                         </span>
                                     </div>
@@ -154,7 +154,7 @@ export default function ResearchHubPage() {
                 </div>
 
                 {/* Info Callout Section */}
-                <div className="mt-12 bg-white rounded-2xl p-8 border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="mt-12 bg-white rounded-sm p-8 border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="max-w-xl">
                         <h3 className="text-lg font-bold text-slate-900 font-heading mb-2">
                             ต้องการร่วมงานวิจัยหรือขอรับบริการวิชาการ?
@@ -166,13 +166,13 @@ export default function ResearchHubPage() {
                     <div className="flex flex-wrap gap-3 shrink-0">
                         <Link
                             href="/contact"
-                            className="px-6 py-3 rounded-full bg-scholar-deep text-white text-sm font-medium hover:bg-scholar-accent transition-colors shadow-sm"
+                            className="px-5 py-2.5 rounded-sm bg-scholar-deep text-white text-sm font-medium hover:bg-slate-800 transition-colors shadow-2xs"
                         >
                             ติดต่อฝ่ายวิจัย
                         </Link>
                         <Link
                             href="/research/database"
-                            className="px-6 py-3 rounded-full bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 transition-colors"
+                            className="px-5 py-2.5 rounded-sm bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 transition-colors border border-slate-200"
                         >
                             ค้นหางานวิจัยทั้งหมด
                         </Link>

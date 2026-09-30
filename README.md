@@ -1,138 +1,76 @@
-# 🏛️ Faculty of Social Sciences, Chiang Rai Rajabhat University (SOC-CRRU)
+# SOC-CRRU Web Platform
 
-Welcome to the official web application repository for the Faculty of Social Sciences, Chiang Rai Rajabhat University. This platform is designed to serve students, staff, and the general public with modern, responsive, and user-centric features.
-
-![Project Status](https://img.shields.io/badge/Status-In%20Development-yellow?style=flat-square)
-![Next.js](https://img.shields.io/badge/Next.js-16.3-black?style=flat-square&logo=next.js)
-![NestJS](https://img.shields.io/badge/NestJS-12.0-E0234E?style=flat-square&logo=nestjs)
-![Node.js](https://img.shields.io/badge/Node.js-26-339933?style=flat-square&logo=node.js)
-![Rspack](https://img.shields.io/badge/Rspack-Rust-orange?style=flat-square)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18.0-336791?style=flat-square&logo=postgresql)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker)
-
-## 🌟 Project Overview
-
-The **SOC-CRRU Web Application** is a comprehensive platform built to support the faculty's educational mission: **"Siam Innovator & Lifelong Learning"**. It consolidates academic information, student services, and organizational transparency into a single, seamless digital experience.
-
-### Key Features
-*   **🎨 Modern Design System**: Built with Tailwind CSS v4 and DaisyUI, featuring the "Scholar" theme (Gold/Deep Blue).
-*   **📚 Academic Programs**: Detailed information on Bachelor's, Master's, and Doctoral degrees.
-*   **🏢 Organization Info**:
-    *   **Strategic Plan**: Interactive strategic map and detailed implementation plans.
-    *   **Organizational Structure**: Visual hierarchy of the faculty's administration.
-    *   **Staff Directory**: Searchable database of faculty members and staff.
-*   **🛠️ E-Service Portal**: Centralized access to student and staff digital services.
-*   **📱 Responsive & Accessible**: Fully optimized for mobile, tablet, and desktop devices.
-
-## 🛠️ Technology Stack
-
-This project utilizes a modern Full-Stack Dockerized environment:
-
-| Component | Technology | Description |
-| :--- | :--- | :--- |
-| **Frontend** | **Next.js 16+** | React Framework with App Router & Server Components |
-| **Styling** | **Tailwind CSS v4** | Utility-first CSS framework |
-| **UI Library** | **DaisyUI 5** | Component library for Tailwind |
-| **Backend** | **NestJS 12 (Modular Monolith)** | High-performance unified backend built with Rust-based Rspack |
-| **Database** | **PostgreSQL 18** | Powerful, open source object-relational database system |
-| **DevOps** | **Docker Compose** | Container orchestration for unified development environment |
-
-## 🚀 Getting Started
-
-Follow these steps to set up the project locally.
-
-### Prerequisites
-*   [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
-*   A Git client.
-
-### Installation
-
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/go2december/soc-crru-2026.git
-    cd soc-crru-2026
-    ```
-
-2.  **Start the environment**
-    Run the following command to build and start all services (Frontend, Backend, DB, pgAdmin):
-    ```bash
-    docker compose up -d
-    ```
-
-3.  **Access the application**
-    *   **Frontend**: [http://localhost:4000](http://localhost:4000)
-    *   **Backend API**: [http://localhost:4001](http://localhost:4001)
-    *   **pgAdmin**: [http://localhost:5050](http://localhost:5050)
-        *   *Email*: `admin@soc.crru.ac.th`
-        *   *Password*: `admin`
-    *   **Faculty Admin**: [http://localhost:4000/admin/login](http://localhost:4000/admin/login)
-    *   **Chiang Rai Admin**: [http://localhost:4000/chiang-rai-studies/admin/login](http://localhost:4000/chiang-rai-studies/admin/login)
-
-## 📂 Project Structure
-
-```
-soc-crru-web/
-├── frontend/             # Next.js Application
-│   ├── app/              # App Router Pages
-│   ├── components/       # Reusable UI Components
-│   └── lib/              # Shared frontend utilities
-├── backend/              # NestJS Application
-│   ├── src/              # API Source Code
-│   └── test/             # E2E Tests
-├── database/             # Database initialization & data
-├── docs/                 # Canonical plans and workflow references
-├── .agent/               # Agent rules, executable task workflows, and local project skills
-└── docker-compose.yml    # Container Configuration
-```
-
-## 🗂️ Planning & Workflow Files
-
-- `docs/WORKFLOW-project-status.md` → consolidated project status snapshot
-- `docs/PLAN-soc-crru-baseline.md` → project-wide baseline and pending work
-- `docs/PLAN-chiang-rai-studies.md` → Chiang Rai Studies implementation plan
-- `docs/PLAN-workflow-standardization.md` → workflow governance standard
-- `.agent/workflows/` → executable task workflows for admin work, content population, release review, and local deployment
-- `.agent/skills/` → local skills for task routing, surface-specific rules, and implementation guidance
-
-## � Local Skill Map
-
-- **Public frontend work**
-  - Primary: `soc-crru-public-frontend`
-  - Add: `ui-ux-pro-max`, `tailwind-patterns`, `nextjs-react-expert`, `soc-crru-seo-metadata`
-
-- **Admin dashboard work**
-  - Primary: `soc-crru-admin-dashboard`
-  - Add: `ui-ux-pro-max`, `nextjs-react-expert`, `lint-and-validate`, `systematic-debugging`
-
-- **Backend / API work**
-  - Primary: `soc-crru-backend-nest-drizzle`
-  - Add: `api-patterns`, `lint-and-validate`, `systematic-debugging`
-
-- **Chiang Rai CRUD work**
-  - Primary: `soc-crru-chiang-rai-crud`
-  - Add: `soc-crru-backend-nest-drizzle`, `api-patterns`, `soc-crru-media-upload-cleanup`, `soc-crru-seo-metadata`, `lint-and-validate`
-
-- **Media upload / cleanup work**
-  - Primary: `soc-crru-media-upload-cleanup`
-  - Add: route-surface skill (`soc-crru-admin-dashboard`, `soc-crru-chiang-rai-crud`, or `soc-crru-public-frontend`)
-
-- **SEO / metadata work**
-  - Primary: `soc-crru-seo-metadata`
-  - Add: `soc-crru-public-frontend`, `ui-ux-pro-max`, `nextjs-react-expert`
-
-- **Debugging**
-  - Primary: `systematic-debugging`
-  - Add: the implementation surface skill + `lint-and-validate`
-
-- **Docs / workflow sync**
-  - Primary: `soc-crru-docs-governance`
-  - Add: the implementation surface skill that changed project status or behavior
-
-## �🤝 Contribution
-
-This project is currently under active development.
-*   **Phase 1-5 (Frontend)**: ~90% Complete (Design, Content, Navigation)
-*   **Phase 6-7 (Backend)**: In Progress (API Development, DB Integration)
+> เว็บไซต์ทางการและระบบจัดการสารสนเทศ คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย (Faculty of Social Sciences, Chiang Rai Rajabhat University) พร้อมระบบศูนย์เชียงรายศึกษา (Chiang Rai Studies Center)
 
 ---
-*Developed for the Faculty of Social Sciences, Chiang Rai Rajabhat University.*
+
+## 📖 ศูนย์กลางเอกสารและสถาปัตยกรรม (Documentation Hub)
+
+โปรเจกต์นี้จัดการเอกสาร แผนงาน และสถาปัตยกรรมด้วยระบบ **Obsidian PKM (Map of Content)** โดยมีจุดเริ่มต้นหลักอยู่ที่:
+
+* **[docs/00_Dashboard.md](docs/00_Dashboard.md)**: **สารบัญหลัก (MOC)** รวมลิงก์สู่แผนผังระบบ, สถาปัตยกรรม, กฎการพัฒนา และกรุเอกสารทั้งหมด
+* **[docs/01_Active_Tasks/Current_Status.md](docs/01_Active_Tasks/Current_Status.md)**: สถานะความคืบหน้าระบบและงานที่กำลังดำเนินการล่าสุด
+* **[docs/04_Webometrics_Guidelines/](docs/04_Webometrics_Guidelines)**: มาตรฐานการจัดอันดับ Webometrics, Technical SEO, Core Web Vitals และโครงสร้างหน้าอาจารย์/นักวิจัย
+* **[docs/WINDOWS_DEPLOYMENT.md](docs/WINDOWS_DEPLOYMENT.md)**: แนวทางการติดตั้งและรัน Production บน Windows Server
+
+---
+
+## 🏗️ Tech Stack & Codebase Structure
+
+โปรเจกต์ใช้โครงสร้าง **Full-stack Monorepo / Multi-tier**:
+
+```plaintext
+soc-crru-web/
+├── frontend/             # Next.js 16 (App Router), React 19, Tailwind CSS v4, TypeScript
+├── backend/              # NestJS Monorepo (Apps & Libs), PostgreSQL 18, Drizzle ORM
+├── database/             # PostgreSQL data, backups, and migration scripts
+├── docs/                 # Obsidian PKM Documentation Hub & MOC
+└── .agent/               # AI Developer Rules, Specialized Agents & Skills
+```
+
+### 1. Frontend (`frontend/`)
+* **Framework:** Next.js 16 (App Router), React 19
+* **Styling:** Tailwind CSS v4, DaisyUI, Radix UI
+* **Design Identity:** **Sharp Theme** (`rounded-sm` ขอบมนเฉียบคม เข้ากับอัตลักษณ์มหาวิทยาลัย), ห้ามใช้โทนสีม่วง (Purple Ban)
+* **Portals:** เว็บไซต์คณะสังคมศาสตร์ และศูนย์เชียงรายศึกษา (แยก Route ชัดเจน)
+
+### 2. Backend (`backend/`)
+* **Framework:** NestJS 12 (Monorepo architecture with `apps/` and `libs/`)
+* **Database & ORM:** PostgreSQL 18, Drizzle ORM
+* **Authentication:** JWT, Passport, Google OAuth
+* **Validation:** Class-validator, Class-transformer, Zod
+
+### 3. Infrastructure (`docker-compose.yml`)
+* Dockerized PostgreSQL 18 พร้อมระบบ Backup อัตโนมัติใน `database/backups`
+
+---
+
+## 🚀 เริ่มต้นใช้งานในโหมดพัฒนา (Quick Start)
+
+### 1. รันฐานข้อมูลด้วย Docker
+```bash
+docker compose up -d postgres
+```
+
+### 2. รัน Backend API
+```bash
+cd backend
+npm install
+npm run start:dev
+```
+*API รันที่:* `http://localhost:4000` (หรือตามค่าใน `.env`)
+
+### 3. รัน Frontend Web
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*Web รันที่:* `http://localhost:3000`
+
+---
+
+## 🎨 ข้อกำหนดและมาตรฐานการออกแบบ (Design Standards)
+* ข้อกำหนด UI/UX ดูได้ที่ [.agent/agents/frontend-specialist.md](.agent/agents/frontend-specialist.md)
+* ข้อกำหนด Admin Dashboard ดูได้ที่ [.agent/skills/soc-crru-admin-dashboard/SKILL.md](.agent/skills/soc-crru-admin-dashboard/SKILL.md)
+* สถาปัตยกรรม Backend & Database ดูได้ที่ [.agent/skills/soc-crru-backend-nest-drizzle/SKILL.md](.agent/skills/soc-crru-backend-nest-drizzle/SKILL.md)

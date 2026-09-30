@@ -34,10 +34,15 @@ export default function CreateNewsPage() {
             if (res.ok) {
                 router.push('/admin/news');
             } else {
-                alert('เกิดข้อผิดพลาดในการสร้างข่าว');
+                const errorData = await res.json().catch(() => null);
+                const message = errorData?.message
+                    ? (Array.isArray(errorData.message) ? errorData.message.join('\n') : errorData.message)
+                    : 'เกิดข้อผิดพลาดในการสร้างข่าว';
+                alert(message);
             }
         } catch (error) {
             console.error(error);
+            alert('ไม่สามารถเชื่อมต่อกับระบบเพื่อสร้างข่าวได้');
         } finally {
             setLoading(false);
         }

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { BookOpen, Calendar, ArrowRight, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
+import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
 
 export const metadata: Metadata = {
     title: 'แหล่งเรียนรู้ทางวัฒนธรรม | ศูนย์เชียงรายศึกษา',
@@ -19,8 +20,7 @@ export const metadata: Metadata = {
     },
 };
 
-const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:4201';
-const PUBLIC_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_URL = getApiBaseUrl();
 
 interface LearningSite {
     id: string;
@@ -93,29 +93,29 @@ export default async function LearningSitesPage({ searchParams }: { searchParams
                         {learningSites.map((site, index) => (
                             <div
                                 key={site.id}
-                                className="bg-white rounded-sm p-6 shadow-sm border border-purple-100 hover:shadow-xl hover:border-orange-200 transition-all duration-300 flex flex-col md:flex-row gap-6 group animate-fade-in-up"
+                                className="bg-white rounded-sm p-6 shadow-sm border border-stone-200 hover:shadow-lg hover:border-orange-300 transition-all duration-300 flex flex-col md:flex-row gap-6 group animate-fade-in-up"
                                 style={{ animationDelay: `${index * 0.1}s` }}
                             >
                                 {/* Thumbnail */}
-                                <div className="w-full md:w-48 h-48 bg-purple-100 rounded-sm overflow-hidden flex-shrink-0 relative">
+                                <div className="w-full md:w-48 h-48 bg-stone-100 rounded-sm overflow-hidden flex-shrink-0 relative">
                                     {site.thumbnailUrl ? (
                                         <Image
-                                            src={site.thumbnailUrl!.startsWith('/') ? `${PUBLIC_URL}${site.thumbnailUrl}` : site.thumbnailUrl!}
+                                            src={getAssetUrl(site.thumbnailUrl)}
                                             alt={site.title}
                                             fill
                                             unoptimized
-                                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
                                             sizes="(max-width: 768px) 100vw, 200px"
                                         />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-purple-300">
+                                        <div className="w-full h-full flex items-center justify-center text-stone-300">
                                             <BookOpen size={40} />
                                         </div>
                                     )}
                                     {site.tags && site.tags.length > 0 && (
                                         <div className="absolute top-3 left-3">
                                             <Link href={`/chiang-rai-studies/learning-sites?tag=${encodeURIComponent(site.tags[0])}`}
-                                                className="bg-white/90 backdrop-blur-sm text-purple-800 text-[10px] font-bold px-3 py-1 rounded-sm uppercase tracking-wide border border-purple-100 shadow-sm hover:bg-white transition">
+                                                className="bg-white/90 backdrop-blur-sm text-purple-900 text-[10px] font-bold px-3 py-1 rounded-sm uppercase tracking-wide border border-stone-200 shadow-sm hover:bg-white transition">
                                                 {site.tags[0]}
                                             </Link>
                                         </div>
@@ -126,14 +126,14 @@ export default async function LearningSitesPage({ searchParams }: { searchParams
                                 <div className="flex-1 flex flex-col">
                                     <div className="flex items-center gap-4 mb-3 text-xs text-stone-400 font-normal">
                                         {site.publishedAt && (
-                                            <div className="flex items-center gap-1.5 bg-stone-50 px-2 py-1 rounded-sm">
+                                            <div className="flex items-center gap-1.5 bg-stone-50 px-2 py-1 rounded-sm border border-stone-100">
                                                 <Calendar size={12} className="text-orange-500" />
                                                 {format(new Date(site.publishedAt), 'd MMM yyyy', { locale: th })}
                                             </div>
                                         )}
                                         {site.author && (
-                                            <div className="flex items-center gap-1.5 bg-stone-50 px-2 py-1 rounded-sm">
-                                                <BookOpen size={12} className="text-purple-500" />
+                                            <div className="flex items-center gap-1.5 bg-stone-50 px-2 py-1 rounded-sm border border-stone-100">
+                                                <BookOpen size={12} className="text-[#702963]" />
                                                 {site.author}
                                             </div>
                                         )}
@@ -160,13 +160,13 @@ export default async function LearningSitesPage({ searchParams }: { searchParams
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-32 bg-white rounded-sm border-2 border-dashed border-purple-100 max-w-4xl mx-auto px-10">
-                        <div className="w-24 h-24 bg-purple-50 rounded-sm flex items-center justify-center mx-auto mb-8 shadow-inner">
-                            <BookOpen className="text-purple-200" size={48} />
+                    <div className="text-center py-32 bg-white rounded-sm border-2 border-dashed border-stone-200 max-w-4xl mx-auto px-10">
+                        <div className="w-24 h-24 bg-stone-50 rounded-sm flex items-center justify-center mx-auto mb-8 shadow-inner border border-stone-100">
+                            <BookOpen className="text-stone-300" size={48} />
                         </div>
-                        <h3 className="text-2xl font-bold text-purple-900 mb-4">ยังไม่มีบทความ</h3>
-                        <p className="text-purple-400 font-light text-lg mb-8 max-w-md mx-auto italic">
-                            "ติดตามบทความและสาระน่ารู้จากศูนย์เชียงรายศึกษาได้ที่นี่ เร็วๆ นี้"
+                        <h3 className="text-2xl font-bold text-[#2e1065] mb-4">ยังไม่มีข้อมูลแหล่งเรียนรู้</h3>
+                        <p className="text-stone-400 font-light text-lg mb-8 max-w-md mx-auto italic">
+                            "ติดตามบทความและสาระน่ารู้เกี่ยวกับแหล่งเรียนรู้ทางวัฒนธรรมจากศูนย์เชียงรายศึกษาได้ที่นี่ เร็วๆ นี้"
                         </p>
                     </div>
                 )}

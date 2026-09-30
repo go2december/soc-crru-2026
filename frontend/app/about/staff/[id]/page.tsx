@@ -3,10 +3,50 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowLeft, Mail, GraduationCap, Briefcase, Award, Crown, UserCircle2, Bookmark, Lightbulb, Globe, Fingerprint, BookOpen, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
+import {
+    ArrowLeft,
+    Mail,
+    GraduationCap,
+    Briefcase,
+    Award,
+    Crown,
+    UserCircle2,
+    Lightbulb,
+    Globe,
+    Fingerprint,
+    BookOpen,
+    ExternalLink,
+    Building2,
+    CheckCircle2,
+    AlertCircle,
+    ArrowRight,
+    FlaskConical
+} from 'lucide-react';
 import JsonLd from '@/components/seo/JsonLd';
+import {
+    getFullName,
+    getFullNameEn,
+    getGoogleScholarLink,
+    getOrcidLink,
+    getScopusLink,
+} from '@/lib/staff';
 
-// Types ตาม Backend Schema
+interface LinkedResearchProject {
+    id: string;
+    slug: string;
+    titleTh: string;
+    titleEn: string | null;
+    year: number;
+    status: 'ONGOING' | 'COMPLETED' | 'PUBLISHED' | 'CANCELLED';
+    fundingSource: string | null;
+    isSocialService: boolean;
+    isCommercial: boolean;
+    coverImageUrl: string | null;
+    role: 'HEAD' | 'CO_RESEARCHER' | 'ADVISOR' | 'ASSISTANT' | 'EXTERNAL_EXPERT';
+    positionTitle: string | null;
+}
+
 interface Staff {
     id: string;
     prefixTh: string | null;
@@ -29,7 +69,9 @@ interface Staff {
     orcidId: string | null;
     scopusAuthorId: string | null;
     department: string | null;
+    departmentEn: string | null;
     isExecutive: boolean;
+    researchProjects?: LinkedResearchProject[];
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
@@ -45,52 +87,17 @@ const getImageUrl = (url: string | null): string => {
     return url;
 };
 
-// Helper: Extract abbreviation for academic titles
-const getAcademicAbbr = (position: string | null): string => {
-    if (!position) return '';
-    if (position.includes('ผู้ช่วยศาสตราจารย์')) return 'ผศ.';
-    if (position.includes('รองศาสตราจารย์')) return 'รศ.';
-    if (position.includes('ศาสตราจารย์')) return 'ศ.';
-    if (position.includes('อาจารย์')) return 'อาจารย์';
-    return position;
-};
-
-// Helper: สร้างชื่อเต็มพร้อมตำแหน่งวิชาการ
-const getFullName = (staff: Staff): string => {
-    const acadPos = getAcademicAbbr(staff.academicPosition);
-    const prefix = staff.prefixTh || '';
-    const name = `${staff.firstNameTh} ${staff.lastNameTh}`;
-
-    if (acadPos && prefix) {
-        return `${acadPos}${prefix}${name}`;
-    } else if (acadPos) {
-        return `${acadPos}${name}`;
-    } else if (prefix) {
-        return `${prefix}${name}`;
+const getRoleBadge = (role: LinkedResearchProject['role']) => {
+    switch (role) {
+        case 'HEAD':
+            return { text: 'หัวหน้าโครงการ (PI)', bg: 'bg-emerald-50 text-emerald-800 border-emerald-200' };
+        case 'CO_RESEARCHER':
+            return { text: 'ผู้ร่วมวิจัย (Co-PI)', bg: 'bg-blue-50 text-blue-800 border-blue-200' };
+        case 'ADVISOR':
+            return { text: 'ที่ปรึกษาโครงการ', bg: 'bg-amber-50 text-amber-800 border-amber-200' };
+        default:
+            return { text: 'คณะผู้วิจัย', bg: 'bg-slate-50 text-slate-700 border-slate-200' };
     }
-    return name;
-};
-
-const getFullNameEn = (staff: Staff): string => {
-    if (!staff.firstNameEn && !staff.lastNameEn) return '';
-    const prefix = staff.prefixEn ? `${staff.prefixEn} ` : '';
-    return `${prefix}${staff.firstNameEn || ''} ${staff.lastNameEn || ''}`.trim();
-};
-
-// Helper: External profile links for Researchers
-const getGoogleScholarLink = (val: string | null): string => {
-    if (!val) return '';
-    return val.startsWith('http') ? val : `https://scholar.google.com/citations?user=${val.trim()}`;
-};
-
-const getOrcidLink = (val: string | null): string => {
-    if (!val) return '';
-    return val.startsWith('http') ? val : `https://orcid.org/${val.trim().replace(/^https?:\/\/orcid\.org\//, '')}`;
-};
-
-const getScopusLink = (val: string | null): string => {
-    if (!val) return '';
-    return val.startsWith('http') ? val : `https://www.scopus.com/authid/detail.uri?authorId=${val.trim()}`;
 };
 
 export default function StaffProfilePage() {
@@ -127,20 +134,26 @@ export default function StaffProfilePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex justify-center items-center py-20">
-                <span className="loading loading-spinner loading-lg text-scholar-deep"></span>
+            <div className="min-h-screen bg-slate-50 flex justify-center items-center py-20">
+                <div className="flex flex-col items-center gap-3">
+                    <span className="loading loading-spinner loading-lg text-scholar-deep"></span>
+                    <p className="text-xs text-slate-500 font-medium">กำลังโหลดข้อมูลบุคลากร...</p>
+                </div>
             </div>
         );
     }
 
     if (error || !staff) {
         return (
-            <div className="min-h-screen bg-gray-50 py-20 px-4">
-                <div className="max-w-xl mx-auto text-center bg-white p-12 rounded-3xl shadow-sm border border-gray-100">
-                    <UserCircle2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{error || 'ไม่พบข้อมูลบุคลากร'}</h2>
-                    <p className="text-gray-500 mb-8">อาจมีการเปลี่ยนแปลงหรือลบข้อมูลนี้ออกจากระบบแล้ว</p>
-                    <button onClick={() => router.back()} className="px-6 py-2.5 bg-scholar-deep text-white font-medium rounded-xl hover:bg-opacity-90 transition-all">
+            <div className="min-h-screen bg-slate-50 py-20 px-4">
+                <div className="max-w-md mx-auto text-center bg-white p-8 rounded-sm shadow-sm border border-slate-200">
+                    <UserCircle2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-slate-900 mb-2">{error || 'ไม่พบข้อมูลบุคลากร'}</h2>
+                    <p className="text-slate-500 text-sm mb-6">อาจมีการเปลี่ยนแปลงหรือลบข้อมูลนี้ออกจากระบบแล้ว</p>
+                    <button
+                        onClick={() => router.back()}
+                        className="px-5 py-2.5 bg-scholar-deep text-white text-sm font-medium rounded-sm hover:bg-slate-800 transition-colors"
+                    >
                         กลับหน้าทำเนียบบุคลากร
                     </button>
                 </div>
@@ -148,344 +161,490 @@ export default function StaffProfilePage() {
         );
     }
 
-    const hasResearcherProfiles = Boolean(staff.googleScholarUrl || staff.orcidId || staff.scopusAuthorId);
+    const hasScholar = Boolean(staff.googleScholarUrl);
+    const hasOrcid = Boolean(staff.orcidId);
+    const hasScopus = Boolean(staff.scopusAuthorId);
+    const hasAnyResearcherId = hasScholar || hasOrcid || hasScopus;
 
     const personSchema = {
         "@context": "https://schema.org",
         "@type": "Person",
-        "name": `${staff.prefixTh || ''} ${staff.firstNameTh} ${staff.lastNameTh}`.trim(),
-        "alternateName": `${staff.prefixEn || ''} ${staff.firstNameEn || ''} ${staff.lastNameEn || ''}`.trim(),
+        "name": getFullName(staff),
+        "alternateName": getFullNameEn(staff) || undefined,
+        "url": `https://soc.crru.ac.th/about/staff/${staff.id}`,
         "jobTitle": staff.adminPosition || staff.academicPosition || 'อาจารย์ประจำคณะสังคมศาสตร์',
         "worksFor": {
             "@type": "EducationalOrganization",
             "name": "คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
-            "url": "https://soc.crru.ac.th"
+            "alternateName": "Faculty of Social Sciences, Chiang Rai Rajabhat University",
+            "url": "https://soc.crru.ac.th",
+            "parentOrganization": {
+                "@type": "CollegeOrUniversity",
+                "name": "มหาวิทยาลัยราชภัฏเชียงราย (Chiang Rai Rajabhat University)",
+                "url": "https://crru.ac.th"
+            }
         },
         "email": staff.contactEmail || undefined,
         "image": staff.imageUrl ? `https://soc.crru.ac.th${getImageUrl(staff.imageUrl)}` : undefined,
         "knowsAbout": staff.expertise && staff.expertise.length > 0 ? staff.expertise : undefined,
         "sameAs": [
-            staff.googleScholarUrl ? getGoogleScholarLink(staff.googleScholarUrl) : null,
-            staff.orcidId ? getOrcidLink(staff.orcidId) : null,
-            staff.scopusAuthorId ? getScopusLink(staff.scopusAuthorId) : null,
+            hasScholar ? getGoogleScholarLink(staff.googleScholarUrl) : null,
+            hasOrcid ? getOrcidLink(staff.orcidId) : null,
+            hasScopus ? getScopusLink(staff.scopusAuthorId) : null,
         ].filter(Boolean),
     };
 
     return (
-        <main className="min-h-screen bg-gray-50 pb-20 font-sans">
+        <main className="min-h-screen bg-slate-50 pb-20 font-sans">
             <JsonLd data={personSchema} />
-            {/* Header Area that is shorter than hero */}
-            <section className="bg-scholar-deep text-white pt-20 pb-24 px-4 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-5 bg-[url('/images/pattern.png')] bg-repeat"></div>
 
-                <div className="relative z-10 container mx-auto">
-                    <button
-                        onClick={() => router.back()}
-                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-4 group font-medium"
-                    >
-                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> กลับหน้าทำเนียบบุคลากร
-                    </button>
+            {/* Header / Institutional Affiliation Breadcrumb */}
+            <section className="bg-scholar-deep text-white pt-8 pb-20 px-4 border-b border-slate-800 relative">
+                <div className="container mx-auto max-w-6xl">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                        <button
+                            onClick={() => router.back()}
+                            className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors group font-medium"
+                        >
+                            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+                            กลับหน้าทำเนียบบุคลากร
+                        </button>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-300 bg-slate-900/60 px-2.5 py-1 rounded-sm border border-slate-700/60">
+                            <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>มหาวิทยาลัยราชภัฏเชียงราย | Chiang Rai Rajabhat University</span>
+                        </div>
+                    </div>
 
-                    {/* Minimalist Intro */}
-                    <div className="mt-4">
-                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white mb-2">ข้อมูลบุคลากร</h1>
-                        <p className="text-blue-100/70 text-sm md:text-base">คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย</p>
+                    <div className="max-w-2xl">
+                        <span className="inline-block text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                            ทำเนียบอาจารย์และนักวิจัย • Faculty & Researcher Profile
+                        </span>
+                        <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white">
+                            {getFullName(staff)}
+                        </h1>
+                        {getFullNameEn(staff) && (
+                            <p className="text-slate-300 text-sm font-light mt-0.5">
+                                {getFullNameEn(staff)}
+                            </p>
+                        )}
                     </div>
                 </div>
             </section>
 
-            <div className="container mx-auto px-4 -mt-16 relative z-20">
-                {/* Main Profile Card */}
-                <div className="bg-white rounded-3xl shadow-lg border border-gray-100/80 overflow-hidden mb-8">
+            <div className="container mx-auto max-w-6xl px-4 -mt-10 relative z-20">
+                <div className="bg-white rounded-sm shadow-xs border border-slate-200 overflow-hidden">
                     <div className="flex flex-col md:flex-row">
 
-                        {/* Left Side: Photo & Quick Contact & Researcher Quick Badges */}
-                        <div className="w-full md:w-1/3 lg:w-1/4 bg-gray-50/50 p-8 flex flex-col items-center border-b md:border-b-0 md:border-r border-gray-100">
-                            <figure className="aspect-[3/4] w-full max-w-[240px] bg-white relative overflow-hidden flex-shrink-0 rounded-2xl shadow-md border border-gray-200/60 mb-6">
+                        {/* Left Side: Photo, Badges & Contact */}
+                        <div className="w-full md:w-1/3 lg:w-1/4 bg-slate-50/70 p-6 md:p-8 flex flex-col items-center border-b md:border-b-0 md:border-r border-slate-200">
+                            <div className="aspect-[3/4] w-full max-w-[220px] bg-white relative overflow-hidden rounded-sm shadow-2xs border border-slate-300 mb-5">
                                 {staff.imageUrl ? (
                                     <Image
                                         src={getImageUrl(staff.imageUrl)}
                                         alt={getFullName(staff)}
                                         fill
-                                        sizes="(max-width: 768px) 100vw, 240px"
+                                        sizes="(max-width: 768px) 100vw, 220px"
                                         className="object-cover"
+                                        priority
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
-                                        <UserCircle2 className="w-24 h-24 mb-2 text-gray-300" strokeWidth={1} />
-                                    </div>
-                                )}
-                            </figure>
-
-                            <div className="w-full space-y-4">
-                                <div>
-                                    <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">ช่องทางการติดต่อ</h4>
-                                    {staff.contactEmail ? (
-                                        <a href={`mailto:${staff.contactEmail}`} className="flex items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl text-gray-600 hover:text-scholar-accent hover:border-scholar-accent/30 transition-colors shadow-sm w-full text-[13px] font-medium break-all">
-                                            <Mail className="w-4 h-4 flex-shrink-0" /> {staff.contactEmail}
-                                        </a>
-                                    ) : (
-                                        <p className="text-sm text-gray-400 text-center bg-white border border-gray-100 p-3 rounded-xl italic">
-                                            ไม่มีข้อมูลอีเมลติดต่อ
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Left Researcher Quick Links (if available) */}
-                                {hasResearcherProfiles && (
-                                    <div className="pt-2 border-t border-gray-200/60">
-                                        <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">ฐานข้อมูลวิชาการ</h4>
-                                        <div className="flex flex-col gap-1.5 w-full">
-                                            {staff.googleScholarUrl && (
-                                                <a
-                                                    href={getGoogleScholarLink(staff.googleScholarUrl)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center justify-between px-3 py-2 bg-blue-50/70 hover:bg-blue-100/70 text-blue-700 rounded-xl text-xs font-semibold border border-blue-100 transition-colors"
-                                                >
-                                                    <span className="flex items-center gap-2">
-                                                        <Globe className="w-3.5 h-3.5 text-blue-600" /> Google Scholar
-                                                    </span>
-                                                    <ExternalLink className="w-3 h-3 text-blue-400" />
-                                                </a>
-                                            )}
-                                            {staff.orcidId && (
-                                                <a
-                                                    href={getOrcidLink(staff.orcidId)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center justify-between px-3 py-2 bg-emerald-50/70 hover:bg-emerald-100/70 text-emerald-700 rounded-xl text-xs font-semibold border border-emerald-100 transition-colors"
-                                                >
-                                                    <span className="flex items-center gap-2">
-                                                        <Fingerprint className="w-3.5 h-3.5 text-emerald-600" /> ORCID
-                                                    </span>
-                                                    <ExternalLink className="w-3 h-3 text-emerald-400" />
-                                                </a>
-                                            )}
-                                            {staff.scopusAuthorId && (
-                                                <a
-                                                    href={getScopusLink(staff.scopusAuthorId)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center justify-between px-3 py-2 bg-orange-50/70 hover:bg-orange-100/70 text-orange-700 rounded-xl text-xs font-semibold border border-orange-100 transition-colors"
-                                                >
-                                                    <span className="flex items-center gap-2">
-                                                        <BookOpen className="w-3.5 h-3.5 text-orange-600" /> Scopus
-                                                    </span>
-                                                    <ExternalLink className="w-3 h-3 text-orange-400" />
-                                                </a>
-                                            )}
-                                        </div>
+                                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-100">
+                                        <UserCircle2 className="w-20 h-20 text-slate-400" strokeWidth={1} />
+                                        <span className="text-[11px] text-slate-400 mt-2">ไม่มีรูปภาพ</span>
                                     </div>
                                 )}
                             </div>
+
+                            {/* Affiliation & Department Badge */}
+                            <div className="w-full mb-6 text-center space-y-1.5">
+                                <span className="inline-block px-2.5 py-1 bg-slate-200/80 text-slate-800 text-[11px] font-bold rounded-sm border border-slate-300 uppercase tracking-wider">
+                                    {staff.staffType === 'ACADEMIC' ? 'สายวิชาการ (Academic)' : 'สายสนับสนุน (Support)'}
+                                </span>
+                                <p className="text-xs font-semibold text-slate-700 leading-tight">
+                                    {staff.department || 'คณะสังคมศาสตร์'}
+                                </p>
+                                {staff.departmentEn && (
+                                    <p className="text-[11px] text-slate-500 font-normal">
+                                        {staff.departmentEn}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Contact Box */}
+                            <div className="w-full space-y-3 pt-4 border-t border-slate-200">
+                                <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                    ข้อมูลการติดต่อ (Contact)
+                                </h4>
+                                {staff.contactEmail ? (
+                                    <a
+                                        href={`mailto:${staff.contactEmail}`}
+                                        className="flex items-center gap-2 p-2.5 bg-white border border-slate-200 rounded-sm text-slate-700 hover:text-slate-950 hover:border-slate-400 transition-colors text-xs font-medium break-all shadow-2xs group"
+                                    >
+                                        <Mail className="w-3.5 h-3.5 flex-shrink-0 text-slate-500 group-hover:text-slate-900" />
+                                        <span>{staff.contactEmail}</span>
+                                    </a>
+                                ) : (
+                                    <p className="text-xs text-slate-400 italic bg-white border border-dashed border-slate-200 p-2.5 rounded-sm text-center">
+                                        ไม่มีข้อมูลอีเมล
+                                    </p>
+                                )}
+                                <div className="text-[11px] text-slate-500 leading-relaxed bg-slate-100/80 p-2 rounded-sm border border-slate-200">
+                                    <span className="font-semibold text-slate-700 block mb-0.5">สังกัดทางการ:</span>
+                                    คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Right Side: Details */}
-                        <div className="w-full md:w-2/3 lg:w-3/4 p-8 md:p-10 lg:p-12">
-                            <div className="mb-6">
-                                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider uppercase border mb-4 ${staff.staffType === 'ACADEMIC'
-                                    ? 'bg-blue-50/50 text-blue-700 border-blue-100'
-                                    : 'bg-teal-50/50 text-teal-700 border-teal-100'
-                                    }`}>
-                                    {staff.department || 'ไม่ระบุสังกัด'}
-                                </span>
+                        {/* Right Side: Details, Researcher Hub, Projects & Bio */}
+                        <div className="w-full md:w-2/3 lg:w-3/4 p-6 md:p-8 lg:p-10">
 
-                                <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2 leading-tight">
+                            {/* Name and Titles */}
+                            <div className="border-b border-slate-200 pb-6 mb-6">
+                                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
                                     {getFullName(staff)}
                                 </h2>
-
                                 {getFullNameEn(staff) && (
-                                    <h3 className="text-xl md:text-2xl font-medium text-gray-400 mb-6 font-serif">
+                                    <h3 className="text-lg md:text-xl font-medium text-slate-500 mt-1">
                                         {getFullNameEn(staff)}
                                     </h3>
                                 )}
 
-                                <div className="space-y-4 mt-8">
-                                    {staff.adminPosition && (
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center mt-0.5 flex-shrink-0 border border-amber-100">
-                                                <Crown className="w-5 h-5 text-amber-500" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">ตำแหน่งบริหาร</p>
-                                                <p className="text-lg font-bold text-scholar-accent leading-snug">{staff.adminPosition}</p>
-                                            </div>
+                                <div className="flex flex-wrap gap-4 mt-4">
+                                    {staff.academicPosition && (
+                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-sm text-xs font-semibold text-slate-800">
+                                            <Briefcase className="w-3.5 h-3.5 text-slate-600" />
+                                            <span>ตำแหน่งทางวิชาการ: {staff.academicPosition}</span>
                                         </div>
                                     )}
-
-                                    {staff.academicPosition && (
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mt-0.5 flex-shrink-0 border border-blue-100">
-                                                <Briefcase className="w-5 h-5 text-blue-500" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">ตำแหน่งทางวิชาการ</p>
-                                                <p className="text-base font-medium text-gray-800 leading-snug">{staff.academicPosition}</p>
-                                            </div>
+                                    {staff.adminPosition && (
+                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-sm text-xs font-semibold text-amber-900">
+                                            <Crown className="w-3.5 h-3.5 text-amber-600" />
+                                            <span>ตำแหน่งบริหาร: {staff.adminPosition}</span>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Prominent Researcher Profiles Card (Render ONLY if there is data) */}
-                            {hasResearcherProfiles && (
-                                <div className="my-8 p-6 bg-gradient-to-br from-slate-50 to-slate-100/60 rounded-2xl border border-slate-200/80 shadow-sm">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="p-1.5 bg-white rounded-lg border border-slate-200 shadow-2xs">
-                                                <BookOpen className="w-4 h-4 text-scholar-deep" />
-                                            </div>
-                                            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
-                                                โปรไฟล์นักวิจัยและฐานข้อมูลวิชาการ (Researcher Profiles)
-                                            </h3>
+                            {/* Webometrics Researcher Profiles Hub */}
+                            <div className="mb-8 p-5 bg-slate-50 border border-slate-200 rounded-sm">
+                                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1 bg-white border border-slate-200 rounded-sm text-slate-700">
+                                            <BookOpen className="w-4 h-4 text-scholar-deep" />
                                         </div>
-                                        <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
-                                            Verified
-                                        </span>
+                                        <div>
+                                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                                                ฐานข้อมูลนักวิจัยและผลงานวิชาการ (Webometrics Profiles)
+                                            </h3>
+                                            <p className="text-[11px] text-slate-500">
+                                                สังกัดมาตรฐานสากล: <span className="font-semibold text-slate-700">Chiang Rai Rajabhat University</span>
+                                            </p>
+                                        </div>
                                     </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                        {staff.googleScholarUrl && (
-                                            <a
-                                                href={getGoogleScholarLink(staff.googleScholarUrl)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="group p-3.5 bg-white hover:bg-blue-50/50 border border-slate-200/80 hover:border-blue-300 rounded-xl transition-all shadow-2xs flex flex-col justify-between"
-                                            >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider flex items-center gap-1.5">
-                                                        <Globe className="w-3.5 h-3.5" /> Google Scholar
-                                                    </span>
-                                                    <ExternalLink className="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-500 transition-colors" />
-                                                </div>
-                                                <p className="text-xs font-semibold text-slate-700 group-hover:text-blue-700 truncate">
-                                                    ดูโปรไฟล์และงานวิจัย
-                                                </p>
-                                            </a>
-                                        )}
-
-                                        {staff.orcidId && (
-                                            <a
-                                                href={getOrcidLink(staff.orcidId)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="group p-3.5 bg-white hover:bg-emerald-50/50 border border-slate-200/80 hover:border-emerald-300 rounded-xl transition-all shadow-2xs flex flex-col justify-between"
-                                            >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
-                                                        <Fingerprint className="w-3.5 h-3.5" /> ORCID
-                                                    </span>
-                                                    <ExternalLink className="w-3.5 h-3.5 text-slate-300 group-hover:text-emerald-500 transition-colors" />
-                                                </div>
-                                                <p className="text-xs font-mono font-semibold text-slate-700 group-hover:text-emerald-700 truncate">
-                                                    {staff.orcidId.replace(/^https?:\/\/orcid\.org\//, '')}
-                                                </p>
-                                            </a>
-                                        )}
-
-                                        {staff.scopusAuthorId && (
-                                            <a
-                                                href={getScopusLink(staff.scopusAuthorId)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="group p-3.5 bg-white hover:bg-orange-50/50 border border-slate-200/80 hover:border-orange-300 rounded-xl transition-all shadow-2xs flex flex-col justify-between"
-                                            >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-[11px] font-bold text-orange-600 uppercase tracking-wider flex items-center gap-1.5">
-                                                        <BookOpen className="w-3.5 h-3.5" /> Scopus ID
-                                                    </span>
-                                                    <ExternalLink className="w-3.5 h-3.5 text-slate-300 group-hover:text-orange-500 transition-colors" />
-                                                </div>
-                                                <p className="text-xs font-mono font-semibold text-slate-700 group-hover:text-orange-700 truncate">
-                                                    ID: {staff.scopusAuthorId.replace(/^https?:\/\/www\.scopus\.com\/authid\/detail\.uri\?authorId=/, '')}
-                                                </p>
-                                            </a>
-                                        )}
-                                    </div>
+                                    <span className="text-[10px] font-semibold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-sm">
+                                        Webometrics Openness
+                                    </span>
                                 </div>
-                            )}
 
-                            <hr className="border-gray-100 my-8" />
+                                {/* Academic IDs Grid */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-                            <div className="grid md:grid-cols-2 gap-10">
+                                    {/* Google Scholar */}
+                                    <div className={`p-3.5 bg-white border rounded-sm flex flex-col justify-between transition-colors ${hasScholar
+                                        ? 'border-blue-200 hover:border-blue-400'
+                                        : 'border-slate-200 bg-slate-50/50'
+                                        }`}>
+                                        <div>
+                                            <div className="flex items-center justify-between mb-1.5">
+                                                <span className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                                                    <Globe className="w-3.5 h-3.5 text-blue-600" /> Google Scholar
+                                                </span>
+                                                {hasScholar ? (
+                                                    <span className="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-sm border border-blue-100 font-medium">
+                                                        เชื่อมต่อแล้ว
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm">
+                                                        ยังไม่ระบุ
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-[11px] text-slate-500 leading-snug">
+                                                ดัชนีการอ้างอิงและบทความวิจัย
+                                            </p>
+                                        </div>
+                                        <div className="mt-3 pt-2 border-t border-slate-100">
+                                            {hasScholar ? (
+                                                <a
+                                                    href={getGoogleScholarLink(staff.googleScholarUrl)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-between w-full text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                                                >
+                                                    <span>ดูโปรไฟล์และงานวิจัย</span>
+                                                    <ExternalLink className="w-3 h-3 ml-1" />
+                                                </a>
+                                            ) : (
+                                                <span className="text-[11px] text-slate-400 italic">
+                                                    รอการเชื่อมต่อโปรไฟล์
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* ORCID */}
+                                    <div className={`p-3.5 bg-white border rounded-sm flex flex-col justify-between transition-colors ${hasOrcid
+                                        ? 'border-emerald-200 hover:border-emerald-400'
+                                        : 'border-slate-200 bg-slate-50/50'
+                                        }`}>
+                                        <div>
+                                            <div className="flex items-center justify-between mb-1.5">
+                                                <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                                                    <Fingerprint className="w-3.5 h-3.5 text-emerald-600" /> ORCID iD
+                                                </span>
+                                                {hasOrcid ? (
+                                                    <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-sm border border-emerald-100 font-medium">
+                                                        Verified
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm">
+                                                        ยังไม่ระบุ
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-[11px] font-mono text-slate-600 truncate">
+                                                {hasOrcid ? staff.orcidId?.replace(/^https?:\/\/orcid\.org\//, '') : 'รหัสนักวิจัยสากล 16 หลัก'}
+                                            </p>
+                                        </div>
+                                        <div className="mt-3 pt-2 border-t border-slate-100">
+                                            {hasOrcid ? (
+                                                <a
+                                                    href={getOrcidLink(staff.orcidId)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-between w-full text-xs font-semibold text-emerald-600 hover:text-emerald-800 transition-colors"
+                                                >
+                                                    <span>ตรวจสอบสิทธิ์ ORCID</span>
+                                                    <ExternalLink className="w-3 h-3 ml-1" />
+                                                </a>
+                                            ) : (
+                                                <span className="text-[11px] text-slate-400 italic">
+                                                    รอการเชื่อมต่อ ORCID
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Scopus Author ID */}
+                                    <div className={`p-3.5 bg-white border rounded-sm flex flex-col justify-between transition-colors ${hasScopus
+                                        ? 'border-amber-200 hover:border-amber-400'
+                                        : 'border-slate-200 bg-slate-50/50'
+                                        }`}>
+                                        <div>
+                                            <div className="flex items-center justify-between mb-1.5">
+                                                <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                                                    <BookOpen className="w-3.5 h-3.5 text-amber-600" /> Scopus ID
+                                                </span>
+                                                {hasScopus ? (
+                                                    <span className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded-sm border border-amber-200 font-medium">
+                                                        Scopus
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm">
+                                                        ยังไม่ระบุ
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-[11px] font-mono text-slate-600 truncate">
+                                                {hasScopus ? `ID: ${staff.scopusAuthorId?.replace(/^https?:\/\/www\.scopus\.com\/authid\/detail\.uri\?authorId=/, '')}` : 'ฐานข้อมูลวิชาการ Scopus'}
+                                            </p>
+                                        </div>
+                                        <div className="mt-3 pt-2 border-t border-slate-100">
+                                            {hasScopus ? (
+                                                <a
+                                                    href={getScopusLink(staff.scopusAuthorId)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-between w-full text-xs font-semibold text-amber-700 hover:text-amber-900 transition-colors"
+                                                >
+                                                    <span>ดูข้อมูลใน Scopus</span>
+                                                    <ExternalLink className="w-3 h-3 ml-1" />
+                                                </a>
+                                            ) : (
+                                                <span className="text-[11px] text-slate-400 italic">
+                                                    รอการเชื่อมต่อ Scopus
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                {!hasAnyResearcherId && staff.staffType === 'ACADEMIC' && (
+                                    <p className="text-[11px] text-slate-500 bg-amber-50/80 border border-amber-200 p-2.5 rounded-sm mt-3 flex items-center gap-2">
+                                        <AlertCircle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                                        <span>
+                                            อยู่ระหว่างการเชื่อมต่อฐานข้อมูล Google Scholar และ ORCID สังกัด Chiang Rai Rajabhat University ตามเกณฑ์ Webometrics
+                                        </span>
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Linked Research Projects Section */}
+                            <div className="mb-8">
+                                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+                                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                                        <FlaskConical className="w-4 h-4 text-scholar-deep" />
+                                        โครงการวิจัยและผลงานวิชาการที่เชื่อมโยง
+                                    </h3>
+                                    <Link
+                                        href="/research/database"
+                                        className="text-xs text-slate-600 hover:text-slate-900 font-medium inline-flex items-center gap-1 transition-colors"
+                                    >
+                                        ดูคลังวิจัยคณะ <ArrowRight className="w-3 h-3" />
+                                    </Link>
+                                </div>
+
+                                {staff.researchProjects && staff.researchProjects.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {staff.researchProjects.map((proj) => {
+                                            const roleBadge = getRoleBadge(proj.role);
+                                            return (
+                                                <div
+                                                    key={proj.id}
+                                                    className="p-4 bg-white border border-slate-200 rounded-sm hover:border-slate-400 transition-all shadow-2xs"
+                                                >
+                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm border uppercase ${roleBadge.bg}`}>
+                                                            {roleBadge.text}
+                                                        </span>
+                                                        <span className="text-[11px] font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-sm">
+                                                            ปีงบประมาณ {proj.year}
+                                                        </span>
+                                                        {proj.fundingSource && (
+                                                            <span className="text-[11px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded-sm border border-slate-200">
+                                                                ทุน: {proj.fundingSource}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <Link
+                                                        href={`/research/projects/${proj.slug}`}
+                                                        className="group block"
+                                                    >
+                                                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-scholar-accent transition-colors leading-snug">
+                                                            {proj.titleTh}
+                                                        </h4>
+                                                        {proj.titleEn && (
+                                                            <p className="text-xs text-slate-500 mt-1 font-normal line-clamp-1">
+                                                                {proj.titleEn}
+                                                            </p>
+                                                        )}
+                                                    </Link>
+
+                                                    <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                                                        <span className="text-[11px] text-slate-500">
+                                                            สถานะ: {proj.status === 'COMPLETED' ? 'เสร็จสิ้นโครงการ' : 'กำลังดำเนินการ'}
+                                                        </span>
+                                                        <Link
+                                                            href={`/research/projects/${proj.slug}`}
+                                                            className="text-xs font-semibold text-slate-700 hover:text-slate-900 inline-flex items-center gap-1 group"
+                                                        >
+                                                            รายละเอียดโครงการ
+                                                            <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="p-6 bg-slate-50 border border-dashed border-slate-200 rounded-sm text-center">
+                                        <FlaskConical className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                                        <p className="text-xs font-medium text-slate-600 mb-1">
+                                            ยังไม่มีโครงการวิจัยที่เชื่อมโยงในระบบฐานข้อมูล
+                                        </p>
+                                        <p className="text-[11px] text-slate-400">
+                                            ข้อมูลจะแสดงอัตโนมัติเมื่อโครงการวิจัยที่อาจารย์มีส่วนร่วมได้รับการอนุมัติและเผยแพร่
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Education & Expertise Grid */}
+                            <div className="grid md:grid-cols-2 gap-8 pt-4 border-t border-slate-200">
+
                                 {/* Education */}
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                        <div className="p-2 bg-gray-50 rounded-lg border border-gray-100">
-                                            <GraduationCap className="w-4 h-4 text-scholar-deep" />
-                                        </div>
-                                        ประวัติการศึกษา
+                                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-4 flex items-center gap-2">
+                                        <GraduationCap className="w-4 h-4 text-scholar-deep" />
+                                        ประวัติการศึกษา (Education)
                                     </h3>
 
                                     {staff.education && staff.education.length > 0 ? (
-                                        <ul className="space-y-4">
+                                        <ul className="space-y-3">
                                             {staff.education.map((edu, idx) => (
-                                                <li key={idx} className="relative pl-6 before:content-[''] before:absolute before:left-1 before:top-2 before:w-1.5 before:h-1.5 before:bg-scholar-accent before:rounded-full">
-                                                    <p className="text-[13px] font-bold text-gray-800 mb-0.5 border-b border-gray-100 pb-1 inline-block">
+                                                <li key={idx} className="p-3 bg-white border border-slate-200 rounded-sm">
+                                                    <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-sm mb-1.5">
                                                         {edu.level === 'DOCTORAL' ? 'ปริญญาเอก' : edu.level === 'MASTER' ? 'ปริญญาโท' : 'ปริญญาตรี'}
-                                                    </p>
-                                                    <p className="text-sm text-gray-600 leading-relaxed mt-1">{edu.detail}</p>
+                                                    </span>
+                                                    <p className="text-xs text-slate-700 font-medium leading-relaxed">{edu.detail}</p>
                                                 </li>
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p className="text-sm text-gray-400 italic bg-gray-50 p-4 rounded-xl border border-dashed border-gray-200 text-center">ไม่มีข้อมูลประวัติการศึกษา</p>
+                                        <p className="text-xs text-slate-400 italic bg-slate-50 p-4 rounded-sm border border-dashed border-slate-200 text-center">
+                                            ไม่มีข้อมูลประวัติการศึกษา
+                                        </p>
                                     )}
                                 </div>
 
                                 {/* Expertise & Short Bio */}
                                 <div>
-                                    {staff.shortBios && staff.shortBios.length > 0 && (
-                                        <div className="mb-8 p-6 bg-white rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                                            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-scholar-accent to-scholar-deep"></div>
-                                            <h3 className="text-sm uppercase tracking-widest font-bold text-gray-400 mb-4 flex items-center gap-2">
-                                                <Lightbulb className="w-4 h-4 text-scholar-accent" />
-                                                ประวัติโดยสังเขป
-                                            </h3>
-                                            <ul className="space-y-4">
-                                                {staff.shortBios.map((bio, idx) => (
-                                                    <li key={idx} className="text-sm text-gray-700 leading-relaxed font-medium">
-                                                        {bio}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-
-                                    <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                        <div className="p-2 bg-gray-50 rounded-lg border border-gray-100">
-                                            <Award className="w-4 h-4 text-scholar-deep" />
-                                        </div>
-                                        ความเชี่ยวชาญ
+                                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-4 flex items-center gap-2">
+                                        <Award className="w-4 h-4 text-scholar-deep" />
+                                        ความเชี่ยวชาญ (Areas of Expertise)
                                     </h3>
 
                                     {staff.expertise && staff.expertise.length > 0 ? (
-                                        <div className="flex flex-wrap gap-2">
+                                        <div className="flex flex-wrap gap-1.5 mb-6">
                                             {staff.expertise.map((exp, idx) => {
                                                 if (!exp.trim()) return null;
                                                 return (
-                                                    <span key={idx} className="px-4 py-2 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 text-[13px] font-medium rounded-xl border border-indigo-100 transition-colors">
+                                                    <span
+                                                        key={idx}
+                                                        className="px-2.5 py-1 bg-slate-100 text-slate-800 text-xs font-medium rounded-sm border border-slate-200"
+                                                    >
                                                         {exp}
                                                     </span>
-                                                )
+                                                );
                                             })}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-gray-400 italic bg-gray-50 p-4 rounded-xl border border-dashed border-gray-200 text-center">ไม่มีข้อมูลความเชี่ยวชาญ</p>
+                                        <p className="text-xs text-slate-400 italic bg-slate-50 p-4 rounded-sm border border-dashed border-slate-200 text-center mb-6">
+                                            ไม่มีข้อมูลความเชี่ยวชาญ
+                                        </p>
+                                    )}
+
+                                    {/* Short Bio */}
+                                    {staff.shortBios && staff.shortBios.length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+                                                <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                                                ประวัติโดยสังเขป
+                                            </h4>
+                                            <div className="p-3.5 bg-slate-50 border-l-2 border-slate-800 rounded-r-sm text-xs text-slate-700 space-y-2">
+                                                {staff.shortBios.map((bio, idx) => (
+                                                    <p key={idx} className="leading-relaxed">
+                                                        {bio}
+                                                    </p>
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
-                            </div>
 
-                            {/* Further Details Placeholder (For Future features like Research Papers) */}
-                            {staff.staffType === 'ACADEMIC' && (
-                                <div className="mt-12 p-6 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 border-dashed text-center">
-                                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-gray-100">
-                                        <Bookmark className="w-5 h-5 text-gray-300" />
-                                    </div>
-                                    <p className="text-sm font-medium text-gray-500">ผลงานทางวิชาการและงานวิจัยจะเปิดให้ใช้งานในเร็วๆ นี้</p>
-                                </div>
-                            )}
+                            </div>
 
                         </div>
                     </div>
