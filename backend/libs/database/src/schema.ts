@@ -13,7 +13,9 @@ import {
   index,
   primaryKey,
   real,
+  serial,
 } from 'drizzle-orm/pg-core';
+
 
 // ------------------------------------------
 // Enums
@@ -53,8 +55,28 @@ export const newsCategoryEnum = pgEnum('news_category', [
 // Staff-related Constants
 export const staffTypeEnum = pgEnum('staff_type', ['ACADEMIC', 'SUPPORT']);
 
+// Publication & Approval Workflow Enum
+export const publicationStatusEnum = pgEnum('publication_status', [
+  'DRAFT',
+  'PENDING_REVIEW',
+  'APPROVED',
+  'PUBLISHED',
+  'REJECTED',
+]);
+
 // ------------------------------------------
-// 1. Users & IAM (Google OAuth for @crru.ac.th)
+// 1. Organization (ตาม Excel Schema)
+// ------------------------------------------
+
+export const departments = pgTable('departments', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  nameTh: varchar('name_th', { length: 255 }).notNull(),
+  nameEn: varchar('name_en', { length: 255 }),
+  isAcademicUnit: boolean('is_academic_unit').default(true).notNull(), // สาขาวิชา vs หน่วยงานสนับสนุน
+});
+
+// ------------------------------------------
+// 2. Users & IAM (Google OAuth for @crru.ac.th)
 // ------------------------------------------
 
 export const users = pgTable('users', {
@@ -64,23 +86,13 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }), // ชื่อจาก Google
   avatar: varchar('avatar', { length: 500 }), // รูปโปรไฟล์จาก Google
   passwordHash: varchar('password_hash', { length: 255 }), // Optional: สำหรับ local auth
+  departmentId: integer('department_id').references(() => departments.id), // สังกัด/สาขาวิชา (สำหรับกำหนด Scope)
   // role: userRoleEnum('role').default('STAFF').notNull(), // OLD
   roles: text('roles').array().default(['STAFF']).notNull(), // NEW: Multiple Roles
   isActive: boolean('is_active').default(true).notNull(),
   lastLoginAt: timestamp('last_login_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
-
-// ------------------------------------------
-// 2. Organization & Personnel (ตาม Excel Schema)
-// ------------------------------------------
-
-export const departments = pgTable('departments', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  nameTh: varchar('name_th', { length: 255 }).notNull(),
-  nameEn: varchar('name_en', { length: 255 }),
-  isAcademicUnit: boolean('is_academic_unit').default(true).notNull(), // สาขาวิชา vs หน่วยงานสนับสนุน
 });
 
 export const academicPositions = pgTable('academic_positions', {
@@ -158,6 +170,7 @@ export const staffProfiles = pgTable('staff_profiles', {
 
 export const programs = pgTable('programs', {
   id: uuid('id').primaryKey().defaultRandom(),
+  departmentId: integer('department_id').references(() => departments.id), // สังกัดสาขาวิชา
   code: varchar('code', { length: 50 }).notNull().unique(),
   nameTh: varchar('name_th', { length: 255 }).notNull(),
   degreeTitleTh: varchar('degree_title_th', { length: 255 }), // e.g. "ศิลปศาสตรบัณฑิต (สังคมศาสตร์)"
@@ -227,11 +240,24 @@ export const programInstructors = pgTable('program_instructors', {
 
 export const shortCourses = pgTable('short_courses', {
   id: uuid('id').primaryKey().defaultRandom(),
+  departmentId: integer('department_id').references(() => departments.id), // สังกัดสาขาวิชา
+  code: varchar('code', { length: 50 }),
   title: varchar('title', { length: 255 }).notNull(),
-  durationHours: integer('duration_hours').notNull(),
+  category: varchar('category', { length: 100 }),
+  description: text('description'),
+  instructorName: varchar('instructor_name', { length: 255 }),
+  coverImageUrl: varchar('cover_image_url', { length: 500 }),
+  durationHours: integer('duration_hours').default(0).notNull(),
   creditBankValue: integer('credit_bank_value').default(0).notNull(),
   isOnline: boolean('is_online').default(false).notNull(),
-  price: decimal('price', { precision: 10, scale: 2 }).notNull(),
+  price: decimal('price', { precision: 10, scale: 2 }).default('0').notNull(),
+  lifelongUrl: varchar('lifelong_url', { length: 500 }),
+  isCreditBank: boolean('is_credit_bank').default(true).notNull(),
+  status: varchar('status', { length: 50 }).default('OPEN').notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // ------------------------------------------
@@ -242,6 +268,7 @@ export const researchProjects = pgTable(
   'research_projects',
   {
     id: uuid('id').primaryKey().defaultRandom(),
+    departmentId: integer('department_id').references(() => departments.id), // สังกัดสาขาวิชา/หน่วยงาน
     slug: varchar('slug', { length: 255 }).notNull().unique(),
     titleTh: varchar('title_th', { length: 500 }).notNull(),
     titleEn: varchar('title_en', { length: 500 }),
@@ -415,6 +442,7 @@ export const researchAttachments = pgTable(
 
 export const news = pgTable('news', {
   id: uuid('id').primaryKey().defaultRandom(),
+  departmentId: integer('department_id').references(() => departments.id), // สังกัดสาขาวิชา/หน่วยงาน (optional)
   title: varchar('title', { length: 500 }).notNull(),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   content: text('content').notNull(),
@@ -429,9 +457,15 @@ export const news = pgTable('news', {
       size?: number;
     }[]
   >(),
-  isPublished: boolean('is_published').default(true).notNull(),
-  publishedAt: timestamp('published_at').defaultNow(),
+  publicationStatus: publicationStatusEnum('publication_status')
+    .default('DRAFT')
+    .notNull(), // DRAFT -> PENDING_REVIEW -> APPROVED / REJECTED -> PUBLISHED
+  isPublished: boolean('is_published').default(false).notNull(),
+  publishedAt: timestamp('published_at'),
   authorId: uuid('author_id').references(() => users.id),
+  reviewerId: uuid('reviewer_id').references(() => users.id), // ผู้ตรวจสอบ/อนุมัติ
+  reviewedAt: timestamp('reviewed_at'),
+  rejectReason: text('reject_reason'), // เหตุผลกรณีส่งกลับแก้ไข
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -707,6 +741,7 @@ export const chiangRaiMediaTypeEnum = pgEnum('cr_media_type', [
 
 export const academicServices = pgTable('academic_services', {
   id: uuid('id').primaryKey().defaultRandom(),
+  departmentId: integer('department_id').references(() => departments.id), // สังกัดสาขาวิชา/หน่วยงาน
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description'),
   serviceType: varchar('service_type', { length: 50 }).notNull(), // SOCIAL_SERVICE, CONSULTING
@@ -795,6 +830,7 @@ export const procurementRecords = pgTable(
   'procurement_records',
   {
     id: uuid('id').primaryKey().defaultRandom(),
+    departmentId: integer('department_id').references(() => departments.id), // สังกัดสาขาวิชา/หน่วยงาน (optional)
     fiscalYear: integer('fiscal_year').notNull(), // ปีงบประมาณ เช่น 2568
     title: varchar('title', { length: 500 }).notNull(), // ชื่อโครงการ/รายการ
     procurementType: procurementTypeEnum('procurement_type').notNull(),
@@ -805,8 +841,14 @@ export const procurementRecords = pgTable(
     approvedAt: timestamp('approved_at'), // วันที่อนุมัติ / ประกาศ
     completedAt: timestamp('completed_at'), // วันที่สิ้นสุดสัญญา
     status: procurementStatusEnum('status').default('PLANNING').notNull(),
-    isPublished: boolean('is_published').default(true).notNull(),
+    publicationStatus: publicationStatusEnum('publication_status')
+      .default('DRAFT')
+      .notNull(), // DRAFT -> PENDING_REVIEW -> APPROVED / REJECTED -> PUBLISHED
+    isPublished: boolean('is_published').default(false).notNull(),
     createdBy: uuid('created_by').references(() => users.id),
+    reviewerId: uuid('reviewer_id').references(() => users.id), // ผู้ตรวจสอบ/อนุมัติ
+    reviewedAt: timestamp('reviewed_at'),
+    rejectReason: text('reject_reason'), // เหตุผลกรณีส่งกลับแก้ไข
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -857,3 +899,90 @@ export const procurementDocuments = pgTable(
     };
   },
 );
+
+export const academicServiceConfigs = pgTable('academic_service_configs', {
+  id: serial('id').primaryKey(),
+  contactEmail: varchar('contact_email', { length: 255 }).default('socialsciences@crru.ac.th'),
+  contactPhone: varchar('contact_phone', { length: 100 }).default('0-5377-6000 ต่อ 1600'),
+  officeHours: varchar('office_hours', { length: 255 }).default('จันทร์ - ศุกร์ 08:30 - 16:30 น. (เว้นวันหยุดราชการ)'),
+  officeLocation: varchar('office_location', { length: 255 }).default('สำนักงานคณบดี อาคาร 1 ชั้น 2 คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย'),
+  responseTime: varchar('response_time', { length: 100 }).default('เจ้าหน้าที่จะติดต่อกลับภายใน 1-2 วันทำการ'),
+  pdfFormUrl: varchar('pdf_form_url', { length: 500 }).default('/forms/academic-service-request.pdf'),
+  docxFormUrl: varchar('docx_form_url', { length: 500 }).default('/forms/academic-service-request.docx'),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// ------------------------------------------
+// 7. Security & Audit Logging (IAM Governance)
+// ------------------------------------------
+
+export const auditLogs = pgTable(
+  'audit_logs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    userEmail: varchar('user_email', { length: 255 }),
+    userName: varchar('user_name', { length: 255 }),
+    action: varchar('action', { length: 100 }).notNull(), // e.g. ROLE_CHANGE, USER_STATUS_TOGGLE, NEWS_APPROVE, PROGRAM_DELETE
+    targetResource: varchar('target_resource', { length: 100 }).notNull(), // e.g. users, news, programs, procurement
+    targetId: varchar('target_id', { length: 255 }),
+    details: jsonb('details'), // Details of changes (old vs new or reason)
+    ipAddress: varchar('ip_address', { length: 100 }),
+    userAgent: text('user_agent'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      userIdIdx: index('audit_logs_user_id_idx').on(table.userId),
+      actionIdx: index('audit_logs_action_idx').on(table.action),
+      targetResourceIdx: index('audit_logs_target_resource_idx').on(
+        table.targetResource,
+      ),
+      createdAtIdx: index('audit_logs_created_at_idx').on(table.createdAt),
+    };
+  },
+);
+
+// ------------------------------------------
+// 8. Dynamic System Modules & Permissions (Extensible RBAC)
+// ------------------------------------------
+
+export const systemModules = pgTable('system_modules', {
+  id: serial('id').primaryKey(),
+  key: varchar('key', { length: 50 }).notNull().unique(), // e.g. "news", "programs", "admissions", "media_library"
+  nameTh: varchar('name_th', { length: 100 }).notNull(), // e.g. "ข่าวสารและประชาสัมพันธ์"
+  description: text('description'),
+  category: varchar('category', { length: 50 }).default('General'), // e.g. "Academic", "Public Relations", "Management"
+  routePath: varchar('route_path', { length: 100 }), // e.g. "/admin/news"
+  isWorkflowRequired: boolean('is_workflow_required').default(false).notNull(), // Has Draft -> Review -> Publish workflow
+  isCore: boolean('is_core').default(false).notNull(), // Core system module (cannot be deleted)
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const rolePermissions = pgTable(
+  'role_permissions',
+  {
+    id: serial('id').primaryKey(),
+    role: userRoleEnum('role').notNull(), // 'ADMIN' | 'EDITOR' | 'STAFF' | 'GUEST'
+    moduleKey: varchar('module_key', { length: 50 })
+      .notNull()
+      .references(() => systemModules.key, { onDelete: 'cascade' }),
+    canCreate: boolean('can_create').default(false).notNull(),
+    canRead: boolean('can_read').default(true).notNull(),
+    canUpdate: boolean('can_update').default(false).notNull(),
+    canDelete: boolean('can_delete').default(false).notNull(),
+    canApprove: boolean('can_approve').default(false).notNull(), // Can approve/publish drafts
+    scopeType: varchar('scope_type', { length: 20 }).default('GLOBAL').notNull(), // 'GLOBAL' | 'DEPARTMENT' | 'OWN'
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      roleModuleIdx: index('role_permissions_role_module_idx').on(
+        table.role,
+        table.moduleKey,
+      ),
+    };
+  },
+);
+

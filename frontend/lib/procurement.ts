@@ -21,6 +21,7 @@ export interface ProcurementDocument {
 
 export interface ProcurementRecord {
   id: string;
+  departmentId?: number | null;
   fiscalYear: number;
   title: string;
   procurementType: ProcurementType;
@@ -31,8 +32,12 @@ export interface ProcurementRecord {
   approvedAt?: string | null;
   completedAt?: string | null;
   status: ProcurementStatus;
+  publicationStatus?: 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'REJECTED';
   isPublished: boolean;
   createdBy?: string | null;
+  reviewerId?: string | null;
+  reviewedAt?: string | null;
+  rejectReason?: string | null;
   createdAt: string;
   updatedAt: string;
   documents?: ProcurementDocument[];

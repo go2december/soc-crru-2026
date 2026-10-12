@@ -77,9 +77,17 @@ export class ResearchController {
     @Query('isPublished') isPublished?: string,
     @Query('isSocialService') isSocialService?: string,
     @Query('isCommercial') isCommercial?: string,
+    @Query('departmentId') departmentId?: string,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
+    @Req() req?: any,
   ) {
+    // If editor, force their department
+    let deptId = departmentId ? Number(departmentId) : undefined;
+    if (req?.user && !req.user.roles?.includes('ADMIN') && req.user.roles?.includes('EDITOR')) {
+      deptId = req.user.departmentId;
+    }
+
     return this.researchService.findAllAdmin({
       q,
       year: year ? Number(year) : undefined,
@@ -87,6 +95,7 @@ export class ResearchController {
       isPublished,
       isSocialService,
       isCommercial,
+      departmentId: deptId,
       page: Number(page),
       limit: Number(limit),
     });
@@ -128,20 +137,24 @@ export class ResearchController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
   create(@Body() dto: CreateResearchProjectDto, @Req() req: any) {
-    return this.researchService.create(dto, req.user?.id);
+    return this.researchService.create(dto, req?.user);
   }
 
   @Put('projects/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
-  update(@Param('id') id: string, @Body() dto: UpdateResearchProjectDto) {
-    return this.researchService.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateResearchProjectDto,
+    @Req() req: any,
+  ) {
+    return this.researchService.update(id, dto, req?.user);
   }
 
   @Delete('projects/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
-  remove(@Param('id') id: string) {
-    return this.researchService.remove(id);
+  remove(@Param('id') id: string, @Req() req: any) {
+    return this.researchService.remove(id, req?.user);
   }
 }

@@ -71,15 +71,47 @@ export class NewsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
-  update(@Param('id') id: string, @Body() updateNewsDto: UpdateNewsDto) {
-    return this.newsService.update(id, updateNewsDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateNewsDto: UpdateNewsDto,
+    @Req() req: any,
+  ) {
+    return this.newsService.update(id, updateNewsDto, req.user);
+  }
+
+  // Approve News (ADMIN only)
+  @Patch(':id/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  approve(@Param('id') id: string, @Req() req: any) {
+    return this.newsService.approve(id, req.user.id);
+  }
+
+  // Reject News (ADMIN only)
+  @Patch(':id/reject')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  reject(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @Req() req: any,
+  ) {
+    return this.newsService.reject(id, req.user.id, reason);
+  }
+
+  // Submit News for Review (EDITOR, ADMIN)
+  @Patch(':id/submit-review')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  submitForReview(@Param('id') id: string) {
+    return this.newsService.submitForReview(id);
   }
 
   // Delete News (ADMIN, EDITOR)
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
-  remove(@Param('id') id: string) {
-    return this.newsService.remove(id);
+  remove(@Param('id') id: string, @Req() req: any) {
+    return this.newsService.remove(id, req.user);
   }
 }

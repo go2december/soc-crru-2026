@@ -186,7 +186,7 @@ export class ProcurementService {
     };
   }
 
-  async update(id: string, updateDto: UpdateProcurementDto) {
+  async update(id: string, updateDto: UpdateProcurementDto, user?: any) {
     const existing = await this.findOne(id);
     const { documents, ...recordData } = updateDto;
 
@@ -224,6 +224,21 @@ export class ProcurementService {
       updatePayload.status = recordData.status as any;
     if (recordData.isPublished !== undefined)
       updatePayload.isPublished = recordData.isPublished;
+    if (recordData.publicationStatus !== undefined)
+      updatePayload.publicationStatus = recordData.publicationStatus as any;
+    if (recordData.departmentId !== undefined)
+      updatePayload.departmentId = recordData.departmentId;
+
+    // Check Editor restrictions
+    if (user && !user.roles?.includes('ADMIN')) {
+      if (user.departmentId && existing.departmentId && existing.departmentId !== user.departmentId) {
+        throw new NotFoundException('คุณไม่มีสิทธิ์แก้ไขข้อมูลจัดซื้อจัดจ้างของหน่วยงานอื่น');
+      }
+      if (updatePayload.publicationStatus === 'PUBLISHED') {
+        updatePayload.publicationStatus = 'PENDING_REVIEW';
+        updatePayload.isPublished = false;
+      }
+    }
 
     const [updatedRecord] = await this.databaseService.db
       .update(schema.procurementRecords)
@@ -275,8 +290,59 @@ export class ProcurementService {
     };
   }
 
-  async remove(id: string) {
+  async submitForReview(id: string) {
+    const [updated] = await this.databaseService.db
+      .update(schema.procurementRecords)
+      .set({
+        publicationStatus: 'PENDING_REVIEW',
+        isPublished: false,
+        rejectReason: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.procurementRecords.id, id))
+      .returning();
+    return updated;
+  }
+
+  async approve(id: string, reviewerId: string) {
+    const [updated] = await this.databaseService.db
+      .update(schema.procurementRecords)
+      .set({
+        publicationStatus: 'PUBLISHED',
+        isPublished: true,
+        reviewerId,
+        reviewedAt: new Date(),
+        rejectReason: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.procurementRecords.id, id))
+      .returning();
+    return updated;
+  }
+
+  async reject(id: string, reviewerId: string, reason: string) {
+    const [updated] = await this.databaseService.db
+      .update(schema.procurementRecords)
+      .set({
+        publicationStatus: 'REJECTED',
+        isPublished: false,
+        reviewerId,
+        reviewedAt: new Date(),
+        rejectReason: reason,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.procurementRecords.id, id))
+      .returning();
+    return updated;
+  }
+
+  async remove(id: string, user?: any) {
     const existing = await this.findOne(id);
+    if (user && !user.roles?.includes('ADMIN') && user.departmentId) {
+      if (existing.departmentId && existing.departmentId !== user.departmentId) {
+        throw new NotFoundException('คุณไม่มีสิทธิ์ลบข้อมูลจัดซื้อจัดจ้างของหน่วยงานอื่น');
+      }
+    }
     for (const doc of existing.documents || []) {
       if (doc.fileUrl) {
         await this.uploadService.deleteProcurementFile(doc.fileUrl);

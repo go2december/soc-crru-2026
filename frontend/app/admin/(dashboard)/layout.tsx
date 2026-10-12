@@ -20,7 +20,8 @@ import {
     Briefcase,
     CalendarDays,
     BookOpen,
-    ClipboardList
+    ClipboardList,
+    Award
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+
+    const [pendingCounts, setPendingCounts] = useState<{ news: number; procurement: number }>({ news: 0, procurement: 0 });
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -64,6 +67,29 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
                 const userData = await res.json();
                 setUser(userData);
+
+                // If admin, fetch pending review items count
+                if (userData?.roles?.includes('ADMIN')) {
+                    try {
+                        const [newsRes, procRes] = await Promise.all([
+                            fetch(`${apiUrl}/api/news/admin/all?limit=100`, { headers: { Authorization: `Bearer ${token}` } }),
+                            fetch(`${apiUrl}/api/procurement/admin/all?limit=100`, { headers: { Authorization: `Bearer ${token}` } }),
+                        ]);
+                        let newsCount = 0;
+                        let procCount = 0;
+                        if (newsRes.ok) {
+                            const nData = await newsRes.json();
+                            newsCount = (nData.data || []).filter((item: any) => item.publicationStatus === 'PENDING_REVIEW').length;
+                        }
+                        if (procRes.ok) {
+                            const pData = await procRes.json();
+                            procCount = (pData.data || []).filter((item: any) => item.publicationStatus === 'PENDING_REVIEW').length;
+                        }
+                        setPendingCounts({ news: newsCount, procurement: procCount });
+                    } catch (e) {
+                        console.error('Failed to fetch pending review counts:', e);
+                    }
+                }
             } catch {
                 localStorage.removeItem('admin_token');
                 router.push('/admin/login');
@@ -129,18 +155,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {
             title: 'Content',
             items: [
-                { href: '/admin/news', label: 'ข่าวสาร', icon: Newspaper, minLevel: 2 },
-                { href: '/admin/procurement', label: 'จัดซื้อจัดจ้าง', icon: ClipboardList, minLevel: 2 },
+                { href: '/admin/news', label: 'ข่าวสาร', icon: Newspaper, minLevel: 2, badgeKey: 'news' as const },
+                { href: '/admin/procurement', label: 'จัดซื้อจัดจ้าง', icon: ClipboardList, minLevel: 2, badgeKey: 'procurement' as const },
                 { href: '/admin/research', label: 'งานวิจัย', icon: FlaskConical, minLevel: 2 },
                 { href: '/admin/academic-services', label: 'บริการวิชาการ', icon: BookOpen, minLevel: 2 },
                 { href: '/admin/programs', label: 'หลักสูตร', icon: GraduationCap, minLevel: 2 },
+                { href: '/admin/short-courses', label: 'คอร์สระยะสั้น/Credit Bank', icon: Award, minLevel: 2 },
                 { href: '/admin/admissions', label: 'รับสมัคร', icon: CalendarDays, minLevel: 2 },
             ]
         },
         {
             title: 'System',
             items: [
-                { href: '/admin/users', label: 'จัดการผู้ใช้', icon: Settings, minLevel: 3 },
+                { href: '/admin/users', label: 'จัดการสิทธิ์และผู้ใช้', icon: ShieldCheck, minLevel: 3 },
                 { href: '/admin/profile', label: 'โปรไฟล์', icon: UserCircle, minLevel: 1 },
             ]
         }
@@ -200,9 +227,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                                         {group.title}
                                     </h3>
                                 )}
-                                {validItems.map((item) => {
+                                {validItems.map((item: any) => {
                                     const Icon = item.icon;
                                     const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+                                    const badgeCount = item.badgeKey ? pendingCounts[item.badgeKey as keyof typeof pendingCounts] : 0;
 
                                     return (
                                         <Link
@@ -217,9 +245,20 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                                             )}
                                             title={!sidebarOpen ? item.label : undefined}
                                         >
-                                            <Icon className={cn("w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-105", isActive && "text-primary")} />
+                                            <div className="relative">
+                                                <Icon className={cn("w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-105", isActive && "text-primary")} />
+                                                {!sidebarOpen && badgeCount > 0 && (
+                                                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
+                                                )}
+                                            </div>
 
-                                            {sidebarOpen && <span>{item.label}</span>}
+                                            {sidebarOpen && <span className="flex-1">{item.label}</span>}
+
+                                            {sidebarOpen && badgeCount > 0 && (
+                                                <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[11px] font-bold text-amber-900 bg-amber-100 border border-amber-200 rounded-full">
+                                                    {badgeCount}
+                                                </span>
+                                            )}
 
                                             {/* Active Indicator for collapsed state */}
                                             {!sidebarOpen && isActive && (

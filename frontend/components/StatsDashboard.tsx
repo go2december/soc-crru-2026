@@ -52,14 +52,14 @@ const StatItem = ({ end, label, suffix = "", icon }: { end: number, label: strin
     const { count, countRef } = useCountUp(end);
 
     return (
-        <div ref={countRef} className="text-center p-6 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-2 group">
-            <div className="w-16 h-16 mx-auto mb-4 bg-scholar-accent/20 rounded-full flex items-center justify-center text-scholar-accent group-hover:bg-scholar-accent group-hover:text-white transition-colors duration-300">
+        <div ref={countRef} className="text-center p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-scholar-accent/30 transition-all duration-300 hover:-translate-y-2 group">
+            <div className="w-16 h-16 mx-auto mb-4 bg-orange-50 rounded-2xl flex items-center justify-center text-scholar-accent group-hover:bg-scholar-accent group-hover:text-white transition-colors duration-300 shadow-xs">
                 {icon}
             </div>
-            <div className="text-4xl lg:text-5xl font-bold text-white mb-2 font-mono">
+            <div className="text-4xl lg:text-5xl font-bold text-scholar-deep mb-2 font-mono group-hover:text-scholar-accent transition-colors">
                 {count}{suffix}
             </div>
-            <div className="text-gray-300 text-sm lg:text-base font-medium uppercase tracking-wider">
+            <div className="text-slate-600 text-sm lg:text-base font-medium">
                 {label}
             </div>
         </div>
@@ -68,17 +68,17 @@ const StatItem = ({ end, label, suffix = "", icon }: { end: number, label: strin
 
 export default function StatsDashboard() {
     return (
-        <section className="py-20 bg-scholar-deep relative overflow-hidden">
+        <section className="py-20 bg-slate-50 relative overflow-hidden border-y border-slate-200/60">
             {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10" style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            <div className="absolute inset-0 opacity-[0.03]" style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230F172A' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E")`
             }}></div>
 
             <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center mb-16">
-                    <span className="text-scholar-gold font-bold tracking-widest uppercase text-sm mb-2 block">Our Impact</span>
-                    <h2 className="text-3xl lg:text-4xl font-bold text-white">พลังแห่งการสร้างสรรค์สังคม</h2>
-                    <p className="text-gray-400 mt-2">ผลลัพธ์ที่เป็นรูปธรรมจากการทำงานร่วมกับชุมชนและเครือข่าย</p>
+                    <span className="inline-block px-3.5 py-1 rounded-full bg-scholar-accent/10 text-scholar-accent border border-scholar-accent/20 font-bold tracking-widest uppercase text-xs mb-3">Our Impact</span>
+                    <h2 className="text-3xl lg:text-4xl font-bold text-scholar-deep">พลังแห่งการสร้างสรรค์สังคม</h2>
+                    <p className="text-slate-500 mt-2">ผลลัพธ์ที่เป็นรูปธรรมจากการทำงานร่วมกับชุมชนและเครือข่าย</p>
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
@@ -115,7 +115,7 @@ export default function StatsDashboard() {
 
                 {/* Optional: Learn More Button */}
                 <div className="text-center mt-12">
-                    <Link href="/about/strategy" className="inline-flex items-center text-white hover:text-scholar-accent transition-colors font-semibold border-b border-transparent hover:border-scholar-accent pb-1">
+                    <Link href="/about/strategy" className="inline-flex items-center text-scholar-deep hover:text-scholar-accent transition-colors font-semibold border-b-2 border-transparent hover:border-scholar-accent pb-1">
                         ดูแผนยุทธศาสตร์และตัวชี้วัดทั้งหมด
                         <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </Link>

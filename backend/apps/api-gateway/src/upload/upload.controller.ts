@@ -55,6 +55,14 @@ export class UploadController {
     return this.uploadService.saveNewsAttachment(file);
   }
 
+  @Post('course')
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCourseImage(@UploadedFile() file: Express.Multer.File) {
+    const imageUrl = await this.uploadService.saveCourseImage(file);
+    return { url: imageUrl };
+  }
+
   @Delete('chiang-rai')
   @Roles('ADMIN', 'EDITOR', 'STAFF')
   async deleteChiangRaiImage(@Body('url') url: string) {

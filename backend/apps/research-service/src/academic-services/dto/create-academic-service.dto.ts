@@ -20,6 +20,10 @@ export class AcademicServiceMemberDto {
 }
 
 export class CreateAcademicServiceDto {
+  @IsOptional()
+  @Type(() => Number)
+  department_id?: number;
+
   @IsString()
   @MaxLength(255)
   title: string;

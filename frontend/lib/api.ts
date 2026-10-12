@@ -52,7 +52,7 @@ export { getApiBaseUrl, getAssetUrl, apiFetch } from './api-config';
 import { getApiBaseUrl } from './api-config';
 
 export async function fetchPrograms(): Promise<Program[]> {
-    const baseUrl = getBaseUrl();
+    const baseUrl = getApiBaseUrl();
     try {
         const res = await fetch(`${baseUrl}/api/programs`, {
             cache: 'no-store', // Ensure fresh data
@@ -94,7 +94,7 @@ export async function fetchPrograms(): Promise<Program[]> {
 }
 
 export async function fetchProgramByCode(code: string): Promise<Program | null> {
-    const baseUrl = getBaseUrl();
+    const baseUrl = getApiBaseUrl();
     try {
         const res = await fetch(`${baseUrl}/api/programs/code/${code}`, {
             cache: 'no-store',

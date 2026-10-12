@@ -22,6 +22,7 @@ interface Program {
     nameTh: string;
     degreeLevel: string;
     isActive: boolean;
+    departmentId?: number | null;
 }
 
 interface PaginationMeta {
@@ -44,11 +45,19 @@ export default function AdminProgramsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [programToDelete, setProgramToDelete] = useState<Program | null>(null);
     const [deleting, setDeleting] = useState(false);
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
-    const fetchPrograms = useCallback(async () => {
+    const fetchPrograms = useCallback(async (userObj?: any) => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/api/programs?page=${page}&limit=${ITEMS_PER_PAGE}`);
+            const token = localStorage.getItem('admin_token');
+            const targetUser = userObj || currentUser;
+            const isEditorOnly = targetUser?.roles?.includes('EDITOR') && !targetUser?.roles?.includes('ADMIN');
+            const deptQuery = (isEditorOnly && targetUser?.departmentId) ? `&departmentId=${targetUser.departmentId}` : '';
+
+            const res = await fetch(`${API_URL}/api/programs?page=${page}&limit=${ITEMS_PER_PAGE}${deptQuery}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {}
+            });
             if (res.ok) {
                 const jsonRes = await res.json();
                 setPrograms(jsonRes.data || []);
@@ -59,11 +68,30 @@ export default function AdminProgramsPage() {
         } finally {
             setLoading(false);
         }
-    }, [page]);
+    }, [page, currentUser]);
 
     useEffect(() => {
-        fetchPrograms();
-    }, [fetchPrograms]);
+        const init = async () => {
+            const token = localStorage.getItem('admin_token');
+            if (token) {
+                try {
+                    const uRes = await fetch(`${API_URL}/api/auth/profile`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (uRes.ok) {
+                        const uData = await uRes.json();
+                        setCurrentUser(uData);
+                        fetchPrograms(uData);
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Profile fetch error:', e);
+                }
+            }
+            fetchPrograms();
+        };
+        init();
+    }, [page]);
 
     useEffect(() => {
         setPage(1);

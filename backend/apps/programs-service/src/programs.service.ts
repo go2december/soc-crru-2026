@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { eq, sql } from 'drizzle-orm';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { eq, sql, and } from 'drizzle-orm';
 import {
   DatabaseService,
   programs,
@@ -15,12 +15,37 @@ export class ProgramsService {
   constructor(private readonly drizzle: DatabaseService) {}
 
   /**
+   * Helper to check department scope for non-admins
+   */
+  private checkScope(user: any, targetDepartmentId?: number | null) {
+    if (!user) return;
+    const roles: string[] = user.roles || [];
+    if (roles.includes('ADMIN')) return; // Super admin bypass
+
+    if (roles.includes('EDITOR')) {
+      const userDept = user.departmentId;
+      if (!userDept || userDept !== targetDepartmentId) {
+        throw new ForbiddenException(
+          'คุณไม่มีสิทธิ์จัดการหลักสูตรนอกสังกัดสาขาวิชาของคุณ',
+        );
+      }
+    }
+  }
+
+  /**
    * Create a new program
    */
-  async create(createProgramDto: CreateProgramDto) {
+  async create(createProgramDto: CreateProgramDto, user?: any) {
+    // If editor, enforce user's department
+    let targetDeptId = createProgramDto.department_id;
+    if (user && !user.roles?.includes('ADMIN') && user.roles?.includes('EDITOR')) {
+      targetDeptId = user.departmentId;
+    }
+
     const result = await this.drizzle.db
       .insert(programs)
       .values({
+        departmentId: targetDeptId,
         code: createProgramDto.code,
         nameTh: createProgramDto.name_th,
         degreeTitleTh: createProgramDto.degree_title_th,
@@ -50,21 +75,27 @@ export class ProgramsService {
   }
 
   /**
-   * Get all programs
+   * Get all programs (optional department filter)
    */
-  async findAll(page: number = 1, limit: number = 100) {
+  async findAll(page: number = 1, limit: number = 100, departmentId?: number) {
     const offset = (page - 1) * limit;
+
+    const condition = departmentId
+      ? eq(programs.departmentId, departmentId)
+      : undefined;
 
     const data = await this.drizzle.db
       .select()
       .from(programs)
+      .where(condition)
       .orderBy(programs.code)
       .limit(limit)
       .offset(offset);
 
     const countResult = await this.drizzle.db
       .select({ count: sql<number>`count(*)` })
-      .from(programs);
+      .from(programs)
+      .where(condition);
     const totalCount = Number(countResult[0].count);
 
     return {
@@ -121,11 +152,15 @@ export class ProgramsService {
   /**
    * Update a program
    */
-  async update(id: string, updateProgramDto: UpdateProgramDto) {
+  async update(id: string, updateProgramDto: UpdateProgramDto, user?: any) {
     // Check if exists first
-    await this.findOne(id);
+    const existing = await this.findOne(id);
+    this.checkScope(user, existing.departmentId);
 
     const updateData: Partial<typeof programs.$inferInsert> = {};
+    if (updateProgramDto.department_id !== undefined && user?.roles?.includes('ADMIN')) {
+      updateData.departmentId = updateProgramDto.department_id;
+    }
     if (updateProgramDto.code !== undefined)
       updateData.code = updateProgramDto.code;
     if (updateProgramDto.name_th !== undefined)
@@ -183,9 +218,10 @@ export class ProgramsService {
   /**
    * Delete a program
    */
-  async remove(id: string) {
+  async remove(id: string, user?: any) {
     // Check if exists first
-    await this.findOne(id);
+    const existing = await this.findOne(id);
+    this.checkScope(user, existing.departmentId);
 
     // program_instructors will cascade delete based on schema
     await this.drizzle.db.delete(programs).where(eq(programs.id, id));

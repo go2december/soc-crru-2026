@@ -152,8 +152,16 @@ export class NewsService {
     return result[0];
   }
 
-  async update(id: string, updateNewsDto: UpdateNewsDto) {
+  async update(id: string, updateNewsDto: UpdateNewsDto, user?: any) {
     const existing = await this.findOne(id);
+
+    // If user is EDITOR (not ADMIN), check department scope if existing has departmentId
+    if (user && !user.roles?.includes('ADMIN') && user.departmentId) {
+      if (existing.departmentId && existing.departmentId !== user.departmentId) {
+        throw new NotFoundException('คุณไม่มีสิทธิ์แก้ไขข่าวของหน่วยงานอื่น');
+      }
+    }
+
     const nextItem = {
       thumbnailUrl: updateNewsDto.thumbnailUrl ?? existing.thumbnailUrl,
       mediaUrls: updateNewsDto.mediaUrls ?? existing.mediaUrls,
@@ -162,14 +170,27 @@ export class NewsService {
 
     await this.cleanupRemovedFiles(existing, nextItem);
 
+    // Editor cannot set directly to PUBLISHED unless admin
+    let publicationStatus = updateNewsDto.publicationStatus ?? existing.publicationStatus;
+    let isPublished = updateNewsDto.isPublished ?? existing.isPublished;
+
+    if (user && !user.roles?.includes('ADMIN')) {
+      if (updateNewsDto.publicationStatus === 'PUBLISHED') {
+        publicationStatus = 'PENDING_REVIEW';
+        isPublished = false;
+      }
+    }
+
     const result = await this.databaseService.db
       .update(schema.news)
       .set({
         ...updateNewsDto,
+        publicationStatus,
+        isPublished,
         mediaUrls: updateNewsDto.mediaUrls ?? existing.mediaUrls ?? [],
         attachments: updateNewsDto.attachments ?? existing.attachments ?? [],
         publishedAt:
-          updateNewsDto.isPublished === false
+          isPublished === false
             ? null
             : existing.publishedAt || new Date(),
         updatedAt: new Date(),
@@ -179,8 +200,63 @@ export class NewsService {
     return result[0];
   }
 
-  async remove(id: string) {
+  async submitForReview(id: string) {
     const existing = await this.findOne(id);
+    const result = await this.databaseService.db
+      .update(schema.news)
+      .set({
+        publicationStatus: 'PENDING_REVIEW',
+        isPublished: false,
+        rejectReason: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.news.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async approve(id: string, reviewerId: string) {
+    const result = await this.databaseService.db
+      .update(schema.news)
+      .set({
+        publicationStatus: 'PUBLISHED',
+        isPublished: true,
+        reviewerId,
+        reviewedAt: new Date(),
+        publishedAt: new Date(),
+        rejectReason: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.news.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async reject(id: string, reviewerId: string, reason: string) {
+    const result = await this.databaseService.db
+      .update(schema.news)
+      .set({
+        publicationStatus: 'REJECTED',
+        isPublished: false,
+        reviewerId,
+        reviewedAt: new Date(),
+        rejectReason: reason,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.news.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async remove(id: string, user?: any) {
+    const existing = await this.findOne(id);
+
+    if (user && !user.roles?.includes('ADMIN') && user.departmentId) {
+      if (existing.departmentId && existing.departmentId !== user.departmentId) {
+        throw new NotFoundException('คุณไม่มีสิทธิ์ลบข่าวของหน่วยงานอื่น');
+      }
+    }
+
     await Promise.all(
       this.collectManagedUrls(existing).map((url) =>
         this.uploadService.deleteNewsFile(url),

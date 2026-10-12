@@ -5,6 +5,7 @@ import { UploadModule } from 'upload/upload';
 import { ProgramsModule } from './programs.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { AdmissionsModule } from './admissions/admissions.module';
+import { ShortCoursesModule } from './short-courses/short-courses.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { AdmissionsModule } from './admissions/admissions.module';
     ProgramsModule,
     DepartmentsModule,
     AdmissionsModule,
+    ShortCoursesModule,
   ],
-  exports: [ProgramsModule, DepartmentsModule, AdmissionsModule],
+  exports: [ProgramsModule, DepartmentsModule, AdmissionsModule, ShortCoursesModule],
 })
 export class ProgramsServiceModule {}

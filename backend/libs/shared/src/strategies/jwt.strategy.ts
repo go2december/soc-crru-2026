@@ -35,11 +35,39 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         if (blacklisted) {
           throw new UnauthorizedException('Token has been revoked');
         }
+
+        // Live check user isActive status in database
+        const dbUser = await this.databaseService.db
+          .select({
+            id: schema.users.id,
+            isActive: schema.users.isActive,
+            roles: schema.users.roles,
+            departmentId: schema.users.departmentId,
+          })
+          .from(schema.users)
+          .where(eq(schema.users.id, payload.sub))
+          .then((r) => r[0]);
+
+        if (!dbUser) {
+          throw new UnauthorizedException('User account no longer exists');
+        }
+
+        if (!dbUser.isActive) {
+          throw new UnauthorizedException('User account has been deactivated');
+        }
+
+        return {
+          id: payload.sub,
+          email: payload.email,
+          roles: dbUser.roles || payload.roles,
+          departmentId: dbUser.departmentId,
+          name: payload.name,
+        };
       } catch (err) {
         if (err instanceof UnauthorizedException) {
           throw err;
         }
-        console.error('Error checking token blacklist in DB:', err);
+        console.error('Error checking user/token in DB:', err);
       }
     }
 

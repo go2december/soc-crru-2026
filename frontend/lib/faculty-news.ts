@@ -9,8 +9,11 @@ export interface FacultyNewsAttachment {
   size?: number;
 }
 
+export type PublicationStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'REJECTED';
+
 export interface FacultyNewsItem {
   id: string;
+  departmentId?: number | null;
   title: string;
   slug: string;
   content: string;
@@ -18,8 +21,12 @@ export interface FacultyNewsItem {
   thumbnailUrl: string | null;
   mediaUrls: string[] | null;
   attachments: FacultyNewsAttachment[] | null;
+  publicationStatus?: PublicationStatus;
   isPublished: boolean;
   publishedAt: string | null;
+  reviewerId?: string | null;
+  reviewedAt?: string | null;
+  rejectReason?: string | null;
   createdAt: string;
   updatedAt: string;
 }

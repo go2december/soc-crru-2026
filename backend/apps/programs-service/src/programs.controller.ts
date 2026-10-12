@@ -15,6 +15,7 @@ import { ProgramsService } from './programs.service';
 import { CreateProgramDto } from './dto/create-program.dto';
 import { UpdateProgramDto } from './dto/update-program.dto';
 import { JwtAuthGuard, RolesGuard, Roles } from 'shared/shared';
+import { Req } from '@nestjs/common';
 
 @Controller('programs')
 export class ProgramsController {
@@ -26,18 +27,23 @@ export class ProgramsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
-  create(@Body() createProgramDto: CreateProgramDto) {
-    return this.programsService.create(createProgramDto);
+  create(@Body() createProgramDto: CreateProgramDto, @Req() req: any) {
+    return this.programsService.create(createProgramDto, req?.user);
   }
 
   /**
    * GET /programs - Get all programs
    */
   @Get()
-  findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('departmentId') departmentId?: string,
+  ) {
     const pageNumber = page ? parseInt(page, 10) : 1;
     const limitNumber = limit ? parseInt(limit, 10) : 100;
-    return this.programsService.findAll(pageNumber, limitNumber);
+    const deptIdNumber = departmentId ? parseInt(departmentId, 10) : undefined;
+    return this.programsService.findAll(pageNumber, limitNumber, deptIdNumber);
   }
 
   /**
@@ -62,8 +68,12 @@ export class ProgramsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
-  update(@Param('id') id: string, @Body() updateProgramDto: UpdateProgramDto) {
-    return this.programsService.update(id, updateProgramDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateProgramDto: UpdateProgramDto,
+    @Req() req: any,
+  ) {
+    return this.programsService.update(id, updateProgramDto, req?.user);
   }
 
   /**
@@ -73,7 +83,7 @@ export class ProgramsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
-  remove(@Param('id') id: string) {
-    return this.programsService.remove(id);
+  remove(@Param('id') id: string, @Req() req: any) {
+    return this.programsService.remove(id, req?.user);
   }
 }

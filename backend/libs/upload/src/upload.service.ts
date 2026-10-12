@@ -13,6 +13,7 @@ export class UploadService {
   private readonly programsUploadDir = './uploads/programs';
   private readonly researchUploadDir = './uploads/research';
   private readonly procurementUploadDir = './uploads/procurement';
+  private readonly coursesUploadDir = './uploads/courses';
 
   constructor() {
     // Ensure upload directories exist
@@ -37,6 +38,99 @@ export class UploadService {
     if (!fs.existsSync(this.procurementUploadDir)) {
       fs.mkdirSync(this.procurementUploadDir, { recursive: true });
     }
+    if (!fs.existsSync(this.coursesUploadDir)) {
+      fs.mkdirSync(this.coursesUploadDir, { recursive: true });
+    }
+  }
+
+  /**
+   * Validates file buffer against known safe signatures (Magic Bytes)
+   * Prevents executable or malicious payloads disguised as safe file extensions.
+   */
+  private validateMagicBytes(
+    buffer: Buffer,
+    allowedTypes: ('pdf' | 'image' | 'archive' | 'office')[],
+  ): boolean {
+    if (!buffer || buffer.length < 4) return false;
+
+    // Disallow executable headers immediately: MZ (Windows PE/EXE/DLL) or ELF (Linux) or scripts
+    const isWindowsExe = buffer[0] === 0x4d && buffer[1] === 0x5a; // "MZ"
+    const isElfExe =
+      buffer[0] === 0x7f &&
+      buffer[1] === 0x45 &&
+      buffer[2] === 0x4c &&
+      buffer[3] === 0x46; // "\x7FELF"
+    if (isWindowsExe || isElfExe) {
+      throw new BadRequestException(
+        'Security rejection: Executable binary files are strictly prohibited.',
+      );
+    }
+
+    for (const type of allowedTypes) {
+      if (type === 'pdf') {
+        // PDF magic bytes: "%PDF-" -> 0x25 0x50 0x44 0x46
+        if (
+          buffer[0] === 0x25 &&
+          buffer[1] === 0x50 &&
+          buffer[2] === 0x44 &&
+          buffer[3] === 0x46
+        ) {
+          return true;
+        }
+      }
+      if (type === 'image') {
+        // JPEG: FF D8 FF
+        const isJpeg =
+          buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+        // PNG: 89 50 4E 47
+        const isPng =
+          buffer[0] === 0x89 &&
+          buffer[1] === 0x50 &&
+          buffer[2] === 0x4e &&
+          buffer[3] === 0x47;
+        // GIF: 47 49 46 38 ("GIF8")
+        const isGif =
+          buffer[0] === 0x47 &&
+          buffer[1] === 0x49 &&
+          buffer[2] === 0x46 &&
+          buffer[3] === 0x38;
+        // WebP: RIFF....WEBP (0x52 0x49 0x46 0x46 at 0, 0x57 0x45 0x42 0x50 at 8)
+        const isWebp =
+          buffer.length >= 12 &&
+          buffer[0] === 0x52 &&
+          buffer[1] === 0x49 &&
+          buffer[2] === 0x46 &&
+          buffer[3] === 0x46 &&
+          buffer[8] === 0x57 &&
+          buffer[9] === 0x45 &&
+          buffer[10] === 0x42 &&
+          buffer[11] === 0x50;
+
+        if (isJpeg || isPng || isGif || isWebp) return true;
+      }
+      if (type === 'office' || type === 'archive') {
+        // Zip / Office Open XML (DOCX, XLSX, PPTX): 50 4B 03 04 ("PK\x03\x04")
+        if (
+          buffer[0] === 0x50 &&
+          buffer[1] === 0x4b &&
+          buffer[2] === 0x03 &&
+          buffer[3] === 0x04
+        ) {
+          return true;
+        }
+        // Legacy MS Office (DOC, XLS, PPT OLE2): D0 CF 11 E0
+        if (
+          buffer[0] === 0xd0 &&
+          buffer[1] === 0xcf &&
+          buffer[2] === 0x11 &&
+          buffer[3] === 0xe0
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   async saveNewsImage(file: Express.Multer.File): Promise<string> {
@@ -75,6 +169,19 @@ export class UploadService {
   }> {
     if (!file) {
       throw new BadRequestException('No file uploaded');
+    }
+
+    // Validate Magic Bytes (Allow PDF, Office documents, and safe images)
+    const isSafeAttachment = this.validateMagicBytes(file.buffer, [
+      'pdf',
+      'office',
+      'archive',
+      'image',
+    ]);
+    if (!isSafeAttachment) {
+      throw new BadRequestException(
+        'Invalid or disallowed file content format. Allowed: PDF, Office Docs (DOCX, XLSX, PPTX), Safe Images.',
+      );
     }
 
     // Fix Multer latin1 encoding issue for Thai characters
@@ -326,6 +433,13 @@ export class UploadService {
       );
     }
 
+    // Validate Magic Bytes strictly for PDF (%PDF-)
+    if (!this.validateMagicBytes(file.buffer, ['pdf'])) {
+      throw new BadRequestException(
+        'Security rejection: Uploaded file is not a valid PDF document.',
+      );
+    }
+
     const utf8OriginalName = Buffer.from(file.originalname, 'latin1').toString(
       'utf8',
     );
@@ -365,6 +479,34 @@ export class UploadService {
     } catch (error) {
       console.error('Delete procurement file error:', error);
       return false;
+    }
+  }
+
+  async saveCourseImage(file: Express.Multer.File): Promise<string> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+      throw new BadRequestException('Unsupported file type');
+    }
+
+    const filename = `${uuidv4()}.webp`;
+    const filepath = path.join(this.coursesUploadDir, filename);
+
+    try {
+      await sharp(file.buffer)
+        .resize(1200, null, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .webp({ quality: 85 })
+        .toFile(filepath);
+
+      return `/uploads/courses/${filename}`;
+    } catch (error) {
+      console.error('Course image processing error:', error);
+      throw new BadRequestException('Failed to process course image');
     }
   }
 }

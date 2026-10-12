@@ -4,6 +4,7 @@ import { SharedService } from './shared.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { PermissionGuard } from './guards/permission.guard';
 import { DatabaseModule } from 'db/database';
 
 @Global()
@@ -12,13 +13,20 @@ import { DatabaseModule } from 'db/database';
     DatabaseModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
-  providers: [SharedService, JwtStrategy, JwtAuthGuard, RolesGuard],
+  providers: [
+    SharedService,
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+    PermissionGuard,
+  ],
   exports: [
     SharedService,
     PassportModule,
     JwtStrategy,
     JwtAuthGuard,
     RolesGuard,
+    PermissionGuard,
   ],
 })
 export class SharedModule {}

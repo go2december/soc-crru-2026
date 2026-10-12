@@ -31,6 +31,10 @@ export class ProgramInstructorDto {
 }
 
 export class CreateProgramDto {
+  @IsOptional()
+  @Type(() => Number)
+  department_id?: number;
+
   @IsString()
   code: string;
 

@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   DatabaseService,
@@ -54,6 +55,7 @@ interface AdminListParams {
   isPublished?: string;
   isSocialService?: string;
   isCommercial?: string;
+  departmentId?: number;
   page: number;
   limit: number;
 }
@@ -64,6 +66,21 @@ export class ResearchService {
     private readonly drizzle: DatabaseService,
     private readonly uploadService: UploadService,
   ) {}
+
+  private checkScope(user: any, targetDepartmentId?: number | null) {
+    if (!user) return;
+    const roles: string[] = user.roles || [];
+    if (roles.includes('ADMIN')) return;
+
+    if (roles.includes('EDITOR')) {
+      const userDept = user.departmentId;
+      if (!userDept || userDept !== targetDepartmentId) {
+        throw new ForbiddenException(
+          'คุณไม่มีสิทธิ์จัดการงานวิจัยนอกสังกัดสาขาวิชาของคุณ',
+        );
+      }
+    }
+  }
 
   private generateSlug(title: string): string {
     return `${slugify(title, { lower: true, strict: true })}-${Date.now().toString().slice(-4)}`;
@@ -574,6 +591,10 @@ export class ResearchService {
     if (isCommercial !== undefined)
       conditions.push(eq(researchProjects.isCommercial, isCommercial));
 
+    if (params.departmentId !== undefined) {
+      conditions.push(eq(researchProjects.departmentId, params.departmentId));
+    }
+
     const whereCondition =
       conditions.length === 0
         ? undefined
@@ -801,14 +822,20 @@ export class ResearchService {
     };
   }
 
-  async create(dto: CreateResearchProjectDto, _userId?: string) {
+  async create(dto: CreateResearchProjectDto, user?: any) {
     this.ensureProjectMembers(dto.members);
     await this.ensureStaffProfilesExist(dto.members);
+
+    let targetDeptId = dto.department_id;
+    if (user && !user.roles?.includes('ADMIN') && user.roles?.includes('EDITOR')) {
+      targetDeptId = user.departmentId;
+    }
 
     const slug = this.generateSlug(dto.titleTh);
     const projectInsert = await this.drizzle.db
       .insert(researchProjects)
       .values({
+        departmentId: targetDeptId,
         slug,
         titleTh: dto.titleTh,
         titleEn: dto.titleEn?.trim() || null,
@@ -832,8 +859,10 @@ export class ResearchService {
     return this.findOneAdmin(projectId);
   }
 
-  async update(id: string, dto: UpdateResearchProjectDto) {
+  async update(id: string, dto: UpdateResearchProjectDto, user?: any) {
     const existing = await this.findOneAdmin(id);
+    this.checkScope(user, existing.departmentId);
+
     const existingMembers = this.normalizeExistingMembers(existing.members);
     const existingLocations = this.normalizeExistingLocations(
       existing.locations,
@@ -949,8 +978,9 @@ export class ResearchService {
     return { fileUrl: result[0].fileUrl };
   }
 
-  async remove(id: string) {
+  async remove(id: string, user?: any) {
     const existing = await this.findOneAdmin(id);
+    this.checkScope(user, existing.departmentId);
 
     const result = await this.drizzle.db
       .delete(researchProjects)

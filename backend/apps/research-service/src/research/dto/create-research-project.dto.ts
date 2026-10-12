@@ -159,6 +159,10 @@ export class CreateResearchAttachmentDto {
 }
 
 export class CreateResearchProjectDto {
+  @IsOptional()
+  @Type(() => Number)
+  department_id?: number;
+
   @IsNotEmpty()
   @IsString()
   @MaxLength(500)

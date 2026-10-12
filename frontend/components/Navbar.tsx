@@ -133,18 +133,25 @@ export default function Navbar() {
                         </li>
                     </ul>
                 </div>
-                <Link href="/" className="btn btn-ghost text-xl font-bold tracking-wider flex items-center gap-3 hover:bg-transparent group">
+                <Link
+                    href="/"
+                    className="group flex items-center gap-3.5 px-3 py-1.5 rounded-xl transition-all duration-300 hover:bg-white/[0.08] active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-scholar-accent"
+                >
                     {/* Logo Image */}
-                    <div className="relative w-10 h-10 flex items-center justify-center">
+                    <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 group-hover:drop-shadow-[0_2px_12px_rgba(241,70,39,0.45)]">
                         <img
                             src="/images/soc-logo.png"
                             alt="Faculty of Social Sciences Logo"
                             className="w-full h-full object-contain"
                         />
                     </div>
-                    <div className="flex flex-col items-start justify-center h-full">
-                        <span className="text-sm font-bold leading-none tracking-wide group-hover:text-scholar-accent transition-colors">Faculty of Social Sciences</span>
-                        <span className="text-[10px] font-light text-scholar-gold tracking-[0.05em] uppercase opacity-90">Chiang Rai Rajabhat University</span>
+                    <div className="flex flex-col items-start justify-center">
+                        <span className="text-[15px] font-bold leading-tight tracking-wide text-white transition-colors duration-200 group-hover:text-scholar-accent">
+                            Faculty of Social Sciences
+                        </span>
+                        <span className="text-[10px] font-medium text-scholar-gold tracking-[0.06em] uppercase opacity-90 transition-all duration-200 group-hover:opacity-100 group-hover:text-amber-300">
+                            Chiang Rai Rajabhat University
+                        </span>
                     </div>
                 </Link>
             </div>

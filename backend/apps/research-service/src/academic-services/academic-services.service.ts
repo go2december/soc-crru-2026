@@ -1,25 +1,48 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import {
   DatabaseService,
   academicServices,
   academicServiceMembers,
+  academicServiceConfigs,
   staffProfiles,
 } from 'db/database';
 import { CreateAcademicServiceDto } from './dto/create-academic-service.dto';
 import { UpdateAcademicServiceDto } from './dto/update-academic-service.dto';
+import { UpdateAcademicServiceConfigDto } from './dto/update-academic-service-config.dto';
 import { eq, desc } from 'drizzle-orm';
 
 @Injectable()
 export class AcademicServicesService {
   constructor(private readonly drizzleService: DatabaseService) {}
 
-  async create(createDto: CreateAcademicServiceDto) {
+  private checkScope(user: any, targetDepartmentId?: number | null) {
+    if (!user) return;
+    const roles: string[] = user.roles || [];
+    if (roles.includes('ADMIN')) return;
+
+    if (roles.includes('EDITOR')) {
+      const userDept = user.departmentId;
+      if (!userDept || userDept !== targetDepartmentId) {
+        throw new ForbiddenException(
+          'คุณไม่มีสิทธิ์จัดการบริการวิชาการนอกสังกัดสาขาวิชาของคุณ',
+        );
+      }
+    }
+  }
+
+  async create(createDto: CreateAcademicServiceDto, user?: any) {
     const { members, ...data } = createDto;
+
+    let targetDeptId = data.department_id;
+    if (user && !user.roles?.includes('ADMIN') && user.roles?.includes('EDITOR')) {
+      targetDeptId = user.departmentId;
+    }
 
     const [newService] = await this.drizzleService.db
       .insert(academicServices)
       .values({
         ...data,
+        departmentId: targetDeptId,
         publishedAt: data.publishedAt ? new Date(data.publishedAt) : undefined,
       })
       .returning();
@@ -66,10 +89,12 @@ export class AcademicServicesService {
     );
   }
 
-  async findAllAdmin() {
+  async findAllAdmin(departmentId?: number) {
+    const condition = departmentId ? eq(academicServices.departmentId, departmentId) : undefined;
     const services = await this.drizzleService.db
       .select()
       .from(academicServices)
+      .where(condition)
       .orderBy(desc(academicServices.createdAt));
 
     return Promise.all(
@@ -128,8 +153,9 @@ export class AcademicServicesService {
     };
   }
 
-  async update(id: string, updateDto: UpdateAcademicServiceDto) {
-    await this.findOne(id); // Check exists
+  async update(id: string, updateDto: UpdateAcademicServiceDto, user?: any) {
+    const existing = await this.findOne(id); // Check exists
+    this.checkScope(user, existing.departmentId);
 
     const { members, ...data } = updateDto;
 
@@ -164,11 +190,63 @@ export class AcademicServicesService {
     return this.findOne(id);
   }
 
-  async remove(id: string) {
-    await this.findOne(id); // Check exists
+  async remove(id: string, user?: any) {
+    const existing = await this.findOne(id); // Check exists
+    this.checkScope(user, existing.departmentId);
+
     await this.drizzleService.db
       .delete(academicServices)
       .where(eq(academicServices.id, id));
     return { success: true };
   }
+
+  async getConfig() {
+    const [config] = await this.drizzleService.db
+      .select()
+      .from(academicServiceConfigs)
+      .where(eq(academicServiceConfigs.id, 1));
+
+    if (!config) {
+      // Fallback create default if not found
+      const [newConfig] = await this.drizzleService.db
+        .insert(academicServiceConfigs)
+        .values({
+          id: 1,
+          contactEmail: 'socialsciences@crru.ac.th',
+          contactPhone: '0-5377-6000 ต่อ 1600',
+          officeHours: 'จันทร์ - ศุกร์ 08:30 - 16:30 น. (เว้นวันหยุดราชการ)',
+          officeLocation: 'สำนักงานคณบดี อาคาร 1 ชั้น 2 คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+          responseTime: 'เจ้าหน้าที่จะติดต่อกลับภายใน 1-2 วันทำการ',
+          pdfFormUrl: '/forms/academic-service-request.pdf',
+          docxFormUrl: '/forms/academic-service-request.docx',
+        })
+        .onConflictDoNothing()
+        .returning();
+      if (newConfig) return newConfig;
+
+      const [fallback] = await this.drizzleService.db
+        .select()
+        .from(academicServiceConfigs)
+        .limit(1);
+      return fallback;
+    }
+
+    return config;
+  }
+
+  async updateConfig(dto: UpdateAcademicServiceConfigDto) {
+    const existing = await this.getConfig();
+
+    const [updated] = await this.drizzleService.db
+      .update(academicServiceConfigs)
+      .set({
+        ...dto,
+        updatedAt: new Date(),
+      })
+      .where(eq(academicServiceConfigs.id, existing.id))
+      .returning();
+
+    return updated;
+  }
 }
+

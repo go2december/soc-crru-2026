@@ -52,20 +52,52 @@ export class ProcurementController {
     return this.procurementService.create(createDto, userId);
   }
 
-  // 5. Admin: Update Record
+  // 5. Admin/Editor: Update Record
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR', 'STAFF')
-  update(@Param('id') id: string, @Body() updateDto: UpdateProcurementDto) {
-    return this.procurementService.update(id, updateDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateProcurementDto,
+    @Req() req: any,
+  ) {
+    return this.procurementService.update(id, updateDto, req.user);
+  }
+
+  // 5.1 Admin: Approve Procurement
+  @Patch(':id/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  approve(@Param('id') id: string, @Req() req: any) {
+    return this.procurementService.approve(id, req.user.id);
+  }
+
+  // 5.2 Admin: Reject Procurement
+  @Patch(':id/reject')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  reject(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @Req() req: any,
+  ) {
+    return this.procurementService.reject(id, req.user.id, reason);
+  }
+
+  // 5.3 Editor/Staff: Submit for Review
+  @Patch(':id/submit-review')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  submitForReview(@Param('id') id: string) {
+    return this.procurementService.submitForReview(id);
   }
 
   // 6. Admin: Delete Record
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR', 'STAFF')
-  remove(@Param('id') id: string) {
-    return this.procurementService.remove(id);
+  remove(@Param('id') id: string, @Req() req: any) {
+    return this.procurementService.remove(id, req.user);
   }
 
   // 7. Admin: Add document to record

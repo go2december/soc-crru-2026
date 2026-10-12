@@ -59,6 +59,105 @@ export default function AdminProcurementPage() {
   const [deleteTarget, setDeleteTarget] = useState<ProcurementRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Workflow Review & Role
+  const [userRole, setUserRole] = useState<string>('GUEST');
+  const [workflowFilter, setWorkflowFilter] = useState<string>('ALL');
+  const [rejectTarget, setRejectTarget] = useState<ProcurementRecord | null>(null);
+  const [rejectReason, setRejectReason] = useState<string>('');
+  const [actionLoading, setActionLoading] = useState(false);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    const token = localStorage.getItem('admin_token');
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}/api/auth/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.roles?.includes('ADMIN')) setUserRole('ADMIN');
+        else if (data.roles?.includes('EDITOR')) setUserRole('EDITOR');
+        else if (data.roles?.includes('STAFF')) setUserRole('STAFF');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    const token = localStorage.getItem('admin_token');
+    setActionLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/procurement/${id}/approve`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        toast.success('อนุมัติเผยแพร่รายการจัดซื้อจัดจ้างสำเร็จ');
+        fetchItems();
+      } else {
+        toast.error('ไม่สามารถอนุมัติได้');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectTarget) return;
+    const token = localStorage.getItem('admin_token');
+    setActionLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/procurement/${rejectTarget.id}/reject`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ reason: rejectReason }),
+      });
+      if (res.ok) {
+        toast.success('ส่งกลับแก้ไขเรียบร้อยแล้ว');
+        setRejectTarget(null);
+        setRejectReason('');
+        fetchItems();
+      } else {
+        toast.error('ไม่สามารถส่งกลับแก้ไขได้');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSubmitReview = async (id: string) => {
+    const token = localStorage.getItem('admin_token');
+    setActionLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/procurement/${id}/submit-review`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        toast.success('ส่งขออนุมัติเรียบร้อยแล้ว');
+        fetchItems();
+      } else {
+        toast.error('ไม่สามารถส่งขออนุมัติได้');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const fetchItems = async () => {
     setLoading(true);
     const token = localStorage.getItem('admin_token');
@@ -272,6 +371,40 @@ export default function AdminProcurementPage() {
         </div>
       </div>
 
+      {/* Workflow Status Filter Tabs */}
+      <div className="flex flex-wrap gap-2 border-b border-border/70 pb-3">
+        {[
+          { id: 'ALL', label: 'ทั้งหมด' },
+          { id: 'PENDING_REVIEW', label: 'รอตรวจสอบอนุมัติ' },
+          { id: 'PUBLISHED', label: 'เผยแพร่แล้ว' },
+          { id: 'DRAFT', label: 'ฉบับร่าง' },
+          { id: 'REJECTED', label: 'ส่งกลับแก้ไข' },
+        ].map((tab) => {
+          const count =
+            tab.id === 'ALL'
+              ? items.length
+              : items.filter(
+                  (n) => (n.publicationStatus || (n.isPublished ? 'PUBLISHED' : 'DRAFT')) === tab.id,
+                ).length;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setWorkflowFilter(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                workflowFilter === tab.id
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span className="rounded-full bg-background/20 px-1.5 py-0.2 text-[10px]">
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Table Section */}
       <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
         {loading ? (
@@ -295,128 +428,181 @@ export default function AdminProcurementPage() {
                   <th className="py-3 px-4 font-semibold">วิธี / หมวดหมู่</th>
                   <th className="py-3 px-4 font-semibold text-right">วงเงินงบประมาณ</th>
                   <th className="py-3 px-4 font-semibold text-center">เอกสาร PDF</th>
-                  <th className="py-3 px-4 font-semibold text-center">สถานะ</th>
-                  <th className="py-3 px-4 font-semibold text-center">เผยแพร่</th>
-                  <th className="py-3 px-4 font-semibold text-right">จัดการ</th>
+                  <th className="py-3 px-4 font-semibold text-center">สถานะโครงการ</th>
+                  <th className="py-3 px-4 font-semibold text-center">สถานะ Workflow</th>
+                  <th className="py-3 px-4 font-semibold text-right">จัดการ & อนุมัติ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {items.map((item) => {
-                  const statusInfo = getProcurementStatusInfo(item.status);
-                  const docsCount = item.documents?.length || 0;
+                {items
+                  .filter((item) => {
+                    const currentStatus =
+                      item.publicationStatus || (item.isPublished ? 'PUBLISHED' : 'DRAFT');
+                    if (workflowFilter === 'ALL') return true;
+                    return currentStatus === workflowFilter;
+                  })
+                  .map((item) => {
+                    const statusInfo = getProcurementStatusInfo(item.status);
+                    const docsCount = item.documents?.length || 0;
+                    const currentStatus =
+                      item.publicationStatus || (item.isPublished ? 'PUBLISHED' : 'DRAFT');
 
-                  return (
-                    <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="py-3 px-4 font-bold text-foreground shrink-0">
-                        {item.fiscalYear}
-                      </td>
+                    return (
+                      <tr key={item.id} className="hover:bg-muted/30 transition-colors">
+                        <td className="py-3 px-4 font-bold text-foreground shrink-0">
+                          {item.fiscalYear}
+                        </td>
 
-                      <td className="py-3 px-4 max-w-sm">
-                        <p className="font-semibold text-foreground line-clamp-1">{item.title}</p>
-                        {item.vendorName && (
-                          <p className="text-[11px] text-muted-foreground truncate">
-                            คู่สัญญา: {item.vendorName}
-                          </p>
-                        )}
-                      </td>
-
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="space-y-0.5">
-                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                            {getProcurementTypeLabel(item.procurementType)}
-                          </span>
-                          <p className="text-[11px] text-muted-foreground">
-                            {getProcurementCategoryLabel(item.category)}
-                          </p>
-                        </div>
-                      </td>
-
-                      <td className="py-3 px-4 text-right whitespace-nowrap font-medium text-foreground">
-                        <p>{formatThaiBaht(item.budget)}</p>
-                        {item.contractAmount && (
-                          <p className="text-[10px] text-emerald-600">
-                            จริง: {formatThaiBaht(item.contractAmount)}
-                          </p>
-                        )}
-                      </td>
-
-                      <td className="py-3 px-4 text-center whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                            docsCount > 0
-                              ? 'bg-red-50 text-red-700 border border-red-200'
-                              : 'bg-muted text-muted-foreground'
-                          }`}
-                        >
-                          <FileText className="w-3 h-3" />
-                          {docsCount} ไฟล์
-                        </span>
-                      </td>
-
-                      <td className="py-3 px-4 text-center whitespace-nowrap">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${statusInfo.colorClass}`}
-                        >
-                          {statusInfo.label}
-                        </span>
-                      </td>
-
-                      <td className="py-3 px-4 text-center whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => handleTogglePublish(item)}
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors ${
-                            item.isPublished
-                              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                              : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-                          }`}
-                        >
-                          {item.isPublished ? (
-                            <>
-                              <Eye className="w-3 h-3" />
-                              <span>แสดงหน้าเว็บ</span>
-                            </>
-                          ) : (
-                            <>
-                              <EyeOff className="w-3 h-3" />
-                              <span>แบบร่าง</span>
-                            </>
+                        <td className="py-3 px-4 max-w-sm">
+                          <p className="font-semibold text-foreground line-clamp-1">{item.title}</p>
+                          {item.vendorName && (
+                            <p className="text-[11px] text-muted-foreground truncate">
+                              คู่สัญญา: {item.vendorName}
+                            </p>
                           )}
-                        </button>
-                      </td>
+                          {item.rejectReason && currentStatus === 'REJECTED' && (
+                            <p className="text-[10px] text-rose-600 bg-rose-50 p-1 mt-1 rounded border border-rose-200">
+                              เหตุผลตีกลับ: {item.rejectReason}
+                            </p>
+                          )}
+                        </td>
 
-                      <td className="py-3 px-4 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1">
-                          <Link
-                            href={`/eservice/procurement/${item.id}`}
-                            target="_blank"
-                            className="p-1 text-muted-foreground hover:text-foreground rounded"
-                            title="ดูหน้าสาธารณะ"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </Link>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <div className="space-y-0.5">
+                            <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                              {getProcurementTypeLabel(item.procurementType)}
+                            </span>
+                            <p className="text-[11px] text-muted-foreground">
+                              {getProcurementCategoryLabel(item.category)}
+                            </p>
+                          </div>
+                        </td>
 
-                          <Link
-                            href={`/admin/procurement/${item.id}/edit`}
-                            className="p-1 text-muted-foreground hover:text-primary rounded"
-                            title="แก้ไข"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </Link>
+                        <td className="py-3 px-4 text-right whitespace-nowrap font-medium text-foreground">
+                          <p>{formatThaiBaht(item.budget)}</p>
+                          {item.contractAmount && (
+                            <p className="text-[10px] text-emerald-600">
+                              จริง: {formatThaiBaht(item.contractAmount)}
+                            </p>
+                          )}
+                        </td>
 
-                          <button
-                            type="button"
-                            onClick={() => setDeleteTarget(item)}
-                            className="p-1 text-muted-foreground hover:text-destructive rounded"
-                            title="ลบ"
+                        <td className="py-3 px-4 text-center whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                              docsCount > 0
+                                ? 'bg-red-50 text-red-700 border border-red-200'
+                                : 'bg-muted text-muted-foreground'
+                            }`}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                            <FileText className="w-3 h-3" />
+                            {docsCount} ไฟล์
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-4 text-center whitespace-nowrap">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${statusInfo.colorClass}`}
+                          >
+                            {statusInfo.label}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-4 text-center whitespace-nowrap">
+                          {currentStatus === 'PUBLISHED' && (
+                            <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">
+                              เผยแพร่แล้ว
+                            </span>
+                          )}
+                          {currentStatus === 'PENDING_REVIEW' && (
+                            <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 font-semibold animate-pulse">
+                              รอตรวจสอบ
+                            </span>
+                          )}
+                          {currentStatus === 'DRAFT' && (
+                            <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                              ฉบับร่าง
+                            </span>
+                          )}
+                          {currentStatus === 'REJECTED' && (
+                            <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
+                              ส่งกลับแก้ไข
+                            </span>
+                          )}
+                        </td>
+
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1">
+                            {/* Admin Approve / Reject actions */}
+                            {userRole === 'ADMIN' && currentStatus === 'PENDING_REVIEW' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  className="h-6 px-2 text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white"
+                                  onClick={() => handleApprove(item.id)}
+                                  disabled={actionLoading}
+                                >
+                                  อนุมัติ
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-6 px-2 text-[10px] text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                                  onClick={() => {
+                                    setRejectTarget(item);
+                                    setRejectReason('');
+                                  }}
+                                  disabled={actionLoading}
+                                >
+                                  ตีกลับ
+                                </Button>
+                              </>
+                            )}
+
+                            {/* Submit Review action for Draft / Rejected */}
+                            {(currentStatus === 'DRAFT' || currentStatus === 'REJECTED') && (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                className="h-6 px-2 text-[10px] text-primary"
+                                onClick={() => handleSubmitReview(item.id)}
+                                disabled={actionLoading}
+                                title="ส่งให้ Admin ตรวจสอบเพื่อเผยแพร่"
+                              >
+                                ส่งตรวจ
+                              </Button>
+                            )}
+
+                            <Link
+                              href={`/eservice/procurement/${item.id}`}
+                              target="_blank"
+                              className="p-1 text-muted-foreground hover:text-foreground rounded"
+                              title="ดูหน้าสาธารณะ"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </Link>
+
+                            <Link
+                              href={`/admin/procurement/${item.id}/edit`}
+                              className="p-1 text-muted-foreground hover:text-primary rounded"
+                              title="แก้ไข"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Link>
+
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget(item)}
+                              className="p-1 text-muted-foreground hover:text-destructive rounded"
+                              title="ลบ"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
@@ -452,32 +638,40 @@ export default function AdminProcurementPage() {
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+      {/* Reject Reason Confirmation Dialog */}
+      <Dialog open={!!rejectTarget} onOpenChange={(open) => !open && setRejectTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>ยืนยันการลบรายการจัดซื้อจัดจ้าง</DialogTitle>
+            <DialogTitle className="text-rose-600">ส่งกลับแก้ไข: {rejectTarget?.title}</DialogTitle>
             <DialogDescription>
-              คุณต้องการลบรายการ &quot;{deleteTarget?.title}&quot; หรือไม่?
-              การลบนี้จะรวมถึงไฟล์ PDF ที่แนบไว้ทั้งหมด และไม่สามารถกู้คืนได้
+              กรุณาระบุเหตุผลหรือข้อเสนอแนะในการปรับปรุงแก้ไขก่อนเผยแพร่
             </DialogDescription>
           </DialogHeader>
+          <div className="py-2">
+            <textarea
+              className="w-full rounded-md border border-input bg-background p-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+              rows={3}
+              placeholder="ระบุเหตุผล เช่น เอกสาร TOR ไม่สมบูรณ์, งบประมาณไม่ตรง..."
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+          </div>
           <DialogFooter className="gap-2">
             <Button
               variant="outline"
-              onClick={() => setDeleteTarget(null)}
-              disabled={deleting}
+              onClick={() => setRejectTarget(null)}
+              disabled={actionLoading}
             >
               ยกเลิก
             </Button>
             <Button
               variant="destructive"
-              onClick={handleDelete}
-              disabled={deleting}
+              onClick={handleReject}
+              disabled={actionLoading || !rejectReason.trim()}
               className="gap-1.5"
             >
-              {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
-              <span>ยืนยันการลบ</span>
+              {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+              <span>ยืนยันส่งกลับ</span>
             </Button>
           </DialogFooter>
         </DialogContent>

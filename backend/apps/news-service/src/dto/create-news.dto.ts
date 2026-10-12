@@ -63,4 +63,11 @@ export class CreateNewsDto {
   @IsOptional()
   @IsString()
   authorId?: string;
+
+  @IsOptional()
+  departmentId?: number;
+
+  @IsOptional()
+  @IsEnum(['DRAFT', 'PENDING_REVIEW', 'APPROVED', 'PUBLISHED', 'REJECTED'])
+  publicationStatus?: 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'REJECTED';
 }

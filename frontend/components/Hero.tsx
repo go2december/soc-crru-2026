@@ -37,7 +37,7 @@ const slides: SlideData[] = [
         image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
         buttons: [
             { text: "สมัครเรียนปริญญาตรี", href: "/admissions", style: "primary" },
-            { text: "ดูเกณฑ์การรับสมัคร", href: "/admissions/requirements", style: "outline" }
+            { text: "ดูเกณฑ์การรับสมัคร", href: "/admissions", style: "outline" }
         ]
     },
     {
@@ -47,8 +47,8 @@ const slides: SlideData[] = [
         description: "เรียนรู้ได้ทุกที่ทุกเวลา พร้อมระบบสะสมหน่วยกิต (Credit Bank) สำหรับวัยทำงานและบุคคลทั่วไป",
         image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop",
         buttons: [
-            { text: "ดูคอร์สระยะสั้น", href: "/short-courses", style: "primary" },
-            { text: "ระบบคลังหน่วยกิต", href: "/credit-bank", style: "outline" }
+            { text: "ดูคอร์สระยะสั้น", href: "/academics/short-courses", style: "primary" },
+            { text: "ระบบคลังหน่วยกิต", href: "/academics/credit-bank", style: "outline" }
         ]
     }
 ];
@@ -95,8 +95,8 @@ export default function Hero() {
                             className={`object-cover ${index === currentSlide ? 'scale-105 transition-transform duration-[8000ms]' : 'scale-100'}`}
                             priority={index === 0}
                         />
-                        {/* Gradient Overlay for better text readability */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-scholar-deep/95 via-scholar-deep/80 to-transparent"></div>
+                        {/* Gradient Overlay for better text readability with brighter photo ambiance */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-scholar-deep/75 via-scholar-deep/45 to-black/15"></div>
                     </div>
 
                     {/* Content */}
