@@ -214,16 +214,17 @@ export default function Navbar() {
                         <NavItem href="/academics/short-courses" title="สมัครเรียนหลักสูตรระยะสั้น" onClose={closeDropdown} />
                     </DropdownMenu>
 
-                    {/* D. วิจัยและนวัตกรรม */}
-                    <DropdownMenu name="research" title="วิจัยและนวัตกรรม" isOpen={openDropdown === 'research'} onToggle={toggleDropdown}>
+                    {/* D. วิจัยและบริการวิชาการ */}
+                    <DropdownMenu name="research" title="วิจัยและบริการวิชาการ" isOpen={openDropdown === 'research'} onToggle={toggleDropdown}>
                         <li className="mb-2 pb-2 border-b border-white/10">
                             <Link href="/research" className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-scholar-gold hover:text-white hover:bg-scholar-accent rounded-md transition-all" onClick={closeDropdown}>
                                 ศูนย์รวมงานวิจัยและบริการวิชาการ
                             </Link>
                         </li>
                         <NavItem href="/research/database" title="ฐานข้อมูลงานวิจัย" onClose={closeDropdown} />
-                        <NavItem href="/research/startups" title="นวัตกรรมชุมชน (Local Startups)" onClose={closeDropdown} />
-                        <NavItem href="/research/services" title="บริการวิชาการ" onClose={closeDropdown} />
+                        <NavItem href="/research/journal" title="วารสารสังคมศาสตร์วิชาการ (ThaiJO)" onClose={closeDropdown} />
+                        <NavItem href="/research/services" title="บริการวิชาการแก่สังคม" onClose={closeDropdown} />
+                        <NavItem href="/research/mou" title="เครือข่ายความร่วมมือและ MOU" onClose={closeDropdown} />
                     </DropdownMenu>
 
                     {/* E. ศูนย์เชียงรายศึกษา */}

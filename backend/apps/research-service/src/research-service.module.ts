@@ -4,6 +4,7 @@ import { DatabaseModule } from 'db/database';
 import { UploadModule } from 'upload/upload';
 import { ResearchModule } from './research/research.module';
 import { AcademicServicesModule } from './academic-services/academic-services.module';
+import { MousModule } from './mous/mous.module';
 
 @Module({
   imports: [
@@ -12,7 +13,8 @@ import { AcademicServicesModule } from './academic-services/academic-services.mo
     PassportModule.register({ defaultStrategy: 'jwt' }),
     ResearchModule,
     AcademicServicesModule,
+    MousModule,
   ],
-  exports: [ResearchModule, AcademicServicesModule],
+  exports: [ResearchModule, AcademicServicesModule, MousModule],
 })
 export class ResearchServiceModule {}

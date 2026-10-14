@@ -1,17 +1,17 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import Breadcrumb from '@/components/Breadcrumb';
-import { Database, Lightbulb, Rocket, ArrowRight, BookOpen, Globe2, Award, Users } from 'lucide-react';
+import { Database, Lightbulb, ArrowRight, BookOpen, Globe2, Award, Users, Handshake, BookCheck } from 'lucide-react';
 
 export const metadata: Metadata = {
     title: 'ศูนย์วิจัยและบริการวิชาการ | คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
-    description: 'ศูนย์รวมงานวิจัย นวัตกรรมเพื่อการพัฒนาท้องถิ่น บริการวิชาการ และการบ่มเพาะสตาร์ทอัพ คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    description: 'ศูนย์รวมงานวิจัย วารสารวิชาการ บริการวิชาการ และเครือข่ายความร่วมมือ MOU คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
     alternates: {
         canonical: '/research',
     },
     openGraph: {
         title: 'ศูนย์วิจัยและบริการวิชาการ | คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
-        description: 'ศูนย์รวมงานวิจัย นวัตกรรมเพื่อการพัฒนาท้องถิ่น บริการวิชาการ และการบ่มเพาะสตาร์ทอัพ',
+        description: 'ศูนย์รวมงานวิจัย วารสารวิชาการ บริการวิชาการ และเครือข่ายความร่วมมือ MOU',
         url: '/research',
         type: 'website',
         locale: 'th_TH',
@@ -31,6 +31,17 @@ const RESEARCH_PILLARS = [
         iconBg: 'bg-blue-50 text-blue-600',
     },
     {
+        title: 'วารสารสังคมศาสตร์วิชาการ',
+        subtitle: 'Journal of Social Academic (ThaiJO)',
+        description: 'วารสารวิชาการระดับชาติด้านสังคมศาสตร์ มนุษยศาสตร์ และการพัฒนาท้องถิ่น ดัชนี TCI เผยแพร่และส่งบทความผ่านระบบ ThaiJO',
+        icon: BookCheck,
+        href: '/research/journal',
+        badge: 'ระบบ ThaiJO / TCI',
+        accentColor: 'border-emerald-500/20 hover:border-emerald-500/50',
+        badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        iconBg: 'bg-emerald-50 text-emerald-600',
+    },
+    {
         title: 'ศูนย์บริการวิชาการเพื่อสังคม',
         subtitle: 'Academic Services & Community Impact',
         description: 'โครงการขับเคลื่อนองค์ความรู้สู่ชุมชนท้องถิ่น การพัฒนาเศรษฐกิจฐานราก ห้องปฏิบัติการทางสังคม และงานบริการวิชาการแบบมีส่วนร่วม',
@@ -42,15 +53,15 @@ const RESEARCH_PILLARS = [
         iconBg: 'bg-amber-50 text-amber-600',
     },
     {
-        title: 'นวัตกรรมและผู้ประกอบการสังคม',
-        subtitle: 'Social Innovation & Student Startups',
-        description: 'พื้นที่ส่งเสริมการสร้างโมเดลธุรกิจเพื่อสังคม บ่มเพาะผู้ประกอบการรุ่นใหม่ ผลงานสร้างสรรค์ และการต่อยอดสู่เชิงพาณิชย์',
-        icon: Rocket,
-        href: '/research/startups',
-        badge: 'บ่มเพาะสตาร์ทอัพ',
-        accentColor: 'border-emerald-500/20 hover:border-emerald-500/50',
-        badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        iconBg: 'bg-emerald-50 text-emerald-600',
+        title: 'เครือข่ายความร่วมมือและ MOU',
+        subtitle: 'Partnerships & Cooperation Network',
+        description: 'บันทึกข้อตกลงความร่วมมือทางวิชาการและการพัฒนาสังคม ร่วมกับหน่วยงานภาครัฐ ภาคประชาสังคม สถาบันการศึกษา และเอกชน',
+        icon: Handshake,
+        href: '/research/mou',
+        badge: 'ภาคีความร่วมมือ',
+        accentColor: 'border-purple-500/20 hover:border-purple-500/50',
+        badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
+        iconBg: 'bg-purple-50 text-purple-600',
     },
 ];
 
@@ -114,7 +125,7 @@ export default function ResearchHubPage() {
 
             {/* Main Portals Grid */}
             <section className="container mx-auto px-4 -mt-8 relative z-20 pb-20">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {RESEARCH_PILLARS.map((pillar, idx) => {
                         const IconComponent = pillar.icon;
                         return (

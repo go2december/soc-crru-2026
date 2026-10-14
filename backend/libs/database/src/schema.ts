@@ -986,3 +986,39 @@ export const rolePermissions = pgTable(
   },
 );
 
+export const mouPartnerTypeEnum = pgEnum('mou_partner_type', [
+  'GOVERNMENT', // ภาครัฐและองค์กรปกครองส่วนท้องถิ่น
+  'COMMUNITY', // ภาคประชาสังคมและชุมชน
+  'ACADEMIC', // สถาบันการศึกษาและนานาชาติ
+  'PRIVATE', // ภาคเอกชนและวิสาหกิจชุมชน
+]);
+
+export const mous = pgTable(
+  'mous',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: varchar('title', { length: 500 }).notNull(), // ชื่อบันทึกข้อตกลง / โครงการความร่วมมือ
+    partnerName: varchar('partner_name', { length: 255 }).notNull(), // ชื่อองค์กร/หน่วยงานพันธมิตร
+    partnerType: mouPartnerTypeEnum('partner_type').default('GOVERNMENT').notNull(),
+    partnerLogoUrl: text('partner_logo_url'), // โลโก้หรือภาพหน่วยงาน
+    scope: text('scope'), // ขอบเขตความร่วมมือ / วัตถุประสงค์
+    startDate: timestamp('start_date'), // วันที่เริ่มต้นลงนาม
+    endDate: timestamp('end_date'), // วันที่สิ้นสุด (null = ต่อเนื่อง)
+    isActive: boolean('is_active').default(true).notNull(), // สถานะสัญญายังมีผลบังคับใช้
+    documentUrl: text('document_url'), // ลิงก์ไฟล์เอกสารหรือ MOU ฉบับเต็ม
+    websiteUrl: text('website_url'), // เว็บไซต์หน่วยงานพันธมิตร
+    isPublished: boolean('is_published').default(true).notNull(), // แสดงในหน้าสาธารณะ
+    displayOrder: integer('display_order').default(0).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      titleIdx: index('mous_title_idx').on(table.title),
+      partnerTypeIdx: index('mous_partner_type_idx').on(table.partnerType),
+      isPublishedIdx: index('mous_is_published_idx').on(table.isPublished),
+    };
+  },
+);
+
+
