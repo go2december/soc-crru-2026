@@ -1,67 +1,116 @@
-
 import React from 'react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Calendar as CalendarIcon, FileDown, ExternalLink, ArrowLeft } from 'lucide-react';
+import { parseIcsContent, CalendarEvent } from '@/lib/calendar/ical-parser';
+import CalendarClient from './CalendarClient';
 
-// Mock Events Data
-const UPCOMING_EVENTS = [
-    { id: 1, date: '15', month: 'ม.ค.', title: 'วันสุดท้ายของการถอนรายวิชา (W)', type: 'registration', desc: 'สำหรับนักศึกษาทุกชั้นปี' },
-    { id: 2, date: '20', month: 'ม.ค.', title: 'สอบกลางภาค 2/2568', type: 'exam', desc: 'เริ่มสอบวันแรก' },
-    { id: 3, date: '28', month: 'ม.ค.', title: 'วันสุดท้ายของการสอบกลางภาค', type: 'exam', desc: 'สิ้นสุดการสอบ' },
-    { id: 4, date: '14', month: 'ก.พ.', title: 'วันราชภัฏ', type: 'activity', desc: 'กิจกรรมรำลึกพระมหากรุณาธิคุณ' },
-];
+export const metadata: Metadata = {
+    title: 'ปฏิทินวิชาการและกิจกรรม | สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    description: 'ปฏิทินกิจกรรม วันสอบ และกำหนดการสำคัญของสำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย ซิงค์สดจาก Google Calendar'
+};
 
-export default function CalendarPage() {
+export const revalidate = 1800; // ISR cache every 30 minutes
+
+const GOOGLE_CALENDAR_ICS_URL =
+    'https://calendar.google.com/calendar/ical/c_classroome6d5584c%40group.calendar.google.com/public/basic.ics';
+
+async function getCalendarEvents(): Promise<CalendarEvent[]> {
+    try {
+        const response = await fetch(GOOGLE_CALENDAR_ICS_URL, {
+            next: { revalidate: 1800 },
+            headers: {
+                'User-Agent': 'SOC-CRRU-Web/1.0 (+https://soc.crru.ac.th)'
+            }
+        });
+
+        if (!response.ok) {
+            console.error(`Google Calendar returned status ${response.status}`);
+            return [];
+        }
+
+        const icsText = await response.text();
+        return parseIcsContent(icsText);
+    } catch (error) {
+        console.error('Error fetching calendar data server-side:', error);
+        return [];
+    }
+}
+
+export default async function CalendarPage() {
+    const events = await getCalendarEvents();
+
     return (
         <main className="min-h-screen bg-base-100 text-base-content pb-20">
-            <section className="bg-gradient-to-r from-red-600 to-rose-800 text-white py-16 px-4 text-center">
-                <h1 className="text-4xl font-bold mb-4 font-heading">ปฏิทินวิชาการ</h1>
-                <p className="text-xl opacity-90">Academic Calendar</p>
+            {/* Header Hero Section */}
+            <section className="bg-gradient-to-r from-red-700 via-rose-800 to-red-900 text-white py-14 px-4 shadow-sm relative overflow-hidden">
+                <div className="max-w-6xl mx-auto relative z-10">
+                    <div className="flex items-center gap-2 text-rose-200 text-xs sm:text-sm mb-3">
+                        <Link href="/eservice" className="hover:underline inline-flex items-center gap-1">
+                            <ArrowLeft className="w-3.5 h-3.5" />
+                            บริการอิเล็กทรอนิกส์ (e-Services)
+                        </Link>
+                        <span>/</span>
+                        <span className="text-white font-medium">ปฏิทินวิชาการและกิจกรรม</span>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div>
+                            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-heading">
+                                ปฏิทินวิชาการและกิจกรรม
+                            </h1>
+                            <p className="text-base sm:text-lg text-rose-100 mt-2 font-light">
+                                Academic & Event Calendar — สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
+                            </p>
+                        </div>
+
+                        {/* Direct PDF Download / External Reg Link */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <a
+                                href="https://reg.crru.ac.th"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-sm bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm gap-2"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                                สำนักส่งเสริมวิชาการและงานทะเบียน
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </section>
 
-            <div className="max-w-5xl mx-auto px-4 py-12">
-                {/* Calendar Download */}
-                <div className="card bg-base-200 border border-base-300 mb-12">
-                    <div className="card-body sm:flex-row items-center gap-6 text-center sm:text-left">
-                        <div className="text-5xl">📅</div>
-                        <div className="flex-1">
-                            <h2 className="card-title text-xl mb-1 justify-center sm:justify-start">ปฏิทินการศึกษา ประจำปีการศึกษา 2568</h2>
-                            <p className="opacity-70">ฉบับทางการจากสำนักส่งเสริมวิชาการและงานทะเบียน</p>
+            <div className="max-w-6xl mx-auto px-4 py-8">
+                {/* Official Academic Calendar Banner */}
+                <div className="card bg-base-200/80 border border-base-300 mb-8 shadow-sm">
+                    <div className="card-body p-4 sm:p-6 sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-4 text-center sm:text-left">
+                            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 mx-auto sm:mx-0">
+                                <CalendarIcon className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h2 className="font-bold text-base sm:text-lg text-base-content">
+                                    ปฏิทินการศึกษา มหาวิทยาลัยราชภัฏเชียงราย
+                                </h2>
+                                <p className="text-xs sm:text-sm text-base-content/70 mt-0.5">
+                                    กำหนดการเปิด-ปิดภาคเรียน การลงทะเบียน และวันสอบฉบับทางการ
+                                </p>
+                            </div>
                         </div>
-                        <button className="btn btn-primary">
-                            ดาวน์โหลด PDF
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 ml-1">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                            </svg>
-                        </button>
+                        <a
+                            href="https://reg.crru.ac.th"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-primary btn-sm gap-2 w-full sm:w-auto"
+                        >
+                            <FileDown className="w-4 h-4" />
+                            ดาวน์โหลดฉบับทางการ (PDF)
+                        </a>
                     </div>
                 </div>
 
-                {/* Upcoming Events */}
-                <h2 className="text-2xl font-bold mb-6 border-l-4 border-primary pl-4">กิจกรรมที่กำลังจะมาถึง</h2>
-                <div className="space-y-4">
-                    {UPCOMING_EVENTS.map(event => (
-                        <div key={event.id} className="card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-all flex-row overflow-hidden">
-                            <div className={`w-24 flex flex-col items-center justify-center p-2 text-white
-                   ${event.type === 'exam' ? 'bg-red-500' : event.type === 'registration' ? 'bg-blue-500' : 'bg-green-500'}
-                `}>
-                                <span className="text-3xl font-bold leading-none">{event.date}</span>
-                                <span className="text-sm">{event.month}</span>
-                            </div>
-                            <div className="p-4 flex-1 flex flex-col justify-center">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className={`badge badge-xs ${event.type === 'exam' ? 'badge-error' : event.type === 'registration' ? 'badge-info' : 'badge-success'}`}></span>
-                                    <h3 className="font-bold text-lg">{event.title}</h3>
-                                </div>
-                                <p className="text-sm opacity-70 ml-4">{event.desc}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="mt-12 text-center">
-                    <a href="https://reg.crru.ac.th" target="_blank" rel="noreferrer" className="link link-primary no-underline hover:underline">
-                        ดูปฏิทินทั้งหมดที่เว็บไซต์สำนักทะเบียน &rarr;
-                    </a>
-                </div>
+                {/* Interactive Calendar Component */}
+                <CalendarClient initialEvents={events} />
             </div>
         </main>
     );

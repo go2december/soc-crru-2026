@@ -6,6 +6,8 @@ import { ProgramsModule } from './programs.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { AdmissionsModule } from './admissions/admissions.module';
 import { ShortCoursesModule } from './short-courses/short-courses.module';
+import { StudentServicesModule } from './student-services/student-services.module';
+import { StaffServicesModule } from './staff-services/staff-services.module';
 
 @Module({
   imports: [
@@ -16,7 +18,16 @@ import { ShortCoursesModule } from './short-courses/short-courses.module';
     DepartmentsModule,
     AdmissionsModule,
     ShortCoursesModule,
+    StudentServicesModule,
+    StaffServicesModule,
   ],
-  exports: [ProgramsModule, DepartmentsModule, AdmissionsModule, ShortCoursesModule],
+  exports: [
+    ProgramsModule,
+    DepartmentsModule,
+    AdmissionsModule,
+    ShortCoursesModule,
+    StudentServicesModule,
+    StaffServicesModule,
+  ],
 })
 export class ProgramsServiceModule {}

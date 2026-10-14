@@ -22,7 +22,8 @@ import {
     BookOpen,
     ClipboardList,
     Award,
-    Handshake
+    Handshake,
+    Layers
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -163,6 +164,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 { href: '/admin/mou', label: 'ความร่วมมือและ MOU', icon: Handshake, minLevel: 2 },
                 { href: '/admin/programs', label: 'หลักสูตร', icon: GraduationCap, minLevel: 2 },
                 { href: '/admin/short-courses', label: 'คอร์สระยะสั้น/Credit Bank', icon: Award, minLevel: 2 },
+                { href: '/admin/student-services', label: 'บริการนักศึกษา & เอกสาร', icon: Layers, minLevel: 2 },
+                { href: '/admin/staff-services', label: 'บริการบุคลากร & เอกสาร', icon: Briefcase, minLevel: 2 },
                 { href: '/admin/admissions', label: 'รับสมัคร', icon: CalendarDays, minLevel: 2 },
             ]
         },

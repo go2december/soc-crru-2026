@@ -1021,4 +1021,121 @@ export const mous = pgTable(
   },
 );
 
+// ------------------------------------------
+// 9. Student E-Services & Faculty Documents
+// ------------------------------------------
 
+export const studentServiceCategoryEnum = pgEnum('student_service_category', [
+  'ACADEMIC', // การเรียน ทะเบียน หลักสูตร
+  'WELFARE', // สวัสดิการ กิจกรรม ทุน กยศ. หอพัก
+  'LIBRARY', // ห้องสมุด แหล่งเรียนรู้ วิจัย
+  'DIGITAL_IT', // ดิจิทัล บัญชีผู้ใช้ เครือข่าย
+  'FACULTY', // บริการและเอกสารคณะสังคมศาสตร์
+]);
+
+export const studentServices = pgTable(
+  'student_services',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: varchar('title', { length: 255 }).notNull(),
+    description: text('description'),
+    category: studentServiceCategoryEnum('category').default('ACADEMIC').notNull(),
+    url: varchar('url', { length: 500 }).notNull(),
+    icon: varchar('icon', { length: 50 }).default('globe').notNull(),
+    badge: varchar('badge', { length: 100 }),
+    isExternal: boolean('is_external').default(true).notNull(),
+    displayOrder: integer('display_order').default(0).notNull(),
+    isPublished: boolean('is_published').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      categoryIdx: index('student_services_category_idx').on(table.category),
+      isPublishedIdx: index('student_services_is_published_idx').on(table.isPublished),
+      displayOrderIdx: index('student_services_display_order_idx').on(table.displayOrder),
+    };
+  },
+);
+
+export const studentDocuments = pgTable(
+  'student_documents',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: varchar('title', { length: 255 }).notNull(),
+    category: varchar('category', { length: 100 }).default('คำร้องทั่วไป').notNull(),
+    fileUrl: varchar('file_url', { length: 500 }).notNull(),
+    fileType: varchar('file_type', { length: 20 }).default('PDF').notNull(),
+    fileSize: varchar('file_size', { length: 50 }),
+    displayOrder: integer('display_order').default(0).notNull(),
+    isPublished: boolean('is_published').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      categoryIdx: index('student_docs_category_idx').on(table.category),
+      isPublishedIdx: index('student_docs_is_published_idx').on(table.isPublished),
+      displayOrderIdx: index('student_docs_display_order_idx').on(table.displayOrder),
+    };
+  },
+);
+// ------------------------------------------
+// 10. Staff E-Services & Staff Documents
+// ------------------------------------------
+
+export const staffServiceCategoryEnum = pgEnum('staff_service_category', [
+  'HR_FINANCE', // บุคคล & สารบรรณ & เงินเดือน
+  'ACADEMIC_TEACHING', // การสอน & ส่งเกรด
+  'RESEARCH_QA', // วิจัย & ประกันคุณภาพ
+  'FACILITY_REPAIR', // ยานพาหนะ & ห้อง & แจ้งซ่อม
+  'DIGITAL_IT', // ไอที & คลาวด์องค์กร
+]);
+
+export const staffServices = pgTable(
+  'staff_services',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: varchar('title', { length: 255 }).notNull(),
+    description: text('description'),
+    category: staffServiceCategoryEnum('category').default('HR_FINANCE').notNull(),
+    url: varchar('url', { length: 500 }).notNull(),
+    icon: varchar('icon', { length: 50 }).default('FileText').notNull(),
+    badge: varchar('badge', { length: 100 }),
+    isExternal: boolean('is_external').default(true).notNull(),
+    displayOrder: integer('display_order').default(0).notNull(),
+    isPublished: boolean('is_published').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      categoryIdx: index('staff_services_category_idx').on(table.category),
+      isPublishedIdx: index('staff_services_is_published_idx').on(table.isPublished),
+      displayOrderIdx: index('staff_services_display_order_idx').on(table.displayOrder),
+    };
+  },
+);
+
+export const staffDocuments = pgTable(
+  'staff_documents',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: varchar('title', { length: 255 }).notNull(),
+    category: varchar('category', { length: 100 }).default('คำร้องทั่วไป').notNull(),
+    fileUrl: varchar('file_url', { length: 500 }).notNull(),
+    fileType: varchar('file_type', { length: 20 }).default('PDF').notNull(),
+    fileSize: varchar('file_size', { length: 50 }),
+    displayOrder: integer('display_order').default(0).notNull(),
+    isPublished: boolean('is_published').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      categoryIdx: index('staff_docs_category_idx').on(table.category),
+      isPublishedIdx: index('staff_docs_is_published_idx').on(table.isPublished),
+      displayOrderIdx: index('staff_docs_display_order_idx').on(table.displayOrder),
+    };
+  },
+);
