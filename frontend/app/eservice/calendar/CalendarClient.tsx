@@ -53,48 +53,66 @@ const THAI_MONTHS = [
 
 const THAI_DAYS_SHORT = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 
-// Color tokens adhering to CRRU Palette and Purple Ban (No violet/purple)
-const EVENT_COLOR_STYLES = [
-    {
-        bg: 'bg-red-50 dark:bg-red-950/50',
-        border: 'border-red-200 dark:border-red-800',
-        text: 'text-red-700 dark:text-red-300',
-        dot: 'bg-red-500'
-    },
-    {
-        bg: 'bg-blue-50 dark:bg-blue-950/50',
-        border: 'border-blue-200 dark:border-blue-800',
-        text: 'text-blue-700 dark:text-blue-300',
-        dot: 'bg-blue-500'
-    },
-    {
-        bg: 'bg-emerald-50 dark:bg-emerald-950/50',
-        border: 'border-emerald-200 dark:border-emerald-800',
-        text: 'text-emerald-700 dark:text-emerald-300',
-        dot: 'bg-emerald-500'
-    },
-    {
-        bg: 'bg-amber-50 dark:bg-amber-950/50',
-        border: 'border-amber-200 dark:border-amber-800',
-        text: 'text-amber-800 dark:text-amber-300',
-        dot: 'bg-amber-500'
-    },
-    {
-        bg: 'bg-cyan-50 dark:bg-cyan-950/50',
-        border: 'border-cyan-200 dark:border-cyan-800',
-        text: 'text-cyan-800 dark:text-cyan-300',
-        dot: 'bg-cyan-500'
-    }
-];
+// High-contrast, WCAG AA/AAA compliant color tokens (Adhering to Purple Ban)
+interface EventCategoryStyle {
+    badgeText: string;
+    chipBg: string;      // High-contrast solid background with white text
+    listRibbon: string;  // Left date ribbon for Agenda view
+    badgeClass: string;
+    dotColor: string;
+}
 
-function getEventStyle(id: string) {
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) {
-        hash = (hash << 5) - hash + id.charCodeAt(i);
-        hash |= 0;
+function getEventStyle(title: string = ''): EventCategoryStyle {
+    const t = (title || '').toLowerCase();
+
+    if (t.includes('สอบ') || t.includes('exam') || t.includes('คะแนน') || t.includes('เกรด')) {
+        return {
+            badgeText: 'การสอบ / วัดผล',
+            chipBg: 'bg-rose-600 hover:bg-rose-700 text-white shadow-xs',
+            listRibbon: 'bg-rose-600 text-white',
+            badgeClass: 'bg-rose-600 text-white border-none font-semibold',
+            dotColor: 'bg-rose-500'
+        };
     }
-    const index = Math.abs(hash) % EVENT_COLOR_STYLES.length;
-    return EVENT_COLOR_STYLES[index];
+
+    if (t.includes('ประชุม') || t.includes('meeting') || t.includes('office') || t.includes('คณะกรรมการ')) {
+        return {
+            badgeText: 'การประชุม',
+            chipBg: 'bg-sky-600 hover:bg-sky-700 text-white shadow-xs',
+            listRibbon: 'bg-sky-600 text-white',
+            badgeClass: 'bg-sky-600 text-white border-none font-semibold',
+            dotColor: 'bg-sky-500'
+        };
+    }
+
+    if (t.includes('อบรม') || t.includes('สัมมนา') || t.includes('workshop') || t.includes('โครงการ') || t.includes('พัฒนา') || t.includes('ทักษะ')) {
+        return {
+            badgeText: 'อบรม / โครงการ',
+            chipBg: 'bg-amber-600 hover:bg-amber-700 text-white shadow-xs',
+            listRibbon: 'bg-amber-600 text-white',
+            badgeClass: 'bg-amber-600 text-white border-none font-semibold',
+            dotColor: 'bg-amber-500'
+        };
+    }
+
+    if (t.includes('กิจกรรม') || t.includes('วันสำคัญ') || t.includes('สถาปนา') || t.includes('ประกวด') || t.includes('รำลึก')) {
+        return {
+            badgeText: 'กิจกรรม / วันสำคัญ',
+            chipBg: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs',
+            listRibbon: 'bg-emerald-600 text-white',
+            badgeClass: 'bg-emerald-600 text-white border-none font-semibold',
+            dotColor: 'bg-emerald-500'
+        };
+    }
+
+    // Default / General Academic Event (CRRU Slate)
+    return {
+        badgeText: 'วิชาการ / ทั่วไป',
+        chipBg: 'bg-slate-700 hover:bg-slate-800 text-white shadow-xs',
+        listRibbon: 'bg-slate-700 text-white',
+        badgeClass: 'bg-slate-700 text-white border-none font-semibold',
+        dotColor: 'bg-slate-500'
+    };
 }
 
 function formatThaiMonthYear(date: Date) {
@@ -352,6 +370,31 @@ export default function CalendarClient({ initialEvents }: CalendarClientProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* Category Color Legend Bar for instant readability */}
+                <div className="flex items-center gap-3 sm:gap-5 overflow-x-auto pt-3 border-t border-base-200 text-xs text-base-content/80 mt-3">
+                    <span className="text-base-content/50 text-[11px] font-semibold shrink-0">หมวดหมู่:</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="w-2.5 h-2.5 rounded-full bg-rose-600" />
+                        <span className="font-medium">การสอบ / วัดผล</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="w-2.5 h-2.5 rounded-full bg-sky-600" />
+                        <span className="font-medium">การประชุม</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-600" />
+                        <span className="font-medium">อบรม / โครงการ</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
+                        <span className="font-medium">กิจกรรม / วันสำคัญ</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="w-2.5 h-2.5 rounded-full bg-slate-700" />
+                        <span className="font-medium">วิชาการ / ทั่วไป</span>
+                    </div>
+                </div>
             </div>
 
             {/* View Mode: Month Grid */}
@@ -409,7 +452,7 @@ export default function CalendarClient({ initialEvents }: CalendarClientProps) {
                                     {/* Event Chips List */}
                                     <div className="space-y-1 flex-1 overflow-hidden">
                                         {dayEvents.slice(0, 3).map(evt => {
-                                            const style = getEventStyle(evt.id);
+                                            const style = getEventStyle(evt.title);
                                             return (
                                                 <button
                                                     key={evt.id}
@@ -417,10 +460,10 @@ export default function CalendarClient({ initialEvents }: CalendarClientProps) {
                                                         e.stopPropagation();
                                                         setSelectedEvent(evt);
                                                     }}
-                                                    className={`w-full text-left truncate text-[11px] sm:text-xs px-1.5 py-0.5 rounded border transition-transform hover:scale-[1.01] ${style.bg} ${style.border} ${style.text}`}
+                                                    className={`w-full text-left truncate text-xs px-2 py-0.5 rounded-md font-semibold transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer block ${style.chipBg}`}
                                                     title={evt.title}
                                                 >
-                                                    <span className="font-medium truncate block">{evt.title}</span>
+                                                    <span className="truncate block leading-tight">{evt.title}</span>
                                                 </button>
                                             );
                                         })}
@@ -448,25 +491,25 @@ export default function CalendarClient({ initialEvents }: CalendarClientProps) {
                     ) : (
                         <div className="space-y-3">
                             {currentMonthEvents.map(evt => {
-                                const style = getEventStyle(evt.id);
+                                const style = getEventStyle(evt.title);
                                 const startDate = parseISO(evt.start);
                                 return (
                                     <div
                                         key={evt.id}
                                         onClick={() => setSelectedEvent(evt)}
-                                        className="group card bg-base-100 border border-base-200 hover:border-primary/40 hover:shadow-md transition-all cursor-pointer overflow-hidden flex-col sm:flex-row"
+                                        className="group card bg-base-100 border border-base-200 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer overflow-hidden flex-col sm:flex-row"
                                     >
                                         {/* Date Ribbon */}
                                         <div
-                                            className={`sm:w-28 flex flex-row sm:flex-col items-center justify-between sm:justify-center p-3 sm:p-4 border-b sm:border-b-0 sm:border-r border-base-200 ${style.bg}`}
+                                            className={`sm:w-28 flex flex-row sm:flex-col items-center justify-between sm:justify-center p-3 sm:p-4 border-b sm:border-b-0 sm:border-r border-base-200 ${style.listRibbon}`}
                                         >
-                                            <span className="text-xs uppercase tracking-wider font-semibold opacity-70">
+                                            <span className="text-xs uppercase tracking-wider font-semibold opacity-90">
                                                 {format(startDate, 'EEE')}
                                             </span>
-                                            <span className="text-2xl sm:text-3xl font-extrabold leading-none my-0 sm:my-1">
+                                            <span className="text-2xl sm:text-3xl font-black leading-none my-0 sm:my-1">
                                                 {format(startDate, 'd')}
                                             </span>
-                                            <span className="text-xs opacity-75 font-medium">
+                                            <span className="text-xs opacity-95 font-semibold">
                                                 {THAI_MONTHS[startDate.getMonth()]}
                                             </span>
                                         </div>
@@ -474,6 +517,11 @@ export default function CalendarClient({ initialEvents }: CalendarClientProps) {
                                         {/* Content info */}
                                         <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                                             <div>
+                                                <div className="flex items-center gap-2 mb-1.5">
+                                                    <span className={`badge badge-sm ${style.badgeClass}`}>
+                                                        {style.badgeText}
+                                                    </span>
+                                                </div>
                                                 <h3 className="font-bold text-lg text-base-content group-hover:text-primary transition-colors">
                                                     {evt.title}
                                                 </h3>
@@ -554,8 +602,11 @@ export default function CalendarClient({ initialEvents }: CalendarClientProps) {
                             <X className="w-4 h-4" />
                         </button>
 
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="badge badge-primary badge-sm">Google Calendar</span>
+                        <div className="flex items-center gap-2 mb-3 flex-wrap">
+                            <span className={`badge badge-sm ${getEventStyle(selectedEvent.title).badgeClass}`}>
+                                {getEventStyle(selectedEvent.title).badgeText}
+                            </span>
+                            <span className="badge badge-outline badge-sm">Google Calendar</span>
                             {selectedEvent.isAllDay && <span className="badge badge-ghost badge-sm">ตลอดวัน</span>}
                         </div>
 
@@ -645,7 +696,7 @@ export default function CalendarClient({ initialEvents }: CalendarClientProps) {
 
                         <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
                             {selectedDateEvents.events.map(evt => {
-                                const style = getEventStyle(evt.id);
+                                const style = getEventStyle(evt.title);
                                 return (
                                     <div
                                         key={evt.id}
@@ -653,12 +704,20 @@ export default function CalendarClient({ initialEvents }: CalendarClientProps) {
                                             setSelectedDateEvents(null);
                                             setSelectedEvent(evt);
                                         }}
-                                        className={`p-3 rounded-xl border cursor-pointer hover:shadow-sm transition-all ${style.bg} ${style.border}`}
+                                        className="p-3 rounded-xl border border-base-200 bg-base-100 hover:border-primary/50 hover:shadow-sm cursor-pointer transition-all flex items-start gap-3"
                                     >
-                                        <div className={`font-semibold text-sm ${style.text}`}>{evt.title}</div>
-                                        <div className="flex items-center gap-2 mt-1 text-xs text-base-content/70">
-                                            <Clock className="w-3.5 h-3.5" />
-                                            <span>{formatEventTime(evt.start, evt.end, evt.isAllDay)}</span>
+                                        <div className={`w-3 h-3 rounded-full mt-1 shrink-0 ${style.dotColor}`} />
+                                        <div className="flex-1">
+                                            <div className="font-bold text-sm text-base-content">{evt.title}</div>
+                                            <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-base-content/70">
+                                                <span className={`badge badge-xs ${style.badgeClass}`}>
+                                                    {style.badgeText}
+                                                </span>
+                                                <span className="inline-flex items-center gap-1">
+                                                    <Clock className="w-3 h-3 text-primary" />
+                                                    {formatEventTime(evt.start, evt.end, evt.isAllDay)}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 );
