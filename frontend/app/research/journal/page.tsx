@@ -70,8 +70,27 @@ const PEER_REVIEW_STEPS = [
 ];
 
 export default function JournalPage() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Periodical',
+    name: 'วารสารสังคมศาสตร์วิชาการ (Journal of Social Academic)',
+    issn: ['1906-2508', '2697-5831'],
+    publisher: {
+      '@type': 'CollegeOrUniversity',
+      name: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+      url: 'https://soc.crru.ac.th',
+    },
+    url: THAIJO_URL,
+    description:
+      'วารสารวิชาการระดับชาติด้านสังคมศาสตร์ มนุษยศาสตร์ และการพัฒนาท้องถิ่น ดัชนี TCI เผยแพร่ผ่านระบบ ThaiJO',
+  };
+
   return (
     <div className="bg-slate-50/50 min-h-screen font-sans text-slate-800 pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* 1. HERO SECTION */}
       <section className="relative bg-gradient-to-b from-scholar-deep to-slate-900 text-white pt-24 pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#f14627_1px,transparent_1px)] [background-size:16px_16px]" />

@@ -134,7 +134,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${BASE_URL}/academics/credit-bank`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
         { url: `${BASE_URL}/news`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
         { url: `${BASE_URL}/research/database`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.85 },
+        { url: `${BASE_URL}/research/journal`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
         { url: `${BASE_URL}/research/services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.85 },
+        { url: `${BASE_URL}/research/mou`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.85 },
 
         // Chiang Rai Studies Center
         { url: `${BASE_URL}/chiang-rai-studies`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
