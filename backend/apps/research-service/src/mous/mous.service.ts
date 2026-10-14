@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DatabaseService, mous, MouPartnerType } from 'db/database';
+import { DatabaseService, mous } from 'db/database';
 import { CreateMouDto } from './dto/create-mou.dto';
 import { UpdateMouDto } from './dto/update-mou.dto';
-import { eq, desc, asc, and, ilike, or } from 'drizzle-orm';
+import { eq, desc, asc, and, ilike, or, SQL } from 'drizzle-orm';
 
 @Injectable()
 export class MousService {
   constructor(private readonly drizzleService: DatabaseService) {}
 
   async findAllPublic(partnerType?: string, search?: string) {
-    const conditions = [eq(mous.isPublished, true)];
+    const conditions: SQL[] = [eq(mous.isPublished, true)];
 
     if (partnerType && partnerType !== 'ALL') {
       conditions.push(eq(mous.partnerType, partnerType as any));
@@ -17,13 +17,14 @@ export class MousService {
 
     if (search && search.trim()) {
       const q = `%${search.trim()}%`;
-      conditions.push(
-        or(
-          ilike(mous.title, q),
-          ilike(mous.partnerName, q),
-          ilike(mous.scope, q),
-        ) as any,
+      const searchCondition = or(
+        ilike(mous.title, q),
+        ilike(mous.partnerName, q),
+        ilike(mous.scope, q),
       );
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
     }
 
     return this.drizzleService.db
@@ -34,7 +35,7 @@ export class MousService {
   }
 
   async findAllAdmin(partnerType?: string, search?: string) {
-    const conditions = [];
+    const conditions: SQL[] = [];
 
     if (partnerType && partnerType !== 'ALL') {
       conditions.push(eq(mous.partnerType, partnerType as any));
@@ -42,13 +43,14 @@ export class MousService {
 
     if (search && search.trim()) {
       const q = `%${search.trim()}%`;
-      conditions.push(
-        or(
-          ilike(mous.title, q),
-          ilike(mous.partnerName, q),
-          ilike(mous.scope, q),
-        ) as any,
+      const searchCondition = or(
+        ilike(mous.title, q),
+        ilike(mous.partnerName, q),
+        ilike(mous.scope, q),
       );
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
     }
 
     return this.drizzleService.db
