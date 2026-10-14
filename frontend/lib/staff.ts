@@ -3,6 +3,50 @@
  * Provides consistent formatting for academic titles, names, and Webometrics links.
  */
 
+export interface LinkedResearchProject {
+    id: string;
+    slug: string;
+    titleTh: string;
+    titleEn: string | null;
+    year: number;
+    status: 'ONGOING' | 'COMPLETED' | 'PUBLISHED' | 'CANCELLED';
+    fundingSource: string | null;
+    isSocialService: boolean;
+    isCommercial: boolean;
+    coverImageUrl: string | null;
+    role: 'HEAD' | 'CO_RESEARCHER' | 'ADVISOR' | 'ASSISTANT' | 'EXTERNAL_EXPERT';
+    positionTitle: string | null;
+}
+
+export interface Staff {
+    id: string;
+    prefixTh: string | null;
+    firstNameTh: string;
+    lastNameTh: string;
+    prefixEn: string | null;
+    firstNameEn: string | null;
+    lastNameEn: string | null;
+    staffType: 'ACADEMIC' | 'SUPPORT';
+    academicPositionId: number | null;
+    academicPosition: string | null;
+    adminPositionId: number | null;
+    adminPosition: string | null;
+    education: { level: 'BACHELOR' | 'MASTER' | 'DOCTORAL'; detail: string }[] | null;
+    expertise: string[] | null;
+    bio?: string | null;
+    shortBios?: string[] | null;
+    imageUrl: string | null;
+    contactEmail: string | null;
+    googleScholarUrl: string | null;
+    orcidId: string | null;
+    scopusAuthorId: string | null;
+    sortOrder: number;
+    department: string | null;
+    departmentEn: string | null;
+    isExecutive: boolean;
+    researchProjects?: LinkedResearchProject[];
+}
+
 export interface StaffNameFields {
     prefixTh?: string | null;
     firstNameTh: string;

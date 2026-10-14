@@ -21,71 +21,27 @@ import {
     CheckCircle2,
     AlertCircle,
     ArrowRight,
-    FlaskConical
+    FlaskConical,
+    Copy,
+    Check,
+    FileText,
+    Lock,
+    Quote
 } from 'lucide-react';
-import JsonLd from '@/components/seo/JsonLd';
+import Breadcrumb from '@/components/Breadcrumb';
+import RequestResumeModal from './RequestResumeModal';
 import {
     getFullName,
     getFullNameEn,
     getGoogleScholarLink,
     getOrcidLink,
     getScopusLink,
+    Staff,
+    LinkedResearchProject,
 } from '@/lib/staff';
-
-interface LinkedResearchProject {
-    id: string;
-    slug: string;
-    titleTh: string;
-    titleEn: string | null;
-    year: number;
-    status: 'ONGOING' | 'COMPLETED' | 'PUBLISHED' | 'CANCELLED';
-    fundingSource: string | null;
-    isSocialService: boolean;
-    isCommercial: boolean;
-    coverImageUrl: string | null;
-    role: 'HEAD' | 'CO_RESEARCHER' | 'ADVISOR' | 'ASSISTANT' | 'EXTERNAL_EXPERT';
-    positionTitle: string | null;
-}
-
-interface Staff {
-    id: string;
-    prefixTh: string | null;
-    firstNameTh: string;
-    lastNameTh: string;
-    prefixEn: string | null;
-    firstNameEn: string | null;
-    lastNameEn: string | null;
-    staffType: 'ACADEMIC' | 'SUPPORT';
-    academicPositionId: number | null;
-    academicPosition: string | null;
-    adminPositionId: number | null;
-    adminPosition: string | null;
-    education: { level: 'BACHELOR' | 'MASTER' | 'DOCTORAL'; detail: string }[] | null;
-    expertise: string[] | null;
-    shortBios: string[] | null;
-    imageUrl: string | null;
-    contactEmail: string | null;
-    googleScholarUrl: string | null;
-    orcidId: string | null;
-    scopusAuthorId: string | null;
-    department: string | null;
-    departmentEn: string | null;
-    isExecutive: boolean;
-    researchProjects?: LinkedResearchProject[];
-}
+import { getAssetUrl } from '@/lib/api-config';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-
-const getImageUrl = (url: string | null): string => {
-    if (!url) return '';
-    if (url.startsWith('http://localhost') || url.startsWith('http://soc_backend')) {
-        try { return new URL(url).pathname; } catch { return url; }
-    }
-    if (API_URL && url.startsWith(API_URL)) {
-        return url.replace(API_URL, '');
-    }
-    return url;
-};
 
 const getRoleBadge = (role: LinkedResearchProject['role']) => {
     switch (role) {
@@ -108,6 +64,26 @@ export default function StaffProfilePage() {
     const [staff, setStaff] = useState<Staff | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [copiedEmail, setCopiedEmail] = useState(false);
+    const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+
+    // Print Protection: intercept Ctrl+P / Cmd+P
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+                e.preventDefault();
+                setIsRequestModalOpen(true);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    const handleCopyEmail = (email: string) => {
+        navigator.clipboard.writeText(email);
+        setCopiedEmail(true);
+        setTimeout(() => setCopiedEmail(false), 2000);
+    };
 
     useEffect(() => {
         if (!id) return;
@@ -150,12 +126,12 @@ export default function StaffProfilePage() {
                     <UserCircle2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                     <h2 className="text-xl font-bold text-slate-900 mb-2">{error || 'ไม่พบข้อมูลบุคลากร'}</h2>
                     <p className="text-slate-500 text-sm mb-6">อาจมีการเปลี่ยนแปลงหรือลบข้อมูลนี้ออกจากระบบแล้ว</p>
-                    <button
-                        onClick={() => router.back()}
-                        className="px-5 py-2.5 bg-scholar-deep text-white text-sm font-medium rounded-sm hover:bg-slate-800 transition-colors"
+                    <Link
+                        href="/about/staff"
+                        className="px-5 py-2.5 bg-scholar-deep text-white text-sm font-medium rounded-sm hover:bg-slate-800 transition-colors inline-block"
                     >
                         กลับหน้าทำเนียบบุคลากร
-                    </button>
+                    </Link>
                 </div>
             </div>
         );
@@ -166,58 +142,95 @@ export default function StaffProfilePage() {
     const hasScopus = Boolean(staff.scopusAuthorId);
     const hasAnyResearcherId = hasScholar || hasOrcid || hasScopus;
 
-    const personSchema = {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": getFullName(staff),
-        "alternateName": getFullNameEn(staff) || undefined,
-        "url": `https://soc.crru.ac.th/about/staff/${staff.id}`,
-        "jobTitle": staff.adminPosition || staff.academicPosition || 'อาจารย์ประจำคณะสังคมศาสตร์',
-        "worksFor": {
-            "@type": "EducationalOrganization",
-            "name": "คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
-            "alternateName": "Faculty of Social Sciences, Chiang Rai Rajabhat University",
-            "url": "https://soc.crru.ac.th",
-            "parentOrganization": {
-                "@type": "CollegeOrUniversity",
-                "name": "มหาวิทยาลัยราชภัฏเชียงราย (Chiang Rai Rajabhat University)",
-                "url": "https://crru.ac.th"
-            }
-        },
-        "email": staff.contactEmail || undefined,
-        "image": staff.imageUrl ? `https://soc.crru.ac.th${getImageUrl(staff.imageUrl)}` : undefined,
-        "knowsAbout": staff.expertise && staff.expertise.length > 0 ? staff.expertise : undefined,
-        "sameAs": [
-            hasScholar ? getGoogleScholarLink(staff.googleScholarUrl) : null,
-            hasOrcid ? getOrcidLink(staff.orcidId) : null,
-            hasScopus ? getScopusLink(staff.scopusAuthorId) : null,
-        ].filter(Boolean),
-    };
-
     return (
         <main className="min-h-screen bg-slate-50 pb-20 font-sans">
-            <JsonLd data={personSchema} />
+            {/* CSS Print Protection Style */}
+            <style jsx global>{`
+                @media print {
+                    body * {
+                        visibility: hidden !important;
+                    }
+                    #print-restricted-notice, #print-restricted-notice * {
+                        visibility: visible !important;
+                    }
+                    #print-restricted-notice {
+                        position: fixed !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        background: white !important;
+                        padding: 40px !important;
+                        text-align: center !important;
+                        z-index: 99999 !important;
+                    }
+                }
+            `}</style>
 
-            {/* Header / Institutional Affiliation Breadcrumb */}
+            {/* Print Restriction Notice (Visible only during print) */}
+            <div id="print-restricted-notice" className="hidden">
+                <div className="max-w-md border-2 border-slate-400 p-8 rounded-lg text-center bg-slate-50">
+                    <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Lock className="w-6 h-6" />
+                    </div>
+                    <h2 className="text-base font-bold text-slate-900 mb-2">
+                        เอกสารประวัติบุคลากรได้รับการคุ้มครอง
+                    </h2>
+                    <p className="text-xs text-slate-600 mb-4 leading-relaxed">
+                        ตามระเบียบของคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย และพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+                        การนำประวัติหรือข้อมูลวิทยากรไปใช้ประกอบราชการหรืองานสัมมนา กรุณายื่นคำขอเอกสารประวัติทางการผ่านระบบเว็บไซต์
+                    </p>
+                    <p className="text-xs font-semibold text-slate-800 border-t border-slate-300 pt-3">
+                        สำนักงานคณบดี คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
+                    </p>
+                </div>
+            </div>
+
+            {/* Breadcrumb Navigation Bar */}
+            <div className="bg-slate-100/80 border-b border-slate-200">
+                <div className="container mx-auto max-w-6xl px-4 py-2">
+                    <Breadcrumb items={[
+                        { label: 'เกี่ยวกับเรา', href: '/about' },
+                        { label: 'บุคลากร', href: '/about/staff' },
+                        { label: getFullName(staff) }
+                    ]} />
+                </div>
+            </div>
+
+            {/* Header / Institutional Affiliation */}
             <section className="bg-scholar-deep text-white pt-8 pb-20 px-4 border-b border-slate-800 relative">
                 <div className="container mx-auto max-w-6xl">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-                        <button
-                            onClick={() => router.back()}
+                        <Link
+                            href="/about/staff"
                             className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition-colors group font-medium"
                         >
                             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
                             กลับหน้าทำเนียบบุคลากร
-                        </button>
-                        <div className="flex items-center gap-2 text-[11px] text-slate-300 bg-slate-900/60 px-2.5 py-1 rounded-sm border border-slate-700/60">
-                            <Building2 className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>มหาวิทยาลัยราชภัฏเชียงราย | Chiang Rai Rajabhat University</span>
+                        </Link>
+                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                            <button
+                                onClick={() => setIsRequestModalOpen(true)}
+                                className="inline-flex items-center gap-1.5 text-[11px] text-white bg-scholar-accent/90 hover:bg-scholar-accent px-2.5 py-1 rounded-sm shadow-sm transition-colors font-medium"
+                                title="ขอเอกสารประวัติหรือประวัติวิทยากรทางการ"
+                            >
+                                <FileText className="w-3.5 h-3.5" />
+                                <span>ขอประวัติวิทยากร (Resume)</span>
+                            </button>
+                            <div className="hidden sm:flex items-center gap-2 text-[11px] text-slate-300 bg-slate-900/60 px-2.5 py-1 rounded-sm border border-slate-700/60">
+                                <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>มหาวิทยาลัยราชภัฏเชียงราย | Chiang Rai Rajabhat University</span>
+                            </div>
                         </div>
                     </div>
 
                     <div className="max-w-2xl">
                         <span className="inline-block text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                            ทำเนียบอาจารย์และนักวิจัย • Faculty & Researcher Profile
+                            {staff.staffType === 'ACADEMIC' ? 'ทำเนียบอาจารย์และนักวิจัย • Faculty & Researcher Profile' : 'ทำเนียบบุคลากรสายสนับสนุน • Administrative Staff Profile'}
                         </span>
                         <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white">
                             {getFullName(staff)}
@@ -240,7 +253,7 @@ export default function StaffProfilePage() {
                             <div className="aspect-[3/4] w-full max-w-[220px] bg-white relative overflow-hidden rounded-sm shadow-2xs border border-slate-300 mb-5">
                                 {staff.imageUrl ? (
                                     <Image
-                                        src={getImageUrl(staff.imageUrl)}
+                                        src={getAssetUrl(staff.imageUrl)}
                                         alt={getFullName(staff)}
                                         fill
                                         sizes="(max-width: 768px) 100vw, 220px"
@@ -255,14 +268,26 @@ export default function StaffProfilePage() {
                                 )}
                             </div>
 
-                            {/* Affiliation & Department Badge */}
+                            {/* Affiliation & Department Badge (Clickable link to department) */}
                             <div className="w-full mb-6 text-center space-y-1.5">
                                 <span className="inline-block px-2.5 py-1 bg-slate-200/80 text-slate-800 text-[11px] font-bold rounded-sm border border-slate-300 uppercase tracking-wider">
                                     {staff.staffType === 'ACADEMIC' ? 'สายวิชาการ (Academic)' : 'สายสนับสนุน (Support)'}
                                 </span>
-                                <p className="text-xs font-semibold text-slate-700 leading-tight">
-                                    {staff.department || 'คณะสังคมศาสตร์'}
-                                </p>
+                                <div>
+                                    {staff.department ? (
+                                        <Link
+                                            href={`/about/staff?dept=${encodeURIComponent(staff.department)}`}
+                                            className="text-xs font-semibold text-slate-700 hover:text-scholar-accent transition-colors underline decoration-slate-300 underline-offset-2 hover:decoration-scholar-accent leading-tight inline-block"
+                                            title={`ดูคณาจารย์ทั้งหมดในสังกัด ${staff.department}`}
+                                        >
+                                            {staff.department}
+                                        </Link>
+                                    ) : (
+                                        <p className="text-xs font-semibold text-slate-700 leading-tight">
+                                            คณะสังคมศาสตร์
+                                        </p>
+                                    )}
+                                </div>
                                 {staff.departmentEn && (
                                     <p className="text-[11px] text-slate-500 font-normal">
                                         {staff.departmentEn}
@@ -276,18 +301,53 @@ export default function StaffProfilePage() {
                                     ข้อมูลการติดต่อ (Contact)
                                 </h4>
                                 {staff.contactEmail ? (
-                                    <a
-                                        href={`mailto:${staff.contactEmail}`}
-                                        className="flex items-center gap-2 p-2.5 bg-white border border-slate-200 rounded-sm text-slate-700 hover:text-slate-950 hover:border-slate-400 transition-colors text-xs font-medium break-all shadow-2xs group"
-                                    >
-                                        <Mail className="w-3.5 h-3.5 flex-shrink-0 text-slate-500 group-hover:text-slate-900" />
-                                        <span>{staff.contactEmail}</span>
-                                    </a>
+                                    <div className="space-y-1.5">
+                                        <a
+                                            href={`mailto:${staff.contactEmail}`}
+                                            className="flex items-center gap-2 p-2.5 bg-white border border-slate-200 rounded-sm text-slate-700 hover:text-slate-950 hover:border-slate-400 transition-colors text-xs font-medium break-all shadow-2xs group"
+                                        >
+                                            <Mail className="w-3.5 h-3.5 flex-shrink-0 text-slate-500 group-hover:text-slate-900" />
+                                            <span className="flex-grow">{staff.contactEmail}</span>
+                                        </a>
+                                        <button
+                                            onClick={() => handleCopyEmail(staff.contactEmail!)}
+                                            className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 px-2 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-sm text-[11px] font-medium transition-colors"
+                                        >
+                                            {copiedEmail ? (
+                                                <>
+                                                    <Check className="w-3 h-3 text-emerald-600" />
+                                                    <span className="text-emerald-700 font-semibold">คัดลอกอีเมลแล้ว</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy className="w-3 h-3 text-slate-400" />
+                                                    <span>คัดลอกอีเมล</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
                                 ) : (
                                     <p className="text-xs text-slate-400 italic bg-white border border-dashed border-slate-200 p-2.5 rounded-sm text-center">
                                         ไม่มีข้อมูลอีเมล
                                     </p>
                                 )}
+
+                                {/* Action Buttons: Request Resume & Share Profile */}
+                                <div className="space-y-2 pt-1">
+                                    <button
+                                        onClick={() => setIsRequestModalOpen(true)}
+                                        className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 bg-scholar-deep hover:bg-slate-800 text-white rounded-sm text-xs font-semibold shadow-2xs transition-colors"
+                                    >
+                                        <FileText className="w-3.5 h-3.5 text-scholar-accent" />
+                                        <span>ขอเอกสารประวัติ / วิทยากร</span>
+                                    </button>
+                                </div>
+
+                                <div className="p-2.5 bg-amber-50/70 border border-amber-200/80 rounded-sm text-[10px] text-amber-900 flex items-start gap-1.5 leading-snug">
+                                    <Lock className="w-3.5 h-3.5 text-amber-700 flex-shrink-0 mt-0.5" />
+                                    <span>ข้อมูลได้รับการคุ้มครองตาม พ.ร.บ. PDPA การขอเอกสารประวัติราชการหรือเทียบเชิญวิทยากร กรุณายื่นคำขอผ่านระบบ</span>
+                                </div>
+
                                 <div className="text-[11px] text-slate-500 leading-relaxed bg-slate-100/80 p-2 rounded-sm border border-slate-200">
                                     <span className="font-semibold text-slate-700 block mb-0.5">สังกัดทางการ:</span>
                                     คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
@@ -325,8 +385,22 @@ export default function StaffProfilePage() {
                                 </div>
                             </div>
 
-                            {/* Webometrics Researcher Profiles Hub */}
-                            <div className="mb-8 p-5 bg-slate-50 border border-slate-200 rounded-sm">
+                            {/* Biography & Vision Statement (if present) */}
+                            {staff.bio && (
+                                <div className="mb-8 p-5 bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-sm">
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2.5 flex items-center gap-2">
+                                        <Quote className="w-4 h-4 text-scholar-deep" />
+                                        <span>ประวัติและวิสัยทัศน์การทำงาน (Biography & Vision)</span>
+                                    </h3>
+                                    <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-line font-normal">
+                                        {staff.bio}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Webometrics Researcher Profiles Hub (Only for Academic staff or if they have researcher IDs) */}
+                            {(staff.staffType === 'ACADEMIC' || hasAnyResearcherId) && (
+                                <div className="mb-8 p-5 bg-slate-50 border border-slate-200 rounded-sm">
                                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                                     <div className="flex items-center gap-2">
                                         <div className="p-1 bg-white border border-slate-200 rounded-sm text-slate-700">
@@ -489,21 +563,23 @@ export default function StaffProfilePage() {
                                     </p>
                                 )}
                             </div>
+                            )}
 
-                            {/* Linked Research Projects Section */}
-                            <div className="mb-8">
-                                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
-                                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                                        <FlaskConical className="w-4 h-4 text-scholar-deep" />
-                                        โครงการวิจัยและผลงานวิชาการที่เชื่อมโยง
-                                    </h3>
-                                    <Link
-                                        href="/research/database"
-                                        className="text-xs text-slate-600 hover:text-slate-900 font-medium inline-flex items-center gap-1 transition-colors"
-                                    >
-                                        ดูคลังวิจัยคณะ <ArrowRight className="w-3 h-3" />
-                                    </Link>
-                                </div>
+                            {/* Linked Research Projects Section (Academic or if projects exist) */}
+                            {(staff.staffType === 'ACADEMIC' || (staff.researchProjects && staff.researchProjects.length > 0)) && (
+                                <div className="mb-8">
+                                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+                                        <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                                            <FlaskConical className="w-4 h-4 text-scholar-deep" />
+                                            โครงการวิจัยและผลงานวิชาการที่เชื่อมโยง
+                                        </h3>
+                                        <Link
+                                            href="/research/database"
+                                            className="text-xs text-slate-600 hover:text-slate-900 font-medium inline-flex items-center gap-1 transition-colors"
+                                        >
+                                            ดูคลังวิจัยคณะ <ArrowRight className="w-3 h-3" />
+                                        </Link>
+                                    </div>
 
                                 {staff.researchProjects && staff.researchProjects.length > 0 ? (
                                     <div className="space-y-3">
@@ -570,6 +646,7 @@ export default function StaffProfilePage() {
                                     </div>
                                 )}
                             </div>
+                            )}
 
                             {/* Education & Expertise Grid */}
                             <div className="grid md:grid-cols-2 gap-8 pt-4 border-t border-slate-200">
@@ -650,6 +727,13 @@ export default function StaffProfilePage() {
                     </div>
                 </div>
             </div>
+
+            {/* Request Official Resume / Speaker Bio Modal */}
+            <RequestResumeModal
+                isOpen={isRequestModalOpen}
+                onClose={() => setIsRequestModalOpen(false)}
+                staff={staff}
+            />
         </main>
     );
 }

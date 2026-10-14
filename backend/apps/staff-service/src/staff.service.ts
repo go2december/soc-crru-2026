@@ -11,18 +11,25 @@ import {
   adminPositions,
   researchProjects,
   projectMembers,
+  staffResumeRequests,
 } from 'db/database';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { CreatePositionDto, UpdatePositionDto } from './dto/position.dto';
+import { CreateResumeRequestDto, ApproveResumeRequestDto } from './dto/create-resume-request.dto';
 import { UploadService } from 'upload/upload';
+import { StaffMailService } from './mail.service';
+import { PdfResumeService } from './pdf-resume.service';
 import { eq, sql, and, desc } from 'drizzle-orm';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class StaffService {
   constructor(
     private readonly drizzle: DatabaseService,
     private readonly uploadService: UploadService,
+    private readonly mailService: StaffMailService,
+    private readonly pdfResumeService: PdfResumeService,
   ) {}
 
   async create(createStaffDto: CreateStaffDto) {
@@ -337,5 +344,255 @@ export class StaffService {
     if (!result.length)
       throw new NotFoundException(`Admin Position with ID ${id} not found`);
     return result[0];
+  }
+
+  // --- Anti-Bot Human Verification ---
+
+  generateCaptchaChallenge() {
+    const num1 = Math.floor(Math.random() * 9) + 1;
+    const num2 = Math.floor(Math.random() * 9) + 1;
+    const answer = (num1 + num2).toString();
+    const timestamp = Date.now().toString();
+    const secret = process.env.JWT_SECRET || 'soc-captcha-secret';
+
+    const hmac = crypto
+      .createHmac('sha256', secret)
+      .update(`${answer}:${timestamp}`)
+      .digest('hex');
+
+    const token = `${timestamp}.${hmac}`;
+    return {
+      question: `${num1} + ${num2}`,
+      token,
+    };
+  }
+
+  private verifyCaptcha(token?: string, answer?: string): boolean {
+    if (!token || !answer) return false;
+    const parts = token.split('.');
+    if (parts.length !== 2) return false;
+
+    const [timestampStr, hmac] = parts;
+    const timestamp = parseInt(timestampStr, 10);
+    // Token valid for 10 minutes (600,000 ms)
+    if (isNaN(timestamp) || Date.now() - timestamp > 600000) {
+      return false;
+    }
+
+    const secret = process.env.JWT_SECRET || 'soc-captcha-secret';
+    const expectedHmac = crypto
+      .createHmac('sha256', secret)
+      .update(`${answer.trim()}:${timestampStr}`)
+      .digest('hex');
+
+    return hmac === expectedHmac;
+  }
+
+  // --- Resume & Speaker Bio Requests (PDPA Compliance) ---
+
+  async createResumeRequest(dto: CreateResumeRequestDto) {
+    // 1. Anti-Bot Defense: Honeypot check
+    if (dto.honeypot && dto.honeypot.trim().length > 0) {
+      throw new BadRequestException('ระบบตรวจพบการส่งข้อมูลอัตโนมัติ (Automated bot detected)');
+    }
+
+    // 2. Anti-Bot Defense: Time-gate check (minimum 1.5 seconds between modal open and submit)
+    if (dto.renderedTime && Date.now() - dto.renderedTime < 1500) {
+      throw new BadRequestException('กรุณากรอกข้อมูลตามขั้นตอนปกติ (Submission too fast)');
+    }
+
+    // 3. Anti-Bot Defense: Math Challenge Verification
+    if (dto.captchaToken && dto.captchaAnswer) {
+      const isValid = this.verifyCaptcha(dto.captchaToken, dto.captchaAnswer);
+      if (!isValid) {
+        throw new BadRequestException('ผลลัพธ์การตรวจสอบความปลอดภัย (Anti-Bot) ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+      }
+    } else {
+      throw new BadRequestException('กรุณาตอบคำถามยืนยันความปลอดภัยเพื่อป้องกันสแปม');
+    }
+
+    const staff = await this.findOne(dto.staffId);
+    if (!staff) {
+      throw new NotFoundException(`Staff member with ID ${dto.staffId} not found`);
+    }
+
+    const result = await this.drizzle.db
+      .insert(staffResumeRequests)
+      .values({
+        staffId: dto.staffId,
+        requesterName: dto.requesterName,
+        organization: dto.organization,
+        email: dto.email,
+        phone: dto.phone,
+        purpose: dto.purpose,
+        notes: dto.notes,
+        status: 'PENDING',
+      })
+      .returning();
+
+    const request = result[0];
+    const staffName = `${staff.prefixTh || ''} ${staff.firstNameTh} ${staff.lastNameTh}`.trim();
+
+    // ส่งอีเมลยืนยันการรับคำร้องไปยังผู้ขอ (ระบุเงื่อนไขจัดส่งไม่เกิน 7 วันทำการ)
+    await this.mailService.sendAcknowledgmentEmail({
+      to: dto.email,
+      requesterName: dto.requesterName,
+      organization: dto.organization,
+      staffName,
+      purpose: dto.purpose,
+      requestId: request.id,
+    });
+
+    // แจ้งเตือนแอดมินหรืออีเมลประจำตัวอาจารย์
+    await this.mailService.sendAdminAlert({
+      adminEmail: staff.contactEmail || undefined,
+      requesterName: dto.requesterName,
+      organization: dto.organization,
+      staffName,
+      purpose: dto.purpose,
+      requestId: request.id,
+    });
+
+    return {
+      success: true,
+      requestId: request.id,
+      status: request.status,
+      message: 'บันทึกคำขอรับเอกสารประวัติเรียบร้อยแล้ว คณะฯ จะดำเนินการตรวจสอบและจัดส่งให้ทางอีเมลไม่เกิน 7 วันหลังจากได้รับการร้องขอ',
+    };
+  }
+
+  async findAllResumeRequests(page: number = 1, limit: number = 20, status?: string) {
+    const offset = (page - 1) * limit;
+
+    const baseQuery = this.drizzle.db
+      .select({
+        id: staffResumeRequests.id,
+        staffId: staffResumeRequests.staffId,
+        requesterName: staffResumeRequests.requesterName,
+        organization: staffResumeRequests.organization,
+        email: staffResumeRequests.email,
+        phone: staffResumeRequests.phone,
+        purpose: staffResumeRequests.purpose,
+        notes: staffResumeRequests.notes,
+        status: staffResumeRequests.status,
+        sentAt: staffResumeRequests.sentAt,
+        createdAt: staffResumeRequests.createdAt,
+        rejectionReason: staffResumeRequests.rejectionReason,
+        staffFirstNameTh: staffProfiles.firstNameTh,
+        staffLastNameTh: staffProfiles.lastNameTh,
+        staffPrefixTh: staffProfiles.prefixTh,
+        departmentName: departments.nameTh,
+      })
+      .from(staffResumeRequests)
+      .leftJoin(staffProfiles, eq(staffResumeRequests.staffId, staffProfiles.id))
+      .leftJoin(departments, eq(staffProfiles.departmentId, departments.id));
+
+    let query = baseQuery;
+    if (status) {
+      query = query.where(eq(staffResumeRequests.status, status as any)) as any;
+    }
+
+    const data = await (query as any)
+      .orderBy(desc(staffResumeRequests.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const totalRes = await this.drizzle.db
+      .select({ count: sql<number>`count(*)` })
+      .from(staffResumeRequests);
+    const total = Number(totalRes[0]?.count || 0);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async approveResumeRequest(requestId: string, adminUserId?: string) {
+    const requests = await this.drizzle.db
+      .select()
+      .from(staffResumeRequests)
+      .where(eq(staffResumeRequests.id, requestId));
+
+    if (requests.length === 0) {
+      throw new NotFoundException(`Resume request with ID ${requestId} not found`);
+    }
+
+    const request = requests[0];
+    const staff = await this.findOne(request.staffId);
+    if (!staff) {
+      throw new NotFoundException(`Staff profile not found for this request`);
+    }
+
+    // Generate PDF Resume
+    const pdfBuffer = await this.pdfResumeService.generateStaffResumePdf(staff, request.id);
+    const staffName = `${staff.prefixTh || ''} ${staff.firstNameTh} ${staff.lastNameTh}`.trim();
+    const fileName = `CV_${staff.firstNameTh}_${staff.lastNameTh}.pdf`;
+
+    // Send email with PDF attached
+    const emailResult = await this.mailService.sendOfficialResumeEmail({
+      to: request.email,
+      requesterName: request.requesterName,
+      organization: request.organization,
+      staffName,
+      pdfBuffer,
+      fileName,
+      requestId: request.id,
+    });
+
+    // Update status to SENT
+    const updated = await this.drizzle.db
+      .update(staffResumeRequests)
+      .set({
+        status: 'SENT',
+        sentAt: new Date(),
+        approvedBy: adminUserId || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(staffResumeRequests.id, requestId))
+      .returning();
+
+    return {
+      success: true,
+      data: updated[0],
+      emailDelivered: emailResult.success,
+      message: 'อนุมัติคำขอและจัดส่งเอกสาร PDF ให้ผู้ขอเรียบร้อยแล้ว',
+    };
+  }
+
+  async rejectResumeRequest(requestId: string, reason: string, adminUserId?: string) {
+    const updated = await this.drizzle.db
+      .update(staffResumeRequests)
+      .set({
+        status: 'REJECTED',
+        rejectionReason: reason,
+        approvedBy: adminUserId || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(staffResumeRequests.id, requestId))
+      .returning();
+
+    if (updated.length === 0) {
+      throw new NotFoundException(`Resume request with ID ${requestId} not found`);
+    }
+
+    return {
+      success: true,
+      data: updated[0],
+      message: 'ปฏิเสธคำขอเอกสารเรียบร้อยแล้ว',
+    };
+  }
+
+  async getResumePdfPreview(staffId: string): Promise<{ buffer: Buffer; fileName: string }> {
+    const staff = await this.findOne(staffId);
+    if (!staff) {
+      throw new NotFoundException(`Staff profile with ID ${staffId} not found`);
+    }
+    const buffer = await this.pdfResumeService.generateStaffResumePdf(staff, 'PREVIEW');
+    const fileName = `CV_${staff.firstNameTh}_${staff.lastNameTh}.pdf`;
+    return { buffer, fileName };
   }
 }

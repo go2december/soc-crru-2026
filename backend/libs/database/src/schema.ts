@@ -54,6 +54,12 @@ export const newsCategoryEnum = pgEnum('news_category', [
 
 // Staff-related Constants
 export const staffTypeEnum = pgEnum('staff_type', ['ACADEMIC', 'SUPPORT']);
+export const resumeRequestStatusEnum = pgEnum('resume_request_status', [
+  'PENDING',
+  'APPROVED',
+  'REJECTED',
+  'SENT',
+]);
 
 // Publication & Approval Workflow Enum
 export const publicationStatusEnum = pgEnum('publication_status', [
@@ -162,6 +168,25 @@ export const staffProfiles = pgTable('staff_profiles', {
   shortBios: text('short_bios').array(),
   sortOrder: integer('sort_order').default(0).notNull(), // สำหรับเรียงลำดับการแสดงผล
   isExecutive: boolean('is_executive').default(false).notNull(), // สถานะผู้บริหาร (แยกจากประเภทบุคลากร)
+});
+
+export const staffResumeRequests = pgTable('staff_resume_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  staffId: uuid('staff_id')
+    .notNull()
+    .references(() => staffProfiles.id, { onDelete: 'cascade' }),
+  requesterName: varchar('requester_name', { length: 255 }).notNull(),
+  organization: varchar('organization', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  phone: varchar('phone', { length: 50 }),
+  purpose: varchar('purpose', { length: 100 }).notNull(),
+  notes: text('notes'),
+  status: resumeRequestStatusEnum('status').default('PENDING').notNull(),
+  approvedBy: uuid('approved_by').references(() => users.id),
+  rejectionReason: text('rejection_reason'),
+  sentAt: timestamp('sent_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // ------------------------------------------
