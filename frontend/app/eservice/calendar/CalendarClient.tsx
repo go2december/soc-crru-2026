@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useSyncExternalStore } from 'react';
 import {
     format,
     addMonths,
@@ -33,6 +33,17 @@ import { CalendarEvent } from '@/lib/calendar/ical-parser';
 
 interface CalendarClientProps {
     initialEvents: CalendarEvent[];
+}
+
+const emptySubscribe = () => () => {};
+
+// Official React 18/19 pattern to detect client hydration without cascading renders
+function useMounted() {
+    return useSyncExternalStore(
+        emptySubscribe,
+        () => true,
+        () => false
+    );
 }
 
 const THAI_MONTHS = [
@@ -140,6 +151,7 @@ function createGoogleCalendarUrl(event: CalendarEvent): string {
 }
 
 export default function CalendarClient({ initialEvents }: CalendarClientProps) {
+    const isMounted = useMounted();
     const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
     const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
     const [viewMode, setViewMode] = useState<'grid' | 'agenda'>('grid');
@@ -208,6 +220,44 @@ export default function CalendarClient({ initialEvents }: CalendarClientProps) {
             return false;
         });
     };
+
+    // Return clean skeleton during SSR to completely prevent hydration mismatch
+    if (!isMounted) {
+        return (
+            <div className="space-y-6 animate-pulse">
+                {/* Control Bar Skeleton */}
+                <div className="bg-base-100 rounded-2xl p-4 sm:p-6 shadow-sm border border-base-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="h-9 w-28 bg-base-200 rounded-xl" />
+                        <div className="h-7 w-48 bg-base-200 rounded-lg" />
+                    </div>
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        <div className="h-8 w-48 bg-base-200 rounded-lg flex-1 md:flex-initial" />
+                        <div className="h-8 w-36 bg-base-200 rounded-xl" />
+                    </div>
+                </div>
+
+                {/* Calendar Grid Skeleton */}
+                <div className="bg-base-100 rounded-2xl shadow-sm border border-base-200 overflow-hidden p-4">
+                    <div className="grid grid-cols-7 gap-2 mb-3 text-center">
+                        {THAI_DAYS_SHORT.map(d => (
+                            <div key={d} className="h-6 bg-base-200/60 rounded font-medium text-xs flex items-center justify-center text-base-content/40">
+                                {d}
+                            </div>
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-2">
+                        {Array.from({ length: 35 }).map((_, i) => (
+                            <div key={i} className="min-h-[95px] sm:min-h-[125px] bg-base-200/40 rounded-xl border border-base-200/30 p-2 flex flex-col justify-between">
+                                <div className="w-6 h-6 bg-base-200 rounded-full" />
+                                {i % 4 === 0 && <div className="h-4 w-full bg-base-200/80 rounded" />}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
