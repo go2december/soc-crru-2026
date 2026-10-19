@@ -144,13 +144,21 @@ export class StaffController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
   async previewResumePdf(@Param('id') id: string, @Res() res: any) {
-    const { buffer, fileName } = await this.staffService.getResumePdfPreview(id);
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `inline; filename="${fileName}"`,
-      'Content-Length': buffer.length.toString(),
-    });
-    res.end(buffer);
+    try {
+      const { buffer, fileName } = await this.staffService.getResumePdfPreview(id);
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `inline; filename="${fileName}"`,
+        'Content-Length': buffer.length.toString(),
+      });
+      return res.end(buffer);
+    } catch (err: any) {
+      console.error(`[previewResumePdf] Error generating preview for staffId ${id}:`, err);
+      return res.status(err.status || 500).json({
+        statusCode: err.status || 500,
+        message: err.message || 'Error generating PDF preview',
+      });
+    }
   }
 
   @Get(':id')

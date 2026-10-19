@@ -160,12 +160,13 @@ export class PdfResumeService {
             .text(`ตำแหน่ง: ${positionText}`);
         }
 
-        if (staff.departmentName) {
+        const deptName = staff.departmentName || staff.department;
+        if (deptName) {
           doc
             .font(fontToUseRegular)
             .fontSize(10)
             .fillColor('#334155')
-            .text(`สังกัด: ${staff.departmentName} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`);
+            .text(`สังกัด: ${deptName} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`);
         }
 
         if (staff.contactEmail) {
