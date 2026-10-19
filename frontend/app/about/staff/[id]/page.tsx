@@ -519,8 +519,8 @@ export default function StaffProfilePage() {
                             </div>
                             )}
 
-                            {/* Linked Research Projects Section (Max 3 latest items) */}
-                            {(staff.staffType === 'ACADEMIC' || (staff.researchProjects && staff.researchProjects.length > 0)) && (
+                            {/* Linked Research Projects Section (Max 3 latest items, shown ONLY when projects exist) */}
+                            {Boolean(staff.researchProjects && staff.researchProjects.length > 0) && (
                                 <div className="mb-8">
                                     <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
                                         <div className="flex items-center gap-2">
@@ -528,11 +528,9 @@ export default function StaffProfilePage() {
                                                 <FlaskConical className="w-4 h-4 text-scholar-deep" />
                                                 โครงการวิจัยและผลงานวิชาการล่าสุด
                                             </h3>
-                                            {staff.researchProjects && staff.researchProjects.length > 0 && (
-                                                <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-sm">
-                                                    แสดง {Math.min(staff.researchProjects.length, 3)} จาก {staff.researchProjects.length} เรื่อง
-                                                </span>
-                                            )}
+                                            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-sm">
+                                                แสดง {Math.min(staff.researchProjects!.length, 3)} จาก {staff.researchProjects!.length} เรื่อง
+                                            </span>
                                         </div>
                                         <Link
                                             href="/research/database"
@@ -542,9 +540,8 @@ export default function StaffProfilePage() {
                                         </Link>
                                     </div>
 
-                                {staff.researchProjects && staff.researchProjects.length > 0 ? (
                                     <div className="space-y-3">
-                                        {staff.researchProjects.slice(0, 3).map((proj) => {
+                                        {staff.researchProjects!.slice(0, 3).map((proj) => {
                                             const roleBadge = getRoleBadge(proj.role);
                                             return (
                                                 <div
@@ -596,11 +593,11 @@ export default function StaffProfilePage() {
                                         })}
 
                                         {/* Notice if more than 3 projects */}
-                                        {staff.researchProjects.length > 3 && (
+                                        {staff.researchProjects!.length > 3 && (
                                             <div className="p-3 bg-slate-50 border border-dashed border-slate-300 rounded-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                                                 <div className="text-slate-600">
                                                     <span>ยังมีโครงการวิจัยและผลงานวิชาการอีก </span>
-                                                    <span className="font-bold text-slate-900">{staff.researchProjects.length - 3} เรื่อง</span>
+                                                    <span className="font-bold text-slate-900">{staff.researchProjects!.length - 3} เรื่อง</span>
                                                     <span> ในฐานข้อมูลประวัติฉบับเต็ม</span>
                                                 </div>
                                                 <button
@@ -613,18 +610,7 @@ export default function StaffProfilePage() {
                                             </div>
                                         )}
                                     </div>
-                                ) : (
-                                    <div className="p-6 bg-slate-50 border border-dashed border-slate-200 rounded-sm text-center">
-                                        <FlaskConical className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                                        <p className="text-xs font-medium text-slate-600 mb-1">
-                                            ยังไม่มีโครงการวิจัยที่เชื่อมโยงในระบบฐานข้อมูล
-                                        </p>
-                                        <p className="text-[11px] text-slate-400">
-                                            ข้อมูลจะแสดงอัตโนมัติเมื่อโครงการวิจัยที่อาจารย์มีส่วนร่วมได้รับการอนุมัติและเผยแพร่
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+                                </div>
                             )}
 
                             {/* Academic & Social Services Section (Max 3 latest items) */}
