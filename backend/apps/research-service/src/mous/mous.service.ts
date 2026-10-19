@@ -1,12 +1,31 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService, mous } from 'db/database';
+import { UploadService } from 'upload/upload';
 import { CreateMouDto } from './dto/create-mou.dto';
 import { UpdateMouDto } from './dto/update-mou.dto';
 import { eq, desc, asc, and, ilike, or, SQL } from 'drizzle-orm';
 
 @Injectable()
 export class MousService {
-  constructor(private readonly drizzleService: DatabaseService) {}
+  constructor(
+    private readonly drizzleService: DatabaseService,
+    private readonly uploadService: UploadService,
+  ) {}
+
+  private async cleanupMouFiles(
+    prev?: { partnerLogoUrl?: string | null; documentUrl?: string | null } | null,
+    next?: { partnerLogoUrl?: string | null; documentUrl?: string | null } | null,
+  ): Promise<void> {
+    if (!prev) return;
+    const nextUrls = new Set(
+      [next?.partnerLogoUrl, next?.documentUrl].filter(Boolean),
+    );
+    for (const url of [prev.partnerLogoUrl, prev.documentUrl]) {
+      if (url && !nextUrls.has(url)) {
+        await this.uploadService.deleteResearchImage(url);
+      }
+    }
+  }
 
   async findAllPublic(partnerType?: string, search?: string) {
     const conditions: SQL[] = [eq(mous.isPublished, true)];
@@ -90,7 +109,7 @@ export class MousService {
   }
 
   async update(id: string, updateDto: UpdateMouDto, _user?: any) {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
 
     const { startDate, endDate, ...rest } = updateDto;
 
@@ -105,12 +124,14 @@ export class MousService {
       .where(eq(mous.id, id))
       .returning();
 
+    await this.cleanupMouFiles(existing, updated);
     return updated;
   }
 
   async remove(id: string, _user?: any) {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
     await this.drizzleService.db.delete(mous).where(eq(mous.id, id));
+    await this.cleanupMouFiles(existing);
     return { success: true, message: `ลบบันทึกข้อตกลงความร่วมมือเรียบร้อยแล้ว` };
   }
 }

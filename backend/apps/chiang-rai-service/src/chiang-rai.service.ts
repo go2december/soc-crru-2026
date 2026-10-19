@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'db/database';
+import { UploadService } from 'upload/upload';
 import {
   chiangRaiIdentities,
   chiangRaiArtifacts,
@@ -16,7 +17,47 @@ import { eq, desc, asc, ilike, or, and, count, SQL } from 'drizzle-orm';
 
 @Injectable()
 export class ChiangRaiService {
-  constructor(private readonly drizzle: DatabaseService) {}
+  constructor(
+    private readonly drizzle: DatabaseService,
+    private readonly uploadService: UploadService,
+  ) {}
+
+  private collectChiangRaiUrls(
+    item?: {
+      thumbnailUrl?: string | null;
+      imageUrl?: string | null;
+      heroBgUrl?: string | null;
+      digitalArchiveBgUrl?: string | null;
+      mediaUrls?: string[] | null;
+    } | null,
+  ): string[] {
+    if (!item) return [];
+    const urls = new Set<string>();
+    for (const u of [
+      item.thumbnailUrl,
+      item.imageUrl,
+      item.heroBgUrl,
+      item.digitalArchiveBgUrl,
+      ...(item.mediaUrls ?? []),
+    ]) {
+      if (u && u.startsWith('/uploads/chiang-rai/')) {
+        urls.add(u);
+      }
+    }
+    return [...urls];
+  }
+
+  private async cleanupChiangRaiFiles(
+    prev?: Parameters<ChiangRaiService['collectChiangRaiUrls']>[0],
+    next?: Parameters<ChiangRaiService['collectChiangRaiUrls']>[0],
+  ): Promise<void> {
+    const nextUrls = new Set(this.collectChiangRaiUrls(next));
+    for (const url of this.collectChiangRaiUrls(prev)) {
+      if (!nextUrls.has(url)) {
+        await this.uploadService.deleteChiangRaiImage(url);
+      }
+    }
+  }
 
   // --- Identities ---
   async getAllIdentities() {
@@ -634,18 +675,23 @@ export class ChiangRaiService {
     id: string,
     data: Partial<typeof chiangRaiArtifacts.$inferInsert>,
   ) {
-    return this.drizzle.db
+    const prev = await this.getArtifactById(id);
+    const updated = await this.drizzle.db
       .update(chiangRaiArtifacts)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(chiangRaiArtifacts.id, id))
       .returning();
+    await this.cleanupChiangRaiFiles(prev, updated[0]);
+    return updated;
   }
 
   async deleteArtifact(id: string) {
-    return this.drizzle.db
+    const deleted = await this.drizzle.db
       .delete(chiangRaiArtifacts)
       .where(eq(chiangRaiArtifacts.id, id))
       .returning();
+    await this.cleanupChiangRaiFiles(deleted[0]);
+    return deleted;
   }
 
   // --- Articles ---
@@ -737,22 +783,27 @@ export class ChiangRaiService {
     id: string,
     data: Partial<typeof chiangRaiArticles.$inferInsert>,
   ) {
+    const prev = await this.getArticleById(id);
     const payload = { ...data };
     if (payload.publishedAt && typeof payload.publishedAt === 'string') {
       payload.publishedAt = new Date(payload.publishedAt);
     }
-    return this.drizzle.db
+    const updated = await this.drizzle.db
       .update(chiangRaiArticles)
       .set(payload)
       .where(eq(chiangRaiArticles.id, id))
       .returning();
+    await this.cleanupChiangRaiFiles(prev, updated[0]);
+    return updated;
   }
 
   async deleteArticle(id: string) {
-    return this.drizzle.db
+    const deleted = await this.drizzle.db
       .delete(chiangRaiArticles)
       .where(eq(chiangRaiArticles.id, id))
       .returning();
+    await this.cleanupChiangRaiFiles(deleted[0]);
+    return deleted;
   }
 
   // --- Activities ---
@@ -1008,6 +1059,11 @@ export class ChiangRaiService {
     id: string,
     data: Partial<typeof chiangRaiActivities.$inferInsert>,
   ) {
+    const [prev] = await this.drizzle.db
+      .select()
+      .from(chiangRaiActivities)
+      .where(eq(chiangRaiActivities.id, id))
+      .limit(1);
     const payload = { ...data, updatedAt: new Date() };
     if (payload.publishedAt && typeof payload.publishedAt === 'string')
       payload.publishedAt = new Date(payload.publishedAt);
@@ -1015,18 +1071,22 @@ export class ChiangRaiService {
       payload.eventDate = new Date(payload.eventDate);
     if (payload.eventEndDate && typeof payload.eventEndDate === 'string')
       payload.eventEndDate = new Date(payload.eventEndDate);
-    return this.drizzle.db
+    const updated = await this.drizzle.db
       .update(chiangRaiActivities)
       .set(payload)
       .where(eq(chiangRaiActivities.id, id))
       .returning();
+    await this.cleanupChiangRaiFiles(prev, updated[0]);
+    return updated;
   }
 
   async deleteActivity(id: string) {
-    return this.drizzle.db
+    const deleted = await this.drizzle.db
       .delete(chiangRaiActivities)
       .where(eq(chiangRaiActivities.id, id))
       .returning();
+    await this.cleanupChiangRaiFiles(deleted[0]);
+    return deleted;
   }
 
   // --- Staff Management ---
@@ -1074,19 +1134,28 @@ export class ChiangRaiService {
     id: string,
     data: Partial<typeof chiangRaiStaff.$inferInsert>,
   ) {
-    return this.drizzle.db
+    const [prev] = await this.drizzle.db
+      .select()
+      .from(chiangRaiStaff)
+      .where(eq(chiangRaiStaff.id, id))
+      .limit(1);
+    const updated = await this.drizzle.db
       .update(chiangRaiStaff)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(chiangRaiStaff.id, id))
       .returning();
+    await this.cleanupChiangRaiFiles(prev, updated[0]);
+    return updated;
   }
 
   // Delete staff
   async deleteStaff(id: string) {
-    return this.drizzle.db
+    const deleted = await this.drizzle.db
       .delete(chiangRaiStaff)
       .where(eq(chiangRaiStaff.id, id))
       .returning();
+    await this.cleanupChiangRaiFiles(deleted[0]);
+    return deleted;
   }
 
   // List all Faculty Staff (for Admin import selector)
@@ -1175,12 +1244,15 @@ export class ChiangRaiService {
   }
 
   async updateConfig(data: Partial<typeof chiangRaiConfig.$inferInsert>) {
+    const prev = await this.getConfig();
     // Always update ID 1
-    return this.drizzle.db
+    const updated = await this.drizzle.db
       .update(chiangRaiConfig)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(chiangRaiConfig.id, 1))
       .returning();
+    await this.cleanupChiangRaiFiles(prev, updated[0]);
+    return updated;
   }
 
   // --- Learning Sites (แหล่งเรียนรู้ทางวัฒนธรรม) - Same as Articles (without category) ---
@@ -1301,22 +1373,27 @@ export class ChiangRaiService {
     id: string,
     data: Partial<typeof chiangRaiLearningSites.$inferInsert>,
   ) {
+    const prev = await this.getLearningSiteById(id);
     const payload = { ...data };
     if (payload.publishedAt && typeof payload.publishedAt === 'string') {
       payload.publishedAt = new Date(payload.publishedAt);
     }
-    return this.drizzle.db
+    const updated = await this.drizzle.db
       .update(chiangRaiLearningSites)
       .set(payload)
       .where(eq(chiangRaiLearningSites.id, id))
       .returning();
+    await this.cleanupChiangRaiFiles(prev, updated[0]);
+    return updated;
   }
 
   async deleteLearningSite(id: string) {
-    return this.drizzle.db
+    const deleted = await this.drizzle.db
       .delete(chiangRaiLearningSites)
       .where(eq(chiangRaiLearningSites.id, id))
       .returning();
+    await this.cleanupChiangRaiFiles(deleted[0]);
+    return deleted;
   }
 
   async getLearningSiteCategories() {

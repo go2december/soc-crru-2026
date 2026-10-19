@@ -34,30 +34,28 @@ Specialist AI personas for different domains.
 
 | Agent                    | Focus                      | Skills Used                                              |
 | ------------------------ | -------------------------- | -------------------------------------------------------- |
-| `orchestrator`           | Multi-agent coordination   | parallel-agents, behavioral-modes                        |
+| `orchestrator`           | Multi-agent coordination   | parallel-agents, subagent-driven-development, behavioral-modes |
 | `project-planner`        | Discovery, task planning   | brainstorming, plan-writing, architecture                |
 | `frontend-specialist`    | Web UI/UX                  | frontend-design, react-best-practices, tailwind-patterns |
 | `backend-specialist`     | API, business logic        | api-patterns, nodejs-best-practices, database-design     |
-| `database-architect`     | Schema, SQL                | database-design, prisma-expert                           |
-| `mobile-developer`       | iOS, Android, RN           | mobile-design                                            |
-| `game-developer`         | Game logic, mechanics      | game-development                                         |
-| `devops-engineer`        | CI/CD, Docker              | deployment-procedures, docker-expert                     |
+| `database-architect`     | Schema, SQL                | database-design, drizzle-expert                           |
+| `devops-engineer`        | CI/CD, Docker, Windows Ops | deployment-procedures, soc-crru-windows-ops               |
 | `security-auditor`       | Security compliance        | vulnerability-scanner, red-team-tactics                  |
 | `penetration-tester`     | Offensive security         | red-team-tactics                                         |
-| `test-engineer`          | Testing strategies         | testing-patterns, tdd-workflow, webapp-testing           |
-| `debugger`               | Root cause analysis        | systematic-debugging                                     |
+| `test-engineer`          | Testing strategies         | testing-patterns, tdd-workflow, webapp-testing, verification-before-completion |
+| `debugger`               | Root cause analysis        | systematic-debugging, verification-before-completion     |
 | `performance-optimizer`  | Speed, Web Vitals          | performance-profiling                                    |
 | `seo-specialist`         | Ranking, visibility        | seo-fundamentals, geo-fundamentals                       |
 | `documentation-writer`   | Manuals, docs              | documentation-templates                                  |
 | `product-manager`        | Requirements, user stories | plan-writing, brainstorming                              |
 | `product-owner`          | Strategy, backlog, MVP     | plan-writing, brainstorming                              |
 | `qa-automation-engineer` | E2E testing, CI pipelines  | webapp-testing, testing-patterns                         |
-| `code-archaeologist`     | Legacy code, refactoring   | clean-code, code-review-checklist                        |
-| `explorer-agent`         | Codebase analysis          | -                                                        |
+| `code-archaeologist`     | Legacy code, refactoring   | clean-code, graphify, code-review-checklist, receiving-code-review |
+| `explorer-agent`         | Codebase analysis          | graphify, architecture                                   |
 
 ---
 
-## 🧩 Skills (36)
+## 🧩 Skills (40)
 
 Modular knowledge domains that agents can load on-demand. based on task context.
 
@@ -85,7 +83,7 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 | Skill             | Description                 |
 | ----------------- | --------------------------- |
 | `database-design` | Schema design, optimization |
-| `prisma-expert`   | Prisma ORM, migrations      |
+| `drizzle-expert`   | Drizzle ORM, schema, PostgreSQL migrations |
 
 ### TypeScript/JavaScript
 
@@ -100,16 +98,19 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 | `docker-expert`         | Containerization, Compose |
 | `deployment-procedures` | CI/CD, deploy workflows   |
 | `server-management`     | Infrastructure management |
+| `soc-crru-windows-ops`  | Windows Server, PM2, IIS, Automated DB backup |
 
 ### Testing & Quality
 
-| Skill                   | Description              |
-| ----------------------- | ------------------------ |
-| `testing-patterns`      | Jest, Vitest, strategies |
-| `webapp-testing`        | E2E, Playwright          |
-| `tdd-workflow`          | Test-driven development  |
-| `code-review-checklist` | Code review standards    |
-| `lint-and-validate`     | Linting, validation      |
+| Skill                            | Description                                         |
+| -------------------------------- | --------------------------------------------------- |
+| `testing-patterns`               | Jest, Vitest, strategies                            |
+| `webapp-testing`                 | E2E, Playwright                                     |
+| `tdd-workflow`                   | Test-driven development                             |
+| `verification-before-completion` | Evidence-before-claims gate (`obra/superpowers`)    |
+| `code-review-checklist`          | Code review standards                               |
+| `receiving-code-review`          | Technical review reception & YAGNI check (`obra`)   |
+| `lint-and-validate`              | Linting, validation                                 |
 
 ### Security
 
@@ -120,24 +121,25 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 
 ### Architecture & Planning
 
-| Skill           | Description                |
-| --------------- | -------------------------- |
-| `app-builder`   | Full-stack app scaffolding |
-| `architecture`  | System design patterns     |
-| `plan-writing`  | Task planning, breakdown   |
-| `brainstorming` | Socratic questioning       |
+| Skill           | Description                                                |
+| --------------- | ---------------------------------------------------------- |
+| `graphify`      | Local AST Knowledge Graph query/path/explain (`graphify-out/`) |
+| `app-builder`   | Full-stack app scaffolding                                 |
+| `architecture`  | System design patterns                                     |
+| `plan-writing`  | Task planning, breakdown                                   |
+| `brainstorming` | Socratic questioning                                       |
 
-### Mobile
+### Accessibility & Compliance
 
-| Skill           | Description           |
-| --------------- | --------------------- |
-| `mobile-design` | Mobile UI/UX patterns |
+| Skill                         | Description                                      |
+| ----------------------------- | ------------------------------------------------ |
+| `thai-web-accessibility-wcag` | Thai e-Gov & university accessibility (WCAG 2.1 AA) |
 
-### Game Development
+### Database & Search
 
-| Skill              | Description           |
-| ------------------ | --------------------- |
-| `game-development` | Game logic, mechanics |
+| Skill                      | Description                                       |
+| -------------------------- | ------------------------------------------------- |
+| `postgres-fulltext-search` | Trigram GIN indexing & fast Thai full-text search |
 
 ### SEO & Growth
 
@@ -155,16 +157,17 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 
 ### Other
 
-| Skill                     | Description               |
-| ------------------------- | ------------------------- |
-| `clean-code`              | Coding standards (Global) |
-| `behavioral-modes`        | Agent personas            |
-| `parallel-agents`         | Multi-agent patterns      |
-| `mcp-builder`             | Model Context Protocol    |
-| `documentation-templates` | Doc formats               |
-| `i18n-localization`       | Internationalization      |
-| `performance-profiling`   | Web Vitals, optimization  |
-| `systematic-debugging`    | Troubleshooting           |
+| Skill                         | Description                                         |
+| ----------------------------- | --------------------------------------------------- |
+| `clean-code`                  | Coding standards (Global)                           |
+| `behavioral-modes`            | Agent personas                                      |
+| `parallel-agents`             | Multi-agent patterns                                |
+| `subagent-driven-development` | Per-task subagent execution + 2-stage review (`obra`) |
+| `mcp-builder`                 | Model Context Protocol                              |
+| `documentation-templates`     | Doc formats                                         |
+| `i18n-localization`           | Internationalization                                |
+| `performance-profiling`       | Web Vitals, optimization                            |
+| `systematic-debugging`        | Troubleshooting                                     |
 
 ---
 
@@ -280,8 +283,8 @@ For details, see [scripts/README.md](scripts/README.md)
 | -------- | --------------------- | ------------------------------------- |
 | Web App  | `frontend-specialist` | react-best-practices, frontend-design |
 | API      | `backend-specialist`  | api-patterns, nodejs-best-practices   |
-| Mobile   | `mobile-developer`    | mobile-design                         |
-| Database | `database-architect`  | database-design, prisma-expert        |
+| Ops & Deployment | `devops-engineer` | soc-crru-windows-ops, deployment-procedures |
+| Database | `database-architect`  | database-design, drizzle-expert        |
 | Security | `security-auditor`    | vulnerability-scanner                 |
 | Testing  | `test-engineer`       | testing-patterns, webapp-testing      |
 | Debug    | `debugger`            | systematic-debugging                  |

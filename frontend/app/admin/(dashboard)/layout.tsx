@@ -23,7 +23,8 @@ import {
     ClipboardList,
     Award,
     Handshake,
-    Layers
+    Layers,
+    FileCheck
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -44,7 +45,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
-    const [pendingCounts, setPendingCounts] = useState<{ news: number; procurement: number }>({ news: 0, procurement: 0 });
+    const [pendingCounts, setPendingCounts] = useState<{ news: number; procurement: number; resumeRequests: number }>({ news: 0, procurement: 0, resumeRequests: 0 });
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -70,15 +71,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 const userData = await res.json();
                 setUser(userData);
 
-                // If admin, fetch pending review items count
-                if (userData?.roles?.includes('ADMIN')) {
+                // If admin/editor, fetch pending review items count
+                if (userData?.roles?.includes('ADMIN') || userData?.roles?.includes('EDITOR')) {
                     try {
-                        const [newsRes, procRes] = await Promise.all([
+                        const [newsRes, procRes, reqRes] = await Promise.all([
                             fetch(`${apiUrl}/api/news/admin/all?limit=100`, { headers: { Authorization: `Bearer ${token}` } }),
                             fetch(`${apiUrl}/api/procurement/admin/all?limit=100`, { headers: { Authorization: `Bearer ${token}` } }),
+                            fetch(`${apiUrl}/api/staff/resume-requests?status=PENDING&limit=1`, { headers: { Authorization: `Bearer ${token}` } }),
                         ]);
                         let newsCount = 0;
                         let procCount = 0;
+                        let reqCount = 0;
                         if (newsRes.ok) {
                             const nData = await newsRes.json();
                             newsCount = (nData.data || []).filter((item: any) => item.publicationStatus === 'PENDING_REVIEW').length;
@@ -87,7 +90,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                             const pData = await procRes.json();
                             procCount = (pData.data || []).filter((item: any) => item.publicationStatus === 'PENDING_REVIEW').length;
                         }
-                        setPendingCounts({ news: newsCount, procurement: procCount });
+                        if (reqRes.ok) {
+                            const rData = await reqRes.json();
+                            reqCount = rData.total || 0;
+                        }
+                        setPendingCounts({ news: newsCount, procurement: procCount, resumeRequests: reqCount });
                     } catch (e) {
                         console.error('Failed to fetch pending review counts:', e);
                     }
@@ -150,6 +157,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             title: 'Organization',
             items: [
                 { href: '/admin/staff', label: 'บุคลากร', icon: Users, minLevel: 2 },
+                { href: '/admin/staff/resume-requests', label: 'คำขอประวัติ/วิทยากร', icon: FileCheck, minLevel: 2, badgeKey: 'resumeRequests' as const },
                 { href: '/admin/positions', label: 'จัดการตำแหน่ง', icon: Briefcase, minLevel: 2 },
                 { href: '/admin/departments', label: 'จัดการสังกัด', icon: Building2, minLevel: 3 },
             ]

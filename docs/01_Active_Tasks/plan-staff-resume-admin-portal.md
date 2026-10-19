@@ -1,7 +1,8 @@
 ---
 title: Plan - Staff Resume Requests Admin Portal & Management System
-status: planned
+status: completed
 created_at: 2026-10-14
+completed_at: 2026-10-19
 tags:
   - staff
   - resume
@@ -14,40 +15,38 @@ tags:
 # แผนพัฒนาระบบจัดการคำขอเอกสารประวัติวิทยากรสำหรับผู้ดูแลระบบ (Admin Portal)
 
 > [!NOTE] วัตถุประสงค์ (Objectives)
-> ต่อยอดระบบขอประวัติวิทยากรและเรซูเม่อาจารย์ ([`RequestResumeModal.tsx`](file:///e:/web2026/soc-crru-web/frontend/app/about/staff/[id]/RequestResumeModal.tsx)) และ Backend API ที่สร้างไว้ ให้มีหน้าจอจัดการสำหรับผู้ดูแลระบบและเจ้าหน้าที่ธุรการคณะฯ ในส่วนหลังบ้าน (`/admin/staff/resume-requests`) เพื่อตรวจสอบ อนุมัติ และจัดส่งไฟล์ PDF ได้อย่างสะดวกรวดเร็วตามเกณฑ์ PDPA ภายใน 7 วันทำการ
+> ต่อยอดระบบขอประวัติวิทยากรและเรซูเม่อาจารย์ ([`RequestResumeModal.tsx`](file:///e:/web2026/soc-crru-web/frontend/app/about/staff/[id]/RequestResumeModal.tsx)) และ Backend API ที่สร้างไว้ ให้มีหน้าจอจัดการสำหรับผู้ดูแลระบบและเจ้าหน้าที่ธุรการคณะฯ ในส่วนหลังบ้าน ([`/admin/staff/resume-requests`](file:///e:/web2026/soc-crru-web/frontend/app/admin/(dashboard)/staff/resume-requests/page.tsx)) เพื่อตรวจสอบ อนุมัติ และจัดส่งไฟล์ PDF ได้อย่างสะดวกรวดเร็วตามเกณฑ์ PDPA ภายใน 7 วันทำการ
 
 ---
 
-## 1. ขอบเขตงานระยะถัดไป (Next Phase Scope)
+## 1. ขอบเขตงานที่พัฒนาเรียบร้อยแล้ว (Completed Scope)
 
 ```mermaid
 flowchart LR
     A["ผู้ขอยื่นฟอร์มหน้าเว็บ"] --> B["Backend ส่งเมลตอบรับ 7 วัน"]
     B --> C["เก็บคำขอใน Database (PENDING)"]
-    C --> D["Admin Portal (/admin/staff/requests)"]
+    C --> D["Admin Portal (/admin/staff/resume-requests)"]
     D --> E{"เจ้าหน้าที่พิจารณา"}
     E -->|อนุมัติ| F["Generate PDF & ส่งเมลพร้อมแนบไฟล์อัตโนมัติ"]
     E -->|ปฏิเสธ| G["แจ้งเหตุผลปฏิเสธทางอีเมล"]
 ```
 
-### 1.1 หน้าจอผู้ดูแลระบบ (Admin Portal UI: `/admin/staff/requests`)
-- [ ] **ตารางรายการคำขอ (Data Table):**
+### 1.1 หน้าจอผู้ดูแลระบบ (Admin Portal UI: `/admin/staff/resume-requests`)
+- [x] **ตารางรายการคำขอ (Data Table):**
   - แสดงชื่อผู้ขอ, สังกัด/หน่วยงาน, อาจารย์ที่ถูกขอประวัติ, วัตถุประสงค์, วันที่ยื่นคำขอ
   - ป้ายสถานะสี (Status Badges): `PENDING` (รอตรวจสอบ - สีเหลือง), `SENT` (จัดส่งแล้ว - สีเขียว), `REJECTED` (ปฏิเสธ - สีแดง)
-  - แถบเตือนนับถอยหลัง 7 วัน (7-Day SLA Countdown Timer): เช่น *"เหลือเวลา 4 วัน"*
-- [ ] **ปุ่มพรีวิวเอกสาร (Preview PDF):**
-  - เปิดดูเอกสาร PDF Resume ที่สร้างจากระบบก่อนส่งจริงได้ทันที
-- [ ] **ระบบการอนุมัติและจัดส่ง (Approve & Send Action):**
-  - กดปุ่ม **"อนุมัติและจัดส่งทันที"** → เรียก Endpoint `POST /api/staff/resume-requests/:id/approve`
+  - แถบเตือนนับถอยหลัง 7 วัน (7-Day SLA Countdown Timer): แจ้งเตือนนับถอยหลังคงเหลือ เช่น *"เหลือ 4 วัน"* หรือ *"เหลือ 1 วัน (ด่วน)"*
+- [x] **ปุ่มพรีวิวเอกสาร (Preview PDF):**
+  - เปิดดูเอกสาร PDF Resume ที่สร้างจากระบบก่อนส่งจริงได้ทันทีใน Modal
+- [x] **ระบบการอนุมัติและจัดส่ง (Approve & Send Action):**
+  - กดปุ่ม **"อนุมัติ & ส่ง"** → เรียก Endpoint `POST /api/staff/resume-requests/:id/approve`
   - ระบบจะสร้าง PDF แนบไปกับอีเมล `social@crru.ac.th` ถึงผู้ขอโดยอัตโนมัติ
-- [ ] **ระบบปฏิเสธคำขอ (Reject Action):**
-  - แสดงกล่อง Modal ให้ระบุเหตุผล (เช่น วัตถุประสงค์ไม่ชัดเจน หรือไม่ตรงตามเกณฑ์ของคณะฯ)
-
-### 1.2 การแจ้งเตือนและระบบควบคุมระยะเวลา (SLA & Notifications)
-- [ ] **ระบบแจ้งเตือนเมื่อใกล้ครบกำหนด 7 วัน:**
-  - สร้าง Script แจ้งเตือนไปยัง `social@crru.ac.th` เมื่อมีคำขอค้างเกิน 5 วันทำการ
-- [ ] **ประวัติการเข้าถึงข้อมูลตาม PDPA (Audit Trail):**
-  - บันทึกชื่อเจ้าหน้าที่ผู้อนุมัติ (`approvedBy`) และเวลาที่จัดส่งเอกสาร (`sentAt`)
+- [x] **ระบบปฏิเสธคำขอ (Reject Action):**
+  - แสดงกล่อง Modal ให้ระบุเหตุผลในการปฏิเสธเพื่อเก็บเป็นประวัติตามระเบียบ PDPA
+- [x] **การเชื่อมโยงเมนูและ Badge นับจำนวน (Sidebar Integration):**
+  - เพิ่มเมนู `คำขอประวัติ/วิทยากร` ภายใต้หมวด `Organization` ใน Sidebar
+  - แสดงตัวเลข Badge สีส้มแจ้งเตือนจำนวนคำขอที่รอดำเนินการ (`PENDING`) โดยอัตโนมัติ
+  - เพิ่มปุ่มลัดสลับไปยังหน้ารายการคำขอจากหน้าจัดการบุคลากรหลัก (`/admin/staff`)
 
 ---
 

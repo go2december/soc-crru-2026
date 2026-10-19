@@ -50,6 +50,9 @@ aliases: ["Index", "Home"]
 เพื่อไม่ให้ AI หลอนข้อมูลซ้ำซ้อน ไฟล์ `PLAN` หรือบัคที่แก้เสร็จแล้ว ให้โยนเข้ามาหมกไว้ที่นี่ทั้งหมด
 - `[[99_Archive/Academic_Services_CRUD.md]]` (ระบบบริหารจัดการบริการวิชาการ - ✅ เสร็จสมบูรณ์เมื่อ May 11, 2026)
 - `[[99_Archive/Webometrics_Audit_SOC_CRRU.md]]` (งานตรวจสอบและติดตั้งมาตรฐาน Webometrics - ✅ เสร็จสมบูรณ์เมื่อ August 18, 2026)
+- `[[99_Archive/skills-creation.md]]` (การสร้างชุด Skills พื้นฐาน SOC-CRRU - ✅ เสร็จสมบูรณ์เมื่อ July 07, 2026)
+- `[[99_Archive/admin-rbac-workflow-plan.md]]` (ระบบกำหนดสิทธิ์ RBAC & Approval Workflow - ✅ เสร็จสมบูรณ์เมื่อ October 12, 2026)
+- `[[99_Archive/eservice-calendar-plan.md]]` (ระบบปฏิทินกิจกรรมสำนักวิชา Google Calendar iCal - ✅ เสร็จสมบูรณ์)
 - เข้าไปดูไฟล์เก่า: `[[99_Archive/]]`
 
 ---

@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService, schema } from 'db/database';
+import { UploadService } from 'upload/upload';
 import { eq, asc } from 'drizzle-orm';
 
 @Injectable()
 export class AdmissionsService {
-  constructor(private readonly drizzle: DatabaseService) {}
+  constructor(
+    private readonly drizzle: DatabaseService,
+    private readonly uploadService: UploadService,
+  ) {}
 
   // ==========================
   // CONFIG
@@ -53,6 +57,12 @@ export class AdmissionsService {
       })
       .where(eq(schema.admissionConfig.id, 1))
       .returning();
+    if (
+      existing[0].brochureUrl &&
+      existing[0].brochureUrl !== updated.brochureUrl
+    ) {
+      await this.uploadService.deleteProgramsFile(existing[0].brochureUrl);
+    }
     return updated;
   }
 
@@ -124,12 +134,19 @@ export class AdmissionsService {
   }
 
   async updateDocument(id: string, dto: any) {
+    const [existing] = await this.drizzle.db
+      .select()
+      .from(schema.admissionDocuments)
+      .where(eq(schema.admissionDocuments.id, id));
     const [updated] = await this.drizzle.db
       .update(schema.admissionDocuments)
       .set({ ...dto, updatedAt: new Date() })
       .where(eq(schema.admissionDocuments.id, id))
       .returning();
     if (!updated) throw new NotFoundException('Document not found');
+    if (existing?.fileUrl && existing.fileUrl !== updated.fileUrl) {
+      await this.uploadService.deleteProgramsFile(existing.fileUrl);
+    }
     return updated;
   }
 
@@ -139,6 +156,9 @@ export class AdmissionsService {
       .where(eq(schema.admissionDocuments.id, id))
       .returning();
     if (!deleted) throw new NotFoundException('Document not found');
+    if (deleted.fileUrl) {
+      await this.uploadService.deleteProgramsFile(deleted.fileUrl);
+    }
     return { success: true };
   }
 

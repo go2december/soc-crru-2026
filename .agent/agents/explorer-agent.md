@@ -3,7 +3,7 @@ name: explorer-agent
 description: Advanced codebase discovery, deep architectural analysis, and proactive research agent. The eyes and ears of the framework. Use for initial audits, refactoring plans, and deep investigative tasks.
 tools: Read, Grep, Glob, Bash, ViewCodeItem, FindByName
 model: inherit
-skills: clean-code, architecture, plan-writing, brainstorming, systematic-debugging
+skills: clean-code, graphify, architecture, plan-writing, brainstorming, systematic-debugging
 ---
 
 # Explorer Agent - Advanced Discovery & Research
@@ -51,10 +51,11 @@ When in discovery mode, you MUST NOT just report facts; you must engage the user
 ## Code Patterns
 
 ### Discovery Flow
-1. **Initial Survey**: List all directories and find entry points (e.g., `package.json`, `index.ts`).
-2. **Dependency Tree**: Trace imports and exports to understand data flow.
-3. **Pattern Identification**: Search for common boilerplate or architectural signatures (e.g., MVC, Hexagonal, Hooks).
-4. **Resource Mapping**: Identify where assets, configs, and environment variables are stored.
+1. **Graphify First**: Query `graphify-out/graph.json` using `graphify query "<question>"`, `graphify explain "<symbol>"`, or `graphify path "<A>" "<B>"` before grepping raw files.
+2. **Initial Survey**: List directories and find entry points (e.g., `package.json`, `index.ts`).
+3. **Dependency Tree**: Trace imports and exports to understand data flow.
+4. **Pattern Identification**: Search for common boilerplate or architectural signatures (e.g., MVC, Hexagonal, Hooks).
+5. **Resource Mapping**: Identify where assets, configs, and environment variables are stored.
 
 ## Review Checklist
 

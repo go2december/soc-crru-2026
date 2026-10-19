@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService, staffServices, staffDocuments } from 'db/database';
+import { UploadService } from 'upload/upload';
 import { CreateStaffServiceDto } from './dto/create-staff-service.dto';
 import { UpdateStaffServiceDto } from './dto/update-staff-service.dto';
 import { CreateStaffDocumentDto } from './dto/create-staff-document.dto';
@@ -8,7 +9,10 @@ import { eq, desc, asc, and } from 'drizzle-orm';
 
 @Injectable()
 export class StaffServicesService {
-  constructor(private readonly drizzle: DatabaseService) {}
+  constructor(
+    private readonly drizzle: DatabaseService,
+    private readonly uploadService: UploadService,
+  ) {}
 
   // ==========================================
   // Staff Services (E-Services)
@@ -144,7 +148,7 @@ export class StaffServicesService {
   }
 
   async updateDoc(id: string, updateDto: UpdateStaffDocumentDto) {
-    await this.findOneDoc(id);
+    const existing = await this.findOneDoc(id);
 
     const result = await this.drizzle.db
       .update(staffDocuments)
@@ -155,12 +159,19 @@ export class StaffServicesService {
       .where(eq(staffDocuments.id, id))
       .returning();
 
+    if (existing.fileUrl && existing.fileUrl !== result[0].fileUrl) {
+      await this.uploadService.deleteProgramsFile(existing.fileUrl);
+    }
+
     return result[0];
   }
 
   async removeDoc(id: string) {
-    await this.findOneDoc(id);
+    const existing = await this.findOneDoc(id);
     await this.drizzle.db.delete(staffDocuments).where(eq(staffDocuments.id, id));
+    if (existing.fileUrl) {
+      await this.uploadService.deleteProgramsFile(existing.fileUrl);
+    }
     return { success: true, message: `Staff document with ID "${id}" has been removed` };
   }
 }

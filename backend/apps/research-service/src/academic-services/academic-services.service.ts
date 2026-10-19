@@ -6,6 +6,7 @@ import {
   academicServiceConfigs,
   staffProfiles,
 } from 'db/database';
+import { UploadService } from 'upload/upload';
 import { CreateAcademicServiceDto } from './dto/create-academic-service.dto';
 import { UpdateAcademicServiceDto } from './dto/update-academic-service.dto';
 import { UpdateAcademicServiceConfigDto } from './dto/update-academic-service-config.dto';
@@ -13,7 +14,47 @@ import { eq, desc } from 'drizzle-orm';
 
 @Injectable()
 export class AcademicServicesService {
-  constructor(private readonly drizzleService: DatabaseService) {}
+  constructor(
+    private readonly drizzleService: DatabaseService,
+    private readonly uploadService: UploadService,
+  ) {}
+
+  private collectAcademicUrls(
+    item?: {
+      coverImageUrl?: string | null;
+      documentUrl?: string | null;
+      pdfFormUrl?: string | null;
+      docxFormUrl?: string | null;
+      galleryImages?: string[] | null;
+    } | null,
+  ): string[] {
+    if (!item) return [];
+    const urls = new Set<string>();
+    for (const u of [
+      item.coverImageUrl,
+      item.documentUrl,
+      item.pdfFormUrl,
+      item.docxFormUrl,
+      ...(item.galleryImages ?? []),
+    ]) {
+      if (u && u.startsWith('/uploads/research/')) {
+        urls.add(u);
+      }
+    }
+    return [...urls];
+  }
+
+  private async cleanupAcademicFiles(
+    prev?: Parameters<AcademicServicesService['collectAcademicUrls']>[0],
+    next?: Parameters<AcademicServicesService['collectAcademicUrls']>[0],
+  ): Promise<void> {
+    const nextUrls = new Set(this.collectAcademicUrls(next));
+    for (const url of this.collectAcademicUrls(prev)) {
+      if (!nextUrls.has(url)) {
+        await this.uploadService.deleteResearchImage(url);
+      }
+    }
+  }
 
   private checkScope(user: any, targetDepartmentId?: number | null) {
     if (!user) return;
@@ -187,6 +228,7 @@ export class AcademicServicesService {
       }
     }
 
+    await this.cleanupAcademicFiles(existing, updatedService);
     return this.findOne(id);
   }
 
@@ -197,6 +239,7 @@ export class AcademicServicesService {
     await this.drizzleService.db
       .delete(academicServices)
       .where(eq(academicServices.id, id));
+    await this.cleanupAcademicFiles(existing);
     return { success: true };
   }
 
@@ -246,6 +289,7 @@ export class AcademicServicesService {
       .where(eq(academicServiceConfigs.id, existing.id))
       .returning();
 
+    await this.cleanupAcademicFiles(existing, updated);
     return updated;
   }
 }

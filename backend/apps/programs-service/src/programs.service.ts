@@ -7,12 +7,51 @@ import {
   staffProfiles,
   academicPositions,
 } from 'db/database';
+import { UploadService } from 'upload/upload';
 import { CreateProgramDto } from './dto/create-program.dto';
 import { UpdateProgramDto } from './dto/update-program.dto';
 
 @Injectable()
 export class ProgramsService {
-  constructor(private readonly drizzle: DatabaseService) {}
+  constructor(
+    private readonly drizzle: DatabaseService,
+    private readonly uploadService: UploadService,
+  ) {}
+
+  private collectProgramUrls(
+    item?: {
+      bannerUrl?: string | null;
+      curriculumUrl?: string | null;
+      galleryImages?: string[] | null;
+      attachments?: { fileUrl: string }[] | null;
+    } | null,
+  ): string[] {
+    if (!item) return [];
+    const urls = new Set<string>();
+    for (const u of [
+      item.bannerUrl,
+      item.curriculumUrl,
+      ...(item.galleryImages ?? []),
+      ...(item.attachments?.map((a) => a.fileUrl) ?? []),
+    ]) {
+      if (u && u.startsWith('/uploads/programs/')) {
+        urls.add(u);
+      }
+    }
+    return [...urls];
+  }
+
+  private async cleanupProgramFiles(
+    prev?: Parameters<ProgramsService['collectProgramUrls']>[0],
+    next?: Parameters<ProgramsService['collectProgramUrls']>[0],
+  ): Promise<void> {
+    const nextUrls = new Set(this.collectProgramUrls(next));
+    for (const url of this.collectProgramUrls(prev)) {
+      if (!nextUrls.has(url)) {
+        await this.uploadService.deleteProgramsFile(url);
+      }
+    }
+  }
 
   /**
    * Helper to check department scope for non-admins
@@ -212,7 +251,9 @@ export class ProgramsService {
       await this.syncInstructors(id, updateProgramDto.instructors);
     }
 
-    return this.findOne(id);
+    const updated = await this.findOne(id);
+    await this.cleanupProgramFiles(existing, updated);
+    return updated;
   }
 
   /**
@@ -225,6 +266,7 @@ export class ProgramsService {
 
     // program_instructors will cascade delete based on schema
     await this.drizzle.db.delete(programs).where(eq(programs.id, id));
+    await this.cleanupProgramFiles(existing);
 
     return { deleted: true };
   }

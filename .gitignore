@@ -60,3 +60,8 @@ coverage/
 # ----- Media & Local Backups -----
 backend/uploads/
 *.sql
+
+# ----- Graphify Knowledge Graph -----
+graphify-out/
+.graphify_cache/
+

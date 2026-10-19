@@ -1,10 +1,11 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useStaffData, Staff } from './hooks/useStaffData';
 import StaffForm from './components/StaffForm';
-import { Users, Edit3, Plus, Search, Trash2, Link2, Crown, UserX, AlertTriangle, Globe, Fingerprint, BookOpen } from 'lucide-react';
+import { Users, Edit3, Plus, Search, Trash2, Link2, Crown, UserX, AlertTriangle, Globe, Fingerprint, BookOpen, FileCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -164,6 +165,15 @@ export default function AdminStaffPage() {
                             <Search className="h-5 w-5" />
                         </span>
                     </div>
+                    <Link href="/admin/staff/resume-requests">
+                        <Button
+                            variant="outline"
+                            className="gap-2 whitespace-nowrap border-primary/30 text-primary hover:bg-primary/10"
+                        >
+                            <FileCheck className="h-4 w-4" />
+                            คำขอประวัติ/วิทยากร
+                        </Button>
+                    </Link>
                     <Button
                         onClick={() => handleOpenModal(null)}
                         className="gap-2 whitespace-nowrap"

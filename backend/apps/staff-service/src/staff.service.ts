@@ -497,9 +497,13 @@ export class StaffService {
       .limit(limit)
       .offset(offset);
 
-    const totalRes = await this.drizzle.db
+    let countQuery = this.drizzle.db
       .select({ count: sql<number>`count(*)` })
       .from(staffResumeRequests);
+    if (status) {
+      countQuery = countQuery.where(eq(staffResumeRequests.status, status as any)) as any;
+    }
+    const totalRes = await countQuery;
     const total = Number(totalRes[0]?.count || 0);
 
     return {
