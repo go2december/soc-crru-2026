@@ -400,8 +400,8 @@ export default function StaffProfilePage() {
                                 </div>
                             )}
 
-                            {/* Webometrics Researcher Profiles Hub (Only for Academic staff or if they have researcher IDs) */}
-                            {(staff.staffType === 'ACADEMIC' || hasAnyResearcherId) && (
+                            {/* Webometrics Researcher Profiles Hub (Show ONLY when researcher IDs are connected) */}
+                            {hasAnyResearcherId && (
                                 <div className="mb-8 p-5 bg-slate-50 border border-slate-200 rounded-sm">
                                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                                     <div className="flex items-center gap-2">
@@ -422,35 +422,26 @@ export default function StaffProfilePage() {
                                     </span>
                                 </div>
 
-                                {/* Academic IDs Grid */}
+                                {/* Academic IDs Grid (Only show connected IDs) */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
                                     {/* Google Scholar */}
-                                    <div className={`p-3.5 bg-white border rounded-sm flex flex-col justify-between transition-colors ${hasScholar
-                                        ? 'border-blue-200 hover:border-blue-400'
-                                        : 'border-slate-200 bg-slate-50/50'
-                                        }`}>
-                                        <div>
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <span className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                                                    <Globe className="w-3.5 h-3.5 text-blue-600" /> Google Scholar
-                                                </span>
-                                                {hasScholar ? (
+                                    {hasScholar && (
+                                        <div className="p-3.5 bg-white border rounded-sm flex flex-col justify-between transition-colors border-blue-200 hover:border-blue-400">
+                                            <div>
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <span className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                                                        <Globe className="w-3.5 h-3.5 text-blue-600" /> Google Scholar
+                                                    </span>
                                                     <span className="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-sm border border-blue-100 font-medium">
                                                         เชื่อมต่อแล้ว
                                                     </span>
-                                                ) : (
-                                                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm">
-                                                        ยังไม่ระบุ
-                                                    </span>
-                                                )}
+                                                </div>
+                                                <p className="text-[11px] text-slate-500 leading-snug">
+                                                    ดัชนีการอ้างอิงและบทความวิจัย
+                                                </p>
                                             </div>
-                                            <p className="text-[11px] text-slate-500 leading-snug">
-                                                ดัชนีการอ้างอิงและบทความวิจัย
-                                            </p>
-                                        </div>
-                                        <div className="mt-3 pt-2 border-t border-slate-100">
-                                            {hasScholar ? (
+                                            <div className="mt-3 pt-2 border-t border-slate-100">
                                                 <a
                                                     href={getGoogleScholarLink(staff.googleScholarUrl)}
                                                     target="_blank"
@@ -460,40 +451,27 @@ export default function StaffProfilePage() {
                                                     <span>ดูโปรไฟล์และงานวิจัย</span>
                                                     <ExternalLink className="w-3 h-3 ml-1" />
                                                 </a>
-                                            ) : (
-                                                <span className="text-[11px] text-slate-400 italic">
-                                                    รอการเชื่อมต่อโปรไฟล์
-                                                </span>
-                                            )}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
 
                                     {/* ORCID */}
-                                    <div className={`p-3.5 bg-white border rounded-sm flex flex-col justify-between transition-colors ${hasOrcid
-                                        ? 'border-emerald-200 hover:border-emerald-400'
-                                        : 'border-slate-200 bg-slate-50/50'
-                                        }`}>
-                                        <div>
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
-                                                    <Fingerprint className="w-3.5 h-3.5 text-emerald-600" /> ORCID iD
-                                                </span>
-                                                {hasOrcid ? (
+                                    {hasOrcid && (
+                                        <div className="p-3.5 bg-white border rounded-sm flex flex-col justify-between transition-colors border-emerald-200 hover:border-emerald-400">
+                                            <div>
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                                                        <Fingerprint className="w-3.5 h-3.5 text-emerald-600" /> ORCID iD
+                                                    </span>
                                                     <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-sm border border-emerald-100 font-medium">
                                                         Verified
                                                     </span>
-                                                ) : (
-                                                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm">
-                                                        ยังไม่ระบุ
-                                                    </span>
-                                                )}
+                                                </div>
+                                                <p className="text-[11px] font-mono text-slate-600 truncate">
+                                                    {staff.orcidId?.replace(/^https?:\/\/orcid\.org\//, '')}
+                                                </p>
                                             </div>
-                                            <p className="text-[11px] font-mono text-slate-600 truncate">
-                                                {hasOrcid ? staff.orcidId?.replace(/^https?:\/\/orcid\.org\//, '') : 'รหัสนักวิจัยสากล 16 หลัก'}
-                                            </p>
-                                        </div>
-                                        <div className="mt-3 pt-2 border-t border-slate-100">
-                                            {hasOrcid ? (
+                                            <div className="mt-3 pt-2 border-t border-slate-100">
                                                 <a
                                                     href={getOrcidLink(staff.orcidId)}
                                                     target="_blank"
@@ -503,40 +481,27 @@ export default function StaffProfilePage() {
                                                     <span>ตรวจสอบสิทธิ์ ORCID</span>
                                                     <ExternalLink className="w-3 h-3 ml-1" />
                                                 </a>
-                                            ) : (
-                                                <span className="text-[11px] text-slate-400 italic">
-                                                    รอการเชื่อมต่อ ORCID
-                                                </span>
-                                            )}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
 
                                     {/* Scopus Author ID */}
-                                    <div className={`p-3.5 bg-white border rounded-sm flex flex-col justify-between transition-colors ${hasScopus
-                                        ? 'border-amber-200 hover:border-amber-400'
-                                        : 'border-slate-200 bg-slate-50/50'
-                                        }`}>
-                                        <div>
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-                                                    <BookOpen className="w-3.5 h-3.5 text-amber-600" /> Scopus ID
-                                                </span>
-                                                {hasScopus ? (
+                                    {hasScopus && (
+                                        <div className="p-3.5 bg-white border rounded-sm flex flex-col justify-between transition-colors border-amber-200 hover:border-amber-400">
+                                            <div>
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                                                        <BookOpen className="w-3.5 h-3.5 text-amber-600" /> Scopus ID
+                                                    </span>
                                                     <span className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded-sm border border-amber-200 font-medium">
                                                         Scopus
                                                     </span>
-                                                ) : (
-                                                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm">
-                                                        ยังไม่ระบุ
-                                                    </span>
-                                                )}
+                                                </div>
+                                                <p className="text-[11px] font-mono text-slate-600 truncate">
+                                                    ID: {staff.scopusAuthorId?.replace(/^https?:\/\/www\.scopus\.com\/authid\/detail\.uri\?authorId=/, '')}
+                                                </p>
                                             </div>
-                                            <p className="text-[11px] font-mono text-slate-600 truncate">
-                                                {hasScopus ? `ID: ${staff.scopusAuthorId?.replace(/^https?:\/\/www\.scopus\.com\/authid\/detail\.uri\?authorId=/, '')}` : 'ฐานข้อมูลวิชาการ Scopus'}
-                                            </p>
-                                        </div>
-                                        <div className="mt-3 pt-2 border-t border-slate-100">
-                                            {hasScopus ? (
+                                            <div className="mt-3 pt-2 border-t border-slate-100">
                                                 <a
                                                     href={getScopusLink(staff.scopusAuthorId)}
                                                     target="_blank"
@@ -546,24 +511,11 @@ export default function StaffProfilePage() {
                                                     <span>ดูข้อมูลใน Scopus</span>
                                                     <ExternalLink className="w-3 h-3 ml-1" />
                                                 </a>
-                                            ) : (
-                                                <span className="text-[11px] text-slate-400 italic">
-                                                    รอการเชื่อมต่อ Scopus
-                                                </span>
-                                            )}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
 
                                 </div>
-
-                                {!hasAnyResearcherId && staff.staffType === 'ACADEMIC' && (
-                                    <p className="text-[11px] text-slate-500 bg-amber-50/80 border border-amber-200 p-2.5 rounded-sm mt-3 flex items-center gap-2">
-                                        <AlertCircle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                                        <span>
-                                            อยู่ระหว่างการเชื่อมต่อฐานข้อมูล Google Scholar และ ORCID สังกัด Chiang Rai Rajabhat University ตามเกณฑ์ Webometrics
-                                        </span>
-                                    </p>
-                                )}
                             </div>
                             )}
 
