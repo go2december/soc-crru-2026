@@ -470,7 +470,7 @@ export class PdfResumeService {
           doc.moveDown(sectionMargin);
         }
 
-        // ------------------ Uniform PDPA & Institutional Footer Across All Pages ------------------
+        // ------------------ Footer (Unified Box on Last Page & Page Indicators on Preceding Pages) ------------------
         const range = doc.bufferedPageRange();
         const issueDateStr = new Date().toLocaleDateString('th-TH', {
           year: 'numeric',
@@ -478,40 +478,64 @@ export class PdfResumeService {
           day: 'numeric',
         });
 
+        const lastPageIndex = range.start + range.count - 1;
+
         for (let i = range.start; i < range.start + range.count; i++) {
           doc.switchToPage(i);
 
-          // Subtle footer box
-          doc.rect(40, 772, 515, 42).fill('#F8FAFC');
-          doc.strokeColor('#E2E8F0').lineWidth(0.5).rect(40, 772, 515, 42).stroke();
+          if (i === lastPageIndex) {
+            // Unified Box on the FINAL / LAST PAGE of content
+            const boxX = 40;
+            const boxY = 744;
+            const boxWidth = 515;
+            const boxHeight = 62;
 
-          doc
-            .font(fontToUseBold)
-            .fontSize(7.5)
-            .fillColor('#7A102E')
-            .text('ข้อความคุ้มครองข้อมูลส่วนบุคคล (PDPA Notice):', 48, 776);
+            doc.rect(boxX, boxY, boxWidth, boxHeight).fill('#F8FAFC');
+            doc.strokeColor('#CBD5E1').lineWidth(0.7).rect(boxX, boxY, boxWidth, boxHeight).stroke();
 
-          doc
-            .font(fontToUseRegular)
-            .fontSize(7)
-            .fillColor('#64748B')
-            .text(
-              'เอกสารนี้ออกและรับรองโดยสำนักงานคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย เพื่อใช้ตามวัตถุประสงค์ในคำขอทางการเท่านั้น ห้ามคัดลอก ดัดแปลง หรือเผยแพร่แก่บุคคลที่สามโดยไม่ได้รับอนุญาต',
-              48,
-              786,
-              { width: 498 },
-            );
+            // 1. PDPA Notice Header
+            doc
+              .font(fontToUseBold)
+              .fontSize(7.8)
+              .fillColor('#7A102E')
+              .text('ข้อความคุ้มครองข้อมูลส่วนบุคคล (PDPA Notice):', boxX + 10, boxY + 6);
 
-          doc
-            .font(fontToUseRegular)
-            .fontSize(6.8)
-            .fillColor('#94A3B8')
-            .text(
-              `วันที่ออกเอกสาร: ${issueDateStr} | รหัสอ้างอิง: ${requestId} | หน้า ${i + 1} จาก ${range.count} | ติดต่อ: social@crru.ac.th`,
-              48,
-              798,
-              { width: 498 },
-            );
+            // 2. PDPA Body Text
+            doc
+              .font(fontToUseRegular)
+              .fontSize(7.2)
+              .fillColor('#475569')
+              .text(
+                'เอกสารนี้ออกและรับรองโดยสำนักงานคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย เพื่อใช้ตามวัตถุประสงค์ในคำขอทางการเท่านั้น ห้ามคัดลอก ดัดแปลง หรือเผยแพร่แก่บุคคลที่สามโดยไม่ได้รับอนุญาต',
+                boxX + 10,
+                boxY + 18,
+                { width: boxWidth - 20, lineGap: 1.5 },
+              );
+
+            // 3. Subtle horizontal divider inside the box
+            const innerDividerY = boxY + 41;
+            doc
+              .strokeColor('#E2E8F0')
+              .lineWidth(0.5)
+              .moveTo(boxX + 10, innerDividerY)
+              .lineTo(boxX + boxWidth - 10, innerDividerY)
+              .stroke();
+
+            // 4. Verification Metadata Line inside the same box
+            const metaText = `วันที่ออกเอกสาร: ${issueDateStr} | รหัสอ้างอิง: ${requestId} | หน้า ${range.count} จาก ${range.count} | ติดต่อ: social@crru.ac.th`;
+            doc
+              .font(fontToUseRegular)
+              .fontSize(7.1)
+              .fillColor('#64748B')
+              .text(metaText, boxX + 10, boxY + 46, { width: boxWidth - 20 });
+          } else {
+            // Preceding pages: clean page number at bottom right
+            doc
+              .font(fontToUseRegular)
+              .fontSize(7.5)
+              .fillColor('#94A3B8')
+              .text(`หน้า ${i + 1} จาก ${range.count}`, 40, 800, { align: 'right', width: 515 });
+          }
         }
 
         doc.end();
