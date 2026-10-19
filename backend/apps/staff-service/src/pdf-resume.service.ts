@@ -40,6 +40,7 @@ interface StaffData {
   education?: EducationItem[] | null;
   expertise?: string[] | null;
   bio?: string | null;
+  imageUrl?: string | null;
   orcidId?: string | null;
   scopusAuthorId?: string | null;
   googleScholarUrl?: string | null;
@@ -59,6 +60,27 @@ export class PdfResumeService {
       path.join(__dirname, '..', 'assets', relativePath),
       path.join(process.cwd(), 'assets', relativePath),
       path.join(process.cwd(), 'backend', 'assets', relativePath),
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) {
+        return c;
+      }
+    }
+    return null;
+  }
+
+  private resolveStaffPhotoPath(imageUrl?: string | null): string | null {
+    if (!imageUrl || typeof imageUrl !== 'string') return null;
+    const cleanPath = imageUrl.startsWith('/') ? imageUrl.slice(1) : imageUrl;
+    const candidates = [
+      path.join(process.cwd(), cleanPath),
+      path.join(process.cwd(), 'backend', cleanPath),
+      path.join(__dirname, '..', '..', '..', cleanPath),
+      path.join(__dirname, '..', '..', cleanPath),
+      path.join(__dirname, '..', cleanPath),
+      path.join(process.cwd(), 'uploads', 'staff', path.basename(cleanPath)),
+      path.join(process.cwd(), 'backend', 'uploads', 'staff', path.basename(cleanPath)),
+      path.join(__dirname, '..', '..', '..', 'uploads', 'staff', path.basename(cleanPath)),
     ];
     for (const c of candidates) {
       if (fs.existsSync(c)) {
@@ -158,8 +180,35 @@ export class PdfResumeService {
             { align: 'left' },
           );
 
-        // ------------------ Personal Profile Information ------------------
-        doc.y = 110;
+        // ------------------ Personal Profile Information & Photo Layout ------------------
+        const photoPath = this.resolveStaffPhotoPath(staff.imageUrl);
+        const photoWidth = 72;
+        const photoHeight = 92;
+        const photoX = 595.28 - 40 - photoWidth; // 483.28 pt (Top-Right position)
+        const photoY = 108;
+
+        // If staff has photo: text spans 425 pt; if no photo: expands to 515 pt (Full width)
+        const textWidth = photoPath ? 425 : 515;
+
+        // Render photo on the top-right if available
+        if (photoPath) {
+          try {
+            doc.rect(photoX - 2, photoY - 2, photoWidth + 4, photoHeight + 4).fill('#E2E8F0');
+            doc.rect(photoX - 1, photoY - 1, photoWidth + 2, photoHeight + 2).fill('#FFFFFF');
+            doc.image(photoPath, photoX, photoY, {
+              width: photoWidth,
+              height: photoHeight,
+              fit: [photoWidth, photoHeight],
+              align: 'center',
+              valign: 'center',
+            });
+            doc.rect(photoX, photoY, photoWidth, photoHeight).strokeColor('#CBD5E1').lineWidth(0.6).stroke();
+          } catch (e) {
+            this.logger.warn('Could not render staff photo in PDF', e);
+          }
+        }
+
+        doc.y = 108;
 
         const fullNameTh = [staff.prefixTh, staff.firstNameTh, staff.lastNameTh].filter(Boolean).join(' ');
         const fullNameEn = [staff.prefixEn, staff.firstNameEn, staff.lastNameEn].filter(Boolean).join(' ');
@@ -168,14 +217,14 @@ export class PdfResumeService {
           .font(fontToUseBold)
           .fontSize(15)
           .fillColor('#0F172A')
-          .text(fullNameTh, 40, doc.y);
+          .text(fullNameTh, 40, doc.y, { width: textWidth });
 
         if (fullNameEn && fullNameEn.trim()) {
           doc
             .font(fontToUseRegular)
-            .fontSize(10.5)
+            .fontSize(10)
             .fillColor('#64748B')
-            .text(fullNameEn.trim());
+            .text(fullNameEn.trim(), 40, doc.y, { width: textWidth });
         }
 
         doc.moveDown(0.3);
@@ -187,7 +236,7 @@ export class PdfResumeService {
             .font(fontToUseBold)
             .fontSize(9.5)
             .fillColor('#85193C')
-            .text(`ตำแหน่ง: ${posList.join(' • ')}`);
+            .text(`ตำแหน่ง: ${posList.join(' • ')}`, 40, doc.y, { width: textWidth });
         }
 
         // Conditional Department (Only display if present)
@@ -197,7 +246,7 @@ export class PdfResumeService {
             .font(fontToUseRegular)
             .fontSize(9.5)
             .fillColor('#334155')
-            .text(`สังกัด: ${deptName.trim()} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`);
+            .text(`สังกัด: ${deptName.trim()} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`, 40, doc.y, { width: textWidth });
         }
 
         // Conditional Contact Email (Only display if present)
@@ -206,10 +255,16 @@ export class PdfResumeService {
             .font(fontToUseRegular)
             .fontSize(9)
             .fillColor('#0284C7')
-            .text(`อีเมลติดต่อทางราชการ: ${staff.contactEmail.trim()}`);
+            .text(`อีเมลติดต่อทางราชการ: ${staff.contactEmail.trim()}`, 40, doc.y, { width: textWidth });
         }
 
-        doc.moveDown(0.5);
+        // Ensure vertical cursor is below the photo if present
+        const minProfileBottom = photoPath ? photoY + photoHeight + 12 : doc.y + 6;
+        if (doc.y < minProfileBottom) {
+          doc.y = minProfileBottom;
+        } else {
+          doc.moveDown(0.4);
+        }
 
         // Horizontal Separation Bar
         doc.strokeColor('#E2E8F0').lineWidth(0.8).moveTo(40, doc.y).lineTo(555, doc.y).stroke();
@@ -329,13 +384,13 @@ export class PdfResumeService {
           doc.moveDown(0.5);
         }
 
-        // ------------------ 5. Research Projects (Conditional) ------------------
+        // ------------------ 5. Research Projects (Max 10, Conditional) ------------------
         const validProjects = Array.isArray(staff.researchProjects)
-          ? staff.researchProjects.filter((p) => p && (p.titleTh?.trim() || p.titleEn?.trim()))
+          ? staff.researchProjects.filter((p) => p && (p.titleTh?.trim() || p.titleEn?.trim())).slice(0, 10)
           : [];
 
         if (validProjects.length > 0) {
-          renderSectionHeader('โครงการวิจัยและงานวิชาการ', 'Research Projects');
+          renderSectionHeader('โครงการวิจัยและงานวิชาการเด่น (ล่าสุดไม่เกิน 10 โครงการ)', 'Selected Research Projects');
           for (const proj of validProjects) {
             ensureSpace(24);
             const title = (proj.titleTh || proj.titleEn || '').trim();
@@ -357,13 +412,13 @@ export class PdfResumeService {
           doc.moveDown(0.5);
         }
 
-        // ------------------ 6. Academic Services (Conditional) ------------------
+        // ------------------ 6. Academic Services (Max 10, Conditional) ------------------
         const validServices = Array.isArray(staff.academicServices)
-          ? staff.academicServices.filter((s) => s && s.title?.trim())
+          ? staff.academicServices.filter((s) => s && s.title?.trim()).slice(0, 10)
           : [];
 
         if (validServices.length > 0) {
-          renderSectionHeader('ผลงานบริการวิชาการและพัฒนาชุมชนท้องถิ่น', 'Academic & Community Services');
+          renderSectionHeader('ผลงานบริการวิชาการและพัฒนาชุมชนท้องถิ่น (ล่าสุดไม่เกิน 10 โครงการ)', 'Academic & Community Services');
           for (const srv of validServices) {
             ensureSpace(24);
             const title = (srv.title || '').trim();
