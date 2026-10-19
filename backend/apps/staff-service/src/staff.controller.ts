@@ -146,9 +146,10 @@ export class StaffController {
   async previewResumePdf(@Param('id') id: string, @Res() res: any) {
     try {
       const { buffer, fileName } = await this.staffService.getResumePdfPreview(id);
+      const encodedFileName = encodeURIComponent(fileName);
       res.set({
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="${fileName}"`,
+        'Content-Disposition': `inline; filename="official-speaker-bio.pdf"; filename*=UTF-8''${encodedFileName}`,
         'Content-Length': buffer.length.toString(),
       });
       return res.end(buffer);

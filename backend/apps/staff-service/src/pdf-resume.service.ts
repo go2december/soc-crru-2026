@@ -4,8 +4,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 interface EducationItem {
-  level: string;
-  detail: string;
+  level?: string | null;
+  detail?: string | null;
 }
 
 interface ResearchProjectItem {
@@ -13,6 +13,13 @@ interface ResearchProjectItem {
   titleTh?: string | null;
   titleEn?: string | null;
   year?: number | null;
+  role?: string | null;
+}
+
+interface AcademicServiceItem {
+  id?: string | null;
+  title?: string | null;
+  area?: string | null;
   role?: string | null;
 }
 
@@ -28,6 +35,7 @@ interface StaffData {
   academicPosition?: string | null;
   adminPosition?: string | null;
   departmentName?: string | null;
+  department?: string | null;
   contactEmail?: string | null;
   education?: EducationItem[] | null;
   expertise?: string[] | null;
@@ -35,7 +43,8 @@ interface StaffData {
   orcidId?: string | null;
   scopusAuthorId?: string | null;
   googleScholarUrl?: string | null;
-  researchProjects?: any[] | null;
+  researchProjects?: ResearchProjectItem[] | null;
+  academicServices?: AcademicServiceItem[] | null;
   [key: string]: any;
 }
 
@@ -43,16 +52,33 @@ interface StaffData {
 export class PdfResumeService {
   private readonly logger = new Logger(PdfResumeService.name);
 
+  private resolveAssetPath(relativePath: string): string | null {
+    const candidates = [
+      path.join(__dirname, '..', '..', '..', 'assets', relativePath),
+      path.join(__dirname, '..', '..', 'assets', relativePath),
+      path.join(__dirname, '..', 'assets', relativePath),
+      path.join(process.cwd(), 'assets', relativePath),
+      path.join(process.cwd(), 'backend', 'assets', relativePath),
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) {
+        return c;
+      }
+    }
+    return null;
+  }
+
   async generateStaffResumePdf(staff: StaffData | any, requestId: string): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       try {
         const doc = new PDFDocument({
           size: 'A4',
           margin: 40,
+          bufferPages: true,
           info: {
             Title: `CV_${staff.firstNameTh}_${staff.lastNameTh}`,
-            Author: 'Faculty of Social Sciences, CRRU',
-            Subject: 'Official Speaker Bio & Academic CV',
+            Author: 'Faculty of Social Sciences, Chiang Rai Rajabhat University',
+            Subject: 'Official Speaker Bio & Academic Curriculum Vitae',
           },
         });
 
@@ -63,12 +89,12 @@ export class PdfResumeService {
           resolve(pdfData);
         });
 
-        // Register Thai Fonts
-        const fontRegular = path.join(process.cwd(), 'assets', 'fonts', 'tahoma.ttf');
-        const fontBold = path.join(process.cwd(), 'assets', 'fonts', 'tahomabd.ttf');
+        // ------------------ Thai Font Registration ------------------
+        const fontRegular = this.resolveAssetPath('fonts/tahoma.ttf');
+        const fontBold = this.resolveAssetPath('fonts/tahomabd.ttf');
 
-        const hasFontRegular = fs.existsSync(fontRegular);
-        const hasFontBold = fs.existsSync(fontBold);
+        const hasFontRegular = fontRegular && fs.existsSync(fontRegular);
+        const hasFontBold = fontBold && fs.existsSync(fontBold);
 
         if (hasFontRegular) {
           doc.registerFont('ThaiRegular', fontRegular);
@@ -80,30 +106,30 @@ export class PdfResumeService {
         const fontToUseRegular = hasFontRegular ? 'ThaiRegular' : 'Helvetica';
         const fontToUseBold = hasFontBold ? 'ThaiBold' : 'Helvetica-Bold';
 
-        // ------------------ Header Bar with Logos ------------------
-        const crruLogoPath = path.join(process.cwd(), 'assets', 'images', 'crru-logo.png');
-        const facultyLogoPath = path.join(process.cwd(), 'assets', 'images', 'faculty-logo.png');
+        // ------------------ Header Bar with CRRU & Faculty Logos ------------------
+        const crruLogoPath = this.resolveAssetPath('images/crru-logo.png');
+        const facultyLogoPath = this.resolveAssetPath('images/faculty-logo.png');
 
-        // Header Background Banner
-        doc.rect(0, 0, 595.28, 95).fill('#7A102E'); // CRRU Crimson theme
-        doc.rect(0, 93, 595.28, 4).fill('#E07A5F'); // Accent border
+        // Header Background Banner (University Crimson #7A102E + Gold border #C59B27)
+        doc.rect(0, 0, 595.28, 92).fill('#7A102E');
+        doc.rect(0, 90, 595.28, 3.5).fill('#C59B27');
 
         let headerTextX = 40;
 
-        // Render CRRU Logo if available
-        if (fs.existsSync(crruLogoPath)) {
+        // University Emblem (Left)
+        if (crruLogoPath && fs.existsSync(crruLogoPath)) {
           try {
-            doc.image(crruLogoPath, 40, 12, { width: 50, height: 70 });
-            headerTextX = 100;
+            doc.image(crruLogoPath, 38, 12, { width: 48, height: 68 });
+            headerTextX = 96;
           } catch (e) {
             this.logger.warn('Could not render CRRU logo in PDF', e);
           }
         }
 
-        // Render Faculty Logo on top right if available
-        if (fs.existsSync(facultyLogoPath)) {
+        // Faculty Logo (Right)
+        if (facultyLogoPath && fs.existsSync(facultyLogoPath)) {
           try {
-            doc.image(facultyLogoPath, 595.28 - 40 - 55, 18, { width: 55, height: 55 });
+            doc.image(facultyLogoPath, 595.28 - 40 - 54, 18, { width: 54, height: 54 });
           } catch (e) {
             this.logger.warn('Could not render Faculty logo in PDF', e);
           }
@@ -111,25 +137,29 @@ export class PdfResumeService {
 
         doc
           .font(fontToUseBold)
-          .fontSize(16)
+          .fontSize(15)
           .fillColor('#FFFFFF')
           .text('คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย', headerTextX, 22, { align: 'left' });
 
         doc
           .font(fontToUseRegular)
-          .fontSize(10.5)
+          .fontSize(10)
           .fillColor('#FCE7F3')
-          .text('Faculty of Social Sciences, Chiang Rai Rajabhat University', headerTextX, 45, { align: 'left' });
+          .text('Faculty of Social Sciences, Chiang Rai Rajabhat University', headerTextX, 42, { align: 'left' });
 
         doc
           .font(fontToUseRegular)
           .fontSize(8.5)
           .fillColor('#FED7AA')
-          .text(`เอกสารประวัติวิทยากรและผลงานทางวิชาการฉบับทางการ (Official Speaker Bio & CV) | รหัสคำร้อง: ${requestId}`, headerTextX, 62, { align: 'left' });
+          .text(
+            `เอกสารประวัติวิทยากรและผลงานทางวิชาการฉบับทางการ (Official Speaker Bio & CV)`,
+            headerTextX,
+            58,
+            { align: 'left' },
+          );
 
-        // ------------------ Personal Info ------------------
-        const startY = 118;
-        doc.y = startY;
+        // ------------------ Personal Profile Information ------------------
+        doc.y = 110;
 
         const fullNameTh = [staff.prefixTh, staff.firstNameTh, staff.lastNameTh].filter(Boolean).join(' ');
         const fullNameEn = [staff.prefixEn, staff.firstNameEn, staff.lastNameEn].filter(Boolean).join(' ');
@@ -137,221 +167,260 @@ export class PdfResumeService {
         doc
           .font(fontToUseBold)
           .fontSize(15)
-          .fillColor('#1E293B')
+          .fillColor('#0F172A')
           .text(fullNameTh, 40, doc.y);
 
-        if (fullNameEn) {
+        if (fullNameEn && fullNameEn.trim()) {
           doc
             .font(fontToUseRegular)
-            .fontSize(11)
+            .fontSize(10.5)
             .fillColor('#64748B')
-            .text(fullNameEn);
+            .text(fullNameEn.trim());
         }
 
-        doc.moveDown(0.4);
+        doc.moveDown(0.3);
 
-        // Positions & Department
-        const positionText = [staff.adminPosition, staff.academicPosition].filter(Boolean).join(' • ');
-        if (positionText) {
+        // Conditional Positions (Only display if present)
+        const posList = [staff.adminPosition, staff.academicPosition].filter(Boolean);
+        if (posList.length > 0) {
           doc
             .font(fontToUseBold)
-            .fontSize(10)
+            .fontSize(9.5)
             .fillColor('#85193C')
-            .text(`ตำแหน่ง: ${positionText}`);
+            .text(`ตำแหน่ง: ${posList.join(' • ')}`);
         }
 
+        // Conditional Department (Only display if present)
         const deptName = staff.departmentName || staff.department;
-        if (deptName) {
-          doc
-            .font(fontToUseRegular)
-            .fontSize(10)
-            .fillColor('#334155')
-            .text(`สังกัด: ${deptName} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`);
-        }
-
-        if (staff.contactEmail) {
-          doc
-            .font(fontToUseRegular)
-            .fontSize(9)
-            .fillColor('#0284C7')
-            .text(`อีเมลติดต่อทางราชการ: ${staff.contactEmail}`);
-        }
-
-        doc.moveDown(0.8);
-
-        // Divider
-        doc.strokeColor('#E2E8F0').lineWidth(1).moveTo(40, doc.y).lineTo(555, doc.y).stroke();
-        doc.moveDown(0.6);
-
-        // ------------------ Education ------------------
-        if (staff.education && staff.education.length > 0) {
-          doc
-            .font(fontToUseBold)
-            .fontSize(11)
-            .fillColor('#1E293B')
-            .text('ประวัติการศึกษา (Education)');
-          doc.moveDown(0.2);
-
-          for (const edu of staff.education) {
-            const levelLabel =
-              edu.level === 'DOCTORAL' ? 'ปริญญาเอก (Ph.D.)' :
-              edu.level === 'MASTER' ? 'ปริญญาโท (Master)' : 'ปริญญาตรี (Bachelor)';
-            doc
-              .font(fontToUseRegular)
-              .fontSize(9.5)
-              .fillColor('#334155')
-              .text(`• ${levelLabel}: ${edu.detail}`, { indent: 10 });
-          }
-          doc.moveDown(0.6);
-        }
-
-        // ------------------ Expertise ------------------
-        if (staff.expertise && staff.expertise.length > 0) {
-          doc
-            .font(fontToUseBold)
-            .fontSize(11)
-            .fillColor('#1E293B')
-            .text('สาขาความเชี่ยวชาญ (Areas of Expertise)');
-          doc.moveDown(0.2);
-
-          const expText = staff.expertise.join('  •  ');
+        if (deptName && deptName.trim()) {
           doc
             .font(fontToUseRegular)
             .fontSize(9.5)
             .fillColor('#334155')
-            .text(expText, { indent: 10, lineGap: 3 });
-          doc.moveDown(0.6);
+            .text(`สังกัด: ${deptName.trim()} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`);
         }
 
-        // ------------------ Bio / Vision ------------------
-        if (staff.bio) {
-          doc
-            .font(fontToUseBold)
-            .fontSize(11)
-            .fillColor('#1E293B')
-            .text('ประวัติและผลงานวิชาการโดยสังเขป (Biography)');
-          doc.moveDown(0.2);
-
+        // Conditional Contact Email (Only display if present)
+        if (staff.contactEmail && staff.contactEmail.trim()) {
           doc
             .font(fontToUseRegular)
             .fontSize(9)
+            .fillColor('#0284C7')
+            .text(`อีเมลติดต่อทางราชการ: ${staff.contactEmail.trim()}`);
+        }
+
+        doc.moveDown(0.5);
+
+        // Horizontal Separation Bar
+        doc.strokeColor('#E2E8F0').lineWidth(0.8).moveTo(40, doc.y).lineTo(555, doc.y).stroke();
+        doc.moveDown(0.5);
+
+        // Page break controller to prevent overflow into footer
+        const ensureSpace = (neededHeight: number = 45) => {
+          if (doc.y + neededHeight > 730) {
+            doc.addPage();
+            doc.rect(0, 0, 595.28, 26).fill('#7A102E');
+            doc
+              .font(fontToUseBold)
+              .fontSize(8.5)
+              .fillColor('#FFFFFF')
+              .text('คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย | เอกสารประวัติทางการ (ต่อ)', 40, 8);
+            doc.y = 42;
+          }
+        };
+
+        const renderSectionHeader = (titleTh: string, titleEn: string) => {
+          ensureSpace(50);
+          doc.rect(40, doc.y, 4, 13).fill('#7A102E');
+          doc
+            .font(fontToUseBold)
+            .fontSize(10.5)
+            .fillColor('#0F172A')
+            .text(`  ${titleTh} ${titleEn ? `(${titleEn})` : ''}`, 46, doc.y + 1);
+          doc.moveDown(0.3);
+        };
+
+        // ------------------ 1. Education (Conditional) ------------------
+        const validEducation = Array.isArray(staff.education)
+          ? staff.education.filter((e) => e && (e.detail?.trim() || e.level?.trim()))
+          : [];
+
+        if (validEducation.length > 0) {
+          renderSectionHeader('ประวัติการศึกษา', 'Education');
+          for (const edu of validEducation) {
+            ensureSpace(20);
+            const levelLabel =
+              edu.level === 'DOCTORAL'
+                ? 'ปริญญาเอก (Ph.D.)'
+                : edu.level === 'MASTER'
+                  ? 'ปริญญาโท (Master)'
+                  : edu.level === 'BACHELOR'
+                    ? 'ปริญญาตรี (Bachelor)'
+                    : edu.level || 'การศึกษา';
+
+            doc
+              .font(fontToUseRegular)
+              .fontSize(9)
+              .fillColor('#334155')
+              .text(`• ${levelLabel}: ${edu.detail || ''}`, { indent: 10, lineGap: 2 });
+          }
+          doc.moveDown(0.5);
+        }
+
+        // ------------------ 2. Areas of Expertise (Conditional) ------------------
+        const validExpertise = Array.isArray(staff.expertise)
+          ? staff.expertise.filter((x) => typeof x === 'string' && x.trim().length > 0)
+          : [];
+
+        if (validExpertise.length > 0) {
+          renderSectionHeader('สาขาความเชี่ยวชาญ', 'Areas of Expertise');
+          ensureSpace(25);
+          doc
+            .font(fontToUseRegular)
+            .fontSize(9)
+            .fillColor('#334155')
+            .text(validExpertise.join('  •  '), { indent: 10, lineGap: 3 });
+          doc.moveDown(0.5);
+        }
+
+        // ------------------ 3. Biography / Summary (Conditional) ------------------
+        if (staff.bio && staff.bio.trim()) {
+          renderSectionHeader('ประวัติและผลงานวิชาการโดยสังเขป', 'Biography');
+          ensureSpace(30);
+          doc
+            .font(fontToUseRegular)
+            .fontSize(8.5)
             .fillColor('#475569')
-            .text(staff.bio, { indent: 10, lineGap: 3 });
-          doc.moveDown(0.6);
+            .text(staff.bio.trim(), { indent: 10, lineGap: 3 });
+          doc.moveDown(0.5);
         }
 
-        // ------------------ Research Identifiers ------------------
-        const hasIdentifiers = staff.scopusAuthorId || staff.orcidId || staff.googleScholarUrl;
-        if (hasIdentifiers) {
-          doc
-            .font(fontToUseBold)
-            .fontSize(11)
-            .fillColor('#1E293B')
-            .text('ฐานข้อมูลผลงานวิชาการระดับสากล (Academic Identifiers)');
-          doc.moveDown(0.2);
+        // ------------------ 4. Academic Identifiers (Conditional) ------------------
+        const hasScopus = !!(staff.scopusAuthorId && staff.scopusAuthorId.trim());
+        const hasOrcid = !!(staff.orcidId && staff.orcidId.trim());
+        const hasScholar = !!(staff.googleScholarUrl && staff.googleScholarUrl.trim());
 
-          if (staff.scopusAuthorId) {
+        if (hasScopus || hasOrcid || hasScholar) {
+          renderSectionHeader('ฐานข้อมูลผลงานวิชาการระดับสากล', 'Academic Identifiers');
+          if (hasScopus) {
+            ensureSpace(18);
             doc
               .font(fontToUseRegular)
-              .fontSize(9)
+              .fontSize(8.5)
               .fillColor('#334155')
-              .text(`• Scopus Author ID: ${staff.scopusAuthorId}`, { indent: 10 });
+              .text(`• Scopus Author ID: ${staff.scopusAuthorId.trim()}`, { indent: 10 });
           }
-          if (staff.orcidId) {
+          if (hasOrcid) {
+            ensureSpace(18);
             doc
               .font(fontToUseRegular)
-              .fontSize(9)
+              .fontSize(8.5)
               .fillColor('#334155')
-              .text(`• ORCID iD: ${staff.orcidId}`, { indent: 10 });
+              .text(`• ORCID iD: ${staff.orcidId.trim()}`, { indent: 10 });
           }
-          if (staff.googleScholarUrl) {
+          if (hasScholar) {
+            ensureSpace(18);
             doc
               .font(fontToUseRegular)
-              .fontSize(9)
+              .fontSize(8.5)
               .fillColor('#0284C7')
-              .text(`• Google Scholar: ${staff.googleScholarUrl}`, { indent: 10 });
+              .text(`• Google Scholar: ${staff.googleScholarUrl.trim()}`, { indent: 10 });
           }
-          doc.moveDown(0.6);
+          doc.moveDown(0.5);
         }
 
-        // ------------------ Research Projects ------------------
-        if (staff.researchProjects && staff.researchProjects.length > 0) {
-          doc
-            .font(fontToUseBold)
-            .fontSize(11)
-            .fillColor('#1E293B')
-            .text('โครงการวิจัยและงานวิชาการ (Research Projects)');
-          doc.moveDown(0.2);
+        // ------------------ 5. Research Projects (Conditional) ------------------
+        const validProjects = Array.isArray(staff.researchProjects)
+          ? staff.researchProjects.filter((p) => p && (p.titleTh?.trim() || p.titleEn?.trim()))
+          : [];
 
-          for (const proj of staff.researchProjects) {
-            const title = proj.titleTh || proj.titleEn || 'โครงการวิจัย';
+        if (validProjects.length > 0) {
+          renderSectionHeader('โครงการวิจัยและงานวิชาการ', 'Research Projects');
+          for (const proj of validProjects) {
+            ensureSpace(24);
+            const title = (proj.titleTh || proj.titleEn || '').trim();
             const yearStr = proj.year ? `(พ.ศ. ${proj.year})` : '';
-            const roleStr = proj.role === 'HEAD' ? '[หัวหน้าโครงการ]' : proj.role === 'CO_RESEARCHER' ? '[ผู้ร่วมวิจัย]' : proj.role ? `[${proj.role}]` : '';
+            const roleStr =
+              proj.role === 'HEAD'
+                ? '[หัวหน้าโครงการ]'
+                : proj.role === 'CO_RESEARCHER'
+                  ? '[ผู้ร่วมวิจัย]'
+                  : proj.role
+                    ? `[${proj.role}]`
+                    : '';
             doc
               .font(fontToUseRegular)
-              .fontSize(9)
+              .fontSize(8.5)
               .fillColor('#334155')
-              .text(`• ${title} ${yearStr} ${roleStr}`, { indent: 10, lineGap: 2 });
+              .text(`• ${title} ${yearStr} ${roleStr}`.trim(), { indent: 10, lineGap: 2 });
           }
-          doc.moveDown(0.6);
+          doc.moveDown(0.5);
         }
 
-        // ------------------ Academic Services ------------------
-        if (staff.academicServices && staff.academicServices.length > 0) {
-          doc
-            .font(fontToUseBold)
-            .fontSize(11)
-            .fillColor('#1E293B')
-            .text('ผลงานบริการวิชาการและพัฒนาชุมชนท้องถิ่น (Academic & Social Services)');
-          doc.moveDown(0.2);
+        // ------------------ 6. Academic Services (Conditional) ------------------
+        const validServices = Array.isArray(staff.academicServices)
+          ? staff.academicServices.filter((s) => s && s.title?.trim())
+          : [];
 
-          for (const srv of staff.academicServices) {
-            const title = srv.title || 'โครงการบริการวิชาการ';
-            const areaStr = srv.area ? `(พื้นที่: ${srv.area})` : '';
+        if (validServices.length > 0) {
+          renderSectionHeader('ผลงานบริการวิชาการและพัฒนาชุมชนท้องถิ่น', 'Academic & Community Services');
+          for (const srv of validServices) {
+            ensureSpace(24);
+            const title = (srv.title || '').trim();
+            const areaStr = srv.area?.trim() ? `(พื้นที่: ${srv.area.trim()})` : '';
             const roleStr = srv.role === 'LEADER' ? '[หัวหน้าโครงการ]' : '[ผู้ร่วมโครงการ]';
             doc
               .font(fontToUseRegular)
-              .fontSize(9)
+              .fontSize(8.5)
               .fillColor('#334155')
-              .text(`• ${title} ${areaStr} ${roleStr}`, { indent: 10, lineGap: 2 });
+              .text(`• ${title} ${areaStr} ${roleStr}`.trim(), { indent: 10, lineGap: 2 });
           }
-          doc.moveDown(0.6);
+          doc.moveDown(0.5);
         }
 
-        // ------------------ PDPA & Institutional Footer ------------------
-        const footerY = 770;
-        doc.rect(40, footerY - 5, 515, 45).fill('#F8FAFC');
+        // ------------------ Uniform PDPA & Institutional Footer Across All Pages ------------------
+        const range = doc.bufferedPageRange();
+        const issueDateStr = new Date().toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
 
-        doc
-          .font(fontToUseBold)
-          .fontSize(8)
-          .fillColor('#991B1B')
-          .text(
-            'ข้อความคุ้มครองข้อมูลส่วนบุคคล (PDPA Notice):',
-            50,
-            footerY,
-          );
+        for (let i = range.start; i < range.start + range.count; i++) {
+          doc.switchToPage(i);
 
-        doc
-          .font(fontToUseRegular)
-          .fontSize(7.5)
-          .fillColor('#64748B')
-          .text(
-            'เอกสารนี้ออกโดยสำนักงานคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย เพื่อใช้ประโยชน์ตามวัตถุประสงค์ในคำขอทางการเท่านั้น ห้ามทำซ้ำ ดัดแปลง หรือเผยแพร่แก่บุคคลที่สามโดยไม่ได้รับอนุญาต',
-            50,
-            footerY + 11,
-            { width: 495 },
-          );
+          // Subtle footer box
+          doc.rect(40, 772, 515, 42).fill('#F8FAFC');
+          doc.strokeColor('#E2E8F0').lineWidth(0.5).rect(40, 772, 515, 42).stroke();
 
-        doc
-          .font(fontToUseRegular)
-          .fontSize(7.5)
-          .fillColor('#94A3B8')
-          .text(
-            `ออกเอกสารเมื่อ: ${new Date().toLocaleDateString('th-TH')} | ติดต่อสอบถาม: socialsciences@crru.ac.th`,
-            50,
-            footerY + 23,
-          );
+          doc
+            .font(fontToUseBold)
+            .fontSize(7.5)
+            .fillColor('#7A102E')
+            .text('ข้อความคุ้มครองข้อมูลส่วนบุคคล (PDPA Notice):', 48, 776);
+
+          doc
+            .font(fontToUseRegular)
+            .fontSize(7)
+            .fillColor('#64748B')
+            .text(
+              'เอกสารนี้ออกและรับรองโดยสำนักงานคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย เพื่อใช้ตามวัตถุประสงค์ในคำขอทางการเท่านั้น ห้ามคัดลอก ดัดแปลง หรือเผยแพร่แก่บุคคลที่สามโดยไม่ได้รับอนุญาต',
+              48,
+              786,
+              { width: 498 },
+            );
+
+          doc
+            .font(fontToUseRegular)
+            .fontSize(6.8)
+            .fillColor('#94A3B8')
+            .text(
+              `วันที่ออกเอกสาร: ${issueDateStr} | รหัสอ้างอิง: ${requestId} | หน้า ${i + 1} จาก ${range.count} | ติดต่อ: socialsciences@crru.ac.th`,
+              48,
+              798,
+              { width: 498 },
+            );
+        }
 
         doc.end();
       } catch (err) {
