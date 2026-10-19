@@ -927,7 +927,7 @@ export const procurementDocuments = pgTable(
 
 export const academicServiceConfigs = pgTable('academic_service_configs', {
   id: serial('id').primaryKey(),
-  contactEmail: varchar('contact_email', { length: 255 }).default('socialsciences@crru.ac.th'),
+  contactEmail: varchar('contact_email', { length: 255 }).default('social@crru.ac.th'),
   contactPhone: varchar('contact_phone', { length: 100 }).default('0-5377-6000 ต่อ 1600'),
   officeHours: varchar('office_hours', { length: 255 }).default('จันทร์ - ศุกร์ 08:30 - 16:30 น. (เว้นวันหยุดราชการ)'),
   officeLocation: varchar('office_location', { length: 255 }).default('สำนักงานคณบดี อาคาร 1 ชั้น 2 คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย'),

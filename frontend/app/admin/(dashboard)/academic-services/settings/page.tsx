@@ -204,7 +204,7 @@ export default function AcademicServiceSettingsPage() {
                 <Input
                   required
                   type="email"
-                  placeholder="socialsciences@crru.ac.th"
+                  placeholder="social@crru.ac.th"
                   value={config.contactEmail}
                   onChange={(e) => setConfig({ ...config, contactEmail: e.target.value })}
                   className="rounded-sm text-xs font-mono"

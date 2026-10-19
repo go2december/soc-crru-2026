@@ -76,7 +76,7 @@ export class StaffMailService {
         </div>
 
         <p style="font-size: 13px; color: #475569;">
-          หากมีข้อสงสัยหรือต้องการประสานงานเร่งด่วน กรุณาติดต่อสำนักงานคณะสังคมศาสตร์ โทร. 053-776-000 หรืออีเมล socialsciences@crru.ac.th
+          หากมีข้อสงสัยหรือต้องการประสานงานเร่งด่วน กรุณาติดต่อสำนักงานคณะสังคมศาสตร์ โทร. 053-776-000 หรืออีเมล social@crru.ac.th
         </p>
 
         <div style="border-top: 1px solid #e2e8f0; margin-top: 24px; padding-top: 16px; font-size: 12px; color: #94a3b8; text-align: center;">
@@ -145,7 +145,7 @@ export class StaffMailService {
         </div>
 
         <div style="border-top: 1px solid #e2e8f0; margin-top: 24px; padding-top: 16px; font-size: 12px; color: #94a3b8; text-align: center;">
-          คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย | socialsciences@crru.ac.th
+          คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย | social@crru.ac.th
         </div>
       </div>
     `;
@@ -190,7 +190,7 @@ export class StaffMailService {
     purpose: string;
     requestId: string;
   }) {
-    const adminEmail = params.adminEmail || process.env.ADMIN_NOTIFICATION_EMAIL || 'socialsciences@crru.ac.th';
+    const adminEmail = params.adminEmail || process.env.ADMIN_NOTIFICATION_EMAIL || 'social@crru.ac.th';
     const subject = `[แจ้งเตือนคำขอใหม่] มีผู้ขอเอกสารประวัติวิทยากร: ${params.staffName}`;
     const html = `
       <div style="font-family: 'Sarabun', Tahoma, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; padding: 20px;">

@@ -255,7 +255,7 @@ export class AcademicServicesService {
         .insert(academicServiceConfigs)
         .values({
           id: 1,
-          contactEmail: 'socialsciences@crru.ac.th',
+          contactEmail: 'social@crru.ac.th',
           contactPhone: '0-5377-6000 ต่อ 1600',
           officeHours: 'จันทร์ - ศุกร์ 08:30 - 16:30 น. (เว้นวันหยุดราชการ)',
           officeLocation: 'สำนักงานคณบดี อาคาร 1 ชั้น 2 คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
