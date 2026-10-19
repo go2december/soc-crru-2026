@@ -20,6 +20,7 @@ import {
     ChevronRight,
     ArrowLeft,
     X,
+    Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -70,6 +71,8 @@ export default function ResumeRequestsPage() {
     const [approveItem, setApproveItem] = useState<ResumeRequestItem | null>(null);
     const [rejectItem, setRejectItem] = useState<ResumeRequestItem | null>(null);
     const [previewPdfStaffId, setPreviewPdfStaffId] = useState<string | null>(null);
+    const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
+    const [previewLoading, setPreviewLoading] = useState(false);
 
     const [rejectionReason, setRejectionReason] = useState('');
     const [processing, setProcessing] = useState(false);
@@ -182,6 +185,49 @@ export default function ResumeRequestsPage() {
         } finally {
             setProcessing(false);
         }
+    };
+
+    const handleOpenPdfPreview = async (staffId: string) => {
+        setPreviewPdfStaffId(staffId);
+        setPreviewLoading(true);
+        if (previewPdfUrl) {
+            URL.revokeObjectURL(previewPdfUrl);
+            setPreviewPdfUrl(null);
+        }
+
+        const token = localStorage.getItem('admin_token');
+        try {
+            const res = await fetch(`${API_URL}/api/staff/${staffId}/resume-preview`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                showToast(err.message || 'ไม่สามารถโหลดเอกสาร PDF ได้', 'error');
+                setPreviewPdfStaffId(null);
+                return;
+            }
+
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            setPreviewPdfUrl(url);
+        } catch (e) {
+            console.error('Failed to preview PDF:', e);
+            showToast('เกิดข้อผิดพลาดในการดาวน์โหลดเอกสาร PDF', 'error');
+            setPreviewPdfStaffId(null);
+        } finally {
+            setPreviewLoading(false);
+        }
+    };
+
+    const handleClosePdfPreview = () => {
+        if (previewPdfUrl) {
+            URL.revokeObjectURL(previewPdfUrl);
+            setPreviewPdfUrl(null);
+        }
+        setPreviewPdfStaffId(null);
     };
 
     // คำนวณวันคงเหลือในกรอบ 7 วันทำการ
@@ -473,8 +519,8 @@ export default function ResumeRequestsPage() {
                                                         variant="ghost"
                                                         size="sm"
                                                         className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-sm"
-                                                        title="พรีวิวเอกสาร PDF"
-                                                        onClick={() => setPreviewPdfStaffId(item.staffId)}
+                                                        title="พรีวิวเอกสาร PDF ทางการ"
+                                                        onClick={() => handleOpenPdfPreview(item.staffId)}
                                                     >
                                                         <Eye className="w-3.5 h-3.5" />
                                                     </Button>
@@ -713,7 +759,7 @@ export default function ResumeRequestsPage() {
             </Dialog>
 
             {/* Modal: PDF Preview Dialog */}
-            <Dialog open={!!previewPdfStaffId} onOpenChange={() => setPreviewPdfStaffId(null)}>
+            <Dialog open={!!previewPdfStaffId} onOpenChange={() => handleClosePdfPreview()}>
                 <DialogContent className="rounded-sm max-w-4xl h-[85vh] flex flex-col p-4">
                     <DialogHeader className="flex flex-row items-center justify-between pb-2 border-b border-border">
                         <div>
@@ -722,27 +768,46 @@ export default function ResumeRequestsPage() {
                                 พรีวิวเอกสารประวัติทางการ (Official PDF Preview)
                             </DialogTitle>
                             <DialogDescription className="text-xs">
-                                ตัวอย่างเอกสารที่จะสร้างและจัดส่งให้ผู้ขอรับเอกสารทางอีเมล
+                                ตัวอย่างเอกสารที่จะสร้างและจัดส่งให้ผู้ขอรับเอกสารทางอีเมล (มีตราสัญลักษณ์ มรภ.ชร. และคณะฯ)
                             </DialogDescription>
                         </div>
                     </DialogHeader>
 
-                    <div className="flex-1 w-full bg-slate-900 rounded-sm overflow-hidden my-2">
-                        {previewPdfStaffId && (
+                    <div className="flex-1 w-full bg-slate-900 rounded-sm overflow-hidden my-2 relative flex items-center justify-center">
+                        {previewLoading ? (
+                            <div className="flex flex-col items-center gap-3 text-white">
+                                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                <span className="text-xs font-medium text-slate-300">กำลังสร้างและโหลดพรีวิวเอกสาร PDF...</span>
+                            </div>
+                        ) : previewPdfUrl ? (
                             <iframe
-                                src={`${API_URL}/api/staff/${previewPdfStaffId}/resume-preview`}
-                                className="w-full h-full border-0"
+                                src={previewPdfUrl}
+                                className="w-full h-full border-0 bg-white"
                                 title="PDF Resume Preview"
                             />
+                        ) : (
+                            <div className="text-slate-400 text-xs">
+                                ไม่สามารถแสดงตัวอย่างเอกสารได้
+                            </div>
                         )}
                     </div>
 
-                    <DialogFooter className="pt-2 border-t border-border">
+                    <DialogFooter className="pt-2 border-t border-border flex items-center justify-between sm:justify-between">
+                        {previewPdfUrl ? (
+                            <a
+                                href={previewPdfUrl}
+                                download="Official_Speaker_Bio_Preview.pdf"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold rounded-sm transition-colors"
+                            >
+                                <Download className="w-3.5 h-3.5" />
+                                <span>ดาวน์โหลดไฟล์ PDF ทดสอบ</span>
+                            </a>
+                        ) : <div />}
                         <Button
                             variant="outline"
                             size="sm"
                             className="rounded-sm text-xs"
-                            onClick={() => setPreviewPdfStaffId(null)}
+                            onClick={handleClosePdfPreview}
                         >
                             ปิดหน้าต่าง
                         </Button>

@@ -80,31 +80,55 @@ export class PdfResumeService {
         const fontToUseRegular = hasFontRegular ? 'ThaiRegular' : 'Helvetica';
         const fontToUseBold = hasFontBold ? 'ThaiBold' : 'Helvetica-Bold';
 
-        // ------------------ Header Bar ------------------
-        doc.rect(0, 0, 595.28, 85).fill('#85193C');
+        // ------------------ Header Bar with Logos ------------------
+        const crruLogoPath = path.join(process.cwd(), 'assets', 'images', 'crru-logo.png');
+        const facultyLogoPath = path.join(process.cwd(), 'assets', 'images', 'faculty-logo.png');
+
+        // Header Background Banner
+        doc.rect(0, 0, 595.28, 95).fill('#7A102E'); // CRRU Crimson theme
+        doc.rect(0, 93, 595.28, 4).fill('#E07A5F'); // Accent border
+
+        let headerTextX = 40;
+
+        // Render CRRU Logo if available
+        if (fs.existsSync(crruLogoPath)) {
+          try {
+            doc.image(crruLogoPath, 40, 12, { width: 50, height: 70 });
+            headerTextX = 100;
+          } catch (e) {
+            this.logger.warn('Could not render CRRU logo in PDF', e);
+          }
+        }
+
+        // Render Faculty Logo on top right if available
+        if (fs.existsSync(facultyLogoPath)) {
+          try {
+            doc.image(facultyLogoPath, 595.28 - 40 - 55, 18, { width: 55, height: 55 });
+          } catch (e) {
+            this.logger.warn('Could not render Faculty logo in PDF', e);
+          }
+        }
 
         doc
           .font(fontToUseBold)
           .fontSize(16)
           .fillColor('#FFFFFF')
-          .text('คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย', 40, 20, { align: 'left' });
+          .text('คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย', headerTextX, 22, { align: 'left' });
 
         doc
           .font(fontToUseRegular)
-          .fontSize(10)
-          .fillColor('#FBD5D5')
-          .text('Faculty of Social Sciences, Chiang Rai Rajabhat University', 40, 42, { align: 'left' });
+          .fontSize(10.5)
+          .fillColor('#FCE7F3')
+          .text('Faculty of Social Sciences, Chiang Rai Rajabhat University', headerTextX, 45, { align: 'left' });
 
         doc
           .font(fontToUseRegular)
-          .fontSize(8)
-          .fillColor('#FDE8E8')
-          .text(`เอกสารประวัติวิทยากรฉบับทางการ (Official Speaker Bio & CV) | รหัสคำร้อง: ${requestId}`, 40, 58, { align: 'left' });
-
-        doc.moveDown(2);
+          .fontSize(8.5)
+          .fillColor('#FED7AA')
+          .text(`เอกสารประวัติวิทยากรและผลงานทางวิชาการฉบับทางการ (Official Speaker Bio & CV) | รหัสคำร้อง: ${requestId}`, headerTextX, 62, { align: 'left' });
 
         // ------------------ Personal Info ------------------
-        const startY = 105;
+        const startY = 118;
         doc.y = startY;
 
         const fullNameTh = [staff.prefixTh, staff.firstNameTh, staff.lastNameTh].filter(Boolean).join(' ');
