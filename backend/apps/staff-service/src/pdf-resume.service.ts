@@ -255,19 +255,40 @@ export class PdfResumeService {
             .font(fontToUseBold)
             .fontSize(11)
             .fillColor('#1E293B')
-            .text('ผลงานโครงการวิจัยเด่น (Selected Research Projects)');
+            .text('โครงการวิจัยและงานวิชาการ (Research Projects)');
           doc.moveDown(0.2);
 
-          const topProjects = staff.researchProjects.slice(0, 5);
-          for (const proj of topProjects) {
+          for (const proj of staff.researchProjects) {
             const title = proj.titleTh || proj.titleEn || 'โครงการวิจัย';
             const yearStr = proj.year ? `(พ.ศ. ${proj.year})` : '';
-            const roleStr = proj.role ? `[${proj.role}]` : '';
+            const roleStr = proj.role === 'HEAD' ? '[หัวหน้าโครงการ]' : proj.role === 'CO_RESEARCHER' ? '[ผู้ร่วมวิจัย]' : proj.role ? `[${proj.role}]` : '';
             doc
               .font(fontToUseRegular)
               .fontSize(9)
               .fillColor('#334155')
               .text(`• ${title} ${yearStr} ${roleStr}`, { indent: 10, lineGap: 2 });
+          }
+          doc.moveDown(0.6);
+        }
+
+        // ------------------ Academic Services ------------------
+        if (staff.academicServices && staff.academicServices.length > 0) {
+          doc
+            .font(fontToUseBold)
+            .fontSize(11)
+            .fillColor('#1E293B')
+            .text('ผลงานบริการวิชาการและพัฒนาชุมชนท้องถิ่น (Academic & Social Services)');
+          doc.moveDown(0.2);
+
+          for (const srv of staff.academicServices) {
+            const title = srv.title || 'โครงการบริการวิชาการ';
+            const areaStr = srv.area ? `(พื้นที่: ${srv.area})` : '';
+            const roleStr = srv.role === 'LEADER' ? '[หัวหน้าโครงการ]' : '[ผู้ร่วมโครงการ]';
+            doc
+              .font(fontToUseRegular)
+              .fontSize(9)
+              .fillColor('#334155')
+              .text(`• ${title} ${areaStr} ${roleStr}`, { indent: 10, lineGap: 2 });
           }
           doc.moveDown(0.6);
         }

@@ -18,6 +18,19 @@ export interface LinkedResearchProject {
     positionTitle: string | null;
 }
 
+export interface LinkedAcademicService {
+    id: string;
+    title: string;
+    serviceType: string;
+    area: string | null;
+    status: string | null;
+    coverImageUrl: string | null;
+    budget: string | null;
+    fundingSource: string | null;
+    role: string | null;
+    createdAt: string;
+}
+
 export interface Staff {
     id: string;
     prefixTh: string | null;
@@ -45,6 +58,7 @@ export interface Staff {
     departmentEn: string | null;
     isExecutive: boolean;
     researchProjects?: LinkedResearchProject[];
+    academicServices?: LinkedAcademicService[];
 }
 
 export interface StaffNameFields {

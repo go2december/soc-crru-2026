@@ -26,7 +26,9 @@ import {
     Check,
     FileText,
     Lock,
-    Quote
+    Quote,
+    Handshake,
+    Sparkles
 } from 'lucide-react';
 import Breadcrumb from '@/components/Breadcrumb';
 import RequestResumeModal from './RequestResumeModal';
@@ -565,14 +567,21 @@ export default function StaffProfilePage() {
                             </div>
                             )}
 
-                            {/* Linked Research Projects Section (Academic or if projects exist) */}
+                            {/* Linked Research Projects Section (Max 3 latest items) */}
                             {(staff.staffType === 'ACADEMIC' || (staff.researchProjects && staff.researchProjects.length > 0)) && (
                                 <div className="mb-8">
                                     <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
-                                        <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                                            <FlaskConical className="w-4 h-4 text-scholar-deep" />
-                                            โครงการวิจัยและผลงานวิชาการที่เชื่อมโยง
-                                        </h3>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                                                <FlaskConical className="w-4 h-4 text-scholar-deep" />
+                                                โครงการวิจัยและผลงานวิชาการล่าสุด
+                                            </h3>
+                                            {staff.researchProjects && staff.researchProjects.length > 0 && (
+                                                <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-sm">
+                                                    แสดง {Math.min(staff.researchProjects.length, 3)} จาก {staff.researchProjects.length} เรื่อง
+                                                </span>
+                                            )}
+                                        </div>
                                         <Link
                                             href="/research/database"
                                             className="text-xs text-slate-600 hover:text-slate-900 font-medium inline-flex items-center gap-1 transition-colors"
@@ -583,7 +592,7 @@ export default function StaffProfilePage() {
 
                                 {staff.researchProjects && staff.researchProjects.length > 0 ? (
                                     <div className="space-y-3">
-                                        {staff.researchProjects.map((proj) => {
+                                        {staff.researchProjects.slice(0, 3).map((proj) => {
                                             const roleBadge = getRoleBadge(proj.role);
                                             return (
                                                 <div
@@ -633,6 +642,24 @@ export default function StaffProfilePage() {
                                                 </div>
                                             );
                                         })}
+
+                                        {/* Notice if more than 3 projects */}
+                                        {staff.researchProjects.length > 3 && (
+                                            <div className="p-3 bg-slate-50 border border-dashed border-slate-300 rounded-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                                                <div className="text-slate-600">
+                                                    <span>ยังมีโครงการวิจัยและผลงานวิชาการอีก </span>
+                                                    <span className="font-bold text-slate-900">{staff.researchProjects.length - 3} เรื่อง</span>
+                                                    <span> ในฐานข้อมูลประวัติฉบับเต็ม</span>
+                                                </div>
+                                                <button
+                                                    onClick={() => setIsRequestModalOpen(true)}
+                                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-scholar-deep hover:text-scholar-accent transition-colors bg-white border border-slate-200 px-2.5 py-1 rounded-sm shadow-2xs hover:border-slate-300"
+                                                >
+                                                    <FileText className="w-3.5 h-3.5" />
+                                                    <span>ขอประวัติวิจัยฉบับเต็ม (Resume)</span>
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="p-6 bg-slate-50 border border-dashed border-slate-200 rounded-sm text-center">
@@ -646,6 +673,94 @@ export default function StaffProfilePage() {
                                     </div>
                                 )}
                             </div>
+                            )}
+
+                            {/* Academic & Social Services Section (Max 3 latest items) */}
+                            {staff.academicServices && staff.academicServices.length > 0 && (
+                                <div className="mb-8">
+                                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                                                <Handshake className="w-4 h-4 text-scholar-deep" />
+                                                โครงการบริการวิชาการและพัฒนาสังคมล่าสุด
+                                            </h3>
+                                            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-sm">
+                                                แสดง {Math.min(staff.academicServices.length, 3)} จาก {staff.academicServices.length} เรื่อง
+                                            </span>
+                                        </div>
+                                        <Link
+                                            href="/research/services"
+                                            className="text-xs text-slate-600 hover:text-slate-900 font-medium inline-flex items-center gap-1 transition-colors"
+                                        >
+                                            ดูบริการวิชาการทั้งหมด <ArrowRight className="w-3 h-3" />
+                                        </Link>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        {staff.academicServices.slice(0, 3).map((srv) => (
+                                            <div
+                                                key={srv.id}
+                                                className="p-4 bg-white border border-slate-200 rounded-sm hover:border-slate-400 transition-all shadow-2xs"
+                                            >
+                                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-sm border uppercase bg-emerald-50 text-emerald-800 border-emerald-200">
+                                                        {srv.role === 'LEADER' ? 'หัวหน้าโครงการ' : 'ผู้ร่วมโครงการ'}
+                                                    </span>
+                                                    {srv.serviceType && (
+                                                        <span className="text-[11px] font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-sm">
+                                                            {srv.serviceType === 'SOCIAL_SERVICE' ? 'พัฒนาสังคม/ชุมชน' : 'ที่ปรึกษา/อบรม'}
+                                                        </span>
+                                                    )}
+                                                    {srv.area && (
+                                                        <span className="text-[11px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded-sm border border-slate-200">
+                                                            พื้นที่: {srv.area}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <Link
+                                                    href={`/research/services/${srv.id}`}
+                                                    className="group block"
+                                                >
+                                                    <h4 className="text-sm font-bold text-slate-900 group-hover:text-scholar-accent transition-colors leading-snug">
+                                                        {srv.title}
+                                                    </h4>
+                                                </Link>
+
+                                                <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                                                    <span className="text-[11px] text-slate-500">
+                                                        สถานะ: {srv.status === 'COMPLETED' ? 'เสร็จสิ้นโครงการ' : 'กำลังดำเนินการ'}
+                                                    </span>
+                                                    <Link
+                                                        href={`/research/services/${srv.id}`}
+                                                        className="text-xs font-semibold text-slate-700 hover:text-slate-900 inline-flex items-center gap-1 group"
+                                                    >
+                                                        รายละเอียดบริการวิชาการ
+                                                        <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        {/* Notice if more than 3 academic services */}
+                                        {staff.academicServices.length > 3 && (
+                                            <div className="p-3 bg-slate-50 border border-dashed border-slate-300 rounded-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                                                <div className="text-slate-600">
+                                                    <span>ยังมีโครงการบริการวิชาการอีก </span>
+                                                    <span className="font-bold text-slate-900">{staff.academicServices.length - 3} เรื่อง</span>
+                                                    <span> ในฐานข้อมูลประวัติฉบับเต็ม</span>
+                                                </div>
+                                                <button
+                                                    onClick={() => setIsRequestModalOpen(true)}
+                                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-scholar-deep hover:text-scholar-accent transition-colors bg-white border border-slate-200 px-2.5 py-1 rounded-sm shadow-2xs hover:border-slate-300"
+                                                >
+                                                    <FileText className="w-3.5 h-3.5" />
+                                                    <span>ขอประวัติวิทยากรฉบับเต็ม (Resume)</span>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             )}
 
                             {/* Education & Expertise Grid */}

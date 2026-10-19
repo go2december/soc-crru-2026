@@ -12,6 +12,8 @@ import {
   researchProjects,
   projectMembers,
   staffResumeRequests,
+  academicServices,
+  academicServiceMembers,
 } from 'db/database';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
@@ -201,9 +203,36 @@ export class StaffService {
       )
       .orderBy(desc(researchProjects.year));
 
+    const services = await this.drizzle.db
+      .select({
+        id: academicServices.id,
+        title: academicServices.title,
+        serviceType: academicServices.serviceType,
+        area: academicServices.area,
+        status: academicServices.status,
+        coverImageUrl: academicServices.coverImageUrl,
+        budget: academicServices.budget,
+        fundingSource: academicServices.fundingSource,
+        role: academicServiceMembers.role,
+        createdAt: academicServices.createdAt,
+      })
+      .from(academicServiceMembers)
+      .innerJoin(
+        academicServices,
+        eq(academicServiceMembers.academicServiceId, academicServices.id),
+      )
+      .where(
+        and(
+          eq(academicServiceMembers.staffId, id),
+          eq(academicServices.isPublished, true),
+        ),
+      )
+      .orderBy(desc(academicServices.createdAt));
+
     return {
       ...result[0],
       researchProjects: projects,
+      academicServices: services,
     };
   }
 
