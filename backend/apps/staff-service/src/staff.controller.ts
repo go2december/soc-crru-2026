@@ -120,6 +120,26 @@ export class StaffController {
     return this.staffService.findAllResumeRequests(pageNum, limitNum, status);
   }
 
+  @Get('resume-requests/stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  getResumeRequestStats() {
+    return this.staffService.getResumeRequestStats();
+  }
+
+  @Get('resume-requests/export')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  async exportResumeRequests(@Query('type') type: string = 'detailed', @Res() res: any) {
+    const csvContent = await this.staffService.exportResumeRequests(type as 'detailed' | 'summary');
+    const fileName = type === 'summary' ? 'resume-requests-summary.csv' : 'resume-requests-detailed.csv';
+    res.set({
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${fileName}"`,
+    });
+    return res.send(Buffer.from('\uFEFF' + csvContent, 'utf-8'));
+  }
+
   @Post('resume-requests/:id/approve')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')

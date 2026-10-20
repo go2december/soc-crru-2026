@@ -1,583 +1,533 @@
-'use client';
-
-import React, { useState, useEffect, useMemo } from 'react';
-import Breadcrumb from '@/components/Breadcrumb';
-import Image from 'next/image';
+import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
-    Crown,
-    UserCircle2,
-    UserX,
-    Mail,
-    ArrowRight,
-    Quote,
-    Network,
-    Users,
-    Sparkles,
-    Building2
+  Crown,
+  UserCircle2,
+  Mail,
+  ArrowRight,
+  Quote,
+  Users,
+  Sparkles,
+  ChevronRight,
+  ShieldCheck,
 } from 'lucide-react';
-import { getFullName, getFullNameEn } from '@/lib/staff';
+import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
+import { Staff, getFullName, getFullNameEn } from '@/lib/staff';
 import JsonLd from '@/components/seo/JsonLd';
 
-// Types ตาม Backend Schema
-interface Staff {
-    id: string;
-    prefixTh: string | null;
-    firstNameTh: string;
-    lastNameTh: string;
-    prefixEn: string | null;
-    firstNameEn: string | null;
-    lastNameEn: string | null;
-    staffType: 'ACADEMIC' | 'SUPPORT';
-    academicPositionId: number | null;
-    academicPosition: string | null;
-    adminPositionId: number | null;
-    adminPosition: string | null;
-    education: { level: 'BACHELOR' | 'MASTER' | 'DOCTORAL'; detail: string }[] | null;
-    expertise: string[] | null;
-    imageUrl: string | null;
-    contactEmail: string | null;
-    bio?: string | null;
-    sortOrder: number;
-    department: string | null;
-    departmentEn: string | null;
-    isExecutive: boolean;
-}
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-
-// Helper: Format image URL to work with next/image inside Docker
-const getImageUrl = (url: string | null): string => {
-    if (!url) return '';
-    if (url.startsWith('http://localhost') || url.startsWith('http://soc_backend')) {
-        try {
-            return new URL(url).pathname;
-        } catch {
-            return url;
-        }
-    }
-    if (API_URL && url.startsWith(API_URL)) {
-        return url.replace(API_URL, '');
-    }
-    return url;
-};
+export const revalidate = 60;
 
 // ==========================================
-// Component: Dean Spotlight Hero Card (แบบ A)
+// Component: Dean Spotlight Hero Showcase
 // ==========================================
-const DeanSpotlightCard = ({ dean }: { dean: Staff }) => {
-    const defaultQuote = "มุ่งมั่นบูรณาการองค์ความรู้ทางสังคมศาสตร์สู่การสร้างนวัตกรรมเพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน และขับเคลื่อนองค์กรสู่มาตรฐานความเป็นเลิศ";
-    const quoteText = dean.bio?.trim() || defaultQuote;
-    const englishName = getFullNameEn(dean);
+function DeanSpotlightCard({ dean }: { dean: Staff }) {
+  const defaultQuote =
+    'มุ่งมั่นบูรณาการองค์ความรู้ทางสังคมศาสตร์สู่การสร้างนวัตกรรมเพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน และขับเคลื่อนองค์กรสู่มาตรฐานความเป็นเลิศระดับสากล';
+  const quoteText = dean.bio?.trim() || defaultQuote;
+  const englishName = getFullNameEn(dean);
+  const imageUrl = getAssetUrl(dean.imageUrl);
 
-    return (
-        <section aria-label="สารและข้อมูลคณบดี" className="w-full bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden mb-16 relative">
-            {/* Top Accent Strip */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-scholar-deep via-scholar-accent to-amber-500" />
-
-            <div className="p-6 md:p-10 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center lg:items-stretch">
-                {/* Dean Photo Frame (Sharp & Professional) */}
-                <div className="w-full sm:w-72 lg:w-80 flex-shrink-0 flex flex-col items-center">
-                    <figure className="aspect-[3/4] w-full bg-slate-100 relative overflow-hidden rounded-sm border-2 border-amber-200/60 shadow-md group">
-                        {dean.imageUrl ? (
-                            <Image
-                                src={getImageUrl(dean.imageUrl)}
-                                alt={getFullName(dean)}
-                                fill
-                                priority
-                                sizes="(max-width: 768px) 100vw, 320px"
-                                className="object-cover object-top transition-transform duration-300 ease-out group-hover:scale-103"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-100">
-                                <UserCircle2 className="w-24 h-24 mb-2 text-slate-300" strokeWidth={1} />
-                            </div>
-                        )}
-                        <div className="absolute top-3 right-3 bg-scholar-deep/90 text-scholar-accent px-2.5 py-1 rounded-sm border border-amber-400/40 text-[11px] font-bold tracking-wider flex items-center gap-1.5 backdrop-blur-sm shadow-sm">
-                            <Crown className="w-3.5 h-3.5" />
-                            <span>DEAN</span>
-                        </div>
-                    </figure>
-                </div>
-
-                {/* Dean Information & Statement (NO Education details displayed) */}
-                <div className="flex-1 flex flex-col justify-between text-left">
-                    <div>
-                        {/* Status Tag */}
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 text-scholar-accent border border-amber-200 rounded-sm text-xs font-bold tracking-wide mb-4">
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span>ผู้นำองค์กร / Head of Organization</span>
-                        </div>
-
-                        {/* Position & Title */}
-                        <p className="text-sm font-semibold text-scholar-accent tracking-wide uppercase mb-1">
-                            {dean.adminPosition || 'คณบดีคณะสังคมศาสตร์'}
-                        </p>
-                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-heading tracking-tight mb-1">
-                            {getFullName(dean)}
-                        </h2>
-                        {englishName && (
-                            <p className="text-sm sm:text-base text-slate-500 font-medium mb-6">
-                                {englishName}
-                            </p>
-                        )}
-
-                        {/* Vision Statement Quote Block */}
-                        <div className="relative bg-slate-50 border-l-4 border-scholar-accent p-5 rounded-sm my-4">
-                            <Quote className="w-6 h-6 text-scholar-accent/30 absolute top-3 right-3" />
-                            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                                วิสัยทัศน์และสารจากคณบดี (Dean&apos;s Vision)
-                            </p>
-                            <p className="text-slate-700 text-sm sm:text-base leading-relaxed italic font-serif">
-                                &ldquo;{quoteText}&rdquo;
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Contact & Profile Action Buttons */}
-                    <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center gap-3">
-                        <Link
-                            href={`/about/staff/${dean.id}`}
-                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-scholar-deep hover:bg-slate-800 text-white text-xs md:text-sm font-semibold rounded-sm transition-colors shadow-2xs group"
-                        >
-                            <span>ดูประวัติและผลงานวิชาการ</span>
-                            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                        </Link>
-
-                        {dean.contactEmail && (
-                            <a
-                                href={`mailto:${dean.contactEmail}`}
-                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-scholar-deep text-xs md:text-sm font-medium rounded-sm border border-slate-200 transition-colors"
-                            >
-                                <Mail className="w-4 h-4 text-slate-400" />
-                                <span>{dean.contactEmail}</span>
-                            </a>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-};
-
-// ==========================================
-// Component: Executive Member Card (Sharp & Professional)
-// ==========================================
-const ExecutiveCard = ({ staff }: { staff: Staff }) => (
-    <Link
-        href={`/about/staff/${staff.id}`}
-        className="bg-white rounded-sm border border-slate-200 shadow-2xs card-hover btn-press-active group overflow-hidden flex flex-col relative w-full block transition-all duration-200 hover:border-scholar-accent/60"
+  return (
+    <section
+      aria-label="สารและข้อมูลคณบดี"
+      className="w-full bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden mb-14 relative group transition-all duration-300 hover:shadow-md"
     >
-        {/* Top Gold Bar on Hover */}
-        <div className="h-1 w-full bg-transparent group-hover:bg-scholar-accent transition-colors" />
+      {/* Top Accent Strip with Warm Amber Gradient */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-[#0B132B] via-[#C2410C] to-amber-500" />
 
-        <div className="pt-6 px-6 bg-slate-50/50 flex justify-center">
-            <figure className="aspect-[3/4] w-[75%] bg-slate-100 relative overflow-hidden flex-shrink-0 rounded-sm border border-slate-200 transition-transform duration-200 ease-out group-hover:scale-102">
-                {staff.imageUrl ? (
-                    <Image
-                        src={getImageUrl(staff.imageUrl)}
-                        alt={getFullName(staff)}
-                        fill
-                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                        className="object-cover object-top transition-transform duration-200 ease-out group-hover:scale-105"
-                    />
-                ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-100">
-                        <UserCircle2 className="w-16 h-16 md:w-20 md:h-20 mb-2 text-slate-300" strokeWidth={1} />
-                    </div>
-                )}
-            </figure>
-        </div>
-
-        <div className="p-5 flex flex-col items-center text-center flex-grow relative bg-white">
-            {/* Department / Category Pill */}
-            {staff.department && (
-                <div className="mb-2">
-                    <span className="inline-block px-2 py-0.5 rounded-sm text-[10px] font-bold tracking-wider text-slate-500 bg-slate-100 border border-slate-200">
-                        {staff.department.replace(/สาขาวิชา|แขนงวิชา/g, '').trim()}
-                    </span>
-                </div>
+      <div className="p-6 sm:p-8 lg:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-center lg:items-start">
+        {/* Dean Portrait Frame */}
+        <div className="w-full sm:w-72 lg:w-80 flex-shrink-0 flex flex-col items-center">
+          <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-slate-100 border-2 border-amber-500/30 shadow-md group-hover:border-amber-500/60 transition-colors">
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={getFullName(dean)}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 320px"
+                className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-103"
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-100">
+                <UserCircle2 className="w-24 h-24 mb-2 text-slate-300" strokeWidth={1} />
+                <span className="text-xs text-slate-400 font-medium">ไม่มีรูปภาพ</span>
+              </div>
             )}
 
-            {/* Full Name */}
-            <h3 className="text-sm font-bold text-slate-900 mb-1.5 leading-snug group-hover:text-scholar-accent transition-colors duration-200 line-clamp-2">
-                {getFullName(staff)}
-            </h3>
+            {/* Emblem Badge */}
+            <div className="absolute top-3.5 right-3.5 bg-[#0B132B]/90 text-amber-400 px-3 py-1 rounded-full border border-amber-400/40 text-[11px] font-bold tracking-wider flex items-center gap-1.5 backdrop-blur-md shadow-sm">
+              <Crown className="size-3.5" />
+              <span>DEAN / คณบดี</span>
+            </div>
+          </div>
 
-            {/* Position Display */}
-            <p className="text-xs font-medium text-scholar-accent line-clamp-2 leading-relaxed">
-                {staff.adminPosition || staff.academicPosition || 'ผู้บริหาร'}
+          <div className="mt-3.5 text-center">
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500">
+              <ShieldCheck className="size-3.5 text-amber-600" />
+              ผู้นำองค์กรและผู้บริหารสูงสุด
+            </span>
+          </div>
+        </div>
+
+        {/* Dean Information & Vision Statement */}
+        <div className="flex-1 flex flex-col justify-between text-left h-full">
+          <div>
+            {/* Hierarchy Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-[#C2410C] border border-orange-200/80 rounded-full text-xs font-bold tracking-wide mb-3">
+              <Sparkles className="size-3.5" />
+              <span>หัวหน้าส่วนราชการ / Dean of Faculty</span>
+            </div>
+
+            {/* Position & Title */}
+            <p className="text-xs sm:text-sm font-bold text-[#C2410C] tracking-wide uppercase mb-1">
+              {dean.adminPosition || 'คณบดีคณะสังคมศาสตร์'}
             </p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-heading tracking-tight mb-1">
+              {getFullName(dean)}
+            </h2>
+            {englishName && (
+              <p className="text-sm sm:text-base text-slate-500 font-medium mb-5">
+                {englishName}
+              </p>
+            )}
 
-            {/* Quick Action Footer */}
-            <div className="mt-4 pt-3 border-t border-slate-100 w-full flex items-center justify-center text-[11px] text-slate-400 group-hover:text-scholar-deep font-medium gap-1">
-                <span>ดูข้อมูลประวัติ</span>
-                <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+            {/* Vision Statement Quote Card */}
+            <div className="relative bg-gradient-to-br from-slate-50 to-orange-50/30 border-l-4 border-[#C2410C] p-5 sm:p-6 rounded-r-xl my-4 shadow-2xs">
+              <Quote className="size-8 text-[#C2410C]/20 absolute top-4 right-4 pointer-events-none" />
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[11px] font-bold text-[#C2410C] uppercase tracking-wider">
+                  วิสัยทัศน์และสารจากคณบดี
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  (Dean&apos;s Vision & Statement)
+                </span>
+              </div>
+              <p className="text-slate-700 text-sm sm:text-base leading-relaxed italic font-serif relative z-10">
+                &ldquo;{quoteText}&rdquo;
+              </p>
             </div>
+          </div>
+
+          {/* Action CTAs */}
+          <div className="pt-6 mt-4 border-t border-slate-100 flex flex-wrap items-center gap-3">
+            <Link
+              href={`/about/staff/${dean.id}`}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0B132B] hover:bg-[#C2410C] text-white text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 shadow-2xs group hover:shadow-sm"
+            >
+              <span>ประวัติและผลงานวิชาการ</span>
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+
+            {dean.contactEmail && (
+              <a
+                href={`mailto:${dean.contactEmail}`}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#0B132B] text-xs sm:text-sm font-medium rounded-lg border border-slate-200 transition-colors shadow-2xs"
+              >
+                <Mail className="size-4 text-slate-400" />
+                <span>{dean.contactEmail}</span>
+              </a>
+            )}
+          </div>
         </div>
+      </div>
+    </section>
+  );
+}
+
+// ==========================================
+// Component: Executive Card (Clickable Entire Card)
+// ==========================================
+function ExecutiveCard({
+  staff,
+  badgeText,
+}: {
+  staff: Staff;
+  badgeText?: string;
+}) {
+  const imageUrl = getAssetUrl(staff.imageUrl);
+  const englishName = getFullNameEn(staff);
+
+  return (
+    <Link
+      href={`/about/staff/${staff.id}`}
+      aria-label={`ดูประวัติ ${getFullName(staff)}`}
+      className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-amber-500/60 transition-all duration-200 group overflow-hidden flex flex-col relative focus:outline-none focus:ring-2 focus:ring-[#C2410C]"
+    >
+      <div className="pt-5 px-4 pb-2 bg-gradient-to-b from-slate-50/80 to-white flex justify-center">
+        <div className="aspect-[3/4] w-36 sm:w-40 relative rounded-lg overflow-hidden bg-slate-100 border border-slate-200/90 group-hover:border-amber-400/60 transition-colors shadow-2xs">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={getFullName(staff)}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 200px"
+              className="object-cover object-top transition-transform duration-300 ease-out group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-100">
+              <UserCircle2 className="size-16 text-slate-300" strokeWidth={1} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="p-4 pt-2 pb-5 flex flex-col items-center text-center flex-grow bg-white">
+        {/* Department / Category Pill */}
+        {(badgeText || staff.department) && (
+          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-200/80 mb-2 max-w-full truncate">
+            {badgeText || staff.department?.replace(/สาขาวิชา|แขนงวิชา/g, '').trim()}
+          </span>
+        )}
+
+        {/* Full Name */}
+        <h3 className="text-sm font-bold text-slate-900 leading-snug group-hover:text-[#C2410C] transition-colors line-clamp-2">
+          {getFullName(staff)}
+        </h3>
+
+        {englishName && (
+          <p className="text-[11px] text-slate-400 font-medium truncate max-w-full mt-0.5">
+            {englishName}
+          </p>
+        )}
+
+        {/* Position Display */}
+        <p className="text-xs font-semibold text-[#C2410C] mt-2 line-clamp-2 leading-relaxed">
+          {staff.adminPosition || staff.academicPosition || 'ผู้บริหาร'}
+        </p>
+      </div>
     </Link>
-);
+  );
+}
 
 // ==========================================
-// Component: Skeleton Loader (ป้องกัน CLS)
+// Main Server Component: ExecutivePage
 // ==========================================
-const ExecutiveSkeleton = () => (
-    <div className="space-y-16 animate-pulse">
-        {/* Dean Spotlight Skeleton */}
-        <div className="bg-white border border-slate-200 rounded-sm p-8 flex flex-col lg:flex-row gap-8">
-            <div className="w-full sm:w-72 aspect-[3/4] bg-slate-200 rounded-sm" />
-            <div className="flex-1 space-y-4 py-4">
-                <div className="h-6 bg-slate-200 rounded-sm w-48" />
-                <div className="h-9 bg-slate-200 rounded-sm w-3/4" />
-                <div className="h-4 bg-slate-200 rounded-sm w-1/2" />
-                <div className="h-24 bg-slate-100 rounded-sm w-full mt-6" />
-                <div className="h-10 bg-slate-200 rounded-sm w-56 mt-6" />
-            </div>
+export default async function ExecutivePage() {
+  let staffList: Staff[] = [];
+  let isApiError = false;
+
+  try {
+    const apiUrl = getApiBaseUrl();
+    const res = await fetch(`${apiUrl}/api/staff?limit=150`, {
+      next: { revalidate: 60 },
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      const allStaff: Staff[] = json.data || [];
+      staffList = allStaff.filter((s) => s.isExecutive);
+    } else {
+      isApiError = true;
+    }
+  } catch (err) {
+    console.error('[ExecutivePage] Error fetching executive staff during SSR:', err);
+    isApiError = true;
+  }
+
+  // -------------------------------------------------------------
+  // จัดกลุ่มตำแหน่งบริหาร 3 ระดับหลัก:
+  // 1. คณบดี (Dean)
+  // 2. คณะผู้บริหารระดับสูง (รองคณบดี, ผู้ทรงคุณวุฒิ)
+  // 3. ผู้ช่วยคณบดี (Assistant Deans)
+  // 4. ประธานหลักสูตรและสาขาวิชา (Department Chairs)
+  // -------------------------------------------------------------
+  let deanPerson: Staff | null = null;
+  const seniorExecs: Staff[] = [];
+  const assistantDeans: Staff[] = [];
+  const departmentChairs: Staff[] = [];
+
+  staffList.forEach((staff) => {
+    const pos = staff.adminPosition || '';
+    const posId = staff.adminPositionId;
+
+    const isDean =
+      (pos.includes('คณบดี') && !pos.includes('รอง') && !pos.includes('ผู้ช่วย')) ||
+      posId === 1;
+
+    if (isDean && !deanPerson) {
+      deanPerson = staff;
+      return;
+    }
+
+    if (
+      pos.includes('รองคณบดี') ||
+      pos.includes('ผู้ทรงคุณวุฒิ') ||
+      (posId !== null && [2, 3, 10].includes(posId))
+    ) {
+      seniorExecs.push(staff);
+      return;
+    }
+
+    if (pos.includes('ผู้ช่วยคณบดี') || (posId !== null && [4, 5, 6].includes(posId))) {
+      assistantDeans.push(staff);
+      return;
+    }
+
+    if (
+      pos.includes('ประธาน') ||
+      pos.includes('ผู้จัดการ') ||
+      (posId !== null && [7, 8, 9].includes(posId))
+    ) {
+      departmentChairs.push(staff);
+      return;
+    }
+
+    if (pos.includes('ผู้ช่วย')) {
+      assistantDeans.push(staff);
+    } else if (pos.includes('สาขา') || pos.includes('แขนง')) {
+      departmentChairs.push(staff);
+    } else {
+      seniorExecs.push(staff);
+    }
+  });
+
+  const sortFn = (a: Staff, b: Staff) => (a.sortOrder || 0) - (b.sortOrder || 0);
+  seniorExecs.sort(sortFn);
+  assistantDeans.sort(sortFn);
+  departmentChairs.sort(sortFn);
+
+  // Schema.org Structured Data
+  const jsonLdData = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'คณะผู้บริหาร คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    description:
+      'ทำเนียบคณะผู้บริหาร คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย นำโดยคณบดี รองคณบดี ผู้ช่วยคณบดี และประธานสาขาวิชา',
+    numberOfItems: staffList.length,
+    itemListElement: staffList.map((staff, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Person',
+        name: getFullName(staff),
+        jobTitle: staff.adminPosition || 'ผู้บริหาร',
+        worksFor: {
+          '@type': 'EducationalOrganization',
+          name: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+        },
+        ...(staff.contactEmail ? { email: staff.contactEmail } : {}),
+        ...(staff.imageUrl ? { image: getAssetUrl(staff.imageUrl) } : {}),
+      },
+    })),
+  };
+
+  return (
+    <main className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-24">
+      {/* Schema.org Structured Data */}
+      <JsonLd data={jsonLdData} />
+
+      {/* ================= 1. HERO HEADER (EDITORIAL LANNA) ================= */}
+      <section className="bg-[#0B132B] text-white pt-14 pb-16 px-4 relative overflow-hidden border-b-4 border-[#C2410C]">
+        {/* Geometric Dot Canvas Background Pattern */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundImage: `radial-gradient(#FFFFFF 1px, transparent 1px)`,
+              backgroundSize: '28px 28px',
+            }}
+          />
         </div>
 
-        {/* Group Cards Skeleton */}
-        {[1, 2].map((g) => (
-            <div key={g} className="space-y-6">
-                <div className="h-8 bg-slate-200 rounded-sm w-64 border-l-4 border-slate-300" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="bg-white border border-slate-200 rounded-sm p-6 space-y-4">
-                            <div className="aspect-[3/4] bg-slate-200 rounded-sm" />
-                            <div className="h-4 bg-slate-200 rounded-sm w-3/4 mx-auto" />
-                            <div className="h-3 bg-slate-200 rounded-sm w-1/2 mx-auto" />
-                        </div>
-                    ))}
-                </div>
-            </div>
-        ))}
-    </div>
-);
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Breadcrumb Navigation */}
+          <nav aria-label="Breadcrumb" className="mb-6">
+            <ol className="flex items-center gap-2 text-xs font-medium text-slate-400">
+              <li>
+                <Link href="/" className="hover:text-white transition-colors">
+                  หน้าแรก
+                </Link>
+              </li>
+              <li>
+                <ChevronRight className="size-3 text-slate-600" />
+              </li>
+              <li>
+                <Link href="/about" className="hover:text-white transition-colors">
+                  เกี่ยวกับคณะ
+                </Link>
+              </li>
+              <li>
+                <ChevronRight className="size-3 text-slate-600" />
+              </li>
+              <li className="text-amber-400 font-semibold" aria-current="page">
+                คณะผู้บริหาร
+              </li>
+            </ol>
+          </nav>
 
-// ==========================================
-// Main Page Component
-// ==========================================
-export default function ExecutivePage() {
-    const [staffList, setStaffList] = useState<Staff[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchStaff = async () => {
-            try {
-                setLoading(true);
-                const res = await fetch(`${API_URL}/api/staff`);
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                const jsonArray = await res.json();
-                const data: Staff[] = jsonArray.data || [];
-
-                // กรองเฉพาะผู้บริหาร (isExecutive = true)
-                const executives = data.filter((s) => s.isExecutive);
-                setStaffList(executives);
-            } catch (err) {
-                console.error('Error fetching executive staff:', err);
-                setError('ไม่สามารถโหลดข้อมูลคณะผู้บริหารได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchStaff();
-    }, []);
-
-    // -------------------------------------------------------------
-    // จัดกลุ่มตำแหน่งบริหาร 3 กลุ่มหลัก ตามความต้องการของผู้ใช้:
-    // 1. คณะผู้บริหารระดับสูง (Senior Leadership): คณบดี, รองคณบดี, ผู้ทรงคุณวุฒิ
-    // 2. ผู้ช่วยคณบดี (Assistant Deans)
-    // 3. ประธานสาขาวิชา/แขนงวิชา (Department & Program Chairs)
-    // -------------------------------------------------------------
-    const { dean, seniorExecs, assistantDeans, departmentChairs } = useMemo(() => {
-        let deanPerson: Staff | null = null;
-        const seniors: Staff[] = [];
-        const assistants: Staff[] = [];
-        const chairs: Staff[] = [];
-
-        staffList.forEach((staff) => {
-            const pos = staff.adminPosition || '';
-            const posId = staff.adminPositionId;
-
-            // ค้นหาคณบดี
-            const isDean = (pos.includes('คณบดี') && !pos.includes('รอง') && !pos.includes('ผู้ช่วย')) || posId === 1;
-
-            if (isDean && !deanPerson) {
-                deanPerson = staff;
-                return;
-            }
-
-            // กลุ่ม 1: คณะผู้บริหารระดับสูง (รองคณบดี, ผู้ทรงคุณวุฒิ)
-            if (pos.includes('รองคณบดี') || pos.includes('ผู้ทรงคุณวุฒิ') || (posId !== null && [2, 3, 10].includes(posId))) {
-                seniors.push(staff);
-                return;
-            }
-
-            // กลุ่ม 2: ผู้ช่วยคณบดี
-            if (pos.includes('ผู้ช่วยคณบดี') || (posId !== null && [4, 5, 6].includes(posId))) {
-                assistants.push(staff);
-                return;
-            }
-
-            // กลุ่ม 3: ประธานสาขาวิชา / แขนงวิชา / ผู้จัดการสาขาวิชา
-            if (pos.includes('ประธาน') || pos.includes('ผู้จัดการ') || (posId !== null && [7, 8, 9].includes(posId))) {
-                chairs.push(staff);
-                return;
-            }
-
-            // Fallback: หากตำแหน่งบริหารอื่นๆ ให้จัดเข้าตามลำดับความเหมาะสม
-            if (pos.includes('ผู้ช่วย')) {
-                assistants.push(staff);
-            } else if (pos.includes('สาขา') || pos.includes('แขนง')) {
-                chairs.push(staff);
-            } else {
-                seniors.push(staff);
-            }
-        });
-
-        // เรียงลำดับภายในกลุ่มตาม sortOrder
-        const sortFn = (a: Staff, b: Staff) => (a.sortOrder || 0) - (b.sortOrder || 0);
-        seniors.sort(sortFn);
-        assistants.sort(sortFn);
-        chairs.sort(sortFn);
-
-        return {
-            dean: deanPerson,
-            seniorExecs: seniors,
-            assistantDeans: assistants,
-            departmentChairs: chairs,
-        };
-    }, [staffList]);
-
-    // JSON-LD Schema.org Data สำหรับ Webometrics และ Google Search
-    const jsonLdData = useMemo(() => {
-        return {
-            '@context': 'https://schema.org',
-            '@type': 'ItemList',
-            name: 'คณะผู้บริหาร คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
-            description: 'ทำเนียบคณะผู้บริหาร คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
-            numberOfItems: staffList.length,
-            itemListElement: staffList.map((staff, index) => ({
-                '@type': 'ListItem',
-                position: index + 1,
-                item: {
-                    '@type': 'Person',
-                    name: getFullName(staff),
-                    jobTitle: staff.adminPosition || 'ผู้บริหาร',
-                    worksFor: {
-                        '@type': 'EducationalOrganization',
-                        name: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
-                    },
-                    ...(staff.contactEmail ? { email: staff.contactEmail } : {}),
-                    ...(staff.imageUrl ? { image: getImageUrl(staff.imageUrl) } : {}),
-                },
-            })),
-        };
-    }, [staffList]);
-
-    return (
-        <main className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-20">
-            {/* Structured Data (Schema.org) */}
-            <JsonLd data={jsonLdData} />
-
-            {/* 1. Hero Header */}
-            <section className="bg-scholar-deep text-white pt-16 pb-20 px-4 relative overflow-hidden border-b-4 border-scholar-accent/30">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-scholar-deep to-slate-950 opacity-90" />
-                <div className="absolute inset-0 bg-[url('/bg-pattern.png')] opacity-5 pointer-events-none" />
-
-                <div className="relative z-10 container mx-auto flex flex-col items-start text-left max-w-6xl">
-                    <div className="px-3.5 py-1 bg-white/10 text-white backdrop-blur-sm border border-white/20 rounded-sm text-xs font-semibold tracking-wide mb-6 flex items-center gap-2">
-                        <Crown className="w-3.5 h-3.5 text-scholar-accent" />
-                        <span>คณะผู้บริหาร / EXECUTIVE BOARD</span>
-                    </div>
-
-                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight font-heading leading-tight max-w-4xl">
-                        คณะผู้บริหาร <br className="hidden sm:inline" />
-                        <span className="text-scholar-accent text-2xl md:text-4xl lg:text-5xl font-bold">
-                            คณะสังคมศาสตร์ มรภ.เชียงราย
-                        </span>
-                    </h1>
-
-                    <p className="text-sm md:text-lg text-slate-300 font-normal max-w-3xl leading-relaxed">
-                        ทีมผู้นำทางวิชาการและการบริหาร มุ่งมั่นพัฒนาการจัดการศึกษา บูรณาการองค์ความรู้เพื่อสังคม และขับเคลื่อนองค์กรสู่มาตรฐานความเป็นเลิศ
-                    </p>
-                </div>
-            </section>
-
-
-            {/* 3. Breadcrumb Navigation */}
-            <div className="container mx-auto px-4 py-6 max-w-6xl">
-                <Breadcrumb
-                    items={[
-                        { label: 'หน้าแรก', href: '/' },
-                        { label: 'เกี่ยวกับเรา', href: '/about' },
-                        { label: 'คณะผู้บริหาร', href: '/about/executive' },
-                    ]}
-                />
+          <div className="max-w-4xl">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-amber-400 border border-white/15 text-xs font-semibold uppercase tracking-wider mb-5">
+              <Crown className="size-3.5" />
+              <span>EXECUTIVE BOARD & LEADERSHIP</span>
             </div>
 
-            {/* 4. Content Body */}
-            <section className="container mx-auto px-4 max-w-6xl">
-                {loading ? (
-                    <ExecutiveSkeleton />
-                ) : error ? (
-                    <div className="text-center py-16 px-6 bg-white rounded-sm border border-red-200 shadow-2xs max-w-2xl mx-auto">
-                        <div className="w-14 h-14 bg-red-50 text-red-600 rounded-sm flex items-center justify-center mx-auto mb-4 border border-red-100">
-                            <UserX className="w-7 h-7" />
-                        </div>
-                        <h3 className="text-lg font-bold text-slate-800 mb-2">เกิดข้อผิดพลาดในการโหลดข้อมูล</h3>
-                        <p className="text-sm text-slate-500 mb-6 leading-relaxed">{error}</p>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="px-5 py-2.5 bg-scholar-deep hover:bg-slate-800 text-white rounded-sm text-xs font-semibold transition-colors"
-                        >
-                            ลองใหม่อีกครั้ง
-                        </button>
-                    </div>
-                ) : staffList.length > 0 ? (
-                    <div className="space-y-16">
-                        {/* ======================================================== */}
-                        {/* กลุ่มที่ 1: คณะผู้บริหารระดับสูง (Senior Leadership)       */}
-                        {/* ======================================================== */}
-                        <div>
-                            {/* Dean Spotlight Card (แบบ A - ไม่แสดงวุฒิการศึกษา) */}
-                            {dean && <DeanSpotlightCard dean={dean} />}
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight mb-4 font-heading">
+              คณะผู้บริหาร <br className="hidden sm:inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-[#F97316] to-[#C2410C]">
+                คณะสังคมศาสตร์ มรภ.เชียงราย
+              </span>
+            </h1>
 
-                            {/* รองคณบดี และ ผู้ทรงคุณวุฒิ */}
-                            {seniorExecs.length > 0 && (
-                                <div className="space-y-8">
-                                    <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <span className="w-1.5 h-6 bg-scholar-accent rounded-sm" />
-                                            <h2 className="text-xl md:text-2xl font-bold text-slate-900 font-heading">
-                                                คณะผู้บริหารระดับสูง (Senior Leadership)
-                                            </h2>
-                                        </div>
-                                        <span className="text-xs font-mono text-slate-400">
-                                            {seniorExecs.length} ท่าน
-                                        </span>
-                                    </div>
+            <p className="text-base sm:text-lg text-slate-300 font-body leading-relaxed max-w-2xl">
+              ทีมผู้บริหารและผู้นำทางวิชาการ มุ่งมั่นขับเคลื่อนการจัดการศึกษา บูรณาการองค์ความรู้เพื่อสังคม และพัฒนาท้องถิ่นสู่มาตรฐานความเป็นเลิศระดับสากล
+            </p>
+          </div>
+        </div>
+      </section>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-                                        {seniorExecs.map((staff) => (
-                                            <ExecutiveCard key={staff.id} staff={staff} />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+      {/* ================= 2. STICKY SUB-NAVIGATION BAR ================= */}
+      <div className="sticky top-18 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between overflow-x-auto no-scrollbar py-3 gap-6 text-xs sm:text-sm font-semibold whitespace-nowrap">
+            <div className="flex items-center gap-2 text-slate-700">
+              <span className="px-3 py-1.5 rounded-lg text-[#C2410C] bg-orange-50/80 font-bold">
+                คณะผู้บริหาร
+              </span>
+            </div>
 
-                        {/* ======================================================== */}
-                        {/* กลุ่มที่ 2: ผู้ช่วยคณบดี (Assistant Deans)                  */}
-                        {/* ======================================================== */}
-                        {assistantDeans.length > 0 && (
-                            <div className="space-y-8">
-                                <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <span className="w-1.5 h-6 bg-scholar-accent rounded-sm" />
-                                        <h2 className="text-xl md:text-2xl font-bold text-slate-900 font-heading">
-                                            ผู้ช่วยคณบดี (Assistant Deans)
-                                        </h2>
-                                    </div>
-                                    <span className="text-xs font-mono text-slate-400">
-                                        {assistantDeans.length} ท่าน
-                                    </span>
-                                </div>
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+              <span className="hidden sm:inline">หน้าอื่นในหมวด:</span>
+              <Link href="/about" className="hover:text-[#C2410C] hover:underline">
+                ภาพรวมคณะ
+              </Link>
+              <span>•</span>
+              <Link href="/about/strategy" className="hover:text-[#C2410C] hover:underline">
+                แผนยุทธศาสตร์
+              </Link>
+              <span>•</span>
+              <Link href="/about/structure" className="hover:text-[#C2410C] hover:underline">
+                โครงสร้างการบริหาร
+              </Link>
+              <span>•</span>
+              <Link href="/about/staff" className="hover:text-[#C2410C] hover:underline">
+                บุคลากร
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                    {assistantDeans.map((staff) => (
-                                        <ExecutiveCard key={staff.id} staff={staff} />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+      {/* ================= 3. CONTENT BODY ================= */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+        {isApiError ? (
+          <div className="text-center py-16 px-6 bg-white rounded-2xl border border-red-200 shadow-2xs max-w-xl mx-auto">
+            <div className="w-14 h-14 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+              <ShieldCheck className="size-7" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 mb-2">
+              ไม่สามารถโหลดข้อมูลคณะผู้บริหารได้ในขณะนี้
+            </h3>
+            <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+              กรุณารีเฟรชหน้าเว็บ หรือตรวจสอบการเชื่อมต่อกับระบบฐานข้อมูล
+            </p>
+          </div>
+        ) : staffList.length > 0 ? (
+          <div className="space-y-16">
+            {/* 3.1 คณบดี (Dean Spotlight) */}
+            {deanPerson && <DeanSpotlightCard dean={deanPerson} />}
 
-                        {/* ======================================================== */}
-                        {/* กลุ่มที่ 3: ประธานสาขาวิชาและแขนงวิชา (Department Chairs)  */}
-                        {/* ======================================================== */}
-                        {departmentChairs.length > 0 && (
-                            <div className="space-y-8">
-                                <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <span className="w-1.5 h-6 bg-scholar-accent rounded-sm" />
-                                        <h2 className="text-xl md:text-2xl font-bold text-slate-900 font-heading">
-                                            ประธานสาขาวิชาและแขนงวิชา (Department & Program Chairs)
-                                        </h2>
-                                    </div>
-                                    <span className="text-xs font-mono text-slate-400">
-                                        {departmentChairs.length} ท่าน
-                                    </span>
-                                </div>
+            {/* 3.2 คณะผู้บริหารระดับสูง (Senior Leadership: รองคณบดี) */}
+            {seniorExecs.length > 0 && (
+              <section aria-labelledby="senior-leadership-title" className="space-y-6">
+                <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="w-1.5 h-6 bg-[#C2410C] rounded-full" />
+                    <h2
+                      id="senior-leadership-title"
+                      className="text-xl sm:text-2xl font-extrabold text-slate-900 font-heading"
+                    >
+                      คณะผู้บริหารระดับสูง (Senior Leadership)
+                    </h2>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                    {seniorExecs.length} ท่าน
+                  </span>
+                </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                    {departmentChairs.map((staff) => (
-                                        <ExecutiveCard key={staff.id} staff={staff} />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {seniorExecs.map((staff) => (
+                    <ExecutiveCard
+                      key={staff.id}
+                      staff={staff}
+                      badgeText="รองคณบดี"
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
 
-                        {/* ======================================================== */}
-                        {/* เชื่อมโยงกับส่วนอื่นในหมวด "เกี่ยวกับเรา" (Quick Hub Links)  */}
-                        {/* ======================================================== */}
-                        <div className="pt-10 border-t border-slate-200">
-                            <h3 className="text-base font-bold text-slate-900 mb-6 flex items-center gap-2">
-                                <Building2 className="w-4 h-4 text-scholar-accent" />
-                                <span>ดูข้อมูลเพิ่มเติมในหมวดเกี่ยวกับคณะ</span>
-                            </h3>
+            {/* 3.3 ผู้ช่วยคณบดี (Assistant Deans) */}
+            {assistantDeans.length > 0 && (
+              <section aria-labelledby="assistant-deans-title" className="space-y-6">
+                <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="w-1.5 h-6 bg-amber-500 rounded-full" />
+                    <h2
+                      id="assistant-deans-title"
+                      className="text-xl sm:text-2xl font-extrabold text-slate-900 font-heading"
+                    >
+                      ผู้ช่วยคณบดี (Assistant Deans)
+                    </h2>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                    {assistantDeans.length} ท่าน
+                  </span>
+                </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <Link
-                                    href="/about/structure"
-                                    className="p-6 bg-white border border-slate-200 rounded-sm hover:border-scholar-accent transition-all duration-200 shadow-2xs group flex items-start gap-4"
-                                >
-                                    <div className="p-3 bg-slate-50 text-scholar-deep rounded-sm border border-slate-100 group-hover:bg-amber-50 group-hover:text-scholar-accent transition-colors">
-                                        <Network className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-scholar-accent transition-colors flex items-center gap-1.5">
-                                            <span>แผนผังโครงสร้างการบริหาร (Org Chart)</span>
-                                            <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                                        </h4>
-                                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                                            ตรวจสอบสายการบังคับบัญชา แผนผังการบริหารงาน และหน่วยงานสนับสนุนภายในคณะ
-                                        </p>
-                                    </div>
-                                </Link>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {assistantDeans.map((staff) => (
+                    <ExecutiveCard
+                      key={staff.id}
+                      staff={staff}
+                      badgeText="ผู้ช่วยคณบดี"
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
 
-                                <Link
-                                    href="/about/staff"
-                                    className="p-6 bg-white border border-slate-200 rounded-sm hover:border-scholar-accent transition-all duration-200 shadow-2xs group flex items-start gap-4"
-                                >
-                                    <div className="p-3 bg-slate-50 text-scholar-deep rounded-sm border border-slate-100 group-hover:bg-amber-50 group-hover:text-scholar-accent transition-colors">
-                                        <Users className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-scholar-accent transition-colors flex items-center gap-1.5">
-                                            <span>ทำเนียบคณาจารย์และบุคลากรทั้งหมด</span>
-                                            <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                                        </h4>
-                                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                                            ค้นหารายชื่อคณาจารย์ประจำสาขาวิชา บุคลากรสายสนับสนุน และผลงานทางวิชาการ
-                                        </p>
-                                    </div>
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-center py-20 bg-white rounded-sm border border-slate-200 shadow-2xs">
-                        <div className="w-16 h-16 bg-slate-50 rounded-sm flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                            <UserX className="w-8 h-8 text-slate-400" />
-                        </div>
-                        <h3 className="text-base font-bold text-slate-800 mb-1">ไม่พบข้อมูลคณะผู้บริหาร</h3>
-                        <p className="text-xs text-slate-500">ยังไม่มีการบันทึกข้อมูลผู้บริหารในระบบ หรืออยู่ระหว่างการปรับปรุงข้อมูล</p>
-                    </div>
-                )}
-            </section>
-        </main>
-    );
+            {/* 3.4 ประธานหลักสูตรและสาขาวิชา (Department Chairs) */}
+            {departmentChairs.length > 0 && (
+              <section aria-labelledby="department-chairs-title" className="space-y-6">
+                <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="w-1.5 h-6 bg-[#0B132B] rounded-full" />
+                    <h2
+                      id="department-chairs-title"
+                      className="text-xl sm:text-2xl font-extrabold text-slate-900 font-heading"
+                    >
+                      ประธานหลักสูตรและสาขาวิชา (Academic Program Chairs)
+                    </h2>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                    {departmentChairs.length} ท่าน
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {departmentChairs.map((staff) => (
+                    <ExecutiveCard key={staff.id} staff={staff} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 shadow-2xs max-w-lg mx-auto">
+            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+              <Users className="size-8 text-slate-400" />
+            </div>
+            <h3 className="text-base font-bold text-slate-800 mb-1">
+              ยังไม่มีการบันทึกข้อมูลคณะผู้บริหาร
+            </h3>
+            <p className="text-xs text-slate-500">
+              อยู่ระหว่างการปรับปรุงข้อมูลทำเนียบผู้บริหารประจำปีการศึกษา
+            </p>
+          </div>
+        )}
+      </div>
+    </main>
+  );
 }

@@ -89,6 +89,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/academics/overview',
+        destination: '/programs',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     const internalApiUrl = process.env.INTERNAL_API_URL || 'http://localhost:4001';
     return [

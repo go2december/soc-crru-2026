@@ -100,6 +100,9 @@ export class CreateProgramDto {
   facebook_video_url?: string;
 
   @IsOptional()
+  social_links?: any;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProgramInstructorDto)

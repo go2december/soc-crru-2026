@@ -4,7 +4,7 @@
  */
 
 const DEFAULT_INTERNAL_URL = 'http://api-gateway:3000';
-const DEFAULT_EXTERNAL_URL = 'http://localhost:4001';
+const DEFAULT_EXTERNAL_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 /**
  * Resolves the base URL for API requests:

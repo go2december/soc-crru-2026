@@ -1,22 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, Kanit } from "next/font/google";
 import ClientLayout from "@/components/ClientLayout";
 import JsonLd from "@/components/seo/JsonLd";
 import "./globals.css";
-
-// Google Fonts Setup
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const kanit = Kanit({
-  variable: "--font-kanit",
-  subsets: ["thai", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
 
 // SEO Metadata
 export const metadata: Metadata = {
@@ -82,13 +67,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" data-theme="socTheme" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="th" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+          rel="stylesheet"
+        />
         <JsonLd data={organizationSchema} />
       </head>
-      <body
-        className={`${inter.variable} ${kanit.variable} font-sans antialiased bg-white text-scholar-text flex flex-col min-h-screen`}
-      >
+      <body className="font-sans antialiased bg-[#F8FAFC] text-slate-800 flex flex-col min-h-screen">
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

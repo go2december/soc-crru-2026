@@ -4,6 +4,7 @@ import {
   DatabaseService,
   programs,
   programInstructors,
+  programTracks,
   staffProfiles,
   academicPositions,
 } from 'db/database';
@@ -61,7 +62,7 @@ export class ProgramsService {
     const roles: string[] = user.roles || [];
     if (roles.includes('ADMIN')) return; // Super admin bypass
 
-    if (roles.includes('EDITOR')) {
+    if (roles.includes('EDITOR') || roles.includes('STAFF')) {
       const userDept = user.departmentId;
       if (!userDept || userDept !== targetDepartmentId) {
         throw new ForbiddenException(
@@ -102,6 +103,7 @@ export class ProgramsService {
         attachments: createProgramDto.attachments,
         youtubeVideoUrl: createProgramDto.youtube_video_url,
         facebookVideoUrl: createProgramDto.facebook_video_url,
+        socialLinks: createProgramDto.social_links,
       })
       .returning();
 
@@ -164,8 +166,9 @@ export class ProgramsService {
     const program = result[0];
 
     const instructorRows = await this.getInstructors(program.id);
+    const trackRows = await this.getTracks(program.id);
 
-    return { ...program, instructors: instructorRows };
+    return { ...program, instructors: instructorRows, tracks: trackRows };
   }
 
   /**
@@ -184,8 +187,9 @@ export class ProgramsService {
     const program = result[0];
 
     const instructorRows = await this.getInstructors(program.id);
+    const trackRows = await this.getTracks(program.id);
 
-    return { ...program, instructors: instructorRows };
+    return { ...program, instructors: instructorRows, tracks: trackRows };
   }
 
   /**
@@ -234,6 +238,8 @@ export class ProgramsService {
       updateData.youtubeVideoUrl = updateProgramDto.youtube_video_url;
     if (updateProgramDto.facebook_video_url !== undefined)
       updateData.facebookVideoUrl = updateProgramDto.facebook_video_url;
+    if (updateProgramDto.social_links !== undefined)
+      updateData.socialLinks = updateProgramDto.social_links;
 
     if (Object.keys(updateData).length > 0) {
       await this.drizzle.db
@@ -316,4 +322,166 @@ export class ProgramsService {
       await this.drizzle.db.insert(programInstructors).values(inserts);
     }
   }
+  async getTracks(programId: string) {
+    return await this.drizzle.db
+      .select()
+      .from(programTracks)
+      .where(and(eq(programTracks.programId, programId), eq(programTracks.isActive, true)))
+      .orderBy(programTracks.sortOrder);
+  }
+
+  async findTrackByCode(programCode: string, trackCode: string) {
+    const progRes = await this.drizzle.db
+      .select()
+      .from(programs)
+      .where(eq(programs.code, programCode));
+    if (progRes.length === 0) {
+      throw new NotFoundException(`Program with code "${programCode}" not found`);
+    }
+    const program = progRes[0];
+
+    const trackRes = await this.drizzle.db
+      .select()
+      .from(programTracks)
+      .where(
+        and(
+          eq(programTracks.programId, program.id),
+          eq(programTracks.code, trackCode),
+          eq(programTracks.isActive, true),
+        ),
+      );
+
+    if (trackRes.length === 0) {
+      throw new NotFoundException(
+        `Track with code "${trackCode}" not found under program "${programCode}"`,
+      );
+    }
+
+    const instructorRows = await this.getInstructors(program.id);
+    return {
+      ...trackRes[0],
+      program: {
+        id: program.id,
+        code: program.code,
+        nameTh: program.nameTh,
+        degreeLevel: program.degreeLevel,
+      },
+      instructors: instructorRows,
+    };
+  }
+
+  async createTrack(programId: string, trackDto: any, user?: any) {
+    const prog = await this.findOne(programId);
+    this.checkScope(user, prog.departmentId);
+
+    const inserted = await this.drizzle.db
+      .insert(programTracks)
+      .values({
+        programId,
+        code: trackDto.code,
+        nameTh: trackDto.name_th || trackDto.nameTh,
+        nameEn: trackDto.name_en || trackDto.nameEn,
+        trackType: trackDto.track_type || trackDto.trackType || 'MAJOR',
+        studyPlanType: trackDto.study_plan_type || trackDto.studyPlanType || 'REGULAR_4YR',
+        degreeTitleTh: trackDto.degree_title_th || trackDto.degreeTitleTh,
+        degreeTitleEn: trackDto.degree_title_en || trackDto.degreeTitleEn,
+        description: trackDto.description,
+        structure: trackDto.structure,
+        careers: trackDto.careers,
+        highlights: trackDto.highlights,
+        bannerUrl: trackDto.banner_url || trackDto.bannerUrl,
+        curriculumUrl: trackDto.curriculum_url || trackDto.curriculumUrl,
+        youtubeVideoUrl: trackDto.youtube_video_url || trackDto.youtubeVideoUrl,
+        facebookVideoUrl: trackDto.facebook_video_url || trackDto.facebookVideoUrl,
+        socialLinks: trackDto.social_links || trackDto.socialLinks,
+        galleryImages: trackDto.gallery_images || trackDto.galleryImages,
+        attachments: trackDto.attachments,
+        sortOrder: trackDto.sort_order ?? trackDto.sortOrder ?? 0,
+        isActive: trackDto.is_active ?? trackDto.isActive ?? true,
+      })
+      .returning();
+
+    return inserted[0];
+  }
+
+  async updateTrack(trackId: string, trackDto: any, user?: any) {
+    const existing = await this.drizzle.db
+      .select()
+      .from(programTracks)
+      .where(eq(programTracks.id, trackId));
+
+    if (existing.length === 0) {
+      throw new NotFoundException(`Track with ID "${trackId}" not found`);
+    }
+
+    const track = existing[0];
+    const prog = await this.findOne(track.programId);
+    this.checkScope(user, prog.departmentId);
+
+    const updateData: any = { updatedAt: new Date() };
+    if (trackDto.code !== undefined) updateData.code = trackDto.code;
+    if (trackDto.name_th !== undefined) updateData.nameTh = trackDto.name_th;
+    if (trackDto.nameTh !== undefined) updateData.nameTh = trackDto.nameTh;
+    if (trackDto.name_en !== undefined) updateData.nameEn = trackDto.name_en;
+    if (trackDto.nameEn !== undefined) updateData.nameEn = trackDto.nameEn;
+    if (trackDto.track_type !== undefined) updateData.trackType = trackDto.track_type;
+    if (trackDto.trackType !== undefined) updateData.trackType = trackDto.trackType;
+    if (trackDto.study_plan_type !== undefined) updateData.studyPlanType = trackDto.study_plan_type;
+    if (trackDto.studyPlanType !== undefined) updateData.studyPlanType = trackDto.studyPlanType;
+    if (trackDto.degree_title_th !== undefined) updateData.degreeTitleTh = trackDto.degree_title_th;
+    if (trackDto.degreeTitleTh !== undefined) updateData.degreeTitleTh = trackDto.degreeTitleTh;
+    if (trackDto.degree_title_en !== undefined) updateData.degreeTitleEn = trackDto.degree_title_en;
+    if (trackDto.degreeTitleEn !== undefined) updateData.degreeTitleEn = trackDto.degreeTitleEn;
+    if (trackDto.description !== undefined) updateData.description = trackDto.description;
+    if (trackDto.structure !== undefined) updateData.structure = trackDto.structure;
+    if (trackDto.careers !== undefined) updateData.careers = trackDto.careers;
+    if (trackDto.highlights !== undefined) updateData.highlights = trackDto.highlights;
+    if (trackDto.banner_url !== undefined) updateData.bannerUrl = trackDto.banner_url;
+    if (trackDto.bannerUrl !== undefined) updateData.bannerUrl = trackDto.bannerUrl;
+    if (trackDto.curriculum_url !== undefined) updateData.curriculumUrl = trackDto.curriculum_url;
+    if (trackDto.curriculumUrl !== undefined) updateData.curriculumUrl = trackDto.curriculumUrl;
+    if (trackDto.youtube_video_url !== undefined) updateData.youtubeVideoUrl = trackDto.youtube_video_url;
+    if (trackDto.youtubeVideoUrl !== undefined) updateData.youtubeVideoUrl = trackDto.youtubeVideoUrl;
+    if (trackDto.facebook_video_url !== undefined) updateData.facebookVideoUrl = trackDto.facebook_video_url;
+    if (trackDto.facebookVideoUrl !== undefined) updateData.facebookVideoUrl = trackDto.facebookVideoUrl;
+    if (trackDto.social_links !== undefined) updateData.socialLinks = trackDto.social_links;
+    if (trackDto.socialLinks !== undefined) updateData.socialLinks = trackDto.socialLinks;
+    if (trackDto.gallery_images !== undefined) updateData.galleryImages = trackDto.gallery_images;
+    if (trackDto.galleryImages !== undefined) updateData.galleryImages = trackDto.galleryImages;
+    if (trackDto.attachments !== undefined) updateData.attachments = trackDto.attachments;
+    if (trackDto.sort_order !== undefined) updateData.sortOrder = trackDto.sort_order;
+    if (trackDto.sortOrder !== undefined) updateData.sortOrder = trackDto.sortOrder;
+    if (trackDto.is_active !== undefined) updateData.isActive = trackDto.is_active;
+    if (trackDto.isActive !== undefined) updateData.isActive = trackDto.isActive;
+
+    const updated = await this.drizzle.db
+      .update(programTracks)
+      .set(updateData)
+      .where(eq(programTracks.id, trackId))
+      .returning();
+
+    return updated[0];
+  }
+
+  async removeTrack(trackId: string, user?: any) {
+    const existing = await this.drizzle.db
+      .select()
+      .from(programTracks)
+      .where(eq(programTracks.id, trackId));
+
+    if (existing.length === 0) {
+      throw new NotFoundException(`Track with ID "${trackId}" not found`);
+    }
+
+    const track = existing[0];
+    const prog = await this.findOne(track.programId);
+    this.checkScope(user, prog.departmentId);
+
+    await this.drizzle.db
+      .delete(programTracks)
+      .where(eq(programTracks.id, trackId));
+
+    return { deleted: true };
+  }
+
 }

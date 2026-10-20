@@ -1,265 +1,408 @@
 "use client";
 
-import Link from 'next/link';
-import { useState, useRef, useEffect } from 'react';
+import Link from "next/link";
+import { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import {
+  ChevronDown,
+  Menu as MenuIcon,
+  X as CloseIcon,
+  ExternalLink,
+  GraduationCap,
+  Sparkles,
+  LogIn,
+  BookOpen,
+  Building2,
+  FileText,
+} from "lucide-react";
 
-// Helper: Component สำหรับ Link ปกติ
-function NavItem({ href, title, onClose }: { href: string; title: string; onClose?: () => void }) {
-    return (
-        <li>
-            <Link
-                href={href}
-                className="block px-3 py-2 text-sm text-white/90 hover:text-scholar-accent hover:bg-white/10 rounded-md transition-colors"
-                onClick={onClose}
-            >
-                {title}
-            </Link>
-        </li>
-    );
-}
-
-// Helper: Component สำหรับหัวข้อกลุ่มใน Dropdown (ไม่คลิก)
-function MenuHeading({ title }: { title: string }) {
-    return (
-        <li className="px-3 pt-3 pb-1 text-xs font-bold text-scholar-gold uppercase tracking-wider opacity-90 border-b border-white/10 mb-1">
-            {title}
-        </li>
-    );
-}
-
-// Component สำหรับ Dropdown Menu
-function DropdownMenu({
-    name,
-    title,
-    children,
-    isOpen,
-    onToggle,
-    highlight = false,
+// Submenu Item
+function NavItem({
+  href,
+  title,
+  onClose,
+  isExternal = false,
 }: {
-    name: string;
-    title: string;
-    children: React.ReactNode;
-    isOpen: boolean;
-    onToggle: (name: string) => void;
-    highlight?: boolean;
+  href: string;
+  title: string;
+  onClose?: () => void;
+  isExternal?: boolean;
 }) {
+  if (isExternal) {
     return (
-        <li className="relative h-full flex items-center">
-            <button
-                onClick={() => onToggle(name)}
-                className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-all text-sm font-medium h-9
-                    ${highlight ? 'text-scholar-gold' : 'text-white'} 
-                    ${isOpen ? 'bg-white/10 text-scholar-accent' : 'hover:bg-white/5 hover:text-scholar-accent'}
-                `}
-            >
-                {title}
-                <svg
-                    className={`w-3 h-3 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-
-            {/* Submenu */}
-            <ul className={`absolute left-0 top-full mt-2 min-w-[260px] z-50 transition-all duration-200 origin-top-left
-                ${isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}
-            `}>
-                <div className="bg-scholar-deep rounded-lg shadow-2xl border border-white/10 border-t-2 border-t-scholar-accent p-2 overflow-hidden">
-                    {children}
-                </div>
-            </ul>
-        </li>
+      <li>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between px-3 py-2 text-sm text-slate-200 hover:text-white hover:bg-white/10 rounded-lg transition-colors group"
+          onClick={onClose}
+        >
+          <span>{title}</span>
+          <ExternalLink className="size-3.5 text-slate-400 group-hover:text-white transition-colors" strokeWidth={1.75} />
+        </a>
+      </li>
     );
+  }
+
+  return (
+    <li>
+      <Link
+        href={href}
+        className="block px-3 py-2 text-sm text-slate-200 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+        onClick={onClose}
+      >
+        {title}
+      </Link>
+    </li>
+  );
+}
+
+// Submenu Group Heading
+function MenuHeading({ title }: { title: string }) {
+  return (
+    <li className="px-3 pt-3 pb-1 text-[11px] font-bold text-[#F59E0B] uppercase tracking-wider opacity-90 border-b border-white/10 mb-1">
+      {title}
+    </li>
+  );
+}
+
+// Dropdown Component with Motion animation
+function DropdownMenu({
+  name,
+  title,
+  children,
+  isOpen,
+  onToggle,
+  highlight = false,
+}: {
+  name: string;
+  title: string;
+  children: React.ReactNode;
+  isOpen: boolean;
+  onToggle: (name: string) => void;
+  highlight?: boolean;
+}) {
+  return (
+    <li className="relative h-full flex items-center">
+      <button
+        type="button"
+        onClick={() => onToggle(name)}
+        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
+          highlight ? "text-[#F59E0B]" : "text-white/90"
+        } ${
+          isOpen
+            ? "bg-white/15 text-white shadow-xs"
+            : "hover:bg-white/10 hover:text-white"
+        }`}
+        aria-expanded={isOpen}
+      >
+        <span>{title}</span>
+        <ChevronDown
+          className={`size-3.5 transition-transform duration-200 ${
+            isOpen ? "rotate-180 text-[#C2410C]" : "text-slate-400"
+          }`}
+          strokeWidth={2}
+        />
+      </button>
+
+      {/* Motion Animated Submenu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.98 }}
+            transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+            className="absolute left-0 top-full mt-2 min-w-[290px] z-50 origin-top-left"
+          >
+            <div className="bg-[#0B132B] rounded-xl shadow-2xl border border-white/15 border-t-2 border-t-[#C2410C] p-2.5 backdrop-blur-xl">
+              <ul className="space-y-0.5">{children}</ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </li>
+  );
 }
 
 export default function Navbar() {
-    // State เก็บว่า dropdown ไหนเปิดอยู่ (null = ปิดหมด)
-    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-    const navRef = useRef<HTMLDivElement>(null);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
 
-    // ปิด dropdown เมื่อคลิกข้างนอก
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (navRef.current && !navRef.current.contains(event.target as Node)) {
-                setOpenDropdown(null);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    // Toggle dropdown - ถ้าคลิกเมนูเดิมจะปิด, ถ้าคลิกเมนูใหม่จะเปิดอันใหม่
-    const toggleDropdown = (name: string) => {
-        setOpenDropdown(prev => prev === name ? null : name);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+        setMobileMenuOpen(false);
+      }
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    // Helper: Close dropdown
-    const closeDropdown = () => setOpenDropdown(null);
+  const toggleDropdown = (name: string) => {
+    setOpenDropdown((prev) => (prev === name ? null : name));
+  };
 
-    return (
-        <div ref={navRef} className="navbar bg-scholar-deep text-white sticky top-0 z-50 shadow-xl font-sans h-16">
+  const closeDropdown = () => setOpenDropdown(null);
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
-            {/* 1. Logo & Mobile Menu */}
-            <div className="navbar-start">
-                <div className="dropdown">
-                    <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
-                        </svg>
-                    </div>
-                    {/* Mobile Menu */}
-                    <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[100] p-2 shadow-xl bg-scholar-deep rounded-box w-64 text-white border border-white/10">
-                        <li><Link href="/about">เกี่ยวกับคณะ</Link></li>
-                        <li><span className="text-scholar-gold font-bold">การจัดการศึกษา</span>
-                            <ul>
-                                <li><Link href="/academics/overview">ภาพรวมวิชาการ</Link></li>
-                                <li><Link href="/programs">หลักสูตรปริญญาตรี</Link></li>
-                                <li><Link href="/programs">หลักสูตรบัณฑิตศึกษา</Link></li>
-                            </ul>
-                        </li>
-                        <li><Link href="/admissions">รับสมัคร</Link></li>
-                        <li><Link href="/research">วิจัยและนวัตกรรม</Link></li>
-                        <li><Link href="/chiang-rai-studies" className="text-scholar-gold">ศูนย์เชียงรายศึกษา</Link></li>
-                        <li><span className="text-yellow-400 font-bold">ระบบสารสนเทศ</span>
-                            <ul>
-                                <li><Link href="/eservice/student">สำหรับนักศึกษา (Student)</Link></li>
-                                <li><Link href="/eservice/staff">สำหรับบุคลากร (Staff)</Link></li>
-                                <li><Link href="/eservice/procurement" className="text-scholar-gold font-semibold">จัดซื้อจัดจ้าง (Procurement)</Link></li>
-                                <li><Link href="/eservice/calendar">ปฏิทินวิชาการ</Link></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-                <Link
-                    href="/"
-                    className="group flex items-center gap-3.5 px-3 py-1.5 rounded-xl transition-all duration-300 hover:bg-white/[0.08] active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-scholar-accent"
-                >
-                    {/* Logo Image */}
-                    <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center transition-all duration-300 ease-out group-hover:scale-110 group-hover:drop-shadow-[0_2px_12px_rgba(241,70,39,0.45)]">
-                        <img
-                            src="/images/soc-logo.png"
-                            alt="Faculty of Social Sciences Logo"
-                            className="w-full h-full object-contain"
-                        />
-                    </div>
-                    <div className="flex flex-col items-start justify-center">
-                        <span className="text-[15px] font-bold leading-tight tracking-wide text-white transition-colors duration-200 group-hover:text-scholar-accent">
-                            Faculty of Social Sciences
-                        </span>
-                        <span className="text-[10px] font-medium text-scholar-gold tracking-[0.06em] uppercase opacity-90 transition-all duration-200 group-hover:opacity-100 group-hover:text-amber-300">
-                            Chiang Rai Rajabhat University
-                        </span>
-                    </div>
-                </Link>
+  return (
+    <nav
+      ref={navRef}
+      className="sticky top-0 z-50 bg-[#0B132B]/95 text-white backdrop-blur-md border-b border-white/10 shadow-lg"
+      aria-label="Main Navigation"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+        {/* Brand / Logo */}
+        <div className="flex items-center gap-3">
+          {/* Mobile hamburger */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+            aria-label="เปิดเมนูนำทาง"
+          >
+            {mobileMenuOpen ? (
+              <CloseIcon className="size-6" strokeWidth={1.75} />
+            ) : (
+              <MenuIcon className="size-6" strokeWidth={1.75} />
+            )}
+          </button>
+
+          <Link
+            href="/"
+            className="group flex items-center gap-3 py-1 outline-none"
+            onClick={closeMobileMenu}
+          >
+            <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+              <img
+                src="/images/soc-logo.png"
+                alt="Faculty of Social Sciences Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
-
-            {/* 2. Desktop Menu (Click-based Dropdowns) */}
-            <div className="navbar-center hidden lg:flex h-full">
-                <ul className="flex items-center gap-1 h-full">
-
-                    {/* A. เกี่ยวกับคณะ */}
-                    <DropdownMenu name="about" title="เกี่ยวกับคณะ" isOpen={openDropdown === 'about'} onToggle={toggleDropdown}>
-                        <NavItem href="/about" title="ภาพรวมคณะ (Vision & History)" onClose={closeDropdown} />
-                        <NavItem href="/about/strategy" title="แผนยุทธศาสตร์ (Strategic Plan)" onClose={closeDropdown} />
-                        <NavItem href="/about/structure" title="โครงสร้างการบริหาร (Org. Structure)" onClose={closeDropdown} />
-                        <div className="divider my-1 border-white/10"></div>
-                        <NavItem href="/about/executive" title="คณะผู้บริหาร (Executive Board)" onClose={closeDropdown} />
-                        <NavItem href="/about/staff" title="ทำเนียบบุคลากร (Staff)" onClose={closeDropdown} />
-                    </DropdownMenu>
-
-                    {/* B. การจัดการศึกษา (Academics) - Highlight Menu */}
-                    <DropdownMenu name="academics" title="การจัดการศึกษา" isOpen={openDropdown === 'academics'} onToggle={toggleDropdown}>
-                        <NavItem href="/academics/overview" title="ภาพรวมวิชาการ (Overview)" onClose={closeDropdown} />
-
-                        <NavItem href="/programs/social-sci" title="สาขาวิชาสังคมศาสตร์" onClose={closeDropdown} />
-                        <NavItem href="/programs/social-dev" title="สาขาวิชานวัตกรรมการพัฒนาสังคม" onClose={closeDropdown} />
-                        <NavItem href="/programs/home-eco" title="สาขาวิชาคหกรรมศาสตร์" onClose={closeDropdown} />
-
-                        <NavItem href="/programs/social-psych" title="สาขาวิชาจิตวิทยาสังคม" onClose={closeDropdown} />
-                        <NavItem href="/programs/gis" title="สาขาวิชาภูมิศาสตร์และภูมิสารสนเทศ" onClose={closeDropdown} />
-
-                        <MenuHeading title="ระดับบัณฑิตศึกษา (Graduate)" />
-                        <NavItem href="/programs/regional-dev-ma" title="ปริญญาโท ยุทธศาสตร์การพัฒนาภูมิภาค" onClose={closeDropdown} />
-                        <NavItem href="/programs/regional-dev-phd" title="ปริญญาเอก ยุทธศาสตร์การพัฒนาภูมิภาค" onClose={closeDropdown} />
-
-                        <MenuHeading title="การเรียนรู้ตลอดชีวิต" />
-                        <NavItem href="/academics/credit-bank" title="ระบบคลังหน่วยกิต (Credit Bank)" onClose={closeDropdown} />
-                        <NavItem href="/academics/short-courses" title="หลักสูตรระยะสั้น" onClose={closeDropdown} />
-                    </DropdownMenu>
-
-                    {/* C. รับสมัคร (Admissions) */}
-                    <DropdownMenu name="admissions" title="รับสมัคร" isOpen={openDropdown === 'admissions'} onToggle={toggleDropdown}>
-                        <li className="mb-2 pb-2 border-b border-white/10">
-                            <Link href="/admissions" className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-scholar-gold hover:text-white hover:bg-scholar-accent rounded-md transition-all" onClick={closeDropdown}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                                </svg>
-                                ศูนย์รับสมัคร (Admission Center)
-                            </Link>
-                        </li>
-                        <li className="block">
-                            <a href="https://admission.crru.ac.th/" target="_blank" rel="noopener noreferrer" className="block px-3 py-2 text-sm text-white/90 hover:text-scholar-accent hover:bg-white/10 rounded-md transition-colors" onClick={closeDropdown}>
-                                ระดับปริญญาตรี
-                            </a>
-                        </li>
-                        <li className="block">
-                            <a href="https://orasis.crru.ac.th/gds_crru/index.php/main/home" target="_blank" rel="noopener noreferrer" className="block px-3 py-2 text-sm text-white/90 hover:text-scholar-accent hover:bg-white/10 rounded-md transition-colors" onClick={closeDropdown}>
-                                ระดับบัณฑิตศึกษา
-                            </a>
-                        </li>
-                        <div className="divider my-1 border-white/10"></div>
-                        <NavItem href="/academics/short-courses" title="สมัครเรียนหลักสูตรระยะสั้น" onClose={closeDropdown} />
-                    </DropdownMenu>
-
-                    {/* D. วิจัยและบริการวิชาการ */}
-                    <DropdownMenu name="research" title="วิจัยและบริการวิชาการ" isOpen={openDropdown === 'research'} onToggle={toggleDropdown}>
-                        <li className="mb-2 pb-2 border-b border-white/10">
-                            <Link href="/research" className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-scholar-gold hover:text-white hover:bg-scholar-accent rounded-md transition-all" onClick={closeDropdown}>
-                                ศูนย์รวมงานวิจัยและบริการวิชาการ
-                            </Link>
-                        </li>
-                        <NavItem href="/research/database" title="ฐานข้อมูลงานวิจัย" onClose={closeDropdown} />
-                        <NavItem href="/research/journal" title="วารสารสังคมศาสตร์วิชาการ (ThaiJO)" onClose={closeDropdown} />
-                        <NavItem href="/research/services" title="บริการวิชาการแก่สังคม" onClose={closeDropdown} />
-                        <NavItem href="/research/mou" title="เครือข่ายความร่วมมือและ MOU" onClose={closeDropdown} />
-                    </DropdownMenu>
-
-                    {/* E. ศูนย์เชียงรายศึกษา */}
-                    <li className="relative h-full flex items-center">
-                        <Link
-                            href="/chiang-rai-studies"
-                            className="flex items-center gap-1 px-3 py-2 rounded-lg transition-all text-sm font-medium h-9 text-scholar-gold hover:bg-white/10 hover:text-scholar-accent"
-                        >
-                            ศูนย์เชียงรายศึกษา
-                        </Link>
-                    </li>
-
-                    {/* F. ระบบสารสนเทศ (E-Service) */}
-                    <DropdownMenu name="eservice" title="ระบบสารสนเทศ" isOpen={openDropdown === 'eservice'} onToggle={toggleDropdown} highlight>
-                        <NavItem href="/eservice/student" title="สำหรับนักศึกษา (Student)" onClose={closeDropdown} />
-                        <NavItem href="/eservice/staff" title="สำหรับบุคลากร (Staff)" onClose={closeDropdown} />
-                        <div className="divider my-1 border-white/10"></div>
-                        <NavItem href="/eservice/procurement" title="จัดซื้อจัดจ้าง (Procurement)" onClose={closeDropdown} />
-                        <NavItem href="/eservice/calendar" title="ปฏิทินวิชาการ" onClose={closeDropdown} />
-                    </DropdownMenu>
-
-                </ul>
+            <div className="flex flex-col">
+              <span className="text-sm sm:text-base font-bold leading-tight tracking-wide text-white group-hover:text-[#F97316] transition-colors">
+                สำนักวิชาสังคมศาสตร์
+              </span>
+              <span className="text-[10px] font-semibold text-amber-400 tracking-wider uppercase opacity-90">
+                Chiang Rai Rajabhat University
+              </span>
             </div>
-
-            {/* 3. CTA Buttons */}
-            <div className="navbar-end gap-3 px-2">
-                <button className="btn btn-ghost btn-circle text-white hover:bg-white/10 btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </button>
-                <Link href="/admin/login" className="hidden sm:flex btn btn-sm bg-gradient-to-r from-scholar-accent to-[#D9341C] text-white border-none shadow-lg hover:shadow-xl hover:scale-105 transition-all rounded-full px-6 font-medium">
-                    เข้าสู่ระบบ
-                </Link>
-            </div>
+          </Link>
         </div>
-    );
+
+        {/* Desktop Navigation Links */}
+        <div className="hidden lg:flex items-center h-full">
+          <ul className="flex items-center gap-1 h-full">
+            {/* 1. เกี่ยวกับคณะ */}
+            <DropdownMenu
+              name="about"
+              title="เกี่ยวกับคณะ"
+              isOpen={openDropdown === "about"}
+              onToggle={toggleDropdown}
+            >
+              <NavItem href="/about" title="ภาพรวมคณะ (Vision & History)" onClose={closeDropdown} />
+              <NavItem href="/about/strategy" title="แผนยุทธศาสตร์ (Strategic Plan)" onClose={closeDropdown} />
+              <NavItem href="/about/structure" title="โครงสร้างการบริหาร" onClose={closeDropdown} />
+              <div className="my-1 border-t border-white/10" />
+              <NavItem href="/about/executive" title="คณะผู้บริหาร (Executive Board)" onClose={closeDropdown} />
+              <NavItem href="/about/staff" title="ทำเนียบบุคลากร (Staff)" onClose={closeDropdown} />
+            </DropdownMenu>
+
+            {/* 2. การจัดการศึกษา (Academics) */}
+            <DropdownMenu
+              name="academics"
+              title="การจัดการศึกษา"
+              isOpen={openDropdown === "academics"}
+              onToggle={toggleDropdown}
+            >
+              <li className="mb-2 pb-2 border-b border-white/10">
+                <Link
+                  href="/programs"
+                  className="flex items-center justify-between px-3 py-2 text-sm font-bold text-amber-400 hover:text-white hover:bg-[#C2410C] rounded-lg transition-colors"
+                  onClick={closeDropdown}
+                >
+                  <span className="flex items-center gap-2">
+                    <GraduationCap className="size-4" strokeWidth={1.75} />
+                    หลักสูตรทั้งหมด (All Programs)
+                  </span>
+                  <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full font-normal">
+                    7 สาขาวิชา
+                  </span>
+                </Link>
+              </li>
+              <MenuHeading title="ระดับปริญญาตรี (Undergraduate)" />
+              <NavItem href="/programs/social-dev" title="สาขาวิชานวัตกรรมการพัฒนาสังคม" onClose={closeDropdown} />
+              <NavItem href="/programs/gis" title="สาขาวิชาภูมิศาสตร์และภูมิสารสนเทศ" onClose={closeDropdown} />
+              <NavItem href="/programs/social-psych" title="สาขาวิชาจิตวิทยาสังคม" onClose={closeDropdown} />
+              <NavItem href="/programs/social-sci" title="สาขาวิชาสังคมศาสตร์" onClose={closeDropdown} />
+              <NavItem href="/programs/home-eco" title="สาขาวิชาคหกรรมศาสตร์" onClose={closeDropdown} />
+
+              <MenuHeading title="ระดับบัณฑิตศึกษา (Graduate)" />
+              <NavItem href="/programs/regional-dev-ma" title="ปริญญาโท ยุทธศาสตร์การพัฒนาภูมิภาค" onClose={closeDropdown} />
+              <NavItem href="/programs/regional-dev-phd" title="ปริญญาเอก ยุทธศาสตร์การพัฒนาภูมิภาค" onClose={closeDropdown} />
+
+              <MenuHeading title="การเรียนรู้ตลอดชีวิต (Lifelong)" />
+              <NavItem href="/academics/credit-bank" title="ระบบคลังหน่วยกิต (Credit Bank)" onClose={closeDropdown} />
+              <NavItem href="/academics/short-courses" title="หลักสูตรระยะสั้น (Short Courses)" onClose={closeDropdown} />
+            </DropdownMenu>
+
+            {/* 3. รับสมัคร (Admissions) */}
+            <DropdownMenu
+              name="admissions"
+              title="รับสมัคร"
+              isOpen={openDropdown === "admissions"}
+              onToggle={toggleDropdown}
+            >
+              <li className="mb-2 pb-2 border-b border-white/10">
+                <Link
+                  href="/admissions"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-amber-400 hover:text-white hover:bg-[#C2410C] rounded-lg transition-colors"
+                  onClick={closeDropdown}
+                >
+                  <Sparkles className="size-4" strokeWidth={1.75} />
+                  <span>ศูนย์รับสมัคร (Admission Center)</span>
+                </Link>
+              </li>
+              <NavItem
+                href="https://admission.crru.ac.th/"
+                title="ระดับปริญญาตรี (มรภ.เชียงราย)"
+                onClose={closeDropdown}
+                isExternal
+              />
+              <NavItem
+                href="https://orasis.crru.ac.th/gds_crru/index.php/main/home"
+                title="ระดับบัณฑิตศึกษา (ป.โท-เอก)"
+                onClose={closeDropdown}
+                isExternal
+              />
+              <div className="my-1 border-t border-white/10" />
+              <NavItem href="/academics/short-courses" title="สมัครเรียนหลักสูตรระยะสั้น" onClose={closeDropdown} />
+            </DropdownMenu>
+
+            {/* 4. วิจัยและบริการวิชาการ */}
+            <DropdownMenu
+              name="research"
+              title="วิจัยและบริการวิชาการ"
+              isOpen={openDropdown === "research"}
+              onToggle={toggleDropdown}
+            >
+              <li className="mb-2 pb-2 border-b border-white/10">
+                <Link
+                  href="/research"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-amber-400 hover:text-white hover:bg-[#C2410C] rounded-lg transition-colors"
+                  onClick={closeDropdown}
+                >
+                  <BookOpen className="size-4" strokeWidth={1.75} />
+                  <span>ศูนย์รวมงานวิจัยและบริการวิชาการ</span>
+                </Link>
+              </li>
+              <NavItem href="/research/database" title="ฐานข้อมูลงานวิจัย" onClose={closeDropdown} />
+              <NavItem href="/research/journal" title="วารสารสังคมศาสตร์วิชาการ (ThaiJO)" onClose={closeDropdown} />
+              <NavItem href="/research/services" title="บริการวิชาการแก่สังคม" onClose={closeDropdown} />
+              <NavItem href="/research/mou" title="เครือข่ายความร่วมมือและ MOU" onClose={closeDropdown} />
+            </DropdownMenu>
+
+            {/* 5. ศูนย์เชียงรายศึกษา */}
+            <li>
+              <Link
+                href="/chiang-rai-studies"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-amber-300 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <span>ศูนย์เชียงรายศึกษา</span>
+              </Link>
+            </li>
+
+            {/* 6. ระบบสารสนเทศ (E-Service) */}
+            <DropdownMenu
+              name="eservice"
+              title="ระบบสารสนเทศ"
+              isOpen={openDropdown === "eservice"}
+              onToggle={toggleDropdown}
+              highlight
+            >
+              <NavItem href="/eservice/student" title="สำหรับนักศึกษา (Student)" onClose={closeDropdown} />
+              <NavItem href="/eservice/staff" title="สำหรับบุคลากร (Staff)" onClose={closeDropdown} />
+              <div className="my-1 border-t border-white/10" />
+              <NavItem href="/eservice/procurement" title="จัดซื้อจัดจ้าง (Procurement)" onClose={closeDropdown} />
+              <NavItem href="/eservice/calendar" title="ปฏิทินวิชาการ" onClose={closeDropdown} />
+            </DropdownMenu>
+          </ul>
+        </div>
+
+        {/* Action Button */}
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/login"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#C2410C] hover:bg-[#9A3412] text-white font-medium text-xs sm:text-sm shadow-sm hover:shadow transition-all duration-200 active:scale-95"
+          >
+            <LogIn className="size-4" strokeWidth={1.75} />
+            <span>เข้าสู่ระบบ</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Mobile Drawer Navigation with Motion */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}
+            className="lg:hidden border-t border-white/10 bg-[#0B132B] px-4 py-4 max-h-[80vh] overflow-y-auto"
+          >
+            <div className="space-y-4">
+              <div>
+                <div className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">เกี่ยวกับคณะ</div>
+                <div className="space-y-1 pl-2">
+                  <Link href="/about" onClick={closeMobileMenu} className="block py-1.5 text-sm text-slate-200 hover:text-white">ภาพรวมคณะ</Link>
+                  <Link href="/about/strategy" onClick={closeMobileMenu} className="block py-1.5 text-sm text-slate-200 hover:text-white">แผนยุทธศาสตร์</Link>
+                  <Link href="/about/structure" onClick={closeMobileMenu} className="block py-1.5 text-sm text-slate-200 hover:text-white">โครงสร้างการบริหาร</Link>
+                  <Link href="/about/staff" onClick={closeMobileMenu} className="block py-1.5 text-sm text-slate-200 hover:text-white">ทำเนียบบุคลากร</Link>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-white/10">
+                <div className="text-xs font-bold text-[#F97316] uppercase tracking-wider mb-2">การจัดการศึกษา</div>
+                <div className="space-y-1 pl-2">
+                  <Link href="/programs" onClick={closeMobileMenu} className="block py-1.5 text-sm font-semibold text-white">หลักสูตรทั้งหมด (7 สาขา)</Link>
+                  <Link href="/programs/social-dev" onClick={closeMobileMenu} className="block py-1 text-xs text-slate-300">สาขานวัตกรรมการพัฒนาสังคม</Link>
+                  <Link href="/programs/gis" onClick={closeMobileMenu} className="block py-1 text-xs text-slate-300">สาขาภูมิศาสตร์และภูมิสารสนเทศ</Link>
+                  <Link href="/programs/social-psych" onClick={closeMobileMenu} className="block py-1 text-xs text-slate-300">สาขาจิตวิทยาสังคม</Link>
+                  <Link href="/academics/credit-bank" onClick={closeMobileMenu} className="block py-1 text-xs text-amber-400">ระบบคลังหน่วยกิต</Link>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-white/10">
+                <div className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">บริการและสารสนเทศ</div>
+                <div className="space-y-1 pl-2">
+                  <Link href="/admissions" onClick={closeMobileMenu} className="block py-1.5 text-sm text-slate-200">ศูนย์รับสมัครนักศึกษา</Link>
+                  <Link href="/research" onClick={closeMobileMenu} className="block py-1.5 text-sm text-slate-200">ศูนย์รวมงานวิจัย</Link>
+                  <Link href="/chiang-rai-studies" onClick={closeMobileMenu} className="block py-1.5 text-sm text-amber-300">ศูนย์เชียงรายศึกษา</Link>
+                  <Link href="/eservice/student" onClick={closeMobileMenu} className="block py-1.5 text-sm text-slate-200">E-Service นักศึกษา</Link>
+                  <Link href="/eservice/staff" onClick={closeMobileMenu} className="block py-1.5 text-sm text-slate-200">E-Service บุคลากร</Link>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-white/10">
+                <Link
+                  href="/admin/login"
+                  onClick={closeMobileMenu}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[#C2410C] text-white font-medium text-sm"
+                >
+                  <LogIn className="size-4" strokeWidth={1.75} />
+                  <span>เข้าสู่ระบบ (Staff Login)</span>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
+  );
 }

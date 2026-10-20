@@ -1,175 +1,142 @@
-import Link from 'next/link';
-import { fetchPrograms, Program } from '@/lib/api';
+import { fetchPrograms } from '@/lib/api';
 import Breadcrumb from '@/components/Breadcrumb';
+import ProgramsExplorerClient from '@/components/ProgramsExplorerClient';
+import Link from 'next/link';
+import { 
+  GraduationCap, 
+  BookOpen, 
+  Calendar, 
+  PhoneCall, 
+  ExternalLink
+} from 'lucide-react';
 
 interface Props {
-    searchParams: Promise<{
-        level?: string;
-    }>
+  searchParams: Promise<{
+    level?: string;
+  }>;
 }
 
 export default async function ProgramsPage(props: Props) {
-    const searchParams = await props.searchParams;
-    const levelFilter = searchParams.level;
+  const searchParams = await props.searchParams;
+  const levelFilter = searchParams.level;
 
-    // Fetch all programs
-    const allPrograms = await fetchPrograms();
+  // Fetch all active programs from database
+  const allPrograms = await fetchPrograms();
 
-    // Filter by level if specified
-    let programs = allPrograms;
-    let pageTitle = 'หลักสูตรทั้งหมด';
-    let pageSubtitle = 'เลือกหลักสูตรที่เหมาะกับคุณ';
+  const bachelorCount = allPrograms.filter(p => p.degreeLevel === 'BACHELOR').length;
+  const masterCount = allPrograms.filter(p => p.degreeLevel === 'MASTER').length;
+  const doctoralCount = allPrograms.filter(p => p.degreeLevel === 'DOCTORAL' || p.degreeLevel === 'PHD').length;
 
-    if (levelFilter === 'bachelor') {
-        programs = allPrograms.filter(p => p.degreeLevel === 'BACHELOR');
-        pageTitle = 'หลักสูตรปริญญาตรี';
-        pageSubtitle = 'หลักสูตรระดับปริญญาตรี 4 ปี';
-    } else if (levelFilter === 'master') {
-        programs = allPrograms.filter(p => p.degreeLevel === 'MASTER');
-        pageTitle = 'หลักสูตรปริญญาโท';
-        pageSubtitle = 'หลักสูตรระดับบัณฑิตศึกษา (ปริญญาโท)';
-    } else if (levelFilter === 'doctoral') {
-        programs = allPrograms.filter(p => p.degreeLevel === 'DOCTORAL' || p.degreeLevel === 'PHD');
-        pageTitle = 'หลักสูตรปริญญาเอก';
-        pageSubtitle = 'หลักสูตรระดับบัณฑิตศึกษา (ปริญญาเอก)';
-    }
+  return (
+    <div className="bg-white font-sans text-scholar-text min-h-screen">
+      {/* =========================================================================
+          1. HERO HEADER: Accurate & Factual Institutional Header
+          ========================================================================= */}
+      <header className="relative py-14 sm:py-16 bg-scholar-deep overflow-hidden border-b-4 border-scholar-gold">
+        <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
+          <span className="inline-block px-3 py-1 bg-white/10 text-scholar-gold text-xs font-semibold uppercase tracking-wider rounded-sm mb-3 border border-scholar-gold/30">
+            ACADEMIC PROGRAMS • คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
+          </span>
 
-    const getLevelBadge = (degreeLevel: string) => {
-        switch (degreeLevel) {
-            case 'BACHELOR':
-                return <span className="badge badge-primary bg-blue-500 border-none text-white">ปริญญาตรี</span>;
-            case 'MASTER':
-                return <span className="badge badge-secondary bg-orange-500 border-none text-white">ปริญญาโท</span>;
-            case 'DOCTORAL':
-            case 'PHD':
-                return <span className="badge badge-accent bg-purple-600 border-none text-white">ปริญญาเอก</span>;
-            default:
-                return null;
-        }
-    };
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 font-heading">
+            หลักสูตรการศึกษา
+          </h1>
 
-    return (
-        <div className="bg-white font-sans text-scholar-text">
+          <p className="text-sm sm:text-base text-gray-300 max-w-2xl mx-auto leading-relaxed font-light mb-6">
+            ข้อมูลหลักสูตรระดับปริญญาตรี และระดับบัณฑิตศึกษา (ปริญญาโท-ปริญญาเอก) 
+            ที่เปิดสอนตามมาตรฐานคุณวุฒิระดับอุดมศึกษา
+          </p>
 
-            {/* Hero Header */}
-            <header className="relative py-20 bg-gradient-to-br from-scholar-deep via-scholar-deep to-[#0A2540] overflow-hidden">
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-scholar-gold rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-scholar-accent rounded-full blur-2xl translate-y-1/2 -translate-x-1/4"></div>
-                </div>
-                <div className="container mx-auto px-4 relative z-10 text-center">
-                    <span className="inline-block px-4 py-1 rounded-full bg-scholar-accent/20 text-scholar-gold text-sm font-semibold mb-4 tracking-wider">
-                        ACADEMIC PROGRAMS
-                    </span>
-                    <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">{pageTitle}</h1>
-                    <p className="text-xl text-white/70 max-w-2xl mx-auto">{pageSubtitle}</p>
-                </div>
-            </header>
+          {/* Factual Program Breakdown Bar */}
+          <div className="inline-flex flex-wrap items-center justify-center gap-3 bg-white/5 border border-white/10 px-4 py-2.5 rounded-sm text-xs text-gray-300">
+            <span className="flex items-center gap-1.5">
+              <GraduationCap className="w-4 h-4 text-scholar-gold" />
+              <span>หลักสูตรทั้งหมด <strong>{allPrograms.length}</strong> หลักสูตร</span>
+            </span>
+            <span className="text-white/30">•</span>
+            <span>ปริญญาตรี <strong>{bachelorCount}</strong> สาขาวิชา</span>
+            <span className="text-white/30">•</span>
+            <span>ปริญญาโท <strong>{masterCount}</strong> สาขาวิชา</span>
+            <span className="text-white/30">•</span>
+            <span>ปริญญาเอก <strong>{doctoralCount}</strong> สาขาวิชา</span>
+          </div>
+        </div>
+      </header>
 
-            <div className="container mx-auto px-4 py-8">
-                <Breadcrumb items={[
-                    { label: 'หลักสูตร', href: '/programs' },
-                    ...(levelFilter ? [{ label: pageTitle }] : [])
-                ]} />
-
-                {/* Filter Tabs */}
-                <div className="flex flex-wrap gap-2 mb-8 mt-6">
-                    <Link
-                        href="/programs"
-                        className={`btn btn-sm ${!levelFilter ? 'btn-primary bg-scholar-deep border-scholar-deep' : 'btn-outline'}`}
-                    >
-                        ทั้งหมด
-                    </Link>
-                    <Link
-                        href="/programs?level=bachelor"
-                        className={`btn btn-sm ${levelFilter === 'bachelor' ? 'btn-primary bg-blue-500 border-blue-500' : 'btn-outline'}`}
-                    >
-                        ปริญญาตรี
-                    </Link>
-                    <Link
-                        href="/programs?level=master"
-                        className={`btn btn-sm ${levelFilter === 'master' ? 'btn-primary bg-orange-500 border-orange-500' : 'btn-outline'}`}
-                    >
-                        ปริญญาโท
-                    </Link>
-                    <Link
-                        href="/programs?level=doctoral"
-                        className={`btn btn-sm ${levelFilter === 'doctoral' ? 'btn-primary bg-purple-600 border-purple-600' : 'btn-outline'}`}
-                    >
-                        ปริญญาเอก
-                    </Link>
-                </div>
-
-                {/* Programs Grid */}
-                {programs.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {programs.map((program) => (
-                            <Link
-                                key={program.id}
-                                href={`/programs/${program.code}`}
-                                className="group bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                            >
-                                {/* Card Header */}
-                                <div className="h-40 bg-gradient-to-br from-scholar-deep to-[#0A2540] relative overflow-hidden">
-                                    <div className="absolute inset-0 opacity-20">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-scholar-gold rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-                                    </div>
-                                    <div className="absolute bottom-4 left-4 right-4">
-                                        {getLevelBadge(program.degreeLevel)}
-                                    </div>
-                                </div>
-
-                                {/* Card Body */}
-                                <div className="p-6">
-                                    <h3 className="text-xl font-bold text-scholar-deep mb-2 group-hover:text-scholar-accent transition-colors line-clamp-2">
-                                        {program.nameTh}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 mb-4">
-                                        {program.degreeTitleTh || program.degreeTitleEn}
-                                    </p>
-                                    {program.description && (
-                                        <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                                            {program.description}
-                                        </p>
-                                    )}
-                                    <div className="flex items-center text-scholar-accent font-semibold text-sm group-hover:translate-x-1 transition-transform">
-                                        ดูรายละเอียด
-                                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-20">
-                        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-600 mb-2">ไม่พบหลักสูตร</h3>
-                        <p className="text-gray-500">ยังไม่มีหลักสูตรในหมวดหมู่นี้</p>
-                        <Link href="/programs" className="btn btn-primary bg-scholar-accent border-none mt-6">
-                            ดูหลักสูตรทั้งหมด
-                        </Link>
-                    </div>
-                )}
+      {/* =========================================================================
+          2. ADMISSION LINK STRIP: Direct links to official CRRU portals
+          ========================================================================= */}
+      <section className="bg-scholar-soft border-b border-gray-200">
+        <div className="container mx-auto px-4 py-3.5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white border border-gray-200 p-3.5 rounded-sm">
+            <div className="flex items-center gap-2.5">
+              <Calendar className="w-4 h-4 text-scholar-accent shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-scholar-deep block">
+                  การรับสมัครนักศึกษาใหม่
+                </span>
+                <span className="text-[11px] text-gray-500">
+                  ตรวจสอบกำหนดการ คุณสมบัติ และยื่นสมัครผ่านระบบรับสมัครของมหาวิทยาลัยราชภัฏเชียงราย
+                </span>
+              </div>
             </div>
 
-            {/* CTA Section */}
-            <section className="py-16 bg-scholar-soft mt-12">
-                <div className="container mx-auto px-4 text-center">
-                    <h2 className="text-2xl font-bold text-scholar-deep mb-4">ต้องการข้อมูลเพิ่มเติม?</h2>
-                    <p className="text-gray-600 mb-6 max-w-lg mx-auto">
-                        หากมีข้อสงสัยเกี่ยวกับหลักสูตร หรือต้องการคำปรึกษา สามารถติดต่อเราได้
-                    </p>
-                    <Link href="/contact" className="btn btn-primary bg-scholar-deep border-none px-8 rounded-full">
-                        ติดต่อสอบถาม
-                    </Link>
-                </div>
-            </section>
+            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+              <a
+                href="https://admission.crru.ac.th/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-1.5 bg-scholar-accent hover:bg-[#D9341C] text-white text-xs font-semibold rounded-sm transition-colors flex items-center gap-1 text-center justify-center flex-1 sm:flex-initial"
+              >
+                <span>รับสมัคร ปริญญาตรี</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <a
+                href="https://orasis.crru.ac.th/gds_crru/index.php/main/home"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-1.5 bg-scholar-deep hover:bg-scholar-deep/90 text-white text-xs font-semibold rounded-sm transition-colors flex items-center gap-1 text-center justify-center flex-1 sm:flex-initial"
+              >
+                <span>รับสมัคร ป.โท-เอก</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          </div>
         </div>
-    );
+      </section>
+
+      {/* =========================================================================
+          3. MAIN CONTENT: Breadcrumb & Programs Explorer
+          ========================================================================= */}
+      <main className="container mx-auto px-4 py-8">
+        <Breadcrumb items={[{ label: 'หลักสูตรทั้งหมด', href: '/programs' }]} />
+
+        <div className="mt-6">
+          <ProgramsExplorerClient programs={allPrograms} initialLevel={levelFilter} />
+        </div>
+      </main>
+
+      {/* =========================================================================
+          4. OFFICIAL CONTACT FOOTNOTE: Factual Inquiry Info
+          ========================================================================= */}
+      <section className="py-10 bg-scholar-soft border-t border-gray-200 mt-12 text-center">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <PhoneCall className="w-5 h-5 text-scholar-gold mx-auto mb-2" />
+          <h2 className="text-base font-bold text-scholar-deep mb-1">
+            ต้องการข้อมูลหลักสูตรเพิ่มเติม
+          </h2>
+          <p className="text-xs text-gray-600 mb-4 leading-relaxed">
+            ติดต่อกลุ่มงานบริหารวิชาการ คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย<br />
+            โทรศัพท์: 0-5377-6000 ต่อ คณะสังคมศาสตร์ หรือส่งข้อความผ่านแบบฟอร์มติดต่อ
+          </p>
+          <Link
+            href="/contact"
+            className="inline-flex items-center gap-1.5 px-5 py-2 bg-white border border-scholar-deep text-scholar-deep font-semibold text-xs rounded-sm hover:bg-scholar-deep hover:text-white transition-all shadow-sm"
+          >
+            <span>ข้อมูลติดต่อและแผนที่คณะ</span>
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
 }

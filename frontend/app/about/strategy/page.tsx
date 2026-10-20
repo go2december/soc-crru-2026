@@ -1,157 +1,235 @@
-import Link from 'next/link';
-import React from 'react';
+import Link from "next/link";
+import React from "react";
+import {
+  GraduationCap,
+  Lightbulb,
+  Landmark,
+  Cog,
+  ChevronRight,
+  ArrowRight,
+  Sparkles,
+  Layers,
+} from "lucide-react";
+
+export const metadata = {
+  title:
+    "แผนยุทธศาสตร์ 5 ปี (พ.ศ. 2565 - 2569) | คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
+  description:
+    "4 ประเด็นยุทธศาสตร์หลัก แผนยุทธศาสตร์ 5 ปี (พ.ศ. 2565 - 2569) ฉบับทบทวน พ.ศ. 2566 คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
+};
 
 export default function StrategicPlanPage() {
-    return (
-        <main className="min-h-screen bg-[#FDFBF7] font-sans text-scholar-text pb-20">
-            {/* Hero Section */}
-            <section className="relative h-[350px] w-full bg-scholar-deep flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070&auto=format&fit=crop')] opacity-20 bg-cover bg-center mix-blend-overlay" />
-                <div className="absolute inset-0 bg-gradient-to-t from-scholar-deep via-scholar-deep/80 to-transparent" />
+  const strategies = [
+    {
+      id: "1",
+      number: "01",
+      badge: "ยุทธศาสตร์ที่ 1",
+      name: "การยกระดับคุณภาพการศึกษา",
+      desc: "Elevating Education Quality",
+      icon: GraduationCap,
+      summary:
+        "มุ่งผลิตบัณฑิตนวัตกรมืออาชีพ ทักษะสูง ตอบโจทย์การพัฒนาพื้นที่ พร้อมหลักสูตรปริญญาและคลังหน่วยกิต (Credit Bank)",
+      color: "from-amber-500 to-[#C2410C]",
+      borderHover: "hover:border-[#C2410C]",
+      accentBg: "bg-amber-50 text-[#C2410C]",
+    },
+    {
+      id: "2",
+      number: "02",
+      badge: "ยุทธศาสตร์ที่ 2",
+      name: "การพัฒนางานวิจัย นวัตกรรม และงานสร้างสรรค์",
+      desc: "Research, Innovation, and Creative Works",
+      icon: Lightbulb,
+      summary:
+        "ส่งเสริมงานวิจัยเชิงสร้างสรรค์เพื่อแก้ปัญหาชุมชนอย่างมีส่วนร่วม และยกระดับขีดความสามารถนักวิจัยสู่สากล (Talent Mobility)",
+      color: "from-[#C2410C] to-[#9A3412]",
+      borderHover: "hover:border-[#C2410C]",
+      accentBg: "bg-orange-50 text-[#C2410C]",
+    },
+    {
+      id: "3",
+      number: "03",
+      badge: "ยุทธศาสตร์ที่ 3",
+      name: "การพัฒนาท้องถิ่น",
+      desc: "Local Development",
+      icon: Landmark,
+      summary:
+        "ส่งเสริมการเรียนรู้ตลอดชีวิต (Lifelong Learning) สร้างความร่วมมือจตุรภาคี และหนุนผู้ประกอบการท้องถิ่น (Local Startups)",
+      color: "from-[#581C87] to-[#3B0764]",
+      borderHover: "hover:border-[#581C87]",
+      accentBg: "bg-purple-50 text-[#581C87]",
+    },
+    {
+      id: "4",
+      number: "04",
+      badge: "ยุทธศาสตร์ที่ 4",
+      name: "การพัฒนาระบบ กลไก และการบริหารจัดการ",
+      desc: "System, Mechanism, and Management Development",
+      icon: Cog,
+      summary:
+        "ปฏิรูประบบการบริหารจัดการตามหลักธรรมาภิบาล ยกระดับสู่มาตรฐานสากล (AUN-QA) และสร้างองค์กรแห่งความสุข (Happy Organization)",
+      color: "from-slate-700 to-[#0B132B]",
+      borderHover: "hover:border-[#0B132B]",
+      accentBg: "bg-slate-100 text-[#0B132B]",
+    },
+  ];
 
-                <div className="relative z-10 text-center px-4 max-w-5xl mx-auto anime-fade-up">
-                    <span className="inline-block px-4 py-1.5 rounded-full bg-scholar-gold/20 text-scholar-gold border border-scholar-gold/30 mb-4 font-semibold tracking-wider backdrop-blur-sm">
-                        STRATEGIC PLAN
-                    </span>
-                    <h1 className="text-3xl md:text-5xl font-bold mb-4 text-white leading-tight drop-shadow-lg">
-                        แผนยุทธศาสตร์ 5 ปี <br />
-                        <span className="text-scholar-gold text-2xl md:text-3xl mt-4 block font-normal">
-                            (พ.ศ. 2565 - 2569) ฉบับทบทวน พ.ศ. 2566
-                        </span>
-                    </h1>
-                </div>
-            </section>
+  return (
+    <main className="min-h-screen bg-[#F8FAFC] font-sans text-slate-800 pb-24">
+      {/* ================= 1. HERO SECTION ================= */}
+      <section className="relative bg-[#0B132B] text-white overflow-hidden pt-12 pb-18 sm:pt-16 sm:pb-24 border-b-4 border-[#C2410C]">
+        {/* Subtle Geometric Canvas Texture */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.04] select-none">
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundImage: `radial-gradient(#FFFFFF 1px, transparent 1px)`,
+              backgroundSize: "28px 28px",
+            }}
+          />
+        </div>
 
-            {/* Content Section */}
-            <section className="py-20 px-4">
-                <div className="container mx-auto max-w-6xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Breadcrumb Navigation */}
+          <nav aria-label="Breadcrumb" className="mb-6">
+            <ol className="flex items-center gap-2 text-xs font-medium text-slate-400">
+              <li>
+                <Link href="/" className="hover:text-white transition-colors">
+                  หน้าแรก
+                </Link>
+              </li>
+              <li>
+                <ChevronRight className="size-3 text-slate-600" />
+              </li>
+              <li>
+                <Link href="/about" className="hover:text-white transition-colors">
+                  เกี่ยวกับคณะ
+                </Link>
+              </li>
+              <li>
+                <ChevronRight className="size-3 text-slate-600" />
+              </li>
+              <li className="text-amber-400 font-semibold" aria-current="page">
+                แผนยุทธศาสตร์
+              </li>
+            </ol>
+          </nav>
 
-                    {/* Vision Wrapper */}
-                    <div className="bg-white rounded-3xl p-10 md:p-14 shadow-xl border border-scholar-gold/20 text-center mb-16 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-scholar-gold/5 rounded-full -mr-20 -mt-20"></div>
-                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-scholar-deep/5 rounded-full -ml-10 -mb-10"></div>
+          <div className="max-w-4xl">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-amber-400 border border-white/15 text-xs font-semibold uppercase tracking-wider mb-5">
+              <Sparkles className="size-3.5" />
+              <span>STRATEGIC ISSUES • พ.ศ. 2565 - 2569</span>
+            </div>
 
-                        <h2 className="text-sm font-bold text-scholar-gold uppercase tracking-widest mb-4">วิสัยทัศน์ (Vision)</h2>
-                        <p className="text-2xl md:text-4xl font-bold text-scholar-deep leading-relaxed max-w-4xl mx-auto relative z-10">
-                            “บูรณาการองค์ความรู้ในการผลิตบัณฑิตสู่การเป็นนวัตกรสังคม เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน”
-                        </p>
-                        <p className="text-gray-500 mt-4 italic">
-                            (Integrating knowledge to produce graduates as social innovators for sustainable local development)
-                        </p>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight mb-4">
+              แผนยุทธศาสตร์ 5 ปี <br className="hidden sm:inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-[#F97316] to-[#C2410C]">
+                4 ประเด็นยุทธศาสตร์หลัก
+              </span>
+            </h1>
+
+            <p className="text-base sm:text-lg text-slate-300 font-body leading-relaxed max-w-2xl">
+              กรอบการดำเนินงานตามแผนยุทธศาสตร์ 5 ปี (พ.ศ. 2565 - 2569) ฉบับทบทวน พ.ศ. 2566
+              เพื่อขับเคลื่อนคณะสังคมศาสตร์สู่ความเป็นเลิศทางวิชาการและนวัตกรรมเพื่อท้องถิ่น
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= 2. SUB-NAVIGATION BAR ================= */}
+      <div className="sticky top-18 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between overflow-x-auto no-scrollbar py-3 gap-6 text-xs sm:text-sm font-semibold whitespace-nowrap">
+            <div className="flex items-center gap-2 text-slate-700">
+              <span className="px-3 py-1.5 rounded-lg text-[#C2410C] bg-orange-50/80 font-bold">
+                4 ประเด็นยุทธศาสตร์
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+              <span className="hidden sm:inline">หน้าอื่นในหมวด:</span>
+              <Link href="/about" className="hover:text-[#C2410C] hover:underline">
+                ภาพรวมคณะ
+              </Link>
+              <span>•</span>
+              <Link
+                href="/about/structure"
+                className="hover:text-[#C2410C] hover:underline"
+              >
+                โครงสร้างบริหาร
+              </Link>
+              <span>•</span>
+              <Link
+                href="/about/executive"
+                className="hover:text-[#C2410C] hover:underline"
+              >
+                ผู้บริหาร
+              </Link>
+              <span>•</span>
+              <Link
+                href="/about/staff"
+                className="hover:text-[#C2410C] hover:underline"
+              >
+                บุคลากร
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ================= 3. 4 STRATEGIC ISSUES SECTION ONLY ================= */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16">
+        <section id="strategic-issues">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {strategies.map((strat) => {
+              const Icon = strat.icon;
+              return (
+                <Link
+                  href={`/about/strategy/${strat.id}`}
+                  key={strat.id}
+                  className={`group relative flex flex-col justify-between p-7 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 ${strat.borderHover}`}
+                >
+                  <div>
+                    {/* Top Accent & Icon */}
+                    <div className="flex items-center justify-between mb-5">
+                      <div
+                        className={`size-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${strat.accentBg}`}
+                      >
+                        <Icon className="size-7" strokeWidth={1.75} />
+                      </div>
+                      <span className="text-3xl font-black text-slate-200 font-mono group-hover:text-[#C2410C]/40 transition-colors">
+                        {strat.number}
+                      </span>
                     </div>
 
-                    {/* Mission Section */}
-                    <div className="mb-20">
-                        <h2 className="text-3xl font-bold text-scholar-deep mb-8 flex items-center gap-3">
-                            <span className="w-2 h-8 bg-scholar-accent rounded-full"></span>
-                            พันธกิจ (Mission)
-                        </h2>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            {[
-                                "ผลิตบัณฑิตที่เป็นนวัตกรมืออาชีพ มีทักษะเด่น มีความรู้ มีคุณธรรม และตอบสนองต่อการพัฒนาท้องถิ่นอย่างยั่งยืน",
-                                "ผลิตผลงานวิจัยและงานสร้างสรรค์เพื่อการนำไปใช้ประโยชน์ในชุมชน ท้องถิ่น ประเทศ และภูมิภาคอาเซียน",
-                                "ให้บริการวิชาการแก่สังคม เพื่อยกระดับคุณภาพชีวิตของประชาชนในท้องถิ่น และประเทศ",
-                                "สืบสานและส่งเสริมศิลปวัฒนธรรมอันดีงามของท้องถิ่นและของชาติ",
-                                "พัฒนาคณะให้เป็นองค์กรแห่งการเรียนรู้ที่มีคุณภาพและมีธรรมาภิบาล"
-                            ].map((item, idx) => (
-                                <div key={idx} className="flex gap-4 items-start bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-scholar-deep/10 text-scholar-deep flex items-center justify-center font-bold text-lg">
-                                        {idx + 1}
-                                    </div>
-                                    <p className="text-gray-700 text-lg leading-relaxed pt-1">{item}</p>
-                                </div>
-                            ))}
-                        </div>
+                    <div className="inline-block text-xs font-bold text-[#C2410C] uppercase tracking-wider mb-2">
+                      {strat.badge}
                     </div>
 
-                    {/* Strategic Issues Section */}
-                    <div className="mb-20">
-                        <div className="text-center mb-12">
-                            <h2 className="text-3xl font-bold text-scholar-deep">ประเด็นยุทธศาสตร์ (Strategic Issues)</h2>
-                            <div className="w-24 h-1 bg-scholar-accent mx-auto mt-6 rounded-full"></div>
-                        </div>
+                    <h2 className="text-lg font-bold text-[#0B132B] group-hover:text-[#C2410C] transition-colors leading-snug mb-2">
+                      {strat.name}
+                    </h2>
 
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {[
-                                {
-                                    id: "1",
-                                    title: "ยุทธศาสตร์ที่ 1",
-                                    name: "การยกระดับคุณภาพการศึกษา",
-                                    desc: "Elevating Education Quality",
-                                    color: "bg-[#D9341C]",
-                                    icon: "📚"
-                                },
-                                {
-                                    id: "2",
-                                    title: "ยุทธศาสตร์ที่ 2",
-                                    name: "การพัฒนางานวิจัย นวัตกรรม และงานสร้างสรรค์",
-                                    desc: "Research, Innovation, and Creative Works",
-                                    color: "bg-[#B02815]",
-                                    icon: "💡"
-                                },
-                                {
-                                    id: "3",
-                                    title: "ยุทธศาสตร์ที่ 3",
-                                    name: "การพัฒนาท้องถิ่น",
-                                    desc: "Local Development",
-                                    color: "bg-[#8E2011]",
-                                    icon: "🏡"
-                                },
-                                {
-                                    id: "4",
-                                    title: "ยุทธศาสตร์ที่ 4",
-                                    name: "การพัฒนาระบบ กลไก และการบริหารจัดการ",
-                                    desc: "System, Mechanism, and Management Development",
-                                    color: "bg-[#6A180C]",
-                                    icon: "⚙️"
-                                }
-                            ].map((strat, i) => (
-                                <Link href={`/about/strategy/${strat.id}`} key={i} className={`bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:-translate-y-2 transition-transform duration-300 relative group cursor-pointer block h-full`}>
-                                    <div className={`w-12 h-12 rounded-xl mb-4 flex items-center justify-center text-2xl text-white shadow-lg ${strat.color}`}>
-                                        {strat.icon}
-                                    </div>
-                                    <span className={`text-xs font-bold uppercase tracking-wider text-scholar-gold mb-2 block`}>
-                                        {strat.title}
-                                    </span>
-                                    <h3 className="text-lg font-bold text-scholar-deep mb-2 min-h-[56px] flex items-center">{strat.name}</h3>
-                                    <p className="text-gray-500 text-sm mb-8">{strat.desc}</p>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">
+                      {strat.desc}
+                    </p>
 
-                                    <div className="absolute bottom-6 right-6 text-scholar-deep opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 text-sm font-bold">
-                                        ดูรายละเอียด
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
+                    <p className="font-body text-xs text-slate-600 leading-relaxed line-clamp-3">
+                      {strat.summary}
+                    </p>
+                  </div>
 
-                    {/* Goals Section */}
-                    <div className="bg-scholar-deep/5 rounded-3xl p-10 md:p-14 border border-scholar-deep/10">
-                        <h2 className="text-3xl font-bold text-scholar-deep mb-8 flex items-center gap-3">
-                            <span className="w-2 h-8 bg-scholar-gold rounded-full"></span>
-                            เป้าหมายความสำเร็จ (Goals)
-                        </h2>
-                        <div className="grid md:grid-cols-2 gap-x-12 gap-y-6">
-                            {[
-                                "บัณฑิตมีความรู้ มีคุณธรรม มีความสามารถในการคิดเชิงสร้างสรรค์ คิดเชิงวิเคราะห์ และมีสมรรถนะวิชาชีพตรงตามความต้องการของผู้ใช้บัณฑิต",
-                                "บุคลากรปฏิบัติงานอย่างมืออาชีพและได้รับการยอมรับจากหน่วยงานภายนอก",
-                                "มีผลงานวิจัย นวัตกรรม และงานสร้างสรรค์ที่สามารถแก้ไขปัญหาและพัฒนาเชิงพื้นที่ และเกิดประโยชน์ต่อสาธารณชน",
-                                "เครือข่ายความร่วมมือทั้งในและต่างประเทศมีความเข้มแข็ง สามารถสร้างประโยชน์ต่อท้องถิ่นร่วมกัน",
-                                "มีการนำผลการดำเนินงานบริการวิชาการ โครงการพัฒนาท้องถิ่น โครงการตามยุทธศาสตร์ ไปใช้ประโยชน์ และสามารถถ่ายทอดสู่ผู้รับบริการอย่างเป็นรูปธรรม",
-                                "เป็นองค์กรแห่งการเรียนรู้เพื่อการพัฒนาท้องถิ่น มีธรรมาภิบาล ใส่ใจต่อสิ่งแวดล้อม มีระบบการบริหารจัดการที่มีประสิทธิภาพ เป็นที่รู้จักและเป็นที่ยอมรับในระดับชาติ"
-                            ].map((goal, idx) => (
-                                <div key={idx} className="flex gap-4">
-                                    <svg className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span className="text-gray-700 leading-relaxed">{goal}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-        </main>
-    );
+                  {/* Card Bottom CTA Link */}
+                  <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#0B132B] group-hover:text-[#C2410C] transition-colors">
+                    <span>ดูรายละเอียด & โครงการ</span>
+                    <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      </div>
+    </main>
+  );
 }

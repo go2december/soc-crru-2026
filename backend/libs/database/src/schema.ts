@@ -193,6 +193,30 @@ export const staffResumeRequests = pgTable('staff_resume_requests', {
 // 3. Academics (Degrees & Short Courses)
 // ------------------------------------------
 
+export interface ProgramConcentration {
+  code: string;
+  title: string;
+  titleEn?: string;
+  degreeTitle?: string;
+  description: string;
+  bannerUrl?: string;
+  highlights?: {
+    title: string;
+    description: string;
+    icon?: string;
+  }[];
+  careers?: string[];
+  structure?: {
+    totalCredits: number;
+    general: number;
+    major: number;
+    freeElective: number;
+  };
+  curriculumUrl?: string;
+  youtubeVideoUrl?: string;
+  facebookVideoUrl?: string;
+}
+
 export const programs = pgTable('programs', {
   id: uuid('id').primaryKey().defaultRandom(),
   departmentId: integer('department_id').references(() => departments.id), // สังกัดสาขาวิชา
@@ -223,12 +247,7 @@ export const programs = pgTable('programs', {
     }[]
   >(),
 
-  concentrations: jsonb('concentrations').$type<
-    {
-      title: string;
-      description: string;
-    }[]
-  >(),
+  concentrations: jsonb('concentrations').$type<ProgramConcentration[]>(),
 
   isActive: boolean('is_active').default(true).notNull(),
 
@@ -244,6 +263,78 @@ export const programs = pgTable('programs', {
   >(),
   youtubeVideoUrl: varchar('youtube_video_url', { length: 500 }),
   facebookVideoUrl: varchar('facebook_video_url', { length: 500 }),
+  socialLinks: jsonb('social_links').$type<{
+    facebook?: string;
+    tiktok?: string;
+    instagram?: string;
+    youtube?: string;
+    line?: string;
+  }>(),
+});
+
+export const trackTypeEnum = pgEnum('track_type', [
+  'CONCENTRATION', // แขนงวิชา
+  'MAJOR',         // วิชาเอก
+  'MINOR',         // วิชาโท
+]);
+
+export const studyPlanTypeEnum = pgEnum('study_plan_type', [
+  'REGULAR_4YR',   // แผน 4 ปี ปกติ
+  'TRANSFER_2YR',  // แผนเทียบโอน / 2 ปีหลัง
+  'GRADUATE',      // แผนบัณฑิตศึกษา (ป.โท / ป.เอก)
+]);
+
+export const programTracks = pgTable('program_tracks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  programId: uuid('program_id')
+    .notNull()
+    .references(() => programs.id, { onDelete: 'cascade' }),
+  code: varchar('code', { length: 100 }).notNull(),
+  nameTh: varchar('name_th', { length: 255 }).notNull(),
+  nameEn: varchar('name_en', { length: 255 }),
+  trackType: trackTypeEnum('track_type').default('MAJOR').notNull(),
+  studyPlanType: studyPlanTypeEnum('study_plan_type').default('REGULAR_4YR').notNull(),
+  degreeTitleTh: varchar('degree_title_th', { length: 255 }),
+  degreeTitleEn: varchar('degree_title_en', { length: 255 }),
+  description: text('description'),
+  structure: jsonb('structure').$type<{
+    totalCredits: number;
+    general: number;
+    major: number;
+    freeElective: number;
+  }>(),
+  careers: text('careers').array(),
+  highlights: jsonb('highlights').$type<
+    {
+      title: string;
+      description: string;
+      icon?: string;
+    }[]
+  >(),
+  bannerUrl: varchar('banner_url', { length: 500 }),
+  curriculumUrl: varchar('curriculum_url', { length: 500 }),
+  youtubeVideoUrl: varchar('youtube_video_url', { length: 500 }),
+  facebookVideoUrl: varchar('facebook_video_url', { length: 500 }),
+  socialLinks: jsonb('social_links').$type<{
+    facebook?: string;
+    tiktok?: string;
+    instagram?: string;
+    youtube?: string;
+    line?: string;
+  }>(),
+  galleryImages: text('gallery_images').array(),
+  attachments: jsonb('attachments').$type<
+    {
+      originalName: string;
+      fileUrl: string;
+      mimeType?: string;
+      size?: number;
+    }[]
+  >(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const programInstructorRoleEnum = pgEnum('program_instructor_role', [

@@ -13,6 +13,78 @@ export interface ProgramInstructor {
     academicPositionNameTh?: string | null;
 }
 
+
+export interface SocialLinks {
+    facebook?: string;
+    tiktok?: string;
+    instagram?: string;
+    youtube?: string;
+    line?: string;
+}
+
+export interface ProgramTrack {
+    id: string;
+    programId: string;
+    code: string;
+    nameTh: string;
+    nameEn?: string | null;
+    trackType: 'CONCENTRATION' | 'MAJOR' | 'MINOR';
+    studyPlanType: 'REGULAR_4YR' | 'TRANSFER_2YR' | 'GRADUATE';
+    degreeTitleTh?: string | null;
+    degreeTitleEn?: string | null;
+    description?: string | null;
+    structure?: {
+        totalCredits: number;
+        general: number;
+        major: number;
+        freeElective: number;
+    } | null;
+    careers?: string[] | null;
+    highlights?: {
+        title: string;
+        description: string;
+        icon?: string;
+    }[] | null;
+    bannerUrl?: string | null;
+    curriculumUrl?: string | null;
+    youtubeVideoUrl?: string | null;
+    facebookVideoUrl?: string | null;
+    socialLinks?: SocialLinks | null;
+    galleryImages?: string[] | null;
+    attachments?: {
+        originalName: string;
+        fileUrl: string;
+        mimeType?: string;
+        size?: number;
+    }[] | null;
+    sortOrder: number;
+    isActive: boolean;
+}
+
+export interface ProgramConcentration {
+    code: string;
+    title: string;
+    titleEn?: string;
+    degreeTitle?: string;
+    description: string;
+    bannerUrl?: string;
+    highlights?: {
+        title: string;
+        description: string;
+        icon?: string;
+    }[];
+    careers?: string[];
+    structure?: {
+        totalCredits: number;
+        general: number;
+        major: number;
+        freeElective: number;
+    };
+    curriculumUrl?: string;
+    youtubeVideoUrl?: string;
+    facebookVideoUrl?: string;
+}
+
 export interface Program {
     id: string;
     code: string;
@@ -35,10 +107,9 @@ export interface Program {
         description: string;
         icon?: string;
     }[];
-    concentrations?: {
-        title: string;
-        description: string;
-    }[];
+    concentrations?: ProgramConcentration[];
+    tracks?: ProgramTrack[];
+    socialLinks?: SocialLinks;
     // PR Media
     galleryImages?: string[];
     attachments?: { originalName: string; fileUrl: string; size?: number; mimeType?: string }[];
@@ -123,6 +194,30 @@ export async function fetchProgramByCode(code: string): Promise<Program | null> 
             }
         }
         console.error(`[API] Error fetching program ${code}:`, error);
+        return null;
+    }
+}
+
+export async function fetchTrackByCode(programCode: string, trackCode: string): Promise<(ProgramTrack & { program: { id: string; code: string; nameTh: string; degreeLevel: string }; instructors?: ProgramInstructor[] }) | null> {
+    const baseUrl = getApiBaseUrl();
+    try {
+        const res = await fetch(`${baseUrl}/api/programs/code/${programCode}/tracks/${trackCode}`, {
+            cache: 'no-store',
+            next: { tags: [`track-${programCode}-${trackCode}`] }
+        });
+        if (!res.ok) {
+            if (typeof window === 'undefined' && !baseUrl.includes('localhost')) {
+                try {
+                    const fallbackRes = await fetch(`http://localhost:4001/api/programs/code/${programCode}/tracks/${trackCode}`, { cache: 'no-store' });
+                    if (fallbackRes.ok) return fallbackRes.json();
+                } catch (e) { }
+            }
+            if (res.status === 404) return null;
+            return null;
+        }
+        return res.json();
+    } catch (error) {
+        console.error(`[API] Error fetching track ${programCode}/${trackCode}:`, error);
         return null;
     }
 }

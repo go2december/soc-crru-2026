@@ -52,8 +52,8 @@ export default function AdminProgramsPage() {
         try {
             const token = localStorage.getItem('admin_token');
             const targetUser = userObj || currentUser;
-            const isEditorOnly = targetUser?.roles?.includes('EDITOR') && !targetUser?.roles?.includes('ADMIN');
-            const deptQuery = (isEditorOnly && targetUser?.departmentId) ? `&departmentId=${targetUser.departmentId}` : '';
+            const isDeptScoped = (targetUser?.roles?.includes('EDITOR') || targetUser?.roles?.includes('STAFF')) && !targetUser?.roles?.includes('ADMIN');
+            const deptQuery = (isDeptScoped && targetUser?.departmentId) ? `&departmentId=${targetUser.departmentId}` : '';
 
             const res = await fetch(`${API_URL}/api/programs?page=${page}&limit=${ITEMS_PER_PAGE}${deptQuery}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {}

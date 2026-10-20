@@ -7,9 +7,12 @@ const API_URL = getApiBaseUrl();
 type DynamicSitemapItem = {
     id?: string;
     slug?: string;
+    code?: string;
     updatedAt?: string;
     publishedAt?: string;
     createdAt?: string;
+    tracks?: { code: string; updatedAt?: string }[];
+    concentrations?: { code: string }[];
 };
 
 async function fetchJson(path: string) {
@@ -27,6 +30,7 @@ async function fetchJson(path: string) {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const [
+        programsData,
         facultyNews,
         researchProjects,
         academicServices,
@@ -36,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         learningSites,
         artifacts
     ] = await Promise.all([
+        fetchJson('/api/programs?limit=100'),
         fetchJson('/api/news'),
         fetchJson('/api/research/projects?limit=500'),
         fetchJson('/api/academic-services?limit=500'),
@@ -46,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         fetchJson('/api/chiang-rai/artifacts?limit=1000'),
     ]);
 
+    const programsList = Array.isArray(programsData) ? (programsData as DynamicSitemapItem[]) : [];
     const facultyNewsItems = Array.isArray(facultyNews) ? (facultyNews as DynamicSitemapItem[]) : [];
     const researchItems = Array.isArray(researchProjects) ? (researchProjects as DynamicSitemapItem[]) : [];
     const academicServiceItems = Array.isArray(academicServices) ? (academicServices as DynamicSitemapItem[]) : [];
@@ -55,7 +61,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const learningSiteItems = Array.isArray(learningSites) ? (learningSites as DynamicSitemapItem[]) : [];
     const artifactItems = Array.isArray(artifacts) ? (artifacts as DynamicSitemapItem[]) : [];
 
+    // Academic Programs & Sub-page Tracks
+    const programUrls: MetadataRoute.Sitemap = [];
+    for (const prog of programsList) {
+        if (!prog.code) continue;
+        programUrls.push({
+            url: `${BASE_URL}/programs/${prog.code}`,
+            lastModified: new Date(prog.updatedAt || Date.now()),
+            changeFrequency: 'weekly' as const,
+            priority: 0.9,
+        });
+
+        if (Array.isArray(prog.tracks)) {
+            for (const trk of prog.tracks) {
+                if (!trk.code) continue;
+                programUrls.push({
+                    url: `${BASE_URL}/programs/${prog.code}/${trk.code}`,
+                    lastModified: new Date(trk.updatedAt || prog.updatedAt || Date.now()),
+                    changeFrequency: 'monthly' as const,
+                    priority: 0.85,
+                });
+            }
+        } else if (Array.isArray(prog.concentrations)) {
+            for (const con of prog.concentrations) {
+                if (!con.code) continue;
+                programUrls.push({
+                    url: `${BASE_URL}/programs/${prog.code}/${con.code}`,
+                    lastModified: new Date(prog.updatedAt || Date.now()),
+                    changeFrequency: 'monthly' as const,
+                    priority: 0.85,
+                });
+            }
+        }
+    }
+
     const dynamicUrls: MetadataRoute.Sitemap = [
+        ...programUrls,
         ...facultyNewsItems
             .filter((item) => item.slug || item.id)
             .map((item) => ({
@@ -129,7 +170,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${BASE_URL}/about/staff`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.85 },
         { url: `${BASE_URL}/about/executive`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.75 },
         { url: `${BASE_URL}/about/structure`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.6 },
-        { url: `${BASE_URL}/programs`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.85 },
+        { url: `${BASE_URL}/programs`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
         { url: `${BASE_URL}/admissions`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
         { url: `${BASE_URL}/academics/credit-bank`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
         { url: `${BASE_URL}/news`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },

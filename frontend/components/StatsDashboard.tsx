@@ -1,126 +1,145 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
+import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
+import {
+  Users,
+  Lightbulb,
+  Handshake,
+  HeartHandshake,
+  ArrowRight,
+  TrendingUp,
+} from "lucide-react";
 
-// Hook สำหรับทำ Count Up Animation
+// Hook for Smooth Count Up Animation
 const useCountUp = (end: number, duration: number = 2000) => {
-    const [count, setCount] = useState(0);
-    const countRef = useRef<HTMLDivElement>(null);
-    const [isVisible, setIsVisible] = useState(false);
+  const [count, setCount] = useState(0);
+  const countRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                    observer.disconnect();
-                }
-            },
-            { threshold: 0.1 }
-        );
-
-        if (countRef.current) {
-            observer.observe(countRef.current);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
         }
+      },
+      { threshold: 0.15 }
+    );
 
-        return () => observer.disconnect();
-    }, []);
+    if (countRef.current) {
+      observer.observe(countRef.current);
+    }
 
-    useEffect(() => {
-        if (!isVisible) return;
+    return () => observer.disconnect();
+  }, []);
 
-        let start = 0;
-        const increment = end / (duration / 16); // 60fps
-        const timer = setInterval(() => {
-            start += increment;
-            if (start >= end) {
-                setCount(end);
-                clearInterval(timer);
-            } else {
-                setCount(Math.floor(start));
-            }
-        }, 16);
+  useEffect(() => {
+    if (!isVisible) return;
 
-        return () => clearInterval(timer);
-    }, [isVisible, end, duration]);
+    let start = 0;
+    const increment = end / (duration / 16);
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= end) {
+        setCount(end);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, 16);
 
-    return { count, countRef };
+    return () => clearInterval(timer);
+  }, [isVisible, end, duration]);
+
+  return { count, countRef };
 };
 
-const StatItem = ({ end, label, suffix = "", icon }: { end: number, label: string, suffix?: string, icon: React.ReactNode }) => {
-    const { count, countRef } = useCountUp(end);
+const StatItem = ({
+  end,
+  label,
+  suffix = "",
+  icon: Icon,
+}: {
+  end: number;
+  label: string;
+  suffix?: string;
+  icon: typeof Users;
+}) => {
+  const { count, countRef } = useCountUp(end);
 
-    return (
-        <div ref={countRef} className="text-center p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-scholar-accent/30 transition-all duration-300 hover:-translate-y-2 group">
-            <div className="w-16 h-16 mx-auto mb-4 bg-orange-50 rounded-2xl flex items-center justify-center text-scholar-accent group-hover:bg-scholar-accent group-hover:text-white transition-colors duration-300 shadow-xs">
-                {icon}
-            </div>
-            <div className="text-4xl lg:text-5xl font-bold text-scholar-deep mb-2 font-mono group-hover:text-scholar-accent transition-colors">
-                {count}{suffix}
-            </div>
-            <div className="text-slate-600 text-sm lg:text-base font-medium">
-                {label}
-            </div>
-        </div>
-    );
+  return (
+    <div
+      ref={countRef}
+      className="text-center p-6 sm:p-8 bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-xl hover:border-[#C2410C]/30 transition-all duration-300 hover:-translate-y-1.5 group"
+    >
+      <div className="w-14 h-14 mx-auto mb-4 bg-orange-50 rounded-2xl flex items-center justify-center text-[#C2410C] group-hover:bg-[#C2410C] group-hover:text-white transition-colors duration-300 shadow-2xs">
+        <Icon className="size-7" strokeWidth={1.75} />
+      </div>
+      <div className="text-4xl lg:text-5xl font-extrabold text-[#0B132B] mb-2 font-mono group-hover:text-[#C2410C] transition-colors">
+        {count}
+        {suffix}
+      </div>
+      <div className="text-slate-600 text-xs sm:text-sm font-semibold tracking-wide">
+        {label}
+      </div>
+    </div>
+  );
 };
 
 export default function StatsDashboard() {
-    return (
-        <section className="py-20 bg-slate-50 relative overflow-hidden border-y border-slate-200/60">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-[0.03]" style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230F172A' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E")`
-            }}></div>
+  return (
+    <section className="py-20 sm:py-24 bg-[#F8FAFC] relative overflow-hidden border-y border-slate-200/70">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-14 max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C2410C]/10 text-[#C2410C] border border-[#C2410C]/20 font-bold tracking-widest uppercase text-xs mb-3">
+            <TrendingUp className="size-3.5" strokeWidth={2} />
+            <span>Social Impact & Community</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0B132B] tracking-tight">
+            พลังแห่งการสร้างสรรค์สังคม
+          </h2>
+          <p className="font-body text-slate-600 mt-2 text-base">
+            ผลลัพธ์ที่เป็นรูปธรรมจากการบูรณาการงานวิจัย นวัตกรรม และความร่วมมือในพื้นที่จริง
+          </p>
+        </div>
 
-            <div className="container mx-auto px-4 relative z-10">
-                <div className="text-center mb-16">
-                    <span className="inline-block px-3.5 py-1 rounded-full bg-scholar-accent/10 text-scholar-accent border border-scholar-accent/20 font-bold tracking-widest uppercase text-xs mb-3">Our Impact</span>
-                    <h2 className="text-3xl lg:text-4xl font-bold text-scholar-deep">พลังแห่งการสร้างสรรค์สังคม</h2>
-                    <p className="text-slate-500 mt-2">ผลลัพธ์ที่เป็นรูปธรรมจากการทำงานร่วมกับชุมชนและเครือข่าย</p>
-                </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+          <StatItem
+            end={150}
+            suffix="+"
+            label="ชุมชนเครือข่ายที่ร่วมพัฒนา"
+            icon={Users}
+          />
+          <StatItem
+            end={85}
+            label="โครงการนวัตกรรมสังคม"
+            icon={Lightbulb}
+          />
+          <StatItem
+            end={42}
+            label="เครือข่ายความร่วมมือและ MOU"
+            icon={Handshake}
+          />
+          <StatItem
+            end={98}
+            suffix="%"
+            label="ความพึงพอใจนายจ้างต่อบัณฑิต"
+            icon={HeartHandshake}
+          />
+        </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-                    {/* 1. Communities */}
-                    <StatItem
-                        end={150}
-                        suffix="+"
-                        label="ชุมชนที่ดูแล"
-                        icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
-                    />
-
-                    {/* 2. Projects/Innovations */}
-                    <StatItem
-                        end={85}
-                        label="นวัตกรรมสังคม"
-                        icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>}
-                    />
-
-                    {/* 3. Partners */}
-                    <StatItem
-                        end={42}
-                        label="เครือข่ายพันธมิตร"
-                        icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>}
-                    />
-
-                    {/* 4. Satisfaction */}
-                    <StatItem
-                        end={98}
-                        suffix="%"
-                        label="ความพึงพอใจนายจ้าง"
-                        icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>}
-                    />
-                </div>
-
-                {/* Optional: Learn More Button */}
-                <div className="text-center mt-12">
-                    <Link href="/about/strategy" className="inline-flex items-center text-scholar-deep hover:text-scholar-accent transition-colors font-semibold border-b-2 border-transparent hover:border-scholar-accent pb-1">
-                        ดูแผนยุทธศาสตร์และตัวชี้วัดทั้งหมด
-                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                    </Link>
-                </div>
-            </div>
-        </section>
-    );
+        <div className="text-center mt-12">
+          <Link
+            href="/about/strategy"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[#0B132B] hover:text-[#C2410C] transition-colors"
+          >
+            <span>ดูแผนยุทธศาสตร์และตัวชี้วัดความสำเร็จทั้งหมด</span>
+            <ArrowRight className="size-4" strokeWidth={2} />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
 }

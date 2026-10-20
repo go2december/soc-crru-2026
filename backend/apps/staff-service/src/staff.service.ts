@@ -544,6 +544,221 @@ export class StaffService {
     };
   }
 
+  async getResumeRequestStats() {
+    const countsResult = await this.drizzle.db
+      .select({
+        total: sql<number>`count(*)`,
+        pending: sql<number>`count(*) filter (where ${staffResumeRequests.status} = 'PENDING')`,
+        sent: sql<number>`count(*) filter (where ${staffResumeRequests.status} = 'SENT')`,
+        rejected: sql<number>`count(*) filter (where ${staffResumeRequests.status} = 'REJECTED')`,
+      })
+      .from(staffResumeRequests);
+
+    const counts = countsResult[0] || { total: 0, pending: 0, sent: 0, rejected: 0 };
+    const totalCount = Number(counts.total || 0);
+
+    const now = new Date();
+    const urgentDate = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
+    const overdueDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const slaResult = await this.drizzle.db
+      .select({
+        urgent: sql<number>`count(*) filter (where ${staffResumeRequests.createdAt} <= ${urgentDate} and ${staffResumeRequests.createdAt} > ${overdueDate})`,
+        overdue: sql<number>`count(*) filter (where ${staffResumeRequests.createdAt} <= ${overdueDate})`,
+      })
+      .from(staffResumeRequests)
+      .where(eq(staffResumeRequests.status, 'PENDING'));
+
+    const sla = slaResult[0] || { urgent: 0, overdue: 0 };
+
+    const purposeRows = await this.drizzle.db
+      .select({
+        purpose: staffResumeRequests.purpose,
+        count: sql<number>`count(*)`,
+      })
+      .from(staffResumeRequests)
+      .groupBy(staffResumeRequests.purpose)
+      .orderBy(desc(sql`count(*)`));
+
+    const purposeLabels: Record<string, string> = {
+      SPEAKER: 'เทียบเชิญวิทยากร / บรรยาย',
+      QA_AUDIT: 'ตรวจประกันคุณภาพ (QA)',
+      COLLABORATION: 'ความร่วมมือ / MoU',
+      STUDENT_ADVISOR: 'ที่ปรึกษา / กรรมการสอบ',
+      OTHER: 'อื่นๆ',
+    };
+
+    const byPurpose = purposeRows.map((r) => {
+      const c = Number(r.count || 0);
+      return {
+        purpose: r.purpose,
+        label: purposeLabels[r.purpose] || r.purpose,
+        count: c,
+        percentage: totalCount > 0 ? Math.round((c / totalCount) * 100) : 0,
+      };
+    });
+
+    const topStaffRows = await this.drizzle.db
+      .select({
+        staffId: staffResumeRequests.staffId,
+        count: sql<number>`count(*)`,
+        prefixTh: staffProfiles.prefixTh,
+        firstNameTh: staffProfiles.firstNameTh,
+        lastNameTh: staffProfiles.lastNameTh,
+        departmentName: departments.nameTh,
+      })
+      .from(staffResumeRequests)
+      .leftJoin(staffProfiles, eq(staffResumeRequests.staffId, staffProfiles.id))
+      .leftJoin(departments, eq(staffProfiles.departmentId, departments.id))
+      .groupBy(
+        staffResumeRequests.staffId,
+        staffProfiles.prefixTh,
+        staffProfiles.firstNameTh,
+        staffProfiles.lastNameTh,
+        departments.nameTh,
+      )
+      .orderBy(desc(sql`count(*)`))
+      .limit(5);
+
+    const topStaff = topStaffRows.map((r) => ({
+      staffId: r.staffId,
+      name: `${r.prefixTh || ''}${r.firstNameTh || ''} ${r.lastNameTh || ''}`.trim() || 'บุคลากร',
+      department: r.departmentName || 'คณะสังคมศาสตร์',
+      count: Number(r.count || 0),
+    }));
+
+    return {
+      total: totalCount,
+      pending: Number(counts.pending || 0),
+      sent: Number(counts.sent || 0),
+      rejected: Number(counts.rejected || 0),
+      slaUrgent: Number(sla.urgent || 0),
+      slaOverdue: Number(sla.overdue || 0),
+      byPurpose,
+      topStaff,
+    };
+  }
+
+  async exportResumeRequests(type: 'detailed' | 'summary' = 'detailed'): Promise<string> {
+    const escapeCsv = (val: any) => `"${(val ?? '').toString().replace(/"/g, '""')}"`;
+    const purposeLabels: Record<string, string> = {
+      SPEAKER: 'เทียบเชิญวิทยากร / บรรยาย',
+      QA_AUDIT: 'ตรวจประกันคุณภาพ (QA)',
+      COLLABORATION: 'ความร่วมมือ / MoU',
+      STUDENT_ADVISOR: 'ที่ปรึกษา / กรรมการสอบ',
+      OTHER: 'อื่นๆ',
+    };
+    const statusLabels: Record<string, string> = {
+      PENDING: 'รอการตรวจสอบ',
+      SENT: 'อนุมัติและจัดส่งแล้ว',
+      REJECTED: 'ปฏิเสธคำขอ',
+    };
+
+    if (type === 'summary') {
+      const stats = await this.getResumeRequestStats();
+      const lines: string[] = [];
+
+      lines.push('รายงานสรุปสถิติคำขอข้อมูลประวัติวิทยากร (Staff Resume Requests Summary Report)');
+      lines.push(`คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย | ข้อมูล ณ วันที่,${new Date().toLocaleDateString('th-TH')}`);
+      lines.push('');
+
+      lines.push('1. ภาพรวมตัวชี้วัด (Overview KPIs)');
+      lines.push('ตัวชี้วัด,จำนวน (รายการ)');
+      lines.push(`จำนวนคำขอทั้งหมด,${stats.total}`);
+      lines.push(`รอการตรวจสอบ (Pending),${stats.pending}`);
+      lines.push(`อนุมัติและจัดส่งสำเร็จ (Sent),${stats.sent}`);
+      lines.push(`ปฏิเสธคำขอ (Rejected),${stats.rejected}`);
+      lines.push(`คำขอใกล้ครบกำหนด SLA (ด่วน),${stats.slaUrgent}`);
+      lines.push(`คำขอเกินกำหนด SLA 7 วัน,${stats.slaOverdue}`);
+      lines.push('');
+
+      lines.push('2. สถิติจำแนกตามวัตถุประสงค์การขอ (Requests by Purpose)');
+      lines.push('วัตถุประสงค์,จำนวนคำขอ (ครั้ง),สัดส่วน (%)');
+      for (const p of stats.byPurpose) {
+        lines.push(`${escapeCsv(p.label)},${p.count},${p.percentage}%`);
+      }
+      lines.push('');
+
+      lines.push('3. รายนามคณาจารย์ที่ได้รับการขอประวัติสูงสุด 5 อันดับแรก (Top 5 Requested Staff)');
+      lines.push('อันดับ,ชื่อ-นามสกุล,สาขาวิชา/สังกัด,จำนวนครั้งที่ถูกขอ (ครั้ง)');
+      stats.topStaff.forEach((s, idx) => {
+        lines.push(`${idx + 1},${escapeCsv(s.name)},${escapeCsv(s.department)},${s.count}`);
+      });
+
+      return lines.join('\r\n');
+    }
+
+    // Detailed export
+    const rows = await this.drizzle.db
+      .select({
+        id: staffResumeRequests.id,
+        createdAt: staffResumeRequests.createdAt,
+        requesterName: staffResumeRequests.requesterName,
+        organization: staffResumeRequests.organization,
+        email: staffResumeRequests.email,
+        phone: staffResumeRequests.phone,
+        purpose: staffResumeRequests.purpose,
+        notes: staffResumeRequests.notes,
+        status: staffResumeRequests.status,
+        sentAt: staffResumeRequests.sentAt,
+        rejectionReason: staffResumeRequests.rejectionReason,
+        staffPrefixTh: staffProfiles.prefixTh,
+        staffFirstNameTh: staffProfiles.firstNameTh,
+        staffLastNameTh: staffProfiles.lastNameTh,
+        departmentName: departments.nameTh,
+      })
+      .from(staffResumeRequests)
+      .leftJoin(staffProfiles, eq(staffResumeRequests.staffId, staffProfiles.id))
+      .leftJoin(departments, eq(staffProfiles.departmentId, departments.id))
+      .orderBy(desc(staffResumeRequests.createdAt));
+
+    const headers = [
+      'รหัสคำขอ',
+      'วันที่ยื่นคำขอ',
+      'ผู้ยื่นคำขอ',
+      'หน่วยงาน/องค์กร',
+      'อีเมลผู้ขอ',
+      'เบอร์โทรศัพท์',
+      'อาจารย์ที่ถูกขอประวัติ',
+      'สังกัด/สาขาวิชา',
+      'วัตถุประสงค์',
+      'รายละเอียดโครงการ/งาน',
+      'สถานะคำขอ',
+      'วันที่จัดส่งเอกสาร',
+      'เหตุผลที่ปฏิเสธ (ถ้ามี)',
+    ];
+
+    const lines = [headers.map(escapeCsv).join(',')];
+
+    for (const r of rows) {
+      const staffName = `${r.staffPrefixTh || ''}${r.staffFirstNameTh || ''} ${r.staffLastNameTh || ''}`.trim() || 'บุคลากร';
+      const createdStr = r.createdAt ? new Date(r.createdAt).toLocaleString('th-TH') : '';
+      const sentStr = r.sentAt ? new Date(r.sentAt).toLocaleString('th-TH') : '';
+
+      lines.push(
+        [
+          r.id,
+          createdStr,
+          r.requesterName,
+          r.organization,
+          r.email,
+          r.phone || '',
+          staffName,
+          r.departmentName || 'คณะสังคมศาสตร์',
+          purposeLabels[r.purpose] || r.purpose,
+          r.notes || '',
+          statusLabels[r.status] || r.status,
+          sentStr,
+          r.rejectionReason || '',
+        ]
+          .map(escapeCsv)
+          .join(','),
+      );
+    }
+
+    return lines.join('\r\n');
+  }
+
   async approveResumeRequest(requestId: string, adminUserId?: string) {
     const requests = await this.drizzle.db
       .select()

@@ -1,172 +1,217 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-
-interface SlideData {
-    id: number;
-    title: string;
-    description: string;
-    image: string;
-    buttons: {
-        text: string;
-        href: string;
-        style: 'primary' | 'outline';
-    }[];
-    tag?: string;
-}
-
-const slides: SlideData[] = [
-    {
-        id: 1,
-        tag: "Social Innovator",
-        title: "สร้างนวัตกรสังคม เพื่อการพัฒนาที่ยั่งยืน",
-        description: "คณะสังคมศาสตร์ มรภ.เชียงราย มุ่งเน้นการสร้างบัณฑิตที่มีทักษะการคิดวิเคราะห์และสร้างสรรค์นวัตกรรมเพื่อสังคม",
-        image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop",
-        buttons: [
-            { text: "ค้นหาหลักสูตร", href: "/courses", style: "primary" },
-            { text: "เกี่ยวกับเรา", href: "/about", style: "outline" }
-        ]
-    },
-    {
-        id: 2,
-        tag: "Admission 2026",
-        title: "เปิดรับสมัครนักศึกษาใหม่ ประจำปี 2569",
-        description: "เข้าร่วมครอบครัวสังคมศาสตร์ พร้อมทุนการศึกษาและโอกาสฝึกงานทั้งในและต่างประเทศ",
-        image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
-        buttons: [
-            { text: "สมัครเรียนปริญญาตรี", href: "/admissions", style: "primary" },
-            { text: "ดูเกณฑ์การรับสมัคร", href: "/admissions", style: "outline" }
-        ]
-    },
-    {
-        id: 3,
-        tag: "Lifelong Learning",
-        title: "Upskill & Reskill ไปกับหลักสูตรระยะสั้น",
-        description: "เรียนรู้ได้ทุกที่ทุกเวลา พร้อมระบบสะสมหน่วยกิต (Credit Bank) สำหรับวัยทำงานและบุคคลทั่วไป",
-        image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop",
-        buttons: [
-            { text: "ดูคอร์สระยะสั้น", href: "/academics/short-courses", style: "primary" },
-            { text: "ระบบคลังหน่วยกิต", href: "/academics/credit-bank", style: "outline" }
-        ]
-    }
-];
+import { useRef } from "react";
+import Link from "next/link";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { motion } from "motion/react";
+import {
+  ArrowRight,
+  GraduationCap,
+  Sparkles,
+  Users,
+  Award,
+  ChevronRight,
+  Search,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default function Hero() {
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const [isPaused, setIsPaused] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const subtextRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
 
-    const nextSlide = useCallback(() => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, []);
+  useGSAP(
+    () => {
+      // Check for user's reduced-motion preference
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
 
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-    };
+      if (prefersReducedMotion) return;
 
-    // Auto-play effect
-    useEffect(() => {
-        if (isPaused) return;
-        const interval = setInterval(nextSlide, 6000); // เปลี่ยนทุก 6 วินาที
-        return () => clearInterval(interval);
-    }, [nextSlide, isPaused]);
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-    return (
+      tl.from(".hero-badge", {
+        opacity: 0,
+        y: -15,
+        duration: 0.6,
+        delay: 0.1,
+      })
+        .from(
+          headlineRef.current,
+          {
+            opacity: 0,
+            y: 35,
+            duration: 0.85,
+            stagger: 0.08,
+          },
+          "-=0.3"
+        )
+        .from(
+          subtextRef.current,
+          {
+            opacity: 0,
+            y: 20,
+            duration: 0.7,
+          },
+          "-=0.5"
+        )
+        .from(
+          ctaRef.current,
+          {
+            opacity: 0,
+            y: 20,
+            duration: 0.6,
+          },
+          "-=0.4"
+        )
+        .from(
+          ".hero-stat-card",
+          {
+            opacity: 0,
+            y: 25,
+            stagger: 0.1,
+            duration: 0.7,
+          },
+          "-=0.3"
+        );
+    },
+    { scope: containerRef }
+  );
+
+  return (
+    <section
+      ref={containerRef}
+      className="relative overflow-hidden bg-[#F8FAFC] pt-12 pb-18 sm:pt-16 sm:pb-24 border-b border-slate-200/80"
+    >
+      {/* Subtle Atmospheric Canvas Backdrop (No AI neon gradient blobs) */}
+      <div className="absolute inset-0 pointer-events-none select-none opacity-40">
+        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-orange-100/70 blur-3xl" />
+        <div className="absolute top-1/2 -left-28 w-80 h-80 rounded-full bg-slate-200/60 blur-3xl" />
         <div
-            className="relative w-full h-[600px] lg:h-[700px] overflow-hidden bg-scholar-deep group"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-        >
-            {/* Slides Container */}
-            {slides.map((slide, index) => (
-                <div
-                    key={slide.id}
-                    className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out
-                        ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}
-                    `}
-                >
-                    {/* Background Image with Parallax-like scaling */}
-                    <div className="absolute inset-0">
-                        <Image
-                            src={slide.image}
-                            alt={slide.title}
-                            fill
-                            className={`object-cover ${index === currentSlide ? 'scale-105 transition-transform duration-[8000ms]' : 'scale-100'}`}
-                            priority={index === 0}
-                        />
-                        {/* Gradient Overlay for better text readability with brighter photo ambiance */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-scholar-deep/75 via-scholar-deep/45 to-black/15"></div>
-                    </div>
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage: `radial-gradient(#0B132B 1px, transparent 1px)`,
+            backgroundSize: "28px 28px",
+          }}
+        />
+      </div>
 
-                    {/* Content */}
-                    <div className="relative z-20 container mx-auto px-4 h-full flex flex-col justify-center max-w-7xl">
-                        <div className={`max-w-2xl transform transition-all duration-1000 delay-300
-                            ${index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}
-                        `}>
-                            {slide.tag && (
-                                <span className="inline-block py-1 px-3 rounded bg-scholar-accent/20 text-scholar-gold border border-scholar-accent/30 text-sm font-semibold mb-4 tracking-wider uppercase">
-                                    {slide.tag}
-                                </span>
-                            )}
-                            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
-                                {slide.title}
-                            </h1>
-                            <p className="text-lg lg:text-xl text-gray-200 mb-8 leading-relaxed drop-shadow-md pr-10">
-                                {slide.description}
-                            </p>
-
-                            <div className="flex flex-wrap gap-4">
-                                {slide.buttons.map((btn, btnIndex) => (
-                                    <Link
-                                        key={btnIndex}
-                                        href={btn.href}
-                                        className={`btn btn-lg rounded-full px-8 shadow-lg transition-all transform hover:scale-105 border-0
-                                            ${btn.style === 'primary'
-                                                ? 'bg-gradient-to-r from-scholar-accent to-[#D9341C] text-white'
-                                                : 'bg-white/10 text-white hover:bg-white hover:text-scholar-deep backdrop-blur-sm ring-1 ring-white/30'}
-                                        `}
-                                    >
-                                        {btn.text}
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ))}
-
-            {/* Navigation Arrows */}
-            <button
-                onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 text-white/50 hover:bg-scholar-accent hover:text-white transition-all backdrop-blur-sm opacity-0 group-hover:opacity-100 -translate-x-10 group-hover:translate-x-0 duration-300"
-            >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-            </button>
-
-            <button
-                onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 text-white/50 hover:bg-scholar-accent hover:text-white transition-all backdrop-blur-sm opacity-0 group-hover:opacity-100 translate-x-10 group-hover:translate-x-0 duration-300"
-            >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </button>
-
-            {/* Pagination Dots */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-3">
-                {slides.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => setCurrentSlide(index)}
-                        className={`transition-all duration-300 rounded-full h-3
-                            ${index === currentSlide ? 'w-10 bg-scholar-accent' : 'w-3 bg-white/30 hover:bg-white'}
-                        `}
-                        aria-label={`Go to slide ${index + 1}`}
-                    />
-                ))}
-            </div>
-
-            {/* Decorative Elements */}
-            <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-white to-transparent z-20"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Top Tag Announcement */}
+        <div className="hero-badge inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-xs mb-8">
+          <span className="w-2 h-2 rounded-full bg-[#C2410C] animate-pulse" />
+          <span className="text-xs font-semibold text-slate-800">
+            เปิดรับสมัครนักศึกษาใหม่ TCAS 2569 รอบ Portfolio
+          </span>
+          <span className="text-slate-300">|</span>
+          <Link
+            href="/admissions"
+            className="text-xs font-semibold text-[#C2410C] flex items-center gap-1 hover:underline"
+          >
+            <span>รายละเอียด</span>
+            <ChevronRight className="size-3" strokeWidth={2} />
+          </Link>
         </div>
-    );
+
+        {/* Editorial Typographic Headline */}
+        <div className="max-w-4xl">
+          <h1
+            ref={headlineRef}
+            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#0B132B] leading-[1.12] mb-6"
+          >
+            ศาสตร์แห่งมนุษย์และสังคม <br className="hidden sm:inline" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0B132B] via-[#C2410C] to-[#C2410C]">
+              เพื่อการพัฒนาล้านนาสู่สากล
+            </span>
+          </h1>
+
+          <p
+            ref={subtextRef}
+            className="font-body text-base sm:text-xl text-slate-600 leading-relaxed max-w-2xl mb-10"
+          >
+            สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
+            มุ่งสร้างบัณฑิตนักปฏิบัติที่มีจิตสำนึกชุมชน เข้าใจพลวัตสังคมโลก
+            และขับเคลื่อนการพัฒนาอย่างยั่งยืน
+          </p>
+
+          {/* Action CTAs */}
+          <div ref={ctaRef} className="flex flex-wrap items-center gap-4 pt-2">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="#programs-showcase"
+                className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#0B132B] hover:bg-slate-800 text-white font-medium text-base shadow-sm hover:shadow-md transition-all"
+              >
+                <span>สำรวจหลักสูตรทั้งหมด</span>
+                <ArrowRight className="size-4 text-[#C2410C]" strokeWidth={2.2} />
+              </Link>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/admissions"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-[#0B132B] font-medium text-base shadow-xs transition-colors"
+              >
+                <Sparkles className="size-4 text-[#C2410C]" strokeWidth={1.75} />
+                <span>สมัครเข้าศึกษา 2569</span>
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Real Metrics Highlight Bar */}
+        <div
+          ref={statsRef}
+          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-white rounded-2xl border border-slate-200/90 shadow-xs"
+        >
+          <div className="hero-stat-card p-4 border-r border-slate-100 last:border-0">
+            <div className="flex items-center gap-2 text-slate-400 mb-1">
+              <GraduationCap className="size-4 text-[#C2410C]" strokeWidth={1.75} />
+              <span className="text-xs font-semibold uppercase tracking-wider">Programs</span>
+            </div>
+            <div className="text-3xl font-extrabold text-[#0B132B]">7</div>
+            <div className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
+              สาขาวิชา ป.ตรี-โท-เอก
+            </div>
+          </div>
+
+          <div className="hero-stat-card p-4 border-r border-slate-100 last:border-0">
+            <div className="flex items-center gap-2 text-slate-400 mb-1">
+              <Award className="size-4 text-[#C2410C]" strokeWidth={1.75} />
+              <span className="text-xs font-semibold uppercase tracking-wider">Employability</span>
+            </div>
+            <div className="text-3xl font-extrabold text-[#C2410C]">94.8%</div>
+            <div className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
+              อัตราการได้งานทำของบัณฑิต
+            </div>
+          </div>
+
+          <div className="hero-stat-card p-4 border-r border-slate-100 last:border-0">
+            <div className="flex items-center gap-2 text-slate-400 mb-1">
+              <Users className="size-4 text-[#C2410C]" strokeWidth={1.75} />
+              <span className="text-xs font-semibold uppercase tracking-wider">Partnership</span>
+            </div>
+            <div className="text-3xl font-extrabold text-[#0B132B]">40+</div>
+            <div className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
+              เครือข่ายความร่วมมือชุมชน
+            </div>
+          </div>
+
+          <div className="hero-stat-card p-4">
+            <div className="flex items-center gap-2 text-slate-400 mb-1">
+              <Sparkles className="size-4 text-[#581C87]" strokeWidth={1.75} />
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#581C87]">Heritage</span>
+            </div>
+            <div className="text-3xl font-extrabold text-[#581C87]">100%</div>
+            <div className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
+              อาจารย์ผู้ทรงคุณวุฒิ
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

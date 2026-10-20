@@ -13,6 +13,12 @@ aliases: ["Index", "Home"]
 
 ## 🚀 1. Active Space (พื้นที่ทำงานปัจจุบัน)
 โฟลเดอร์นี้ใช้เป็นจุดพักไฟล์สำหรับฟีเจอร์หรือบัคที่เรากำลังแก้อยู่ **(ห้ามเก็บของเก่าไว้เด็ดขาด)**
+- `[[01_Active_Tasks/audit-database-admin-gap-analysis.md|🔍 Audit: Database & Admin Dashboard Content Gap Analysis]]`
+- `[[01_Active_Tasks/plan-redesign-about-executive-module|📋 Plan: Redesign /about/executive Module (Editorial Lanna Modernist)]]`
+- `[[01_Active_Tasks/plan-redesign-about-structure-module|📋 Plan: Redesign /about/structure Module (Editorial Lanna Modernist)]]`
+- `[[01_Active_Tasks/plan-redesign-about-strategy-module|📋 Plan: Redesign /about/strategy Module (Editorial Lanna Modernist)]]`
+- `[[01_Active_Tasks/plan-redesign-about-module|📋 Plan: Redesign /about Page with Modern Stack (Prompt & Lucide)]]`
+- `[[01_Active_Tasks/plan-redesign-css-uxui-modern-stack|🎨 Plan: Redesign CSS & UX/UI (Tailwind v4 + shadcn + Motion + GSAP)]]`
 - `[[Project_Map.canvas|🗺️ Project Visual Map]]` (แผนที่เชื่อมโยงโปรเจกต์เชิงภาพ)
 - `[[01_Active_Tasks/Phase_2_Polish_Population.md]]` (งานปัจจุบัน: ขัดเกลา UI และเพิ่มเนื้อหา Phase 2)
 - `[[01_Active_Tasks/Current_Status.md]]` (ภาพรวมสถานะล่าสุด)
@@ -33,6 +39,7 @@ aliases: ["Index", "Home"]
 
 ## 🏛️ 3. Architecture & Systems (โครงสร้างระบบ)
 เอกสารอธิบายสถาปัตยกรรม ฐานข้อมูล และโครงสร้างของโค้ดที่มีความซับซ้อนสูง:
+- `[[02_Architecture/design|🎨 SOC-CRRU Design System & Color Architecture (Tailwind v4, shadcn, Motion, GSAP)]]`
 - `[[02_Architecture/CR-STD-Structure.pdf]]`
 - `[[02_Architecture/CR-STD-Structure.txt]]`
 *(หมายเหตุ: แตกไฟล์ใหญ่ๆ เป็นไฟล์เล็กๆ จะช่วย AI ได้มาก)*

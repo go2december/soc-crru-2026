@@ -21,6 +21,10 @@ import {
     ArrowLeft,
     X,
     Download,
+    FileSpreadsheet,
+    TrendingUp,
+    Award,
+    BarChart3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -37,6 +41,27 @@ import AdminPagination from '@/components/AdminPagination';
 import { cn } from '@/lib/utils';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+
+interface ResumeRequestStats {
+    total: number;
+    pending: number;
+    sent: number;
+    rejected: number;
+    slaUrgent: number;
+    slaOverdue: number;
+    byPurpose: Array<{
+        purpose: string;
+        label: string;
+        count: number;
+        percentage: number;
+    }>;
+    topStaff: Array<{
+        staffId: string;
+        name: string;
+        department: string;
+        count: number;
+    }>;
+}
 
 interface ResumeRequestItem {
     id: string;
@@ -66,6 +91,11 @@ export default function ResumeRequestsPage() {
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Analytics & Stats (Option A)
+    const [stats, setStats] = useState<ResumeRequestStats | null>(null);
+    const [statsLoading, setStatsLoading] = useState(false);
+    const [exporting, setExporting] = useState<'detailed' | 'summary' | null>(null);
+
     // Modals
     const [detailItem, setDetailItem] = useState<ResumeRequestItem | null>(null);
     const [approveItem, setApproveItem] = useState<ResumeRequestItem | null>(null);
@@ -82,6 +112,31 @@ export default function ResumeRequestsPage() {
         setToastMessage({ text, type });
         setTimeout(() => setToastMessage(null), 3500);
     };
+
+    const fetchStats = useCallback(async () => {
+        setStatsLoading(true);
+        const token = localStorage.getItem('admin_token');
+        if (!token) {
+            setStatsLoading(false);
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/api/staff/resume-requests/stats`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setStats(data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch stats:', error);
+        } finally {
+            setStatsLoading(false);
+        }
+    }, []);
 
     const fetchRequests = useCallback(async () => {
         setLoading(true);
@@ -121,7 +176,55 @@ export default function ResumeRequestsPage() {
 
     useEffect(() => {
         fetchRequests();
-    }, [fetchRequests]);
+        fetchStats();
+    }, [fetchRequests, fetchStats]);
+
+    const handleExport = async (type: 'detailed' | 'summary') => {
+        setExporting(type);
+        const token = localStorage.getItem('admin_token');
+        if (!token) {
+            showToast('กรุณาเข้าสู่ระบบก่อนทำการส่งออกข้อมูล', 'error');
+            setExporting(null);
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/api/staff/resume-requests/export?type=${type}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                showToast('เกิดข้อผิดพลาดในการส่งออกรายงาน', 'error');
+                return;
+            }
+
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const today = new Date().toISOString().slice(0, 10);
+            a.download =
+                type === 'summary'
+                    ? `resume-requests-summary-${today}.csv`
+                    : `resume-requests-detailed-${today}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(
+                type === 'summary'
+                    ? 'ดาวน์โหลดรายงานสรุปสถิติ (Summary CSV) สำเร็จ'
+                    : 'ดาวน์โหลดข้อมูลคำขอทั้งหมด (Detailed CSV) สำเร็จ'
+            );
+        } catch (err) {
+            console.error('Export error:', err);
+            showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่อส่งออกข้อมูลได้', 'error');
+        } finally {
+            setExporting(null);
+        }
+    };
 
     const handleApprove = async () => {
         if (!approveItem) return;
@@ -140,6 +243,7 @@ export default function ResumeRequestsPage() {
                 showToast('อนุมัติและจัดส่งเอกสาร PDF ให้ผู้ขอเรียบร้อยแล้ว');
                 setApproveItem(null);
                 fetchRequests();
+                fetchStats();
             } else {
                 const err = await res.json().catch(() => ({}));
                 showToast(err.message || 'เกิดข้อผิดพลาดในการอนุมัติ', 'error');
@@ -176,6 +280,7 @@ export default function ResumeRequestsPage() {
                 setRejectItem(null);
                 setRejectionReason('');
                 fetchRequests();
+                fetchStats();
             } else {
                 const err = await res.json().catch(() => ({}));
                 showToast(err.message || 'เกิดข้อผิดพลาดในการปฏิเสธ', 'error');
@@ -352,24 +457,314 @@ export default function ResumeRequestsPage() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <Button
                         variant="outline"
                         size="sm"
-                        className="rounded-sm text-xs gap-1.5"
-                        onClick={() => fetchRequests()}
-                        disabled={loading}
+                        className="rounded-sm text-xs gap-1.5 border-border hover:bg-muted font-medium text-foreground cursor-pointer"
+                        onClick={() => handleExport('summary')}
+                        disabled={exporting !== null}
+                        title="ส่งออกรายงานสรุปภาพรวม สถิติตามวัตถุประสงค์ และ 5 อันดับอาจารย์ (Summary CSV)"
                     >
-                        <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} />
+                        <FileSpreadsheet className="w-3.5 h-3.5 text-blue-600" />
+                        <span>{exporting === 'summary' ? 'กำลังส่งออก...' : 'รายงานสรุปสถิติ (CSV)'}</span>
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-sm text-xs gap-1.5 border-border hover:bg-muted font-medium text-foreground cursor-pointer"
+                        onClick={() => handleExport('detailed')}
+                        disabled={exporting !== null}
+                        title="ส่งออกบันทึกคำขอทั้งหมดทุกรายการอย่างละเอียด (Detailed CSV)"
+                    >
+                        <Download className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>{exporting === 'detailed' ? 'กำลังส่งออก...' : 'ส่งออกข้อมูลทั้งหมด (CSV)'}</span>
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-sm text-xs gap-1.5 cursor-pointer"
+                        onClick={() => {
+                            fetchRequests();
+                            fetchStats();
+                        }}
+                        disabled={loading || statsLoading}
+                    >
+                        <RefreshCw className={cn('w-3.5 h-3.5', (loading || statsLoading) && 'animate-spin')} />
                         รีเฟรช
                     </Button>
                     <Link href="/admin/staff">
-                        <Button variant="ghost" size="sm" className="rounded-sm text-xs gap-1.5">
+                        <Button variant="ghost" size="sm" className="rounded-sm text-xs gap-1.5 cursor-pointer">
                             <ArrowLeft className="w-3.5 h-3.5" />
                             กลับหน้าบุคลากร
                         </Button>
                     </Link>
                 </div>
+            </div>
+
+            {/* KPI Summary Cards (Option A) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Card 1: Total */}
+                <Card
+                    onClick={() => {
+                        setStatusFilter('ALL');
+                        setPage(1);
+                    }}
+                    className={cn(
+                        'rounded-sm border transition-all cursor-pointer hover:shadow-xs p-4',
+                        statusFilter === 'ALL'
+                            ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                            : 'border-border bg-card hover:border-border/80'
+                    )}
+                >
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">คำขอทั้งหมด</span>
+                        <div className="w-8 h-8 rounded-sm bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200">
+                            <FileCheck className="w-4 h-4" />
+                        </div>
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-2">
+                        <span className="text-2xl font-bold tracking-tight text-foreground">
+                            {statsLoading ? '...' : (stats?.total ?? 0)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">รายการ</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">รวมทุกสถานะในระบบ</p>
+                </Card>
+
+                {/* Card 2: Pending */}
+                <Card
+                    onClick={() => {
+                        setStatusFilter('PENDING');
+                        setPage(1);
+                    }}
+                    className={cn(
+                        'rounded-sm border transition-all cursor-pointer hover:shadow-xs p-4',
+                        statusFilter === 'PENDING'
+                            ? 'border-amber-500 bg-amber-50/20 ring-1 ring-amber-500/30'
+                            : 'border-border bg-card hover:border-border/80'
+                    )}
+                >
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">รอการพิจารณา</span>
+                        <div className="w-8 h-8 rounded-sm bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200">
+                            <Clock className="w-4 h-4" />
+                        </div>
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-2">
+                        <span className="text-2xl font-bold tracking-tight text-amber-700">
+                            {statsLoading ? '...' : (stats?.pending ?? 0)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">รายการ</span>
+                    </div>
+                    <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                        {stats && (stats.slaUrgent > 0 || stats.slaOverdue > 0) ? (
+                            <>
+                                {stats.slaUrgent > 0 && (
+                                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-xs border border-amber-300">
+                                        <Clock className="w-2.5 h-2.5" /> ด่วน {stats.slaUrgent}
+                                    </span>
+                                )}
+                                {stats.slaOverdue > 0 && (
+                                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-red-700 bg-red-100 px-1.5 py-0.5 rounded-xs border border-red-300 animate-pulse">
+                                        <AlertTriangle className="w-2.5 h-2.5" /> เกิน SLA {stats.slaOverdue}
+                                    </span>
+                                )}
+                            </>
+                        ) : (
+                            <span className="text-[11px] text-emerald-600 font-medium">อยู่ในเกณฑ์ SLA 7 วัน</span>
+                        )}
+                    </div>
+                </Card>
+
+                {/* Card 3: Sent */}
+                <Card
+                    onClick={() => {
+                        setStatusFilter('SENT');
+                        setPage(1);
+                    }}
+                    className={cn(
+                        'rounded-sm border transition-all cursor-pointer hover:shadow-xs p-4',
+                        statusFilter === 'SENT'
+                            ? 'border-emerald-500 bg-emerald-50/20 ring-1 ring-emerald-500/30'
+                            : 'border-border bg-card hover:border-border/80'
+                    )}
+                >
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">อนุมัติ & จัดส่งแล้ว</span>
+                        <div className="w-8 h-8 rounded-sm bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
+                            <CheckCircle2 className="w-4 h-4" />
+                        </div>
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-2">
+                        <span className="text-2xl font-bold tracking-tight text-emerald-700">
+                            {statsLoading ? '...' : (stats?.sent ?? 0)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">รายการ</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">จัดส่งไฟล์ PDF ทางอีเมลแล้ว</p>
+                </Card>
+
+                {/* Card 4: Rejected */}
+                <Card
+                    onClick={() => {
+                        setStatusFilter('REJECTED');
+                        setPage(1);
+                    }}
+                    className={cn(
+                        'rounded-sm border transition-all cursor-pointer hover:shadow-xs p-4',
+                        statusFilter === 'REJECTED'
+                            ? 'border-red-500 bg-red-50/20 ring-1 ring-red-500/30'
+                            : 'border-border bg-card hover:border-border/80'
+                    )}
+                >
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">ปฏิเสธคำขอ</span>
+                        <div className="w-8 h-8 rounded-sm bg-slate-100 text-slate-600 flex items-center justify-center border border-slate-200">
+                            <XCircle className="w-4 h-4" />
+                        </div>
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-2">
+                        <span className="text-2xl font-bold tracking-tight text-slate-700">
+                            {statsLoading ? '...' : (stats?.rejected ?? 0)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">รายการ</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">ไม่ผ่านเกณฑ์ / ยกเลิกคำขอ</p>
+                </Card>
+            </div>
+
+            {/* Visual Analytics Grid (Option A) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Purpose Distribution */}
+                <Card className="rounded-sm border-border shadow-2xs">
+                    <CardContent className="p-4">
+                        <div className="flex items-center justify-between border-b border-border pb-3 mb-3">
+                            <div className="flex items-center gap-2">
+                                <TrendingUp className="w-4 h-4 text-primary" />
+                                <h2 className="text-xs font-bold text-foreground">
+                                    สัดส่วนตามวัตถุประสงค์การขอข้อมูล
+                                </h2>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                                รวม {stats?.total || 0} ครั้ง
+                            </span>
+                        </div>
+
+                        {statsLoading ? (
+                            <div className="py-8 text-center text-xs text-muted-foreground">กำลังโหลดสถิติ...</div>
+                        ) : !stats?.byPurpose || stats.byPurpose.length === 0 ? (
+                            <div className="py-8 text-center text-xs text-muted-foreground">
+                                ยังไม่มีข้อมูลสถิติวัตถุประสงค์
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {stats.byPurpose.map((item, idx) => {
+                                    const barColors = [
+                                        'bg-blue-600',
+                                        'bg-emerald-600',
+                                        'bg-amber-600',
+                                        'bg-indigo-600',
+                                        'bg-slate-500',
+                                    ];
+                                    const barColor = barColors[idx % barColors.length];
+                                    return (
+                                        <div key={item.purpose} className="space-y-1">
+                                            <div className="flex items-center justify-between text-xs">
+                                                <span className="font-medium text-foreground">{item.label}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-muted-foreground">{item.count} ครั้ง</span>
+                                                    <span className="font-bold text-foreground font-mono w-10 text-right">
+                                                        {item.percentage}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                                                <div
+                                                    className={cn('h-2 rounded-full transition-all duration-500', barColor)}
+                                                    style={{ width: `${item.percentage}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Top 5 Requested Staff */}
+                <Card className="rounded-sm border-border shadow-2xs">
+                    <CardContent className="p-4">
+                        <div className="flex items-center justify-between border-b border-border pb-3 mb-3">
+                            <div className="flex items-center gap-2">
+                                <Award className="w-4 h-4 text-amber-600" />
+                                <h2 className="text-xs font-bold text-foreground">
+                                    5 อันดับคณาจารย์ที่ได้รับการขอประวัติสูงสุด
+                                </h2>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground font-mono">Top Requested Staff</span>
+                        </div>
+
+                        {statsLoading ? (
+                            <div className="py-8 text-center text-xs text-muted-foreground">กำลังโหลดสถิติ...</div>
+                        ) : !stats?.topStaff || stats.topStaff.length === 0 ? (
+                            <div className="py-8 text-center text-xs text-muted-foreground">
+                                ยังไม่มีข้อมูลคำขออาจารย์ในระบบ
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-border/60">
+                                {stats.topStaff.map((staff, idx) => {
+                                    const rankStyles = [
+                                        'bg-amber-500 text-white font-bold',
+                                        'bg-slate-400 text-white font-bold',
+                                        'bg-amber-700 text-white font-bold',
+                                        'bg-muted text-muted-foreground font-semibold',
+                                        'bg-muted text-muted-foreground font-semibold',
+                                    ];
+                                    const rankClass = rankStyles[idx] || 'bg-muted text-muted-foreground font-semibold';
+
+                                    return (
+                                        <div key={staff.staffId} className="py-2 flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-2.5 min-w-0">
+                                                <span
+                                                    className={cn(
+                                                        'w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0',
+                                                        rankClass
+                                                    )}
+                                                >
+                                                    {idx + 1}
+                                                </span>
+                                                <div className="truncate">
+                                                    <p className="text-xs font-semibold text-foreground truncate">
+                                                        {staff.name}
+                                                    </p>
+                                                    <p className="text-[11px] text-muted-foreground truncate">
+                                                        {staff.department}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-sm border border-primary/20">
+                                                    {staff.count} คำขอ
+                                                </span>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground rounded-sm cursor-pointer"
+                                                    title="พรีวิวเอกสาร CV ทางการ"
+                                                    onClick={() => handleOpenPdfPreview(staff.staffId)}
+                                                >
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Filter & Search Bar */}

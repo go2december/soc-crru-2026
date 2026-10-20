@@ -86,4 +86,62 @@ export class ProgramsController {
   remove(@Param('id') id: string, @Req() req: any) {
     return this.programsService.remove(id, req?.user);
   }
+  /**
+   * GET /programs/code/:code/tracks/:trackCode - Get a single track by program code and track code
+   */
+  @Get('code/:code/tracks/:trackCode')
+  findTrackByCode(
+    @Param('code') code: string,
+    @Param('trackCode') trackCode: string,
+  ) {
+    return this.programsService.findTrackByCode(code, trackCode);
+  }
+
+  /**
+   * GET /programs/:id/tracks - Get all tracks of a program
+   */
+  @Get(':id/tracks')
+  getTracks(@Param('id') id: string) {
+    return this.programsService.getTracks(id);
+  }
+
+  /**
+   * POST /programs/:id/tracks - Create a track for a program
+   */
+  @Post(':id/tracks')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  createTrack(
+    @Param('id') id: string,
+    @Body() trackDto: any,
+    @Req() req: any,
+  ) {
+    return this.programsService.createTrack(id, trackDto, req?.user);
+  }
+
+  /**
+   * PATCH /programs/tracks/:trackId - Update a track
+   */
+  @Patch('tracks/:trackId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  updateTrack(
+    @Param('trackId') trackId: string,
+    @Body() trackDto: any,
+    @Req() req: any,
+  ) {
+    return this.programsService.updateTrack(trackId, trackDto, req?.user);
+  }
+
+  /**
+   * DELETE /programs/tracks/:trackId - Delete a track
+   */
+  @Delete('tracks/:trackId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
+  removeTrack(@Param('trackId') trackId: string, @Req() req: any) {
+    return this.programsService.removeTrack(trackId, req?.user);
+  }
+
 }

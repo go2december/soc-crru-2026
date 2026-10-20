@@ -92,11 +92,11 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-      - ./frontend/.next:/app/.next
+      - /app/.next
     ports:
       - "${FRONTEND_PORT:-4000}:3000"
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4001}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
       INTERNAL_API_URL: http://api-gateway:3000
     networks:
       - soc-network

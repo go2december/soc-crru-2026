@@ -1,13 +1,13 @@
-import Hero from '@/components/Hero';
-import CourseFinder from '@/components/CourseFinder';
-import StatsDashboard from '@/components/StatsDashboard';
-import NewsSection from '@/components/NewsSection';
+import Hero from "@/components/Hero";
+import CurriculumDeck from "@/components/CurriculumDeck";
+import StatsDashboard from "@/components/StatsDashboard";
+import NewsSection from "@/components/NewsSection";
 
 export default function Home() {
   return (
-    <div className="bg-white font-sans text-scholar-text">
+    <div className="bg-[#F8FAFC] font-sans text-slate-800">
       <Hero />
-      <CourseFinder />
+      <CurriculumDeck />
       <StatsDashboard />
       <NewsSection />
     </div>
