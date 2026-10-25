@@ -1,7 +1,7 @@
 # แผนแม่บท: การกำหนดสิทธิ์การใช้งาน Admin Dashboard (RBAC + Department Scope + Approval Workflow)
 
 > **โมเดล:** Role-Based Access Control (RBAC) + Department-Scoped Multi-Tenancy + Draft/Review Approval Workflow  
-> **เป้าหมาย:** จัดการระดับสิทธิ์ในระบบสำนักวิชาสังคมศาสตร์ มรภ.เชียงราย (SOC-CRRU) ให้รัดกุม ปลอดภัย และมีขั้นตอนการตรวจสอบเนื้อหาก่อนเผยแพร่
+> **เป้าหมาย:** จัดการระดับสิทธิ์ในระบบคณะสังคมศาสตร์ มรภ.เชียงราย (SOC-CRRU) ให้รัดกุม ปลอดภัย และมีขั้นตอนการตรวจสอบเนื้อหาก่อนเผยแพร่
 
 ---
 

@@ -16,6 +16,10 @@ import {
   UserCheck,
   Sparkles,
 } from "lucide-react";
+import { getSiteSettings } from "@/lib/site-settings";
+import { LucideIcon } from "@/components/LucideIcon";
+
+export const revalidate = 60;
 
 export const metadata = {
   title: "เกี่ยวกับคณะ | คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
@@ -23,39 +27,9 @@ export const metadata = {
     "ประวัติความเป็นมา ปรัชญา วิสัยทัศน์ เอกลักษณ์ อัตลักษณ์ ค่านิยม และพันธกิจของคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
 };
 
-export default function AboutPage() {
-  const missions = [
-    {
-      id: 1,
-      title: "ผลิตบัณฑิตที่เป็นนวัตกรมืออาชีพ",
-      desc: "มีทักษะเด่น มีความรู้ มีคุณธรรม และตอบสนองต่อการพัฒนาท้องถิ่นอย่างยั่งยืน",
-      icon: Users,
-    },
-    {
-      id: 2,
-      title: "ผลิตผลงานวิจัยและงานสร้างสรรค์",
-      desc: "เพื่อการนำไปใช้ประโยชน์ในชุมชน ท้องถิ่น ประเทศ และภูมิภาคอาเซียน",
-      icon: FlaskConical,
-    },
-    {
-      id: 3,
-      title: "ให้บริการวิชาการแก่สังคม",
-      desc: "เพื่อยกระดับคุณภาพชีวิตของประชาชนในท้องถิ่น และประเทศ",
-      icon: HeartHandshake,
-    },
-    {
-      id: 4,
-      title: "สืบสานและส่งเสริมศิลปวัฒนธรรม",
-      desc: "ทำนุบำรุงและอนุรักษ์ศิลปวัฒนธรรมอันดีงามของท้องถิ่นล้านนาและของชาติ",
-      icon: Landmark,
-    },
-    {
-      id: 5,
-      title: "พัฒนาองค์กรแห่งการเรียนรู้ที่มีธรรมาภิบาล",
-      desc: "พัฒนาคณะให้เป็นองค์กรแห่งการเรียนรู้ที่มีคุณภาพ มีประสิทธิภาพ และยึดหลักธรรมาภิบาล",
-      icon: ShieldCheck,
-    },
-  ];
+export default async function AboutPage() {
+  const settings = await getSiteSettings();
+  const missions = settings.missions || [];
 
   return (
     <main className="min-h-screen bg-[#F8FAFC] font-sans text-slate-800 pb-20">
@@ -191,7 +165,7 @@ export default function AboutPage() {
               </h2>
               <div className="mt-4 p-4 rounded-xl bg-amber-50/70 border border-amber-200/60">
                 <div className="text-3xl font-extrabold text-[#C2410C] font-mono">
-                  2546
+                  {settings.historyFoundedYear || "2546"}
                 </div>
                 <div className="text-xs text-slate-700 font-medium mt-1">
                   ปีก่อตั้งคณะสังคมศาสตร์ สู่กว่าสองทศวรรษแห่งการพัฒนาท้องถิ่น
@@ -201,31 +175,30 @@ export default function AboutPage() {
 
             {/* Right Narrative Card */}
             <div className="lg:col-span-8 p-8 sm:p-10 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
-              <div className="prose prose-slate max-w-none font-body leading-relaxed text-base sm:text-lg text-slate-700 space-y-4">
-                <p>
-                  <strong className="text-[#0B132B] font-bold">คณะสังคมศาสตร์</strong>{" "}
-                  ได้ก่อตั้งมาตั้งแต่ปี พ.ศ. 2546
-                  โดยเป็นหน่วยงานที่อยู่ภายใต้โครงสร้างภายในของมหาวิทยาลัย
-                  มีหน้าที่และการบริหารจัดการศึกษาเทียบเท่ากับหน่วยงานที่อยู่ในโครงสร้างตามกฎหมายของมหาวิทยาลัย
-                </p>
-                <p>
-                  ซึ่งปัจจุบันคณะสังคมศาสตร์
-                  ได้พัฒนาให้มีการเรียนการสอนหลักสูตรต่าง ๆ
-                  ทั้งระดับปริญญาตรีและบัณฑิตศึกษา จำนวน{" "}
-                  <strong className="text-[#C2410C] font-bold">7 หลักสูตร</strong>{" "}
-                  เพื่อตอบสนองต่อการเปลี่ยนแปลงทางเศรษฐกิจ สังคม และสิ่งแวดล้อม
-                  ตลอดจนการสร้างบัณฑิตนักปฏิบัติเพื่อรับใช้ชุมชนท้องถิ่นอย่างแท้จริง
-                </p>
+              <div className="prose prose-slate max-w-none font-body leading-relaxed text-base sm:text-lg text-slate-700 space-y-4 whitespace-pre-line">
+                {settings.historyContentTh ? (
+                  settings.historyContentTh
+                ) : (
+                  <>
+                    <p>
+                      <strong className="text-[#0B132B] font-bold">คณะสังคมศาสตร์</strong> ได้ก่อตั้งมาตั้งแต่ปี พ.ศ. 2546
+                    </p>
+                  </>
+                )}
               </div>
 
               {/* Quick Metrics */}
               <div className="mt-8 pt-6 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
                 <div className="p-3 rounded-xl bg-slate-50">
-                  <div className="text-2xl font-bold text-[#0B132B]">23+</div>
+                  <div className="text-2xl font-bold text-[#0B132B]">
+                    {new Date().getFullYear() + 543 - (parseInt(settings.historyFoundedYear || '2546', 10) || 2546)}+
+                  </div>
                   <div className="text-xs text-slate-500 mt-0.5">ปีแห่งการก่อตั้ง</div>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-50">
-                  <div className="text-2xl font-bold text-[#C2410C]">7</div>
+                  <div className="text-2xl font-bold text-[#C2410C]">
+                    {settings.computedMetrics?.programsCount ?? 7}
+                  </div>
                   <div className="text-xs text-slate-500 mt-0.5">หลักสูตร ตรี-โท-เอก</div>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-50 col-span-2 sm:col-span-1">
@@ -262,7 +235,7 @@ export default function AboutPage() {
                 ปรัชญา (Philosophy)
               </div>
               <blockquote className="text-xl sm:text-2xl font-bold leading-snug text-white">
-                "องค์กรแห่งการบูรณาการองค์ความรู้เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน"
+                &ldquo;{settings.philosophyTh || "องค์กรแห่งการบูรณาการองค์ความรู้เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน"}&rdquo;
               </blockquote>
             </div>
 
@@ -275,7 +248,7 @@ export default function AboutPage() {
                 วิสัยทัศน์ (Vision)
               </div>
               <blockquote className="text-xl sm:text-2xl font-bold leading-snug text-[#0B132B]">
-                "บูรณาการองค์ความรู้ในการผลิตบัณฑิตสู่การเป็นนวัตกรสังคม เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน"
+                &ldquo;{settings.visionTh || "บูรณาการองค์ความรู้ในการผลิตบัณฑิตสู่การเป็นนวัตกรสังคม เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน"}&rdquo;
               </blockquote>
             </div>
           </div>
@@ -296,45 +269,68 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* 1. Uniqueness */}
-            <div className="p-8 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-5">
-                <Award className="size-5" strokeWidth={1.75} />
+          <div className="space-y-6">
+            {/* Uniqueness & Identity (2 Columns) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 1. Uniqueness */}
+              <div className="p-8 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-5">
+                  <Award className="size-5" strokeWidth={1.75} />
+                </div>
+                <h3 className="text-lg font-bold text-[#0B132B] mb-2">
+                  เอกลักษณ์ (Uniqueness)
+                </h3>
+                <p className="font-body text-sm leading-relaxed text-slate-600">
+                  &ldquo;{settings.uniquenessTh || "องค์กรแห่งการเรียนรู้สู่การพัฒนาชุมชน ท้องถิ่น สังคม ประเทศ และนานาชาติ"}&rdquo;
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-[#0B132B] mb-2">
-                เอกลักษณ์ (Uniqueness)
-              </h3>
-              <p className="font-body text-sm leading-relaxed text-slate-600">
-                "องค์กรแห่งการเรียนรู้สู่การพัฒนาชุมชน ท้องถิ่น สังคม ประเทศ และนานาชาติ"
-              </p>
+
+              {/* 2. Identity */}
+              <div className="p-8 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#C2410C] flex items-center justify-center mb-5">
+                  <GraduationCap className="size-5" strokeWidth={1.75} />
+                </div>
+                <h3 className="text-lg font-bold text-[#0B132B] mb-2">
+                  อัตลักษณ์ (Identity)
+                </h3>
+                <p className="font-body text-sm leading-relaxed text-slate-600">
+                  &ldquo;{settings.identityTh || "มีคุณธรรม ความรู้ ความคิดสร้างสรรค์ ทักษะทางสังคม เป็นที่ยอมรับในศตวรรษที่ 21"}&rdquo;
+                </p>
+              </div>
             </div>
 
-            {/* 2. Identity */}
-            <div className="p-8 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#C2410C] flex items-center justify-center mb-5">
-                <GraduationCap className="size-5" strokeWidth={1.75} />
-              </div>
-              <h3 className="text-lg font-bold text-[#0B132B] mb-2">
-                อัตลักษณ์ (Identity)
-              </h3>
-              <p className="font-body text-sm leading-relaxed text-slate-600">
-                "มีคุณธรรม ความรู้ ความคิดสร้างสรรค์ ทักษะทางสังคม เป็นที่ยอมรับในศตวรรษที่ 21"
-              </p>
-            </div>
+            {/* Core Values Section */}
+            {(settings.coreValues || []).length > 0 && (
+              <div className="pt-4">
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold text-[#0B132B]">
+                    ค่านิยมหลักขององค์กร (Core Values)
+                  </h3>
+                  <p className="font-body text-xs text-slate-500 mt-1">
+                    หลักยึดเหนี่ยวและแนวทางประพฤติปฏิบัติของบุคลากรและนักศึกษา
+                  </p>
+                </div>
 
-            {/* 3. Core Values */}
-            <div className="p-8 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 text-[#581C87] flex items-center justify-center mb-5">
-                <Users className="size-5" strokeWidth={1.75} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {(settings.coreValues || []).map((cv, i) => (
+                    <div
+                      key={i}
+                      className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-md transition-all hover:-translate-y-1 group"
+                    >
+                      <div className="size-11 rounded-xl bg-orange-50 text-[#C2410C] flex items-center justify-center mb-4 group-hover:bg-[#C2410C] group-hover:text-white transition-colors">
+                        <LucideIcon name={cv.icon} className="size-5" />
+                      </div>
+                      <h4 className="text-base font-bold text-[#0B132B] mb-2">
+                        {cv.title}
+                      </h4>
+                      <p className="font-body text-xs text-slate-600 leading-relaxed">
+                        {cv.desc}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-[#0B132B] mb-2">
-                ค่านิยม (Core Values)
-              </h3>
-              <p className="font-body text-sm leading-relaxed text-slate-600">
-                "บูรณาการศาสตร์ที่หลากหลายสู่การพัฒนาท้องถิ่น"
-              </p>
-            </div>
+            )}
           </div>
         </section>
 
@@ -347,7 +343,7 @@ export default function AboutPage() {
                 <span>Our Missions</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B132B] tracking-tight">
-                พันธกิจ 5 ประการ
+                พันธกิจของคณะ
               </h2>
               <p className="font-body text-slate-600 text-sm sm:text-base mt-1">
                 ภารกิจหลักที่คณะสังคมศาสตร์ยึดถือปฏิบัติเพื่อประโยชน์ของชุมชนและประเทศชาติ
@@ -355,32 +351,29 @@ export default function AboutPage() {
             </div>
 
             <div className="space-y-4">
-              {missions.map((m) => {
-                const Icon = m.icon;
-                return (
-                  <div
-                    key={m.id}
-                    className="p-5 sm:p-6 rounded-2xl bg-[#F8FAFC] border border-slate-200/80 hover:border-[#C2410C]/40 hover:bg-white hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 group"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-[#0B132B] text-white flex-shrink-0 flex items-center justify-center font-bold text-sm group-hover:bg-[#C2410C] transition-colors">
-                      {m.id}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-lg font-bold text-[#0B132B] mb-1">
-                        {m.title}
-                      </h3>
-                      <p className="font-body text-sm text-slate-600 leading-relaxed">
-                        {m.desc}
-                      </p>
-                    </div>
-
-                    <div className="hidden sm:flex w-9 h-9 rounded-lg bg-white border border-slate-200 items-center justify-center text-slate-400 group-hover:text-[#C2410C] transition-colors">
-                      <Icon className="size-4" strokeWidth={1.75} />
-                    </div>
+              {missions.map((m) => (
+                <div
+                  key={m.id}
+                  className="p-5 sm:p-6 rounded-2xl bg-[#F8FAFC] border border-slate-200/80 hover:border-[#C2410C]/40 hover:bg-white hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[#0B132B] text-white flex-shrink-0 flex items-center justify-center font-bold text-sm group-hover:bg-[#C2410C] transition-colors">
+                    {m.id}
                   </div>
-                );
-              })}
+
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-bold text-[#0B132B] mb-1">
+                      {m.title}
+                    </h3>
+                    <p className="font-body text-sm text-slate-600 leading-relaxed">
+                      {m.desc}
+                    </p>
+                  </div>
+
+                  <div className="hidden sm:flex w-9 h-9 rounded-lg bg-white border border-slate-200 items-center justify-center text-slate-400 group-hover:text-[#C2410C] transition-colors">
+                    <LucideIcon name={m.icon} className="size-4" />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>

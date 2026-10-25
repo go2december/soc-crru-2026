@@ -15,7 +15,10 @@ import { StaffService } from './staff.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { CreatePositionDto, UpdatePositionDto } from './dto/position.dto';
-import { CreateResumeRequestDto, ApproveResumeRequestDto } from './dto/create-resume-request.dto';
+import {
+  CreateResumeRequestDto,
+  ApproveResumeRequestDto,
+} from './dto/create-resume-request.dto';
 import { JwtAuthGuard, RolesGuard, Roles } from 'shared/shared';
 
 @Controller('staff')
@@ -130,9 +133,17 @@ export class StaffController {
   @Get('resume-requests/export')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
-  async exportResumeRequests(@Query('type') type: string = 'detailed', @Res() res: any) {
-    const csvContent = await this.staffService.exportResumeRequests(type as 'detailed' | 'summary');
-    const fileName = type === 'summary' ? 'resume-requests-summary.csv' : 'resume-requests-detailed.csv';
+  async exportResumeRequests(
+    @Query('type') type: string = 'detailed',
+    @Res() res: any,
+  ) {
+    const csvContent = await this.staffService.exportResumeRequests(
+      type as 'detailed' | 'summary',
+    );
+    const fileName =
+      type === 'summary'
+        ? 'resume-requests-summary.csv'
+        : 'resume-requests-detailed.csv';
     res.set({
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': `attachment; filename="${fileName}"`,
@@ -157,7 +168,11 @@ export class StaffController {
     @Req() req: any,
   ) {
     const userId = req.user?.id;
-    return this.staffService.rejectResumeRequest(id, dto.rejectionReason || '', userId);
+    return this.staffService.rejectResumeRequest(
+      id,
+      dto.rejectionReason || '',
+      userId,
+    );
   }
 
   @Get(':id/resume-preview')
@@ -165,7 +180,8 @@ export class StaffController {
   @Roles('ADMIN', 'EDITOR')
   async previewResumePdf(@Param('id') id: string, @Res() res: any) {
     try {
-      const { buffer, fileName } = await this.staffService.getResumePdfPreview(id);
+      const { buffer, fileName } =
+        await this.staffService.getResumePdfPreview(id);
       const encodedFileName = encodeURIComponent(fileName);
       res.set({
         'Content-Type': 'application/pdf',
@@ -174,7 +190,10 @@ export class StaffController {
       });
       return res.end(buffer);
     } catch (err: any) {
-      console.error(`[previewResumePdf] Error generating preview for staffId ${id}:`, err);
+      console.error(
+        `[previewResumePdf] Error generating preview for staffId ${id}:`,
+        err,
+      );
       return res.status(err.status || 500).json({
         statusCode: err.status || 500,
         message: err.message || 'Error generating PDF preview',

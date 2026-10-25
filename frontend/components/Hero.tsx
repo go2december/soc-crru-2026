@@ -105,7 +105,7 @@ export default function Hero() {
         <div className="hero-badge inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-xs mb-8">
           <span className="w-2 h-2 rounded-full bg-[#C2410C] animate-pulse" />
           <span className="text-xs font-semibold text-slate-800">
-            เปิดรับสมัครนักศึกษาใหม่ TCAS 2569 รอบ Portfolio
+            เปิดรับสมัครนักศึกษาใหม่ 2569 (รับสมัครตรง ไม่ต้องสอบ)
           </span>
           <span className="text-slate-300">|</span>
           <Link
@@ -133,7 +133,7 @@ export default function Hero() {
             ref={subtextRef}
             className="font-body text-base sm:text-xl text-slate-600 leading-relaxed max-w-2xl mb-10"
           >
-            สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
+            คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
             มุ่งสร้างบัณฑิตนักปฏิบัติที่มีจิตสำนึกชุมชน เข้าใจพลวัตสังคมโลก
             และขับเคลื่อนการพัฒนาอย่างยั่งยืน
           </p>

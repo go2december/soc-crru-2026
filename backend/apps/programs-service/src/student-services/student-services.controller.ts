@@ -18,7 +18,9 @@ import { JwtAuthGuard, RolesGuard, Roles } from 'shared/shared';
 
 @Controller('student-services')
 export class StudentServicesController {
-  constructor(private readonly studentServicesService: StudentServicesService) {}
+  constructor(
+    private readonly studentServicesService: StudentServicesService,
+  ) {}
 
   // ==========================================
   // Public Endpoints
@@ -80,10 +82,7 @@ export class StudentServicesController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
-  update(
-    @Param('id') id: string,
-    @Body() updateDto: UpdateStudentServiceDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateStudentServiceDto) {
     return this.studentServicesService.update(id, updateDto);
   }
 

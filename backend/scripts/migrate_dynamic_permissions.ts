@@ -76,7 +76,7 @@ async function migrate() {
       {
         key: 'departments',
         name_th: 'โครงสร้างและสาขาวิชา',
-        description: 'จัดการข้อมูลหลักสูตรและสังกัดของสำนักวิชา',
+        description: 'จัดการข้อมูลหลักสูตรและสังกัดของคณะสังคมศาสตร์',
         category: 'Organization',
         route_path: '/admin/departments',
         is_workflow_required: false,

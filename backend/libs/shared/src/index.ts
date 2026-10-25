@@ -6,4 +6,3 @@ export * from './guards/permission.guard';
 export * from './decorators/roles.decorator';
 export * from './decorators/permission.decorator';
 export * from './strategies/jwt.strategy';
-

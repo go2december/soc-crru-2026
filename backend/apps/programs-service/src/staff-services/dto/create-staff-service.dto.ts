@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsInt, IsIn } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsBoolean,
+  IsInt,
+  IsIn,
+} from 'class-validator';
 
 export class CreateStaffServiceDto {
   @IsString()
@@ -10,8 +17,19 @@ export class CreateStaffServiceDto {
   description?: string;
 
   @IsString()
-  @IsIn(['HR_FINANCE', 'ACADEMIC_TEACHING', 'RESEARCH_QA', 'FACILITY_REPAIR', 'DIGITAL_IT'])
-  category: 'HR_FINANCE' | 'ACADEMIC_TEACHING' | 'RESEARCH_QA' | 'FACILITY_REPAIR' | 'DIGITAL_IT';
+  @IsIn([
+    'HR_FINANCE',
+    'ACADEMIC_TEACHING',
+    'RESEARCH_QA',
+    'FACILITY_REPAIR',
+    'DIGITAL_IT',
+  ])
+  category:
+    | 'HR_FINANCE'
+    | 'ACADEMIC_TEACHING'
+    | 'RESEARCH_QA'
+    | 'FACILITY_REPAIR'
+    | 'DIGITAL_IT';
 
   @IsString()
   @IsNotEmpty()

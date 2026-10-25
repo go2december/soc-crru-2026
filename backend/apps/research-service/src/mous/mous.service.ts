@@ -13,8 +13,14 @@ export class MousService {
   ) {}
 
   private async cleanupMouFiles(
-    prev?: { partnerLogoUrl?: string | null; documentUrl?: string | null } | null,
-    next?: { partnerLogoUrl?: string | null; documentUrl?: string | null } | null,
+    prev?: {
+      partnerLogoUrl?: string | null;
+      documentUrl?: string | null;
+    } | null,
+    next?: {
+      partnerLogoUrl?: string | null;
+      documentUrl?: string | null;
+    } | null,
   ): Promise<void> {
     if (!prev) return;
     const nextUrls = new Set(
@@ -117,8 +123,18 @@ export class MousService {
       .update(mous)
       .set({
         ...rest,
-        startDate: startDate !== undefined ? (startDate ? new Date(startDate) : null) : undefined,
-        endDate: endDate !== undefined ? (endDate ? new Date(endDate) : null) : undefined,
+        startDate:
+          startDate !== undefined
+            ? startDate
+              ? new Date(startDate)
+              : null
+            : undefined,
+        endDate:
+          endDate !== undefined
+            ? endDate
+              ? new Date(endDate)
+              : null
+            : undefined,
         updatedAt: new Date(),
       })
       .where(eq(mous.id, id))
@@ -132,6 +148,9 @@ export class MousService {
     const existing = await this.findOne(id);
     await this.drizzleService.db.delete(mous).where(eq(mous.id, id));
     await this.cleanupMouFiles(existing);
-    return { success: true, message: `ลบบันทึกข้อตกลงความร่วมมือเรียบร้อยแล้ว` };
+    return {
+      success: true,
+      message: `ลบบันทึกข้อตกลงความร่วมมือเรียบร้อยแล้ว`,
+    };
   }
 }

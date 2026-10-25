@@ -19,23 +19,41 @@ Always verify that private dashboard routes are wrapped with appropriate **Sessi
 
 ---
 
-## 🎨 2. Design Consistency & Sharp Theme
+## 🎨 2. Design Consistency & Shadcn UI Integration
 
-All forms, buttons, inputs, and modal wrappers must adhere to the **`rounded-sm`** (Sharp & Professional) rule:
-* **Input Fields**: `<input className="input input-bordered rounded-sm w-full" />`
-* **Action Buttons**: `<button className="btn btn-primary rounded-sm">บันทึกข้อมูล</button>`
-* **Card wrappers**: `<div className="card bg-base-100 border border-base-200 rounded-sm">...</div>`
+All forms, buttons, inputs, and modal wrappers must adhere to the **`rounded-sm`** (Sharp & Professional) rule and use **Shadcn UI** primitives:
+* **Input Fields**:
+  ```tsx
+  import { Input } from "@/components/ui/input";
+  <Input className="rounded-sm w-full" placeholder="ระบุข้อมูล..." />
+  ```
+* **Action Buttons**:
+  ```tsx
+  import { Button } from "@/components/ui/button";
+  <Button className="rounded-sm bg-primary text-primary-foreground hover:bg-primary/90">
+    บันทึกข้อมูล
+  </Button>
+  ```
+* **Card Wrappers**:
+  ```tsx
+  <div className="bg-card text-card-foreground border border-border p-6 rounded-sm shadow-sm">
+    {/* Content */}
+  </div>
+  ```
+* **Prohibited**: Do NOT use DaisyUI class names (`btn`, `btn-primary`, `input-bordered`, `card bg-base-100`).
 
 ---
 
 ## 📝 3. Forms & Schema Validation
 
 To ensure database integrity and friendly error feedback:
-* Use **Zod** schema validations on the frontend to check fields prior to submission.
-* Fields like Title, Category, Content, and Dates must match backend schema types (e.g. valid UUIDs, non-empty varchars).
+* Use **Zod** schema validations on the frontend with `react-hook-form` to check fields prior to submission.
+* Fields like Title, Category, Content, and Dates must match backend schema types (e.g. valid UUIDs, non-empty strings).
 * Render explicit error messages below failing inputs:
   ```tsx
-  {errors.nameTh && <p className="text-error text-xs mt-1">{errors.nameTh.message}</p>}
+  {errors.nameTh && (
+    <p className="text-destructive text-xs mt-1 font-medium">{errors.nameTh.message}</p>
+  )}
   ```
 
 ---
@@ -44,28 +62,44 @@ To ensure database integrity and friendly error feedback:
 
 ### Delete / Destructive Actions
 * **NEVER** delete records silently without a confirmation prompt or modal dialogue.
-* Use a structured confirmation modal matching the general theme.
-* Highlight destructive buttons in red (`btn-error` / `bg-red-600`) to denote irreversible actions.
+* Use Shadcn / Radix Dialog or an accessible modal with `rounded-sm`.
+* Highlight destructive buttons using `variant="destructive"` (`bg-destructive text-destructive-foreground`).
 
-Example confirmation modal pattern:
+Example confirmation dialog pattern:
 ```tsx
-{showConfirm && (
-  <div className="modal modal-open">
-    <div className="modal-box rounded-sm">
-      <h3 className="font-bold text-lg">ยืนยันการลบข้อมูล?</h3>
-      <p className="py-4">การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
-      <div className="modal-action">
-        <button className="btn rounded-sm" onClick={() => setShowConfirm(false)}>ยกเลิก</button>
-        <button className="btn btn-error rounded-sm text-white" onClick={handleDelete}>ยืนยันการลบ</button>
-      </div>
-    </div>
-  </div>
-)}
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+<Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+  <DialogContent className="rounded-sm sm:max-w-[425px]">
+    <DialogHeader>
+      <DialogTitle>ยืนยันการลบข้อมูล?</DialogTitle>
+      <DialogDescription>
+        การดำเนินการนี้ไม่สามารถย้อนกลับได้ ข้อมูลจะถูกลบออกจากระบบอย่างถาวร
+      </DialogDescription>
+    </DialogHeader>
+    <DialogFooter className="gap-2 sm:gap-0">
+      <Button variant="outline" className="rounded-sm" onClick={() => setShowConfirm(false)}>
+        ยกเลิก
+      </Button>
+      <Button variant="destructive" className="rounded-sm" onClick={handleDelete}>
+        ยืนยันการลบ
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
 ```
 
 ---
 
 ## ⏳ 5. States & Feedback
 
-* **Loading State**: Always show a loading spinner or skeleton component during API fetch or submission actions. Disable form submit buttons to prevent double-post bugs.
-* **Toast Feedback**: Show a clean toast notification (`success` / `error`) when a create, update, or delete action finishes.
+* **Loading State**: Always show a loading spinner (e.g. `Loader2` from `lucide-react`) or skeleton component during API fetch or submission actions. Disable form submit buttons (`disabled={isSubmitting}`) to prevent double-post bugs.
+* **Toast Feedback**: Use **Sonner** (`toast.success(...)` / `toast.error(...)`) for clean toast notifications when a create, update, or delete action finishes.

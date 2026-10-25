@@ -3,14 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { 
-    ArrowLeft, Save, Upload, Trash2, Plus, GripVertical, Image as ImageIcon, FileText, CheckCircle,
-    Share2, ShieldAlert, Sparkles, Video, ExternalLink
+    ArrowLeft, Save, Upload, Trash2, Plus, Image as ImageIcon, FileText, CheckCircle,
+    Share2, ShieldAlert, Sparkles, Video, ExternalLink, Layers, Edit3, AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -21,9 +22,8 @@ export default function ProgramEditorPage() {
 
     const [loading, setLoading] = useState(!isNew);
     const [saving, setSaving] = useState(false);
-    const [staffList, setStaffList] = useState<any[]>([]);
     const [currentUser, setCurrentUser] = useState<any>(null);
-    const [deletedTrackIds, setDeletedTrackIds] = useState<string[]>([]);
+    const [tracks, setTracks] = useState<any[]>([]);
 
     const [formData, setFormData] = useState({
         code: '',
@@ -46,43 +46,31 @@ export default function ProgramEditorPage() {
             youtube: '',
             line: ''
         },
-        concentrations: [] as {
-            id?: string;
-            code?: string;
-            title: string;
-            titleEn?: string;
-            trackType?: 'CONCENTRATION' | 'MAJOR' | 'MINOR';
-            studyPlanType?: 'REGULAR_4YR' | 'TRANSFER_2YR' | 'GRADUATE';
-            degreeTitle?: string;
-            description: string;
-            bannerUrl?: string;
-            careers?: string[];
-            curriculumUrl?: string;
-            youtubeVideoUrl?: string;
-            facebookVideoUrl?: string;
-            socialLinks?: {
-                facebook?: string;
-                tiktok?: string;
-                instagram?: string;
-                youtube?: string;
-                line?: string;
-            };
-            highlights?: { title: string; description: string }[];
-            structure?: { totalCredits: number; general: number; major: number; freeElective: number };
-        }[],
-        instructors: [] as { staffId: string; role: string; sortOrder?: number }[],
         gallery_images: [] as string[],
         attachments: [] as { originalName: string; fileUrl: string; size?: number; mimeType?: string }[],
         youtube_video_url: '',
-        facebook_video_url: ''
+        facebook_video_url: '',
+        admission_status: 'เปิดรับสมัครตรง (มีสิทธิ์ยื่นกู้ยืม กยศ.)'
     });
+
+    const fetchTracks = async (progId: string) => {
+        try {
+            const trRes = await fetch(`${API_URL}/api/programs/${progId}/tracks`);
+            if (trRes.ok) {
+                const trData = await trRes.json();
+                setTracks(trData || []);
+            }
+        } catch (e) {
+            console.error('Failed to load tracks', e);
+        }
+    };
 
     useEffect(() => {
         const fetchContext = async () => {
             try {
                 const token = localStorage.getItem('admin_token');
 
-                // 1. Fetch current user profile to determine Department Scope RBAC
+                // 1. Fetch current user profile for RBAC
                 let userObj: any = null;
                 if (token) {
                     try {
@@ -98,46 +86,11 @@ export default function ProgramEditorPage() {
                     }
                 }
 
-                // 2. Fetch Staff for Instructors Dropdown
-                const staffRes = await fetch(`${API_URL}/api/staff`);
-                if (staffRes.ok) {
-                    const staffJson = await staffRes.json();
-                    setStaffList(staffJson.data || []);
-                }
-
-                // 3. Fetch Program if not new
+                // 2. Fetch Program & its Tracks if not new
                 if (!isNew) {
                     const progRes = await fetch(`${API_URL}/api/programs/${params.id}`);
                     if (progRes.ok) {
                         const data = await progRes.json();
-                        
-                        // Merge tracks if available, otherwise use concentrations
-                        const mappedTracks = (data.tracks && data.tracks.length > 0)
-                            ? data.tracks.map((t: any) => ({
-                                id: t.id,
-                                code: t.code,
-                                title: t.nameTh,
-                                titleEn: t.nameEn || '',
-                                trackType: t.trackType || 'CONCENTRATION',
-                                studyPlanType: t.studyPlanType || 'REGULAR_4YR',
-                                degreeTitle: t.degreeTitleTh || '',
-                                description: t.description || '',
-                                bannerUrl: t.bannerUrl || '',
-                                careers: t.careers || [],
-                                curriculumUrl: t.curriculumUrl || '',
-                                youtubeVideoUrl: t.youtubeVideoUrl || '',
-                                facebookVideoUrl: t.facebookVideoUrl || '',
-                                socialLinks: t.socialLinks || { facebook: '', tiktok: '', instagram: '', youtube: '', line: '' },
-                                highlights: t.highlights || [],
-                                structure: t.structure || { totalCredits: 0, general: 0, major: 0, freeElective: 0 }
-                            }))
-                            : (data.concentrations || []).map((c: any) => ({
-                                ...c,
-                                trackType: c.trackType || 'CONCENTRATION',
-                                studyPlanType: c.studyPlanType || 'REGULAR_4YR',
-                                socialLinks: c.socialLinks || { facebook: '', tiktok: '', instagram: '', youtube: '', line: '' }
-                            }));
-
                         setFormData({
                             code: data.code || '',
                             name_th: data.nameTh || '',
@@ -159,13 +112,15 @@ export default function ProgramEditorPage() {
                                 youtube: data.youtubeVideoUrl || '',
                                 line: ''
                             },
-                            concentrations: mappedTracks,
-                            instructors: data.instructors ? data.instructors.sort((a:any, b:any) => a.sortOrder - b.sortOrder) : [],
                             gallery_images: data.galleryImages || [],
                             attachments: data.attachments || [],
                             youtube_video_url: data.youtubeVideoUrl || '',
-                            facebook_video_url: data.facebookVideoUrl || ''
+                            facebook_video_url: data.facebookVideoUrl || '',
+                            admission_status: data.admissionStatus || 'เปิดรับสมัครตรง (มีสิทธิ์ยื่นกู้ยืม กยศ.)'
                         });
+
+                        // Fetch dedicated tracks
+                        await fetchTracks(params.id as string);
                     }
                 }
             } catch (error) {
@@ -270,9 +225,37 @@ export default function ProgramEditorPage() {
         }
     };
 
+    const handleDeleteTrack = async (trackId: string, trackName: string) => {
+        if (!confirm(`ยืนยันการลบแขนงวิชา "${trackName}" หรือไม่?\nข้อมูลสื่อ รูปภาพกิจกรรม และลิงก์โซเชียลมีเดียของแขนงนี้จะถูกลบ`)) {
+            return;
+        }
+
+        const token = localStorage.getItem('admin_token');
+        try {
+            const res = await fetch(`${API_URL}/api/programs/tracks/${trackId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                setTracks(prev => prev.filter(t => t.id !== trackId));
+            } else {
+                alert('ไม่สามารถลบแขนงวิชาได้');
+            }
+        } catch (e) {
+            console.error('Error deleting track:', e);
+            alert('เกิดข้อผิดพลาดในการลบแขนงวิชา');
+        }
+    };
+
     const handleSave = async () => {
         if (!hasEditPermission) {
             alert('คุณไม่มีสิทธิ์แก้ไขหลักสูตรนี้เนื่องจากสังกัดอยู่คนละสาขาวิชา');
+            return;
+        }
+
+        if (!formData.code || !formData.name_th) {
+            alert('กรุณากรอกรหัสหลักสูตรและชื่อภาษาไทยให้ครบถ้วน');
             return;
         }
 
@@ -297,16 +280,11 @@ export default function ProgramEditorPage() {
                 careers: formData.careers,
                 highlights: formData.highlights,
                 social_links: formData.social_links,
-                concentrations: formData.concentrations,
-                instructors: formData.instructors.map((inst, idx) => ({
-                    staffId: inst.staffId,
-                    role: inst.role,
-                    sortOrder: idx
-                })),
                 gallery_images: formData.gallery_images,
                 attachments: formData.attachments,
                 youtube_video_url: formData.youtube_video_url || formData.social_links.youtube || '',
-                facebook_video_url: formData.facebook_video_url || formData.social_links.facebook || ''
+                facebook_video_url: formData.facebook_video_url || formData.social_links.facebook || '',
+                admission_status: formData.admission_status
             };
 
             const res = await fetch(url, {
@@ -326,68 +304,13 @@ export default function ProgramEditorPage() {
             }
 
             const savedProgram = await res.json();
-            const programId = isNew ? savedProgram.id : (params.id as string);
+            alert('บันทึกข้อมูลหลักสูตรเรียบร้อยแล้ว');
 
-            // Synchronize Relational Program Tracks (Table: program_tracks)
-            if (programId) {
-                // 1. Delete removed tracks
-                for (const trackId of deletedTrackIds) {
-                    try {
-                        await fetch(`${API_URL}/api/programs/tracks/${trackId}`, {
-                            method: 'DELETE',
-                            headers: { Authorization: `Bearer ${token}` }
-                        });
-                    } catch (e) {
-                        console.error('Failed to delete track', trackId, e);
-                    }
-                }
-
-                // 2. Save / Update existing or new tracks
-                for (let idx = 0; idx < formData.concentrations.length; idx++) {
-                    const track = formData.concentrations[idx];
-                    if (!track.code || !track.title) continue;
-
-                    const trackPayload = {
-                        code: track.code,
-                        name_th: track.title,
-                        name_en: track.titleEn || null,
-                        track_type: track.trackType || 'CONCENTRATION',
-                        study_plan_type: track.studyPlanType || 'REGULAR_4YR',
-                        degree_title_th: track.degreeTitle || null,
-                        description: track.description || '',
-                        banner_url: track.bannerUrl || null,
-                        curriculum_url: track.curriculumUrl || null,
-                        youtube_video_url: track.youtubeVideoUrl || null,
-                        facebook_video_url: track.facebookVideoUrl || null,
-                        social_links: track.socialLinks || null,
-                        careers: track.careers || [],
-                        sort_order: idx,
-                        is_active: true
-                    };
-
-                    if (track.id) {
-                        await fetch(`${API_URL}/api/programs/tracks/${track.id}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: `Bearer ${token}`
-                            },
-                            body: JSON.stringify(trackPayload)
-                        });
-                    } else {
-                        await fetch(`${API_URL}/api/programs/${programId}/tracks`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: `Bearer ${token}`
-                            },
-                            body: JSON.stringify(trackPayload)
-                        });
-                    }
-                }
+            if (isNew) {
+                router.push(`/admin/programs/${savedProgram.id}`);
+            } else {
+                router.push('/admin/programs');
             }
-
-            router.push('/admin/programs');
             router.refresh();
         } catch (error) {
             console.error('Error saving program:', error);
@@ -397,8 +320,35 @@ export default function ProgramEditorPage() {
         }
     };
 
+    const planBadge = (plan: string) => {
+        switch (plan) {
+            case 'TRANSFER_2YR':
+                return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-300">เทียบโอน 2 ปีหลัง (ปวส.)</span>;
+            case 'GRADUATE':
+                return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-100 text-indigo-800 border border-indigo-300">บัณฑิตศึกษา</span>;
+            default:
+                return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">4 ปีปกติ</span>;
+        }
+    };
+
+    const trackTypeBadge = (type: string) => {
+        switch (type) {
+            case 'MAJOR':
+                return <Badge variant="outline" className="bg-sky-50 text-sky-800 border-sky-300 text-xs">กลุ่มวิชาเอก</Badge>;
+            case 'MINOR':
+                return <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-300 text-xs">กลุ่มวิชาโท</Badge>;
+            default:
+                return <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-300 text-xs">แขนงวิชา</Badge>;
+        }
+    };
+
     if (loading) {
-        return <div className="p-8 text-center text-muted-foreground">กำลังโหลดข้อมูลหลักสูตร...</div>;
+        return (
+            <div className="p-16 text-center text-muted-foreground flex items-center justify-center gap-2">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+                <span>กำลังโหลดข้อมูลหลักสูตร...</span>
+            </div>
+        );
     }
 
     return (
@@ -420,14 +370,16 @@ export default function ProgramEditorPage() {
                         </p>
                     </div>
                 </div>
-                <Button 
-                    onClick={handleSave} 
-                    disabled={saving || !hasEditPermission} 
-                    className="gap-2 bg-primary text-white"
-                >
-                    <Save className="w-4 h-4" />
-                    {saving ? 'กำลังบันทึก...' : 'บันทึกหลักสูตร'}
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button 
+                        onClick={handleSave} 
+                        disabled={saving || !hasEditPermission} 
+                        className="gap-2 bg-primary text-white shadow-sm"
+                    >
+                        <Save className="w-4 h-4" />
+                        {saving ? 'กำลังบันทึก...' : 'บันทึกหลักสูตร'}
+                    </Button>
+                </div>
             </div>
 
             {/* Scope Warning Banner if staff is from another department */}
@@ -499,6 +451,29 @@ export default function ProgramEditorPage() {
                         </div>
                     </div>
 
+                    {/* Admission Status Field */}
+                    <div className="space-y-2 p-3.5 bg-slate-50 border border-slate-200 rounded-md">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="admission_status" className="font-semibold text-slate-800">
+                                สถานะการรับสมัคร (Admission Status)
+                            </Label>
+                            <span className="text-xs text-muted-foreground">แสดงบนแถบหัวข้อหลักสูตร</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${formData.admission_status?.includes('ปิด') ? 'bg-rose-500' : 'bg-emerald-500 animate-pulse'}`} />
+                            <Input 
+                                id="admission_status"
+                                value={formData.admission_status} 
+                                onChange={e => setFormData(p => ({ ...p, admission_status: e.target.value }))} 
+                                placeholder="เช่น เปิดรับสมัครตรง (มีสิทธิ์ยื่นกู้ยืม กยศ.)" 
+                                className="bg-white"
+                            />
+                        </div>
+                        <p className="text-xs text-slate-500">
+                            ข้อความนี้จะปรากฏบนแถบด้านบนของหน้าหลักสูตรสาธารณะ เช่น &quot;เปิดรับสมัครตรง (มีสิทธิ์ยื่นกู้ยืม กยศ.)&quot; หรือ &quot;เปิดรับสมัครรอบที่ 1&quot;
+                        </p>
+                    </div>
+
                     <div className="space-y-2">
                         <Label>ปรัชญาและคำอธิบายหลักสูตร</Label>
                         <Textarea 
@@ -557,7 +532,7 @@ export default function ProgramEditorPage() {
                 </CardContent>
             </Card>
 
-            {/* 2. Multi-Channel Social Media (Admin & Department Staff Access) */}
+            {/* 2. Multi-Channel Social Media */}
             <Card className="border-sky-200 bg-sky-50/20">
                 <CardHeader>
                     <div className="flex items-center gap-2">
@@ -695,327 +670,154 @@ export default function ProgramEditorPage() {
                 </CardContent>
             </Card>
 
-            {/* 4. First-Class Concentrations & Major Tracks */}
-            <Card className="border-amber-200">
-                <CardHeader className="flex flex-row items-center justify-between pb-3">
+            {/* 4. TRACK MANAGEMENT (DECOUPLED FORM ARCHITECTURE) */}
+            <Card className="border-amber-300 shadow-sm">
+                <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 bg-amber-50/40 border-b border-amber-200/60 rounded-t-lg">
                     <div>
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <span>แขนงวิชา / กลุ่มวิชาเอกเฉพาะทาง (Concentrations & Tracks)</span>
-                            <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold">
-                                First-Class Entity
-                            </span>
-                        </CardTitle>
+                        <div className="flex items-center gap-2">
+                            <Layers className="w-5 h-5 text-amber-700" />
+                            <CardTitle className="text-lg text-amber-950">
+                                แขนงวิชา / กลุ่มวิชาเอกเฉพาะทาง (Tracks & Concentrations)
+                            </CardTitle>
+                            <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 text-xs">
+                                แยกฟอร์มอิสระ
+                            </Badge>
+                        </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            รองรับการแยกแผนการศึกษา: หลักสูตร 4 ปีปกติ, เทียบโอน 2 ปีหลัง (ปวส.), และระดับบัณฑิตศึกษา พร้อม URL แยกเฉพาะ
+                            จัดการแขนงวิชา แผนเทียบโอน 2 ปีหลัง (ปวส.) พร้อมรูปภาพกิจกรรมและลิงก์โซเชียลแยกเฉพาะ
                         </p>
                     </div>
-                    <Button 
-                        type="button"
-                        variant="outline" 
-                        size="sm" 
-                        className="border-amber-400 text-amber-900 hover:bg-amber-50"
-                        onClick={() => setFormData(p => ({
-                            ...p, 
-                            concentrations: [
-                                ...p.concentrations, 
-                                { 
-                                    code: '', 
-                                    title: '', 
-                                    titleEn: '', 
-                                    trackType: 'CONCENTRATION',
-                                    studyPlanType: 'REGULAR_4YR',
-                                    degreeTitle: formData.degree_title_th || '', 
-                                    description: '',
-                                    bannerUrl: '',
-                                    careers: [],
-                                    socialLinks: { facebook: '', tiktok: '', instagram: '', line: '', youtube: '' }
-                                }
-                            ]
-                        }))}
-                    >
-                        <Plus className="w-4 h-4 mr-1 text-amber-600" /> เพิ่มแขนงวิชา/วิชาเอก
-                    </Button>
+
+                    {!isNew && (
+                        <Button
+                            type="button"
+                            onClick={() => router.push(`/admin/programs/${params.id}/tracks/new`)}
+                            className="bg-amber-600 hover:bg-amber-700 text-white gap-1.5 shadow-sm text-xs h-9 shrink-0"
+                        >
+                            <Plus className="w-4 h-4" />
+                            เพิ่มแขนงวิชาใหม่
+                        </Button>
+                    )}
                 </CardHeader>
-                <CardContent>
-                    <div className="space-y-6">
-                        {formData.concentrations.map((con, index) => (
-                            <div key={index} className="p-5 border-2 border-amber-200/80 rounded-lg bg-amber-50/20 space-y-4 relative">
-                                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-amber-200">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <span className="px-2.5 py-1 bg-scholar-deep text-scholar-gold text-xs font-bold rounded-sm">
-                                            ลำดับที่ {index + 1}
-                                        </span>
-                                        {con.studyPlanType === 'TRANSFER_2YR' && (
-                                            <span className="px-2 py-0.5 bg-amber-600 text-white text-[11px] font-bold rounded-sm">
-                                                เทียบโอน 2 ปีหลัง (ปวส.)
-                                            </span>
-                                        )}
-                                        {con.code && formData.code && (
-                                            <a 
-                                                href={`/programs/${formData.code}/${con.code}`} 
-                                                target="_blank" 
-                                                rel="noreferrer"
-                                                className="text-xs text-scholar-accent font-mono hover:underline flex items-center gap-1"
-                                            >
-                                                <span>/programs/{formData.code}/{con.code}</span>
-                                                <ExternalLink className="w-3 h-3" />
-                                            </a>
-                                        )}
-                                    </div>
-                                    <Button 
-                                        type="button"
-                                        variant="ghost" 
-                                        size="sm" 
-                                        className="text-destructive h-8 px-2 hover:bg-red-50"
-                                        onClick={() => {
-                                            if (con.id) {
-                                                setDeletedTrackIds(prev => [...prev, con.id!]);
-                                            }
-                                            setFormData(p => ({
-                                                ...p, 
-                                                concentrations: p.concentrations.filter((_, i) => i !== index)
-                                            }));
-                                        }}
-                                    >
-                                        <Trash2 className="w-4 h-4 mr-1" /> ลบแขนงนี้
-                                    </Button>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                                    <div className="space-y-1">
-                                        <Label className="text-xs">ประเภทกลุ่มวิชา*</Label>
-                                        <select 
-                                            className="w-full h-9 px-2.5 rounded-md border text-xs bg-white"
-                                            value={con.trackType || 'CONCENTRATION'}
-                                            onChange={e => {
-                                                const updated = [...formData.concentrations];
-                                                updated[index] = { ...updated[index], trackType: e.target.value as any };
-                                                setFormData(p => ({ ...p, concentrations: updated }));
-                                            }}
-                                        >
-                                            <option value="CONCENTRATION">แขนงวิชา (Concentration)</option>
-                                            <option value="MAJOR">กลุ่มวิชาเอก (Major)</option>
-                                            <option value="MINOR">กลุ่มวิชาโท (Minor)</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <Label className="text-xs">แผนการศึกษา (Study Plan)*</Label>
-                                        <select 
-                                            className="w-full h-9 px-2.5 rounded-md border text-xs bg-white font-medium text-scholar-deep"
-                                            value={con.studyPlanType || 'REGULAR_4YR'}
-                                            onChange={e => {
-                                                const updated = [...formData.concentrations];
-                                                updated[index] = { ...updated[index], studyPlanType: e.target.value as any };
-                                                setFormData(p => ({ ...p, concentrations: updated }));
-                                            }}
-                                        >
-                                            <option value="REGULAR_4YR">หลักสูตร 4 ปีปกติ (4-Year Regular)</option>
-                                            <option value="TRANSFER_2YR">หลักสูตรเทียบโอน 2 ปีหลัง ปวส. (2-Year Transfer)</option>
-                                            <option value="GRADUATE">ระดับบัณฑิตศึกษา (Graduate Studies)</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="space-y-1 md:col-span-2">
-                                        <Label className="text-xs">รหัส URL Slug (ภาษาอังกฤษ)*</Label>
-                                        <Input 
-                                            placeholder="เช่น sociology-anthropology หรือ culinary-and-service-transfer" 
-                                            value={con.code || ''}
-                                            onChange={e => {
-                                                const updated = [...formData.concentrations];
-                                                updated[index] = { ...updated[index], code: e.target.value.toLowerCase().replace(/\s+/g, '-') };
-                                                setFormData(p => ({ ...p, concentrations: updated }));
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div className="space-y-1">
-                                        <Label className="text-xs">ชื่อแขนงวิชา/วิชาเอก (ภาษาไทย)*</Label>
-                                        <Input 
-                                            placeholder="เช่น แขนงวิชาสังคมวิทยาและมานุษยวิทยา" 
-                                            value={con.title || ''}
-                                            onChange={e => {
-                                                const updated = [...formData.concentrations];
-                                                updated[index] = { ...updated[index], title: e.target.value };
-                                                setFormData(p => ({ ...p, concentrations: updated }));
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-xs">ชื่อภาษาอังกฤษ (English Title)</Label>
-                                        <Input 
-                                            placeholder="เช่น Sociology and Anthropology" 
-                                            value={con.titleEn || ''}
-                                            onChange={e => {
-                                                const updated = [...formData.concentrations];
-                                                updated[index] = { ...updated[index], titleEn: e.target.value };
-                                                setFormData(p => ({ ...p, concentrations: updated }));
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-xs">คำอธิบายรายละเอียด / ปรัชญาของแขนงวิชา*</Label>
-                                    <Textarea 
-                                        rows={3}
-                                        placeholder="ระบุจุดเน้น ทักษะ และเป้าหมายการผลิตบัณฑิตของแขนงนี้..."
-                                        value={con.description || ''}
-                                        onChange={e => {
-                                            const updated = [...formData.concentrations];
-                                            updated[index] = { ...updated[index], description: e.target.value };
-                                            setFormData(p => ({ ...p, concentrations: updated }));
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    <div className="space-y-1">
-                                        <Label className="text-xs">รูปภาพ Banner ประจำแขนง</Label>
-                                        <div className="flex gap-1.5">
-                                            <Input 
-                                                placeholder="https://... หรืออัปโหลดภาพ" 
-                                                value={con.bannerUrl || ''}
-                                                onChange={e => {
-                                                    const updated = [...formData.concentrations];
-                                                    updated[index] = { ...updated[index], bannerUrl: e.target.value };
-                                                    setFormData(p => ({ ...p, concentrations: updated }));
-                                                }}
-                                            />
-                                            <div className="relative shrink-0">
-                                                <Button variant="outline" size="sm" type="button" className="cursor-pointer pointer-events-none text-xs h-9 px-2.5">
-                                                    <Upload className="w-3.5 h-3.5 mr-1" /> ภาพ
-                                                </Button>
-                                                <input 
-                                                    type="file" 
-                                                    accept="image/*" 
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                                                    onChange={async (e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (!file) return;
-                                                        const token = localStorage.getItem('admin_token');
-                                                        const fd = new FormData();
-                                                        fd.append('file', file);
-                                                        try {
-                                                            const res = await fetch(`${API_URL}/api/upload/programs`, {
-                                                                method: 'POST',
-                                                                headers: { Authorization: `Bearer ${token}` },
-                                                                body: fd,
-                                                            });
-                                                            if (res.ok) {
-                                                                const data = await res.json();
-                                                                if (con.bannerUrl) await deleteManagedFile(con.bannerUrl);
-                                                                const updated = [...formData.concentrations];
-                                                                updated[index] = { ...updated[index], bannerUrl: data.url };
-                                                                setFormData(p => ({ ...p, concentrations: updated }));
-                                                            }
-                                                        } catch (err) {
-                                                            console.error('Upload track banner error', err);
-                                                        }
-                                                    }} 
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <Label className="text-xs">ไฟล์เล่มหลักสูตรเฉพาะแขนง (PDF)</Label>
-                                        <div className="flex gap-1.5">
-                                            <Input 
-                                                placeholder="https://... หรืออัปโหลด PDF" 
-                                                value={con.curriculumUrl || ''}
-                                                onChange={e => {
-                                                    const updated = [...formData.concentrations];
-                                                    updated[index] = { ...updated[index], curriculumUrl: e.target.value };
-                                                    setFormData(p => ({ ...p, concentrations: updated }));
-                                                }}
-                                            />
-                                            <div className="relative shrink-0">
-                                                <Button variant="outline" size="sm" type="button" className="cursor-pointer pointer-events-none text-xs h-9 px-2.5">
-                                                    <FileText className="w-3.5 h-3.5 mr-1" /> PDF
-                                                </Button>
-                                                <input 
-                                                    type="file" 
-                                                    accept=".pdf" 
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                                                    onChange={async (e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (!file) return;
-                                                        const token = localStorage.getItem('admin_token');
-                                                        const fd = new FormData();
-                                                        fd.append('file', file);
-                                                        try {
-                                                            const res = await fetch(`${API_URL}/api/upload/programs`, {
-                                                                method: 'POST',
-                                                                headers: { Authorization: `Bearer ${token}` },
-                                                                body: fd,
-                                                            });
-                                                            if (res.ok) {
-                                                                const data = await res.json();
-                                                                if (con.curriculumUrl) await deleteManagedFile(con.curriculumUrl);
-                                                                const updated = [...formData.concentrations];
-                                                                updated[index] = { ...updated[index], curriculumUrl: data.url };
-                                                                setFormData(p => ({ ...p, concentrations: updated }));
-                                                            }
-                                                        } catch (err) {
-                                                            console.error('Upload track curriculum error', err);
-                                                        }
-                                                    }} 
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <Label className="text-xs">YouTube Video URL ประจำแขนง</Label>
-                                        <Input 
-                                            placeholder="https://www.youtube.com/watch?v=..." 
-                                            value={con.youtubeVideoUrl || ''}
-                                            onChange={e => {
-                                                const updated = [...formData.concentrations];
-                                                updated[index] = { ...updated[index], youtubeVideoUrl: e.target.value };
-                                                setFormData(p => ({ ...p, concentrations: updated }));
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-xs">อาชีพเฉพาะทางของแขนงนี้ (คั่นด้วยเครื่องหมายจุลภาค ,)</Label>
-                                    <Input 
-                                        placeholder="เช่น เชฟโรงแรม, ผู้จัดการฝ่ายอาหารและเครื่องดื่ม, ผู้ประกอบการร้านอาหาร" 
-                                        value={(con.careers || []).join(', ')}
-                                        onChange={e => {
-                                            const updated = [...formData.concentrations];
-                                            const careersArr = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                                            updated[index] = { ...updated[index], careers: careersArr };
-                                            setFormData(p => ({ ...p, concentrations: updated }));
-                                        }}
-                                    />
-                                </div>
+                <CardContent className="pt-4">
+                    {isNew ? (
+                        <div className="text-center py-6 text-sm text-muted-foreground border border-dashed rounded-lg bg-muted/10">
+                            💡 กรุณากด &quot;บันทึกหลักสูตร&quot; ก่อน จึงจะสามารถเพิ่มและจัดการแขนงวิชาย่อยได้
+                        </div>
+                    ) : tracks.length > 0 ? (
+                        <div className="space-y-3">
+                            <div className="overflow-x-auto border rounded-lg">
+                                <table className="w-full text-xs">
+                                    <thead className="bg-muted/50 border-b text-muted-foreground text-left">
+                                        <tr>
+                                            <th className="px-3 py-2.5 font-medium w-12 text-center">#</th>
+                                            <th className="px-3 py-2.5 font-medium">ชื่อแขนงวิชา / รหัส</th>
+                                            <th className="px-3 py-2.5 font-medium">แผนการศึกษา</th>
+                                            <th className="px-3 py-2.5 font-medium">ประเภท</th>
+                                            <th className="px-3 py-2.5 font-medium">สถานะการรับสมัคร</th>
+                                            <th className="px-3 py-2.5 text-right font-medium">จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {tracks.map((t, idx) => (
+                                            <tr key={t.id} className="hover:bg-amber-50/20">
+                                                <td className="px-3 py-3 text-center text-muted-foreground font-medium">
+                                                    {idx + 1}
+                                                </td>
+                                                <td className="px-3 py-3">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-scholar-deep text-sm">{t.nameTh}</span>
+                                                        {t.nameEn && <span className="text-[11px] text-muted-foreground italic">{t.nameEn}</span>}
+                                                        <span className="text-[10px] font-mono text-muted-foreground mt-0.5">/{formData.code}/{t.code}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-3 py-3">
+                                                    {planBadge(t.studyPlanType)}
+                                                </td>
+                                                <td className="px-3 py-3">
+                                                    {trackTypeBadge(t.trackType)}
+                                                </td>
+                                                <td className="px-3 py-3">
+                                                    <span className="text-xs text-slate-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-block max-w-[160px] truncate">
+                                                        {t.admissionStatus || formData.admission_status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-3 py-3 text-right">
+                                                    <div className="flex justify-end items-center gap-1">
+                                                        {formData.code && t.code && (
+                                                            <a
+                                                                href={`/programs/${formData.code}/${t.code}`}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="h-8 w-8 inline-flex items-center justify-center rounded text-scholar-deep hover:bg-slate-100"
+                                                                title="ดูหน้าเว็บจริง"
+                                                            >
+                                                                <ExternalLink className="w-3.5 h-3.5" />
+                                                            </a>
+                                                        )}
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 px-2.5 text-xs text-amber-800 border-amber-300 hover:bg-amber-50"
+                                                            onClick={() => router.push(`/admin/programs/${params.id}/tracks/${t.id}`)}
+                                                        >
+                                                            <Edit3 className="w-3.5 h-3.5 mr-1 text-amber-600" />
+                                                            แก้ไขแขนงวิชา
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-destructive hover:bg-red-50"
+                                                            onClick={() => handleDeleteTrack(t.id, t.nameTh)}
+                                                            title="ลบแขนงวิชา"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
-                        ))}
-
-                        {formData.concentrations.length === 0 && (
-                            <div className="text-center py-8 text-muted-foreground bg-muted/10 rounded-lg border border-dashed">
-                                ยังไม่มีการกำหนดแขนงวิชาเฉพาะ (หลักสูตรนี้แสดงผลเป็นหลักสูตรเดี่ยว) กดปุ่ม &quot;เพิ่มแขนงวิชา/วิชาเอก&quot; เพื่อสร้างแขนงย่อย
+                        </div>
+                    ) : (
+                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-lg text-center space-y-3">
+                            <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mx-auto">
+                                <Layers className="w-5 h-5" />
                             </div>
-                        )}
-                    </div>
+                            <div>
+                                <p className="font-semibold text-slate-800 text-sm">หลักสูตรนี้แสดงผลเป็น &quot;หลักสูตรเดี่ยว&quot; (Single Curriculum)</p>
+                                <p className="text-xs text-slate-500 mt-1 max-w-lg mx-auto">
+                                    หลักสูตรนี้ไม่มีแขนงวิชาย่อย ระบบจะดึงข้อมูลโครงสร้างหลักสูตร สื่อประชาสัมพันธ์ และลิงก์โซเชียลมีเดียจากฟอร์มหลักนี้ไปแสดงผลบนหน้าเว็บไซต์โดยตรง
+                                </p>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.push(`/admin/programs/${params.id}/tracks/new`)}
+                                className="border-amber-400 text-amber-800 hover:bg-amber-50 text-xs"
+                            >
+                                <Plus className="w-3.5 h-3.5 mr-1 text-amber-600" />
+                                เพิ่มแขนงวิชา / แผนเทียบโอนสำหรับหลักสูตรนี้
+                            </Button>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
             {/* 5. PR Media (Gallery & Attachments) */}
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-lg">สื่อประชาสัมพันธ์รูปภาพ & เอกสาร (PR Media)</CardTitle>
+                    <CardTitle className="text-lg">สื่อประชาสัมพันธ์รูปภาพ & เอกสารของหลักสูตร (PR Media)</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <Label>แกลลอรีรูปภาพกิจกรรม (Multiple Images)</Label>
+                            <Label>แกลลอรีรูปภาพกิจกรรมหลักสูตร (Multiple Images)</Label>
                             <div className="relative">
                                 <Button variant="outline" size="sm" type="button" className="cursor-pointer pointer-events-none">
                                     <Upload className="w-4 h-4 mr-2" /> อัปโหลดรูปภาพ
@@ -1045,7 +847,7 @@ export default function ProgramEditorPage() {
                             </div>
                         ) : (
                             <div className="text-center py-6 border border-dashed rounded-xl bg-muted/20 text-muted-foreground text-sm">
-                                ยังไม่มีรูปภาพในแกลลอรี
+                                ยังไม่มีรูปภาพในแกลลอรีของหลักสูตร
                             </div>
                         )}
                     </div>
@@ -1093,7 +895,7 @@ export default function ProgramEditorPage() {
                 </CardContent>
             </Card>
 
-            {/* 6. Careers & Highlights */}
+            {/* 6. Careers */}
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-lg">อาชีพหลังสำเร็จการศึกษา</CardTitle>
@@ -1107,7 +909,7 @@ export default function ProgramEditorPage() {
                             <div key={index} className="flex gap-2">
                                 <Input 
                                     value={career} 
-                                    placeholder="เช่น นักสังคมสงเคราะห์, พนักงานทรัพยากรบุคคล"
+                                    placeholder="เช่น นักสังคมสงเคราะห์, ผู้ประกอบการร้านอาหาร, เจ้าหน้าที่สิ่งแวดล้อม"
                                     onChange={(e) => {
                                         const newCareers = [...formData.careers];
                                         newCareers[index] = e.target.value;

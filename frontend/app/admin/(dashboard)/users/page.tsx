@@ -641,7 +641,7 @@ export default function AdminUsersPage() {
                         <ShieldCheck className="w-7 h-7 text-primary" /> แดชบอร์ดจัดการสิทธิ์ (RBAC & Access Control)
                     </h1>
                     <p className="text-sm text-muted-foreground mt-0.5">
-                        ศูนย์ควบคุมสิทธิ์ผู้ใช้ ขอบเขตประจำสาขาวิชา (Scope) และเมทริกซ์การเข้าถึงระบบสำนักวิชา
+                        ศูนย์ควบคุมสิทธิ์ผู้ใช้ ขอบเขตประจำสาขาวิชา (Scope) และเมทริกซ์การเข้าถึงระบบคณะสังคมศาสตร์
                     </p>
                 </div>
 

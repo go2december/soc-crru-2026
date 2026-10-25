@@ -100,7 +100,8 @@ export class CreateProcurementDto {
 
   @IsOptional()
   @IsEnum(['DRAFT', 'PENDING_REVIEW', 'APPROVED', 'PUBLISHED', 'REJECTED'])
-  publicationStatus?: 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'REJECTED';
+  publicationStatus?:
+    'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'REJECTED';
 
   @IsOptional()
   @IsArray()

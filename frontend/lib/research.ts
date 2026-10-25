@@ -267,3 +267,32 @@ export async function fetchResearchList(params?: {
     };
   }
 }
+
+export interface ResearchStatsResponse {
+  total: number;
+  socialServiceCount: number;
+  commercialCount: number;
+  publishedCount: number;
+  ongoingCount: number;
+  totalBudget: string;
+  topSdgs: { sdgId: number; count: number }[];
+  outputCount: number;
+}
+
+export async function fetchResearchStats(): Promise<ResearchStatsResponse | null> {
+  const apiUrl = getApiBaseUrl();
+
+  try {
+    const res = await fetch(`${apiUrl}/api/research/stats`, {
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) return null;
+
+    return (await res.json()) as ResearchStatsResponse;
+  } catch (error) {
+    console.error('Error fetching research stats:', error);
+    return null;
+  }
+}
+

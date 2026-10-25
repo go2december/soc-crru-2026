@@ -27,7 +27,9 @@ export class StaffMailService {
           pass: smtpPass,
         },
       });
-      this.logger.log(`Initialized SMTP transport via ${smtpHost}:${smtpPort} as ${smtpUser}`);
+      this.logger.log(
+        `Initialized SMTP transport via ${smtpHost}:${smtpPort} as ${smtpUser}`,
+      );
     } else {
       this.logger.warn(
         'SMTP credentials (SMTP_USER/SMTP_PASS) not fully configured in .env. Emails will run in simulated preview mode.',
@@ -53,7 +55,8 @@ export class StaffMailService {
     purpose: string;
     requestId: string;
   }) {
-    const { to, requesterName, organization, staffName, purpose, requestId } = params;
+    const { to, requesterName, organization, staffName, purpose, requestId } =
+      params;
 
     const subject = `[คณะสังคมศาสตร์ มร.ชร.] ยืนยันการรับคำขอเอกสารประวัติวิทยากร/เรซูเม่อาจารย์ (${staffName})`;
     const html = `
@@ -119,7 +122,15 @@ export class StaffMailService {
     fileName: string;
     requestId: string;
   }) {
-    const { to, requesterName, organization, staffName, pdfBuffer, fileName, requestId } = params;
+    const {
+      to,
+      requesterName,
+      organization,
+      staffName,
+      pdfBuffer,
+      fileName,
+      requestId,
+    } = params;
 
     const subject = `[อนุมัติคำขอ] เอกสารประวัติวิทยากร/เรซูเม่ ${staffName} - คณะสังคมศาสตร์ มร.ชร.`;
     const html = `
@@ -174,7 +185,10 @@ export class StaffMailService {
       this.logger.log(`Official resume email sent to ${to}: ${info.messageId}`);
       return { success: true, messageId: info.messageId };
     } catch (error) {
-      this.logger.error(`Failed to send official resume email to ${to}:`, error);
+      this.logger.error(
+        `Failed to send official resume email to ${to}:`,
+        error,
+      );
       return { success: false, error: (error as Error).message };
     }
   }
@@ -190,7 +204,10 @@ export class StaffMailService {
     purpose: string;
     requestId: string;
   }) {
-    const adminEmail = params.adminEmail || process.env.ADMIN_NOTIFICATION_EMAIL || 'social@crru.ac.th';
+    const adminEmail =
+      params.adminEmail ||
+      process.env.ADMIN_NOTIFICATION_EMAIL ||
+      'social@crru.ac.th';
     const subject = `[แจ้งเตือนคำขอใหม่] มีผู้ขอเอกสารประวัติวิทยากร: ${params.staffName}`;
     const html = `
       <div style="font-family: 'Sarabun', Tahoma, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; padding: 20px;">

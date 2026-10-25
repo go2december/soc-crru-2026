@@ -150,7 +150,7 @@ function formatEventTime(startIso: string, endIso: string, isAllDay: boolean) {
 }
 
 function createGoogleCalendarUrl(event: CalendarEvent): string {
-    const title = encodeURIComponent(event.title || 'กิจกรรมสำนักวิชาสังคมศาสตร์');
+    const title = encodeURIComponent(event.title || 'กิจกรรมคณะสังคมศาสตร์');
     const details = encodeURIComponent(event.description || '');
     const location = encodeURIComponent(event.location || '');
 
@@ -563,7 +563,7 @@ export default function CalendarClient({ initialEvents }: CalendarClientProps) {
                         <div>
                             <h4 className="font-semibold text-sm sm:text-base">ซิงค์ปฏิทินกับ Google Calendar หรือมือถือของคุณ</h4>
                             <p className="text-xs text-base-content/60">
-                                ติดตามกำหนดการสอบและการประชุมสำนักวิชาสังคมศาสตร์ได้แบบ Real-time
+                                ติดตามกำหนดการสอบและการประชุมคณะสังคมศาสตร์ได้แบบ Real-time
                             </p>
                         </div>
                     </div>

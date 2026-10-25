@@ -14,11 +14,18 @@ import {
     HelpCircle,
     GraduationCap,
     BookOpen,
-    CheckCircle,
+    CheckCircle2,
     ChevronDown,
     ChevronUp,
-    Sparkles
+    Sparkles,
+    Calendar,
+    ArrowRight
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Course {
     id: string | number;
@@ -97,7 +104,7 @@ const fallbackCourses: Course[] = [
 export default function ShortCoursesPage() {
     const [courses, setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filterType, setFilterType] = useState<'all' | 'credit-bank' | 'general'>('all');
+    const [filterType, setFilterType] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [showGuide, setShowGuide] = useState(false);
 
@@ -145,165 +152,169 @@ export default function ShortCoursesPage() {
     const generalCount = courses.filter(c => !c.isCreditBank).length;
 
     return (
-        <div className="bg-white font-sans text-scholar-text">
-
-            {/* Header Banner */}
-            <div className="bg-gradient-to-r from-scholar-deep to-gray-900 text-white py-16 px-4 shadow-lg relative overflow-hidden">
-                <div className="absolute -right-20 -bottom-20 w-96 h-96 bg-scholar-gold/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="container mx-auto relative z-10">
-                    <Breadcrumb items={[{ label: 'การจัดการศึกษา', href: '/academics/overview' }, { label: 'หลักสูตรระยะสั้น' }]} />
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-scholar-gold/20 border border-scholar-gold/30 text-scholar-gold text-xs font-bold uppercase tracking-widest mt-4">
-                        <Award className="w-3.5 h-3.5" />
-                        Lifelong Learning & Credit Bank
+        <div className="bg-slate-50/50 font-sans text-slate-800 min-h-screen">
+            {/* Header Banner - Scholar Academic Theme */}
+            <div className="bg-[#0B132B] text-white py-16 px-4 shadow-md relative overflow-hidden border-b-4 border-amber-500">
+                <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
+                <div className="container mx-auto relative z-10 max-w-6xl">
+                    <Breadcrumb items={[{ label: 'การจัดการศึกษา', href: '/programs' }, { label: 'หลักสูตรระยะสั้น' }]} />
+                    
+                    <div className="mt-6 flex flex-wrap items-center gap-2">
+                        <Badge variant="outline" className="bg-amber-500/10 text-amber-300 border-amber-400/40 text-xs px-3 py-1 font-semibold uppercase tracking-wider backdrop-blur-xs">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-300 mr-1.5" />
+                            LIFELONG LEARNING &amp; CREDIT BANK
+                        </Badge>
+                        <Badge variant="outline" className="bg-white/10 text-slate-200 border-white/20 text-xs px-2.5 py-1">
+                            CRRU Lifelong Network
+                        </Badge>
                     </div>
-                    <h1 className="text-3xl md:text-5xl font-bold mt-3 leading-tight">
+
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-4 leading-tight font-heading text-white">
                         หลักสูตรระยะสั้น (Short Courses)
                     </h1>
-                    <p className="text-gray-300 mt-3 max-w-2xl text-base md:text-lg font-light leading-relaxed">
-                        พัฒนาและต่อยอดทักษะแห่งอนาคต (Upskill & Reskill) โดยคณาจารย์ผู้ทรงคุณวุฒิ คณะสังคมศาสตร์ <br />
-                        พร้อมเชื่อมโยงและสะสมหน่วยกิตเข้าสู่ระบบคลังหน่วยกิต (Credit Bank) ผ่าน <span className="text-scholar-gold font-medium">CRRU Lifelong Learning</span>
+                    
+                    <p className="text-slate-300 mt-3 max-w-3xl text-sm sm:text-base font-light leading-relaxed">
+                        พัฒนาและต่อยอดทักษะแห่งอนาคต (Upskill &amp; Reskill) โดยคณาจารย์ผู้ทรงคุณวุฒิ คณะสังคมศาสตร์ 
+                        พร้อมระบบสะสมผลลัพธ์การเรียนรู้เทียบโอนหน่วยกิตเข้าสู่ปริญญาบัตรผ่าน <span className="text-amber-400 font-medium">ระบบคลังหน่วยกิต (Credit Bank)</span>
                     </p>
                 </div>
             </div>
 
-            {/* Filter & List */}
-            <div className="container mx-auto px-4 py-12">
+            {/* Main Content Area */}
+            <div className="container mx-auto px-4 py-10 max-w-6xl space-y-8">
 
-                {/* Filter Tabs & Search Bar */}
-                <div className="flex flex-col lg:flex-row gap-4 mb-6 justify-between items-center bg-gray-50 p-3 sm:p-4 rounded-2xl border border-gray-200/80 shadow-sm">
-                    <div className="flex flex-wrap bg-white p-1.5 rounded-xl sm:rounded-full border border-gray-200 shadow-sm gap-1 w-full lg:w-auto">
-                        <button
-                            className={`rounded-lg sm:rounded-full px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold transition-all duration-150 flex items-center gap-1.5 ${filterType === 'all'
-                                ? 'bg-scholar-deep text-white shadow-md'
-                                : 'text-gray-600 hover:text-scholar-deep hover:bg-gray-50'
-                                }`}
-                            onClick={() => setFilterType('all')}
-                        >
-                            <BookOpen className="w-3.5 h-3.5" />
-                            หลักสูตรทั้งหมด ({courses.length})
-                        </button>
-                        <button
-                            className={`rounded-lg sm:rounded-full px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold transition-all duration-150 flex items-center gap-1.5 ${filterType === 'credit-bank'
-                                ? 'bg-amber-500 text-white shadow-md font-bold'
-                                : 'text-gray-600 hover:text-amber-600 hover:bg-amber-50/50'
-                                }`}
-                            onClick={() => setFilterType('credit-bank')}
-                        >
-                            <Award className="w-4 h-4 text-amber-300" />
-                            สะสม Credit Bank ({creditBankCount})
-                        </button>
-                        <button
-                            className={`rounded-lg sm:rounded-full px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold transition-all duration-150 flex items-center gap-1.5 ${filterType === 'general'
-                                ? 'bg-slate-700 text-white shadow-md font-bold'
-                                : 'text-gray-600 hover:text-slate-800 hover:bg-gray-50'
-                                }`}
-                            onClick={() => setFilterType('general')}
-                        >
-                            <GraduationCap className="w-4 h-4" />
-                            หลักสูตรระยะสั้นทั่วไป ({generalCount})
-                        </button>
-                    </div>
+                {/* Filter Tabs & Search Bar using shadcn/ui */}
+                <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col lg:flex-row gap-4 justify-between items-center">
+                    {/* shadcn Tabs */}
+                    <Tabs value={filterType} onValueChange={setFilterType} className="w-full lg:w-auto">
+                        <TabsList className="bg-slate-100 p-1 rounded-xl h-auto flex flex-wrap gap-1 w-full lg:w-auto">
+                            <TabsTrigger 
+                                value="all" 
+                                className="rounded-lg text-xs sm:text-sm font-semibold px-3.5 py-2 data-[state=active]:bg-[#0B132B] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
+                            >
+                                <BookOpen className="w-3.5 h-3.5 mr-1.5" />
+                                ทั้งหมด ({courses.length})
+                            </TabsTrigger>
+                            <TabsTrigger 
+                                value="credit-bank" 
+                                className="rounded-lg text-xs sm:text-sm font-semibold px-3.5 py-2 data-[state=active]:bg-amber-600 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
+                            >
+                                <Award className="w-3.5 h-3.5 mr-1.5 text-amber-200" />
+                                สะสม Credit Bank ({creditBankCount})
+                            </TabsTrigger>
+                            <TabsTrigger 
+                                value="general" 
+                                className="rounded-lg text-xs sm:text-sm font-semibold px-3.5 py-2 data-[state=active]:bg-slate-700 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
+                            >
+                                <GraduationCap className="w-3.5 h-3.5 mr-1.5" />
+                                หลักสูตรอบรมทั่วไป ({generalCount})
+                            </TabsTrigger>
+                        </TabsList>
+                    </Tabs>
 
-                    <div className="flex items-center gap-2 w-full lg:w-auto">
-                        <div className="relative w-full lg:w-72">
-                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            <input
+                    {/* Search & Guide Toggle */}
+                    <div className="flex items-center gap-2.5 w-full lg:w-auto">
+                        <div className="relative w-full lg:w-80">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Input
                                 type="text"
-                                className="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-scholar-accent/20 focus:border-scholar-accent"
+                                className="pl-10 pr-4 h-10 text-xs sm:text-sm bg-slate-50 border-slate-200 focus-visible:ring-amber-500 rounded-xl"
                                 placeholder="ค้นหาชื่อวิชา, รหัส, ผู้สอน..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <button
+                        <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => setShowGuide(!showGuide)}
-                            className={`px-3 py-2.5 rounded-full border text-xs font-semibold inline-flex items-center gap-1.5 flex-shrink-0 transition-colors ${showGuide
-                                ? 'bg-amber-50 border-amber-300 text-amber-800'
-                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                                }`}
-                            title="คำแนะนำประเภทหลักสูตร"
+                            className={`h-10 px-3 rounded-xl border text-xs font-semibold gap-1.5 shrink-0 transition-colors ${
+                                showGuide 
+                                    ? 'bg-amber-50 border-amber-300 text-amber-900' 
+                                    : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                            }`}
                         >
-                            <HelpCircle className="w-4 h-4 text-amber-500" />
+                            <HelpCircle className="w-4 h-4 text-amber-600" />
                             <span className="hidden sm:inline">เกณฑ์การเทียบโอน</span>
                             {showGuide ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
-                {/* Guide Accordion / Banner */}
+                {/* Academic Guide Box using shadcn Card */}
                 {showGuide && (
-                    <div className="mb-10 bg-gradient-to-r from-amber-50/80 via-white to-slate-50 border border-amber-200/80 rounded-2xl p-5 shadow-sm transition-all animate-in fade-in duration-300">
-                        <div className="flex items-start justify-between gap-4 mb-4">
-                            <div>
-                                <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    <Card className="border-amber-200/80 bg-gradient-to-r from-amber-50/50 via-white to-slate-50/50 shadow-sm animate-in fade-in duration-200">
+                        <CardHeader className="pb-3">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-amber-600" />
+                                <CardTitle className="text-base text-slate-900 font-bold">
                                     แนวทางการเลือกประเภทหลักสูตร (Academic Guide)
-                                </h3>
-                                <p className="text-xs text-slate-600 mt-0.5">
-                                    ทำความเข้าใจความแตกต่างของหลักสูตรเพื่อประโยชน์สูงสุดในการวางแผนการเรียนรู้ของคุณ
-                                </p>
+                                </CardTitle>
                             </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Credit Bank Card */}
-                            <div className="bg-white p-4 rounded-xl border border-amber-200 shadow-sm relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-100/50 rounded-full blur-xl pointer-events-none" />
-                                <div className="flex items-center gap-2 text-amber-800 font-bold text-sm mb-2">
-                                    <div className="w-6 h-6 rounded-md bg-amber-500 text-white flex items-center justify-center font-bold text-xs">
-                                        🎓
+                            <CardDescription className="text-xs text-slate-600">
+                                ทำความเข้าใจความแตกต่างของหลักสูตรเพื่อประโยชน์สูงสุดในการวางแผนสะสมผลลัพธ์การเรียนรู้
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Credit Bank Card */}
+                                <div className="bg-white p-4 rounded-xl border border-amber-200 shadow-2xs space-y-2">
+                                    <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
+                                        <Badge className="bg-amber-500 hover:bg-amber-500 text-slate-950 font-bold text-[11px] px-2 py-0.5">
+                                            Credit Bank
+                                        </Badge>
+                                        <span>หลักสูตรสะสมหน่วยกิต (Credit Bank Course)</span>
                                     </div>
-                                    <span>หลักสูตรสะสมหน่วยกิต (Credit Bank Course)</span>
-                                </div>
-                                <ul className="text-xs text-slate-600 space-y-1.5 list-disc list-inside">
-                                    <li>มีการวัดประเมินผลลัพธ์การเรียนรู้ (LOs) เทียบเคียงรายวิชา ป.ตรี</li>
-                                    <li>ระบุจำนวนหน่วยกิตสะสมชัดเจน (1-3 หน่วยกิต)</li>
-                                    <li>ได้รับวุฒิบัตร + บันทึกลง <strong>Credit Ledger</strong> ของมหาวิทยาลัย</li>
-                                    <li><strong className="text-amber-700">สามารถนำไปยื่นเทียบโอน</strong> เพื่อขอยกเว้นรายวิชาในหลักสูตร ป.ตรี คณะสังคมศาสตร์ได้</li>
-                                </ul>
-                                <div className="mt-3 pt-2.5 border-t border-amber-100">
-                                    <Link
-                                        href="/academics/credit-bank"
-                                        className="text-xs text-amber-700 font-bold hover:underline inline-flex items-center gap-1"
-                                    >
-                                        <span>ศึกษาระบบ Credit Bank คณะสังคมศาสตร์</span>
-                                        <ExternalLink className="w-3 h-3" />
-                                    </Link>
-                                </div>
-                            </div>
-
-                            {/* General Short Course Card */}
-                            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
-                                <div className="flex items-center gap-2 text-slate-800 font-bold text-sm mb-2">
-                                    <div className="w-6 h-6 rounded-md bg-slate-700 text-white flex items-center justify-center font-bold text-xs">
-                                        📘
+                                    <ul className="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                                        <li>มีการวัดประเมินผลลัพธ์การเรียนรู้ (Learning Outcomes) เทียบเคียงรายวิชา ป.ตรี</li>
+                                        <li>ระบุจำนวนหน่วยกิตสะสมชัดเจน (1–3 หน่วยกิต)</li>
+                                        <li>ได้รับวุฒิบัตร + บันทึกลง <strong>Credit Ledger</strong> ของมหาวิทยาลัย</li>
+                                        <li><strong className="text-amber-800">สามารถนำไปยื่นเทียบโอน</strong> ยกเว้นรายวิชาในหลักสูตรปริญญาตรี คณะสังคมศาสตร์ได้</li>
+                                    </ul>
+                                    <div className="pt-2 border-t border-amber-100">
+                                        <Link
+                                            href="/academics/credit-bank"
+                                            className="text-xs text-amber-700 font-semibold hover:underline inline-flex items-center gap-1"
+                                        >
+                                            <span>ศึกษาระบบ Credit Bank คณะสังคมศาสตร์</span>
+                                            <ArrowRight className="w-3 h-3" />
+                                        </Link>
                                     </div>
-                                    <span>หลักสูตรระยะสั้นทั่วไป (General Short Course / Non-degree)</span>
                                 </div>
-                                <ul className="text-xs text-slate-600 space-y-1.5 list-disc list-inside">
-                                    <li>เน้นฝึกทักษะเฉพาะทาง ปฏิบัติการจริง (Upskill & Reskill)</li>
-                                    <li>เรียนจบตามเกณฑ์เวลาได้รับ <strong>วุฒิบัตรรับรองการผ่านการอบรม</strong></li>
-                                    <li>ค่าหน่วยกิตในระบบ = 0 หน่วยกิต</li>
-                                    <li><strong className="text-slate-700">ไม่สามารถนำไปเทียบโอน</strong> เป็นหน่วยกิตเพื่อขอรับปริญญาบัตรได้</li>
-                                </ul>
-                                <div className="mt-3 pt-2.5 border-t border-slate-100">
-                                    <span className="text-xs text-slate-500 font-medium">
-                                        เหมาะสำหรับบุคคลทั่วไป ผู้ประกอบการ หรือผู้ที่ต้องการเรียนรู้เชิงทักษะ
-                                    </span>
+
+                                {/* General Course Card */}
+                                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                                    <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                                        <Badge variant="outline" className="bg-slate-100 text-slate-700 font-bold text-[11px] px-2 py-0.5">
+                                            Non-degree
+                                        </Badge>
+                                        <span>หลักสูตรระยะสั้นทั่วไป (General Short Course)</span>
+                                    </div>
+                                    <ul className="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                                        <li>เน้นฝึกทักษะเฉพาะทาง ปฏิบัติการจริง (Upskill &amp; Reskill)</li>
+                                        <li>เรียนจบตามเกณฑ์เวลาได้รับ <strong>วุฒิบัตรรับรองการผ่านการอบรม</strong></li>
+                                        <li>ค่าหน่วยกิตในระบบ = 0 หน่วยกิต</li>
+                                        <li><strong className="text-slate-700">ไม่สามารถนำไปเทียบโอน</strong> เป็นหน่วยกิตเพื่อขอรับปริญญาบัตรได้</li>
+                                    </ul>
+                                    <div className="pt-2 border-t border-slate-100">
+                                        <span className="text-xs text-slate-500">
+                                            เหมาะสำหรับบุคคลทั่วไป ผู้ประกอบการ หรือผู้ที่ต้องการเรียนรู้เชิงทักษะเฉพาะกิจ
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 )}
 
-                {/* Loading State */}
+                {/* Course Cards Grid */}
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-3">
-                        <Loader2 className="w-8 h-8 animate-spin text-scholar-deep" />
-                        <p className="text-gray-500 text-sm">กำลังโหลดรายชื่อหลักสูตร...</p>
+                        <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
+                        <p className="text-slate-500 text-sm">กำลังโหลดรายชื่อหลักสูตร...</p>
                     </div>
                 ) : filteredCourses.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredCourses.map((course) => {
                             const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
                             const imageSrc = course.coverImageUrl
@@ -313,15 +324,16 @@ export default function ShortCoursesPage() {
                             const targetUrl = course.lifelongUrl || 'https://lifelong.crru.ac.th/course';
 
                             return (
-                                <div
+                                <Card 
                                     key={course.id}
-                                    className={`bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border flex flex-col overflow-hidden group hover:-translate-y-1 ${course.isCreditBank
-                                        ? 'border-amber-200/90 ring-1 ring-amber-100'
-                                        : 'border-gray-100'
-                                        }`}
+                                    className={`overflow-hidden border flex flex-col justify-between hover:shadow-lg transition-all duration-300 group hover:-translate-y-0.5 ${
+                                        course.isCreditBank 
+                                            ? 'border-amber-200/90 shadow-xs' 
+                                            : 'border-slate-200 shadow-2xs'
+                                    }`}
                                 >
                                     {/* Cover Image & Badges */}
-                                    <div className="relative h-52 overflow-hidden bg-gray-100">
+                                    <div className="relative h-48 sm:h-52 overflow-hidden bg-slate-100">
                                         <Image
                                             src={imageSrc}
                                             alt={course.title}
@@ -329,152 +341,167 @@ export default function ShortCoursesPage() {
                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                                             unoptimized={imageSrc.startsWith('http')}
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
                                         {/* Status Badge */}
-                                        <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end z-10">
+                                        <div className="absolute top-3 right-3 flex flex-col gap-1 items-end z-10">
                                             {course.status === 'OPEN' && (
-                                                <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-sm backdrop-blur-sm">
+                                                <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-0.5 shadow-sm">
                                                     เปิดรับสมัคร
-                                                </span>
+                                                </Badge>
                                             )}
                                             {course.status === 'COMING_SOON' && (
-                                                <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm backdrop-blur-sm">
+                                                <Badge className="bg-blue-600 hover:bg-blue-600 text-white text-[11px] font-bold px-2.5 py-0.5 shadow-sm">
                                                     เร็วๆ นี้
-                                                </span>
+                                                </Badge>
                                             )}
                                             {course.status === 'CLOSED' && (
-                                                <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-700 text-white shadow-sm backdrop-blur-sm">
+                                                <Badge variant="secondary" className="bg-slate-700 text-white text-[11px] font-bold px-2.5 py-0.5 shadow-sm">
                                                     ปิดรับสมัคร
-                                                </span>
+                                                </Badge>
                                             )}
                                         </div>
 
                                         {/* Course Type Badge */}
                                         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
                                             {course.isCreditBank ? (
-                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-950/90 text-amber-300 text-xs font-bold shadow-md backdrop-blur-sm border border-amber-400/40">
+                                                <Badge className="bg-slate-950/90 hover:bg-slate-950 text-amber-300 text-xs font-bold px-3 py-1 shadow-md border border-amber-400/40 gap-1.5">
                                                     <Award className="w-3.5 h-3.5 text-amber-400" />
                                                     สะสม {course.creditBankValue} หน่วยกิต (Credit Bank)
-                                                </span>
+                                                </Badge>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/90 text-slate-200 text-xs font-semibold shadow-md backdrop-blur-sm border border-slate-700">
+                                                <Badge variant="outline" className="bg-slate-900/90 text-slate-200 text-xs font-semibold px-3 py-1 shadow-md border border-slate-700 gap-1.5">
                                                     <GraduationCap className="w-3.5 h-3.5 text-slate-300" />
-                                                    หลักสูตรระยะสั้นทั่วไป (Non-degree)
-                                                </span>
+                                                    หลักสูตรอบรมทั่วไป (Non-degree)
+                                                </Badge>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* Course Details */}
-                                    <div className="p-6 flex-1 flex flex-col justify-between">
-                                        <div>
-                                            <div className="flex items-center justify-between gap-2 mb-2">
-                                                <span className={`text-xs font-bold uppercase tracking-wide ${course.isCreditBank ? 'text-amber-700' : 'text-scholar-accent'
-                                                    }`}>
+                                    {/* Card Content */}
+                                    <CardContent className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className={`text-[11px] font-bold uppercase tracking-wide ${
+                                                    course.isCreditBank ? 'text-amber-800' : 'text-slate-600'
+                                                }`}>
                                                     {course.category || (course.isCreditBank ? 'หมวดสะสมหน่วยกิต' : 'หลักสูตรอบรมทักษะ')}
                                                 </span>
                                                 {course.code && (
-                                                    <span className="text-xs font-mono font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                                                    <Badge variant="outline" className="font-mono text-[10px] text-slate-600 bg-slate-100 border-slate-200 px-1.5 py-0">
                                                         {course.code}
-                                                    </span>
+                                                    </Badge>
                                                 )}
                                             </div>
 
-                                            <h2 className="text-lg font-bold text-gray-900 group-hover:text-scholar-deep transition-colors line-clamp-2 leading-snug">
+                                            <h2 className="text-base font-bold text-slate-900 group-hover:text-amber-800 transition-colors line-clamp-2 leading-snug">
                                                 {course.title}
                                             </h2>
 
                                             {course.instructorName && (
-                                                <p className="text-xs text-gray-500 mt-2 flex items-center gap-1.5">
-                                                    <UserCheck className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                                                <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                                                    <UserCheck className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                                     <span className="truncate">{course.instructorName}</span>
                                                 </p>
                                             )}
 
                                             {course.description && (
-                                                <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed">
+                                                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                                                     {course.description}
                                                 </p>
                                             )}
 
                                             {/* Transferability indicator */}
-                                            <div className="mt-3">
+                                            <div className="pt-1">
                                                 {course.isCreditBank ? (
-                                                    <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-1 rounded-md border border-amber-200/60">
-                                                        <CheckCircle className="w-3 h-3 text-amber-600" />
+                                                    <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200/70">
+                                                        <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
                                                         เทียบโอนปริญญาตรี คณะสังคมศาสตร์ได้
                                                     </div>
                                                 ) : (
-                                                    <div className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md border border-slate-200/60">
-                                                        <span>📜 วุฒิบัตรรับรองทักษะ (Certificate of Completion)</span>
+                                                    <div className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/70">
+                                                        <span>📜 วุฒิบัตรรับรองทักษะ (Certificate)</span>
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
 
-                                        <div className="mt-6 pt-4 border-t border-gray-100">
-                                            <div className="flex items-center justify-between text-xs text-gray-600 mb-4">
+                                        <div className="pt-3 border-t border-slate-100 space-y-3">
+                                            <div className="flex items-center justify-between text-xs text-slate-600">
                                                 <span className="flex items-center gap-1.5 font-medium">
-                                                    <Clock className="w-4 h-4 text-scholar-gold" />
+                                                    <Clock className="w-3.5 h-3.5 text-amber-600" />
                                                     {course.durationHours} ชั่วโมง
                                                 </span>
-                                                <span className="font-bold text-base text-scholar-deep">
+                                                <span className="font-bold text-sm text-slate-900">
                                                     {Number(course.price) > 0 ? `฿${Number(course.price).toLocaleString()}` : 'ฟรี (ไม่มีค่าใช้จ่าย)'}
                                                 </span>
                                             </div>
 
-                                            {/* Action Button linking to Lifelong CRRU */}
-                                            <a
-                                                href={targetUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className={`w-full py-3 px-4 rounded-xl font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all duration-200 shadow-sm ${course.status === 'OPEN'
-                                                    ? 'bg-scholar-deep hover:bg-scholar-deep/90 text-white hover:shadow-md'
-                                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                                                    }`}
+                                            {/* Action Button */}
+                                            <Button 
+                                                asChild 
+                                                className={`w-full text-xs font-semibold h-10 shadow-sm ${
+                                                    course.status === 'OPEN'
+                                                        ? 'bg-[#0B132B] hover:bg-slate-800 text-white'
+                                                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                                }`}
                                             >
-                                                <span>
-                                                    {course.status === 'OPEN'
-                                                        ? 'สมัครเรียนบน CRRU Lifelong'
-                                                        : 'ดูรายละเอียดบน Lifelong'}
-                                                </span>
-                                                <ExternalLink className="w-4 h-4" />
-                                            </a>
-                                            <p className="text-[11px] text-center text-gray-400 mt-2">
+                                                <a
+                                                    href={targetUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center justify-center gap-1.5"
+                                                >
+                                                    <span>
+                                                        {course.status === 'OPEN'
+                                                            ? 'สมัครเรียนบน CRRU Lifelong'
+                                                            : 'ดูรายละเอียดบน Lifelong'}
+                                                    </span>
+                                                    <ExternalLink className="w-3.5 h-3.5" />
+                                                </a>
+                                            </Button>
+                                            <p className="text-[10px] text-center text-slate-400">
                                                 ดำเนินการผ่านระบบกลาง CRRU Lifelong Learning
                                             </p>
                                         </div>
-                                    </div>
-                                </div>
+                                    </CardContent>
+                                </Card>
                             );
                         })}
                     </div>
                 ) : (
-                    <div className="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200 max-w-lg mx-auto">
-                        <Award className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <h3 className="text-lg font-bold text-gray-700">ไม่พบหลักสูตรที่ตรงตามเงื่อนไข</h3>
-                        <p className="text-sm text-gray-400 mt-1">ลองเปลี่ยนคำค้นหา หรือเลือกแท็บ "หลักสูตรทั้งหมด"</p>
-                    </div>
+                    <Card className="text-center py-16 bg-slate-50 border border-dashed border-slate-200 max-w-lg mx-auto">
+                        <CardContent className="space-y-3">
+                            <Award className="w-12 h-12 text-slate-300 mx-auto" />
+                            <h3 className="text-base font-bold text-slate-800">ไม่พบหลักสูตรที่ตรงตามเงื่อนไข</h3>
+                            <p className="text-xs text-slate-500">ลองเปลี่ยนคำค้นหา หรือเลือกแท็บ &quot;ทั้งหมด&quot;</p>
+                            <Button variant="outline" size="sm" onClick={() => { setFilterType('all'); setSearchQuery(''); }}>
+                                ล้างตัวกรองทั้งหมด
+                            </Button>
+                        </CardContent>
+                    </Card>
                 )}
 
-                {/* Additional Info Box */}
-                <div className="mt-16 bg-gradient-to-r from-scholar-deep/5 via-scholar-gold/10 to-scholar-deep/5 rounded-3xl p-8 border border-scholar-gold/20 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
-                        <h3 className="text-xl font-bold text-scholar-deep">
-                            ต้องการสะสมหน่วยกิตเข้าสู่ระบบคลังหน่วยกิต (Credit Bank)?
-                        </h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                            ศึกษาขั้นตอนการเรียนรู้ การเทียบโอนประสบการณ์ (RPL) และเกณฑ์การขอรับปริญญาบัตร
-                        </p>
-                    </div>
-                    <Link
-                        href="/academics/credit-bank"
-                        className="px-6 py-3 rounded-full bg-scholar-deep text-white font-medium text-sm hover:bg-scholar-deep/90 transition-colors shadow-md flex-shrink-0"
-                    >
-                        ดูข้อมูลระบบคลังหน่วยกิต
-                    </Link>
-                </div>
+                {/* Additional Info / Cross-link Box */}
+                <Card className="bg-gradient-to-r from-slate-900 to-[#0B132B] text-white border-0 shadow-md">
+                    <CardContent className="p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="space-y-1 text-center md:text-left">
+                            <h3 className="text-lg sm:text-xl font-bold text-white flex items-center justify-center md:justify-start gap-2">
+                                <Award className="w-5 h-5 text-amber-400" />
+                                ต้องการสะสมหน่วยกิตเข้าสู่ระบบคลังหน่วยกิต (Credit Bank)?
+                            </h3>
+                            <p className="text-xs sm:text-sm text-slate-300 font-light">
+                                ศึกษาขั้นตอนการเรียนรู้ การเทียบโอนประสบการณ์ (RPL) และเกณฑ์การขอรับปริญญาบัตร
+                            </p>
+                        </div>
+                        <Button asChild className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs h-10 px-5 shrink-0 shadow-sm">
+                            <Link href="/academics/credit-bank" className="flex items-center gap-1.5">
+                                <span>ดูข้อมูลระบบคลังหน่วยกิต</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
 
             </div>
         </div>

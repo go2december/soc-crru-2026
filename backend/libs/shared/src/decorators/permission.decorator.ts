@@ -1,11 +1,7 @@
 import { SetMetadata } from '@nestjs/common';
 
 export type PermissionAction =
-  | 'CREATE'
-  | 'READ'
-  | 'UPDATE'
-  | 'DELETE'
-  | 'APPROVE';
+  'CREATE' | 'READ' | 'UPDATE' | 'DELETE' | 'APPROVE';
 
 export interface RequiredPermission {
   moduleKey: string;

@@ -49,7 +49,7 @@ export class PermissionGuard implements CanActivate {
         .from(schema.rolePermissions)
         .where(
           and(
-            eq(schema.rolePermissions.role, role as any),
+            eq(schema.rolePermissions.role, role),
             eq(schema.rolePermissions.moduleKey, moduleKey),
           ),
         )

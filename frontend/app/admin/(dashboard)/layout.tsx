@@ -180,6 +180,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {
             title: 'System',
             items: [
+                { href: '/admin/site-settings', label: 'ตั้งค่าหน้าเว็บ & ข้อมูลคณะ', icon: Settings, minLevel: 2 },
                 { href: '/admin/users', label: 'จัดการสิทธิ์และผู้ใช้', icon: ShieldCheck, minLevel: 3 },
                 { href: '/admin/profile', label: 'โปรไฟล์', icon: UserCircle, minLevel: 1 },
             ]

@@ -16,7 +16,6 @@ import {
   serial,
 } from 'drizzle-orm/pg-core';
 
-
 // ------------------------------------------
 // Enums
 // ------------------------------------------
@@ -270,18 +269,21 @@ export const programs = pgTable('programs', {
     youtube?: string;
     line?: string;
   }>(),
+  admissionStatus: varchar('admission_status', { length: 255 }).default(
+    'เปิดรับสมัครตรง (มีสิทธิ์ยื่นกู้ยืม กยศ.)',
+  ),
 });
 
 export const trackTypeEnum = pgEnum('track_type', [
   'CONCENTRATION', // แขนงวิชา
-  'MAJOR',         // วิชาเอก
-  'MINOR',         // วิชาโท
+  'MAJOR', // วิชาเอก
+  'MINOR', // วิชาโท
 ]);
 
 export const studyPlanTypeEnum = pgEnum('study_plan_type', [
-  'REGULAR_4YR',   // แผน 4 ปี ปกติ
-  'TRANSFER_2YR',  // แผนเทียบโอน / 2 ปีหลัง
-  'GRADUATE',      // แผนบัณฑิตศึกษา (ป.โท / ป.เอก)
+  'REGULAR_4YR', // แผน 4 ปี ปกติ
+  'TRANSFER_2YR', // แผนเทียบโอน / 2 ปีหลัง
+  'GRADUATE', // แผนบัณฑิตศึกษา (ป.โท / ป.เอก)
 ]);
 
 export const programTracks = pgTable('program_tracks', {
@@ -293,7 +295,9 @@ export const programTracks = pgTable('program_tracks', {
   nameTh: varchar('name_th', { length: 255 }).notNull(),
   nameEn: varchar('name_en', { length: 255 }),
   trackType: trackTypeEnum('track_type').default('MAJOR').notNull(),
-  studyPlanType: studyPlanTypeEnum('study_plan_type').default('REGULAR_4YR').notNull(),
+  studyPlanType: studyPlanTypeEnum('study_plan_type')
+    .default('REGULAR_4YR')
+    .notNull(),
   degreeTitleTh: varchar('degree_title_th', { length: 255 }),
   degreeTitleEn: varchar('degree_title_en', { length: 255 }),
   description: text('description'),
@@ -333,6 +337,7 @@ export const programTracks = pgTable('program_tracks', {
   >(),
   sortOrder: integer('sort_order').default(0).notNull(),
   isActive: boolean('is_active').default(true).notNull(),
+  admissionStatus: varchar('admission_status', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -372,6 +377,7 @@ export const shortCourses = pgTable('short_courses', {
   status: varchar('status', { length: 50 }).default('OPEN').notNull(),
   sortOrder: integer('sort_order').default(0).notNull(),
   isActive: boolean('is_active').default(true).notNull(),
+  admissionStatus: varchar('admission_status', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -1018,13 +1024,27 @@ export const procurementDocuments = pgTable(
 
 export const academicServiceConfigs = pgTable('academic_service_configs', {
   id: serial('id').primaryKey(),
-  contactEmail: varchar('contact_email', { length: 255 }).default('social@crru.ac.th'),
-  contactPhone: varchar('contact_phone', { length: 100 }).default('0-5377-6000 ต่อ 1600'),
-  officeHours: varchar('office_hours', { length: 255 }).default('จันทร์ - ศุกร์ 08:30 - 16:30 น. (เว้นวันหยุดราชการ)'),
-  officeLocation: varchar('office_location', { length: 255 }).default('สำนักงานคณบดี อาคาร 1 ชั้น 2 คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย'),
-  responseTime: varchar('response_time', { length: 100 }).default('เจ้าหน้าที่จะติดต่อกลับภายใน 1-2 วันทำการ'),
-  pdfFormUrl: varchar('pdf_form_url', { length: 500 }).default('/forms/academic-service-request.pdf'),
-  docxFormUrl: varchar('docx_form_url', { length: 500 }).default('/forms/academic-service-request.docx'),
+  contactEmail: varchar('contact_email', { length: 255 }).default(
+    'social@crru.ac.th',
+  ),
+  contactPhone: varchar('contact_phone', { length: 100 }).default(
+    '0-5377-6000 ต่อ 1600',
+  ),
+  officeHours: varchar('office_hours', { length: 255 }).default(
+    'จันทร์ - ศุกร์ 08:30 - 16:30 น. (เว้นวันหยุดราชการ)',
+  ),
+  officeLocation: varchar('office_location', { length: 255 }).default(
+    'สำนักงานคณบดี อาคาร 1 ชั้น 2 คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+  ),
+  responseTime: varchar('response_time', { length: 100 }).default(
+    'เจ้าหน้าที่จะติดต่อกลับภายใน 1-2 วันทำการ',
+  ),
+  pdfFormUrl: varchar('pdf_form_url', { length: 500 }).default(
+    '/forms/academic-service-request.pdf',
+  ),
+  docxFormUrl: varchar('docx_form_url', { length: 500 }).default(
+    '/forms/academic-service-request.docx',
+  ),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
@@ -1036,7 +1056,9 @@ export const auditLogs = pgTable(
   'audit_logs',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    userId: uuid('user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
     userEmail: varchar('user_email', { length: 255 }),
     userName: varchar('user_name', { length: 255 }),
     action: varchar('action', { length: 100 }).notNull(), // e.g. ROLE_CHANGE, USER_STATUS_TOGGLE, NEWS_APPROVE, PROGRAM_DELETE
@@ -1089,7 +1111,9 @@ export const rolePermissions = pgTable(
     canUpdate: boolean('can_update').default(false).notNull(),
     canDelete: boolean('can_delete').default(false).notNull(),
     canApprove: boolean('can_approve').default(false).notNull(), // Can approve/publish drafts
-    scopeType: varchar('scope_type', { length: 20 }).default('GLOBAL').notNull(), // 'GLOBAL' | 'DEPARTMENT' | 'OWN'
+    scopeType: varchar('scope_type', { length: 20 })
+      .default('GLOBAL')
+      .notNull(), // 'GLOBAL' | 'DEPARTMENT' | 'OWN'
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => {
@@ -1115,7 +1139,9 @@ export const mous = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 500 }).notNull(), // ชื่อบันทึกข้อตกลง / โครงการความร่วมมือ
     partnerName: varchar('partner_name', { length: 255 }).notNull(), // ชื่อองค์กร/หน่วยงานพันธมิตร
-    partnerType: mouPartnerTypeEnum('partner_type').default('GOVERNMENT').notNull(),
+    partnerType: mouPartnerTypeEnum('partner_type')
+      .default('GOVERNMENT')
+      .notNull(),
     partnerLogoUrl: text('partner_logo_url'), // โลโก้หรือภาพหน่วยงาน
     scope: text('scope'), // ขอบเขตความร่วมมือ / วัตถุประสงค์
     startDate: timestamp('start_date'), // วันที่เริ่มต้นลงนาม
@@ -1155,7 +1181,9 @@ export const studentServices = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 255 }).notNull(),
     description: text('description'),
-    category: studentServiceCategoryEnum('category').default('ACADEMIC').notNull(),
+    category: studentServiceCategoryEnum('category')
+      .default('ACADEMIC')
+      .notNull(),
     url: varchar('url', { length: 500 }).notNull(),
     icon: varchar('icon', { length: 50 }).default('globe').notNull(),
     badge: varchar('badge', { length: 100 }),
@@ -1168,8 +1196,12 @@ export const studentServices = pgTable(
   (table) => {
     return {
       categoryIdx: index('student_services_category_idx').on(table.category),
-      isPublishedIdx: index('student_services_is_published_idx').on(table.isPublished),
-      displayOrderIdx: index('student_services_display_order_idx').on(table.displayOrder),
+      isPublishedIdx: index('student_services_is_published_idx').on(
+        table.isPublished,
+      ),
+      displayOrderIdx: index('student_services_display_order_idx').on(
+        table.displayOrder,
+      ),
     };
   },
 );
@@ -1179,7 +1211,9 @@ export const studentDocuments = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 255 }).notNull(),
-    category: varchar('category', { length: 100 }).default('คำร้องทั่วไป').notNull(),
+    category: varchar('category', { length: 100 })
+      .default('คำร้องทั่วไป')
+      .notNull(),
     fileUrl: varchar('file_url', { length: 500 }).notNull(),
     fileType: varchar('file_type', { length: 20 }).default('PDF').notNull(),
     fileSize: varchar('file_size', { length: 50 }),
@@ -1191,8 +1225,12 @@ export const studentDocuments = pgTable(
   (table) => {
     return {
       categoryIdx: index('student_docs_category_idx').on(table.category),
-      isPublishedIdx: index('student_docs_is_published_idx').on(table.isPublished),
-      displayOrderIdx: index('student_docs_display_order_idx').on(table.displayOrder),
+      isPublishedIdx: index('student_docs_is_published_idx').on(
+        table.isPublished,
+      ),
+      displayOrderIdx: index('student_docs_display_order_idx').on(
+        table.displayOrder,
+      ),
     };
   },
 );
@@ -1214,7 +1252,9 @@ export const staffServices = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 255 }).notNull(),
     description: text('description'),
-    category: staffServiceCategoryEnum('category').default('HR_FINANCE').notNull(),
+    category: staffServiceCategoryEnum('category')
+      .default('HR_FINANCE')
+      .notNull(),
     url: varchar('url', { length: 500 }).notNull(),
     icon: varchar('icon', { length: 50 }).default('FileText').notNull(),
     badge: varchar('badge', { length: 100 }),
@@ -1227,8 +1267,12 @@ export const staffServices = pgTable(
   (table) => {
     return {
       categoryIdx: index('staff_services_category_idx').on(table.category),
-      isPublishedIdx: index('staff_services_is_published_idx').on(table.isPublished),
-      displayOrderIdx: index('staff_services_display_order_idx').on(table.displayOrder),
+      isPublishedIdx: index('staff_services_is_published_idx').on(
+        table.isPublished,
+      ),
+      displayOrderIdx: index('staff_services_display_order_idx').on(
+        table.displayOrder,
+      ),
     };
   },
 );
@@ -1238,7 +1282,9 @@ export const staffDocuments = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 255 }).notNull(),
-    category: varchar('category', { length: 100 }).default('คำร้องทั่วไป').notNull(),
+    category: varchar('category', { length: 100 })
+      .default('คำร้องทั่วไป')
+      .notNull(),
     fileUrl: varchar('file_url', { length: 500 }).notNull(),
     fileType: varchar('file_type', { length: 20 }).default('PDF').notNull(),
     fileSize: varchar('file_size', { length: 50 }),
@@ -1250,8 +1296,132 @@ export const staffDocuments = pgTable(
   (table) => {
     return {
       categoryIdx: index('staff_docs_category_idx').on(table.category),
-      isPublishedIdx: index('staff_docs_is_published_idx').on(table.isPublished),
-      displayOrderIdx: index('staff_docs_display_order_idx').on(table.displayOrder),
+      isPublishedIdx: index('staff_docs_is_published_idx').on(
+        table.isPublished,
+      ),
+      displayOrderIdx: index('staff_docs_display_order_idx').on(
+        table.displayOrder,
+      ),
     };
   },
 );
+
+// ------------------------------------------
+// 12. Site Settings & Centralized CMS (Home & About)
+// ------------------------------------------
+
+export interface CoreValueItem {
+  title: string;
+  desc: string;
+  icon?: string;
+}
+
+export interface MissionItem {
+  id: number;
+  title: string;
+  desc: string;
+  icon?: string;
+}
+
+export interface DeputyDeanItem {
+  title: string;
+  sub?: string;
+  desc: string;
+  accent?: string;
+  tag?: string;
+}
+
+export interface DeanOfficeUnitItem {
+  name: string;
+  en?: string;
+  desc: string;
+}
+
+export interface StrategicPlanItem {
+  id: string;
+  number: string;
+  badge: string;
+  name: string;
+  desc: string;
+  icon?: string;
+  summary: string;
+  color?: string;
+  borderHover?: string;
+  accentBg?: string;
+  objectives?: string[];
+  kpis?: string[];
+}
+
+export interface StructureSectionItem {
+  id: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  tag?: string;
+  accent?: string;
+}
+
+export interface StructureSection {
+  id: string;
+  title: string;
+  titleEn?: string;
+  description?: string;
+  displayLayout?: 'cards' | 'list';
+  items: StructureSectionItem[];
+}
+
+export const siteSettings = pgTable('site_settings', {
+  id: integer('id').primaryKey().default(1),
+  // Homepage Announcement & Hero
+  announcementText: varchar('announcement_text', { length: 500 }).default(
+    'เปิดรับสมัครนักศึกษาใหม่ TCAS 2569 รอบ Portfolio',
+  ),
+  announcementLink: varchar('announcement_link', { length: 500 }).default(
+    '/admissions',
+  ),
+  isAnnouncementActive: boolean('is_announcement_active')
+    .default(true)
+    .notNull(),
+  heroHeadlineTh: varchar('hero_headline_th', { length: 500 }),
+  heroSubtextTh: text('hero_subtext_th'),
+
+  // Homepage Hybrid Metrics (Hero Bar)
+  manualProgramsCount: integer('manual_programs_count'),
+  employabilityRate: varchar('employability_rate', { length: 50 }).default(
+    '94.8%',
+  ),
+  manualPartnershipsCount: integer('manual_partnerships_count'),
+  lecturersRate: varchar('lecturers_rate', { length: 50 }).default('100%'),
+
+  // Homepage Hybrid Stats (StatsDashboard)
+  communitiesCount: varchar('communities_count', { length: 50 }).default(
+    '150+',
+  ),
+  manualInnovationsCount: integer('manual_innovations_count'),
+  manualMousCount: integer('manual_mous_count'),
+  employerSatisfactionRate: varchar('employer_satisfaction_rate', {
+    length: 50,
+  }).default('98%'),
+
+  // Faculty About Info
+  historyFoundedYear: varchar('history_founded_year', { length: 50 }).default(
+    '2546',
+  ),
+  historyContentTh: text('history_content_th'),
+  philosophyTh: text('philosophy_th'),
+  visionTh: text('vision_th'),
+  identityTh: text('identity_th'),
+  uniquenessTh: text('uniqueness_th'),
+  coreValues: jsonb('core_values').$type<CoreValueItem[]>(),
+  missions: jsonb('missions').$type<MissionItem[]>(),
+
+  // Structure & Strategy
+  structureDeputies: jsonb('structure_deputies').$type<DeputyDeanItem[]>(),
+  structureOfficeUnits: jsonb('structure_office_units').$type<
+    DeanOfficeUnitItem[]
+  >(),
+  structureSections: jsonb('structure_sections').$type<StructureSection[]>(),
+  strategicPlans: jsonb('strategic_plans').$type<StrategicPlanItem[]>(),
+
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});

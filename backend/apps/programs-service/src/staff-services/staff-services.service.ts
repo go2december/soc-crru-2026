@@ -35,7 +35,10 @@ export class StaffServicesService {
       query.where(and(...conditions));
     }
 
-    return await query.orderBy(asc(staffServices.displayOrder), desc(staffServices.createdAt));
+    return await query.orderBy(
+      asc(staffServices.displayOrder),
+      desc(staffServices.createdAt),
+    );
   }
 
   async findAllAdmin() {
@@ -88,7 +91,10 @@ export class StaffServicesService {
   async remove(id: string) {
     await this.findOne(id);
     await this.drizzle.db.delete(staffServices).where(eq(staffServices.id, id));
-    return { success: true, message: `Staff service with ID "${id}" has been removed` };
+    return {
+      success: true,
+      message: `Staff service with ID "${id}" has been removed`,
+    };
   }
 
   // ==========================================
@@ -112,14 +118,20 @@ export class StaffServicesService {
       query.where(and(...conditions));
     }
 
-    return await query.orderBy(asc(staffDocuments.displayOrder), desc(staffDocuments.createdAt));
+    return await query.orderBy(
+      asc(staffDocuments.displayOrder),
+      desc(staffDocuments.createdAt),
+    );
   }
 
   async findAllDocsAdmin() {
     return await this.drizzle.db
       .select()
       .from(staffDocuments)
-      .orderBy(asc(staffDocuments.displayOrder), desc(staffDocuments.createdAt));
+      .orderBy(
+        asc(staffDocuments.displayOrder),
+        desc(staffDocuments.createdAt),
+      );
   }
 
   async findOneDoc(id: string) {
@@ -168,10 +180,15 @@ export class StaffServicesService {
 
   async removeDoc(id: string) {
     const existing = await this.findOneDoc(id);
-    await this.drizzle.db.delete(staffDocuments).where(eq(staffDocuments.id, id));
+    await this.drizzle.db
+      .delete(staffDocuments)
+      .where(eq(staffDocuments.id, id));
     if (existing.fileUrl) {
       await this.uploadService.deleteProgramsFile(existing.fileUrl);
     }
-    return { success: true, message: `Staff document with ID "${id}" has been removed` };
+    return {
+      success: true,
+      message: `Staff document with ID "${id}" has been removed`,
+    };
   }
 }

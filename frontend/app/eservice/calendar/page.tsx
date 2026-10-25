@@ -6,8 +6,8 @@ import { parseIcsContent, CalendarEvent } from '@/lib/calendar/ical-parser';
 import CalendarClient from './CalendarClient';
 
 export const metadata: Metadata = {
-    title: 'ปฏิทินวิชาการและกิจกรรม | สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
-    description: 'ปฏิทินกิจกรรม วันสอบ และกำหนดการสำคัญของสำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย ซิงค์สดจาก Google Calendar'
+    title: 'ปฏิทินวิชาการและกิจกรรม | คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    description: 'ปฏิทินกิจกรรม วันสอบ และกำหนดการสำคัญของคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย ซิงค์สดจาก Google Calendar'
 };
 
 export const revalidate = 1800; // ISR cache every 30 minutes
@@ -60,7 +60,7 @@ export default async function CalendarPage() {
                                 ปฏิทินวิชาการและกิจกรรม
                             </h1>
                             <p className="text-base sm:text-lg text-rose-100 mt-2 font-light">
-                                Academic & Event Calendar — สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
+                                Academic & Event Calendar — คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
                             </p>
                         </div>
 

@@ -1,6 +1,11 @@
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
-import { Injectable, UnauthorizedException, BadRequestException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { DatabaseService, schema } from 'db/database';
 import { eq, desc, lt, sql, and } from 'drizzle-orm';
 
@@ -90,7 +95,8 @@ export class AuthService implements OnModuleInit {
 
     return {
       retentionPolicyDays: this.RETENTION_DAYS,
-      policyDescription: 'เก็บบันทึกประวัติไว้ 365 วัน (1 ปี) ตามมาตรฐาน Cyber & IAM Audit',
+      policyDescription:
+        'เก็บบันทึกประวัติไว้ 365 วัน (1 ปี) ตามมาตรฐาน Cyber & IAM Audit',
       totalLogs: total,
       oldestLogDate: oldestLog[0]?.createdAt || null,
     };
@@ -183,7 +189,10 @@ export class AuthService implements OnModuleInit {
     adminUser?: any,
   ) {
     // Sanitize key (lowercase, alphanumeric + underscore)
-    const sanitizedKey = data.key.toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
+    const sanitizedKey = data.key
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9_]/g, '_');
 
     // Check existing
     const existing = await this.databaseService.db
@@ -192,7 +201,9 @@ export class AuthService implements OnModuleInit {
       .where(eq(schema.systemModules.key, sanitizedKey));
 
     if (existing.length > 0) {
-      throw new BadRequestException(`โมดูลรหัส '${sanitizedKey}' มีอยู่ในระบบแล้ว`);
+      throw new BadRequestException(
+        `โมดูลรหัส '${sanitizedKey}' มีอยู่ในระบบแล้ว`,
+      );
     }
 
     const inserted = await this.databaseService.db
@@ -202,7 +213,8 @@ export class AuthService implements OnModuleInit {
         nameTh: data.nameTh,
         description: data.description,
         category: data.category || 'Custom',
-        routePath: data.routePath || `/admin/${sanitizedKey.replace(/_/g, '-')}`,
+        routePath:
+          data.routePath || `/admin/${sanitizedKey.replace(/_/g, '-')}`,
         isWorkflowRequired: !!data.isWorkflowRequired,
         isCore: false,
       })
@@ -352,7 +364,9 @@ export class AuthService implements OnModuleInit {
     }
 
     if (existing[0].isCore) {
-      throw new BadRequestException('ไม่สามารถลบโมดูลหลักของระบบ (Core Module) ได้');
+      throw new BadRequestException(
+        'ไม่สามารถลบโมดูลหลักของระบบ (Core Module) ได้',
+      );
     }
 
     const deleted = await this.databaseService.db

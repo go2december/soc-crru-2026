@@ -44,7 +44,11 @@ export class AcademicServicesController {
   @Roles('ADMIN', 'EDITOR')
   findAllAdmin(@Query('departmentId') departmentId?: string, @Req() req?: any) {
     let deptId = departmentId ? Number(departmentId) : undefined;
-    if (req?.user && !req.user.roles?.includes('ADMIN') && req.user.roles?.includes('EDITOR')) {
+    if (
+      req?.user &&
+      !req.user.roles?.includes('ADMIN') &&
+      req.user.roles?.includes('EDITOR')
+    ) {
       deptId = req.user.departmentId;
     }
     return this.academicServicesService.findAllAdmin(deptId);
@@ -62,7 +66,10 @@ export class AcademicServicesController {
     @Body() createAcademicServiceDto: CreateAcademicServiceDto,
     @Req() req: any,
   ) {
-    return this.academicServicesService.create(createAcademicServiceDto, req?.user);
+    return this.academicServicesService.create(
+      createAcademicServiceDto,
+      req?.user,
+    );
   }
 
   @Put(':id')
@@ -73,7 +80,11 @@ export class AcademicServicesController {
     @Body() updateAcademicServiceDto: UpdateAcademicServiceDto,
     @Req() req: any,
   ) {
-    return this.academicServicesService.update(id, updateAcademicServiceDto, req?.user);
+    return this.academicServicesService.update(
+      id,
+      updateAcademicServiceDto,
+      req?.user,
+    );
   }
 
   @Delete(':id')

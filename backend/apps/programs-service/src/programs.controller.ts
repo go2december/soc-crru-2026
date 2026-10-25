@@ -111,12 +111,28 @@ export class ProgramsController {
   @Post(':id/tracks')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR', 'STAFF')
-  createTrack(
-    @Param('id') id: string,
-    @Body() trackDto: any,
-    @Req() req: any,
-  ) {
+  createTrack(@Param('id') id: string, @Body() trackDto: any, @Req() req: any) {
     return this.programsService.createTrack(id, trackDto, req?.user);
+  }
+
+  /**
+   * GET /programs/tracks/all - Get all tracks across all programs
+   */
+  @Get('tracks/all')
+  getAllTracks(
+    @Query('departmentId') departmentId?: string,
+    @Query('programId') programId?: string,
+  ) {
+    const deptId = departmentId ? parseInt(departmentId, 10) : undefined;
+    return this.programsService.getAllTracks(deptId, programId);
+  }
+
+  /**
+   * GET /programs/tracks/:trackId - Get single track by UUID
+   */
+  @Get('tracks/:trackId')
+  getTrackById(@Param('trackId') trackId: string) {
+    return this.programsService.getTrackById(trackId);
   }
 
   /**
@@ -143,5 +159,4 @@ export class ProgramsController {
   removeTrack(@Param('trackId') trackId: string, @Req() req: any) {
     return this.programsService.removeTrack(trackId, req?.user);
   }
-
 }

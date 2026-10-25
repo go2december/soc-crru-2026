@@ -148,7 +148,7 @@ export default function Footer() {
                   href="/admissions"
                   className="text-slate-300 hover:text-white transition-colors block"
                 >
-                  รับสมัครนักศึกษาใหม่ (TCAS)
+                  รับสมัครนักศึกษาใหม่ (รับสมัครตรง)
                 </Link>
               </li>
               <li>

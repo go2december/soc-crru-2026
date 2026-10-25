@@ -103,6 +103,10 @@ export class CreateProgramDto {
   social_links?: any;
 
   @IsOptional()
+  @IsString()
+  admission_status?: string;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProgramInstructorDto)

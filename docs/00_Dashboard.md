@@ -13,6 +13,8 @@ aliases: ["Index", "Home"]
 
 ## 🚀 1. Active Space (พื้นที่ทำงานปัจจุบัน)
 โฟลเดอร์นี้ใช้เป็นจุดพักไฟล์สำหรับฟีเจอร์หรือบัคที่เรากำลังแก้อยู่ **(ห้ามเก็บของเก่าไว้เด็ดขาด)**
+- `[[01_Active_Tasks/plan-separate-program-tracks-forms.md|📋 Plan: Separate Forms & Tables for Programs and Tracks/Majors]]`
+- `[[01_Active_Tasks/plan-site-settings-and-about-cms.md|📋 Plan: Centralized Site Settings & About/Home CMS Module]]`
 - `[[01_Active_Tasks/audit-database-admin-gap-analysis.md|🔍 Audit: Database & Admin Dashboard Content Gap Analysis]]`
 - `[[01_Active_Tasks/plan-redesign-about-executive-module|📋 Plan: Redesign /about/executive Module (Editorial Lanna Modernist)]]`
 - `[[01_Active_Tasks/plan-redesign-about-structure-module|📋 Plan: Redesign /about/structure Module (Editorial Lanna Modernist)]]`
@@ -59,7 +61,7 @@ aliases: ["Index", "Home"]
 - `[[99_Archive/Webometrics_Audit_SOC_CRRU.md]]` (งานตรวจสอบและติดตั้งมาตรฐาน Webometrics - ✅ เสร็จสมบูรณ์เมื่อ August 18, 2026)
 - `[[99_Archive/skills-creation.md]]` (การสร้างชุด Skills พื้นฐาน SOC-CRRU - ✅ เสร็จสมบูรณ์เมื่อ July 07, 2026)
 - `[[99_Archive/admin-rbac-workflow-plan.md]]` (ระบบกำหนดสิทธิ์ RBAC & Approval Workflow - ✅ เสร็จสมบูรณ์เมื่อ October 12, 2026)
-- `[[99_Archive/eservice-calendar-plan.md]]` (ระบบปฏิทินกิจกรรมสำนักวิชา Google Calendar iCal - ✅ เสร็จสมบูรณ์)
+- `[[99_Archive/eservice-calendar-plan.md]]` (ระบบปฏิทินกิจกรรมคณะสังคมศาสตร์ Google Calendar iCal - ✅ เสร็จสมบูรณ์)
 - เข้าไปดูไฟล์เก่า: `[[99_Archive/]]`
 
 ---

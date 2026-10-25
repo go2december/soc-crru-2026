@@ -1,195 +1,121 @@
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import Breadcrumb from '@/components/Breadcrumb';
-import { Database, Lightbulb, ArrowRight, BookOpen, Globe2, Award, Users, Handshake, BookCheck } from 'lucide-react';
+import JsonLd from '@/components/seo/JsonLd';
+import ResearchHeroSearch from '@/components/research/ResearchHeroSearch';
+import ResearchStatsBar from '@/components/research/ResearchStatsBar';
+import ResearchPillarsGrid from '@/components/research/ResearchPillarsGrid';
+import ResearchFeaturedGrid from '@/components/research/ResearchFeaturedGrid';
+import ResearchSdgMatrix from '@/components/research/ResearchSdgMatrix';
+import ResearchCallToAction from '@/components/research/ResearchCallToAction';
+import { fetchResearchStats, fetchResearchList } from '@/lib/research';
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
+  title: 'ศูนย์วิจัยและบริการวิชาการ | คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+  description:
+    'ศูนย์รวมงานวิจัย วารสารวิชาการระดับชาติ (ThaiJO) บริการวิชาการเพื่อสังคม และเครือข่ายความร่วมมือ MOU คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+  alternates: {
+    canonical: '/research',
+  },
+  openGraph: {
     title: 'ศูนย์วิจัยและบริการวิชาการ | คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
-    description: 'ศูนย์รวมงานวิจัย วารสารวิชาการ บริการวิชาการ และเครือข่ายความร่วมมือ MOU คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
-    alternates: {
-        canonical: '/research',
-    },
-    openGraph: {
-        title: 'ศูนย์วิจัยและบริการวิชาการ | คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
-        description: 'ศูนย์รวมงานวิจัย วารสารวิชาการ บริการวิชาการ และเครือข่ายความร่วมมือ MOU',
-        url: '/research',
-        type: 'website',
-        locale: 'th_TH',
-    },
+    description:
+      'สืบค้นผลงานวิจัย วารสารสังคมศาสตร์วิชาการ โครงการบริการวิชาการเพื่อชุมชน และเครือข่ายความร่วมมือทางวิชาการ',
+    url: '/research',
+    type: 'website',
+    locale: 'th_TH',
+    siteName: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+  },
 };
 
-const RESEARCH_PILLARS = [
-    {
-        title: 'ฐานข้อมูลงานวิจัยและวิทยานิพนธ์',
-        subtitle: 'Research Database & Thesis',
-        description: 'สืบค้นผลงานวิจัย บทความวิชาการ และวิทยานิพนธ์ของคณาจารย์และนักศึกษา พร้อมจำแนกตามเป้าหมายการพัฒนาที่ยั่งยืน (SDGs)',
-        icon: Database,
-        href: '/research/database',
-        badge: 'คลังข้อมูลดิจิทัล',
-        accentColor: 'border-blue-500/20 hover:border-blue-500/50',
-        badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
-        iconBg: 'bg-blue-50 text-blue-600',
+export default async function ResearchHubPage() {
+  // Fetch real dynamic research statistics and latest publications in parallel
+  const [stats, featuredResponse] = await Promise.all([
+    fetchResearchStats(),
+    fetchResearchList({ limit: 4, status: 'PUBLISHED' }),
+  ]);
+
+  const featuredProjects = featuredResponse?.data || [];
+
+  // Structured Data Schema for Webometrics & Google Academic
+  const researchSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ResearchOrganization',
+    name: 'ศูนย์วิจัยและบริการวิชาการ คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    alternateName: 'Research and Academic Services Center, Faculty of Social Sciences, CRRU',
+    url: 'https://soc.crru.ac.th/research',
+    parentOrganization: {
+      '@type': 'CollegeOrUniversity',
+      name: 'มหาวิทยาลัยราชภัฏเชียงราย',
+      url: 'https://www.crru.ac.th',
     },
-    {
-        title: 'วารสารสังคมศาสตร์วิชาการ',
-        subtitle: 'Journal of Social Academic (ThaiJO)',
-        description: 'วารสารวิชาการระดับชาติด้านสังคมศาสตร์ มนุษยศาสตร์ และการพัฒนาท้องถิ่น ดัชนี TCI เผยแพร่และส่งบทความผ่านระบบ ThaiJO',
-        icon: BookCheck,
-        href: '/research/journal',
-        badge: 'ระบบ ThaiJO / TCI',
-        accentColor: 'border-emerald-500/20 hover:border-emerald-500/50',
-        badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        iconBg: 'bg-emerald-50 text-emerald-600',
+    description:
+      'ศูนย์รวมการวิจัยทางสังคมศาสตร์ พัฒนาท้องถิ่น วารสารวิชาการระดับชาติ และการบริการวิชาการเพื่อยกระดับคุณภาพชีวิตชุมชนภาคเหนือตอนบน',
+    areaServed: {
+      '@type': 'AdministrativeArea',
+      name: 'Chiang Rai and Upper Northern Thailand',
     },
-    {
-        title: 'ศูนย์บริการวิชาการเพื่อสังคม',
-        subtitle: 'Academic Services & Community Impact',
-        description: 'โครงการขับเคลื่อนองค์ความรู้สู่ชุมชนท้องถิ่น การพัฒนาเศรษฐกิจฐานราก ห้องปฏิบัติการทางสังคม และงานบริการวิชาการแบบมีส่วนร่วม',
-        icon: Lightbulb,
-        href: '/research/services',
-        badge: 'พันธกิจเพื่อสังคม',
-        accentColor: 'border-amber-500/20 hover:border-amber-500/50',
-        badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
-        iconBg: 'bg-amber-50 text-amber-600',
-    },
-    {
-        title: 'เครือข่ายความร่วมมือและ MOU',
-        subtitle: 'Partnerships & Cooperation Network',
-        description: 'บันทึกข้อตกลงความร่วมมือทางวิชาการและการพัฒนาสังคม ร่วมกับหน่วยงานภาครัฐ ภาคประชาสังคม สถาบันการศึกษา และเอกชน',
-        icon: Handshake,
-        href: '/research/mou',
-        badge: 'ภาคีความร่วมมือ',
-        accentColor: 'border-purple-500/20 hover:border-purple-500/50',
-        badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
-        iconBg: 'bg-purple-50 text-purple-600',
-    },
-];
+  };
 
-const STATS = [
-    { number: '100+', label: 'ผลงานวิจัยและตีพิมพ์', icon: BookOpen },
-    { number: '17', label: 'เป้าหมาย SDGs ที่เกี่ยวข้อง', icon: Globe2 },
-    { number: '50+', label: 'ชุมชนที่ได้รับการบริการวิชาการ', icon: Users },
-    { number: '10+', label: 'รางวัลและนวัตกรรมสร้างสรรค์', icon: Award },
-];
+  return (
+    <div className="bg-slate-50/60 min-h-screen font-sans text-slate-800">
+      <JsonLd data={researchSchema} />
 
-export default function ResearchHubPage() {
-    return (
-        <div className="bg-slate-50/50 min-h-screen font-sans text-slate-800">
-            {/* Header / Hero Section */}
-            <section className="relative bg-gradient-to-b from-scholar-deep to-slate-900 text-white pt-24 pb-20 overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#f14627_1px,transparent_1px)] [background-size:16px_16px]" />
-                <div className="container mx-auto px-4 relative z-10">
-                    <Breadcrumb
-                        items={[
-                            { label: 'หน้าหลัก', href: '/' },
-                            { label: 'วิจัยและบริการวิชาการ' },
-                        ]}
-                    />
+      {/* Hero Section with Editorial Lanna Palette */}
+      <section className="relative bg-gradient-to-b from-[#0B132B] via-[#0F172A] to-slate-900 text-white pt-24 pb-20 overflow-hidden border-b border-slate-800">
+        {/* Subtle geometric dot pattern */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#F59E0B_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
 
-                    <div className="max-w-3xl mt-8">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-scholar-gold/20 border border-scholar-gold/30 text-scholar-gold text-xs font-semibold uppercase tracking-wider mb-4 backdrop-blur-sm">
-                            <span className="w-2 h-2 rounded-full bg-scholar-gold animate-pulse" />
-                            Research & Academic Services
-                        </div>
-                        <h1 className="text-3xl md:text-5xl font-bold font-heading tracking-tight leading-tight text-white mb-6">
-                            งานวิจัย นวัตกรรม และบริการวิชาการ <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-scholar-gold via-amber-200 to-white">
-                                เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน
-                            </span>
-                        </h1>
-                        <p className="text-slate-300 text-base md:text-lg leading-relaxed font-light">
-                            บูรณาการองค์ความรู้ทางสังคมศาสตร์เพื่อตอบสนองการเปลี่ยนแปลงของสังคม สร้างสรรค์งานวิจัยที่มีผลกระทบสูง
-                            และขับเคลื่อนการพัฒนาชุมชนท้องถิ่นจังหวัดเชียงรายและพื้นที่ภาคเหนือตอนบน
-                        </p>
-                    </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <Breadcrumb
+            items={[
+              { label: 'หน้าหลัก', href: '/' },
+              { label: 'ศูนย์วิจัยและบริการวิชาการ' },
+            ]}
+          />
 
-                    {/* Quick Stats */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 pt-8 border-t border-slate-800">
-                        {STATS.map((stat, idx) => {
-                            const IconComponent = stat.icon;
-                            return (
-                                <div key={idx} className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-sm bg-white/10 flex items-center justify-center text-scholar-gold shrink-0">
-                                        <IconComponent size={20} />
-                                    </div>
-                                    <div>
-                                        <div className="text-2xl font-bold font-heading text-white">{stat.number}</div>
-                                        <div className="text-xs text-slate-400">{stat.label}</div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </section>
+          <div className="max-w-3xl mt-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4 backdrop-blur-sm">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span>Research, Innovation & Academic Services</span>
+            </div>
 
-            {/* Main Portals Grid */}
-            <section className="container mx-auto px-4 -mt-8 relative z-20 pb-20">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {RESEARCH_PILLARS.map((pillar, idx) => {
-                        const IconComponent = pillar.icon;
-                        return (
-                            <Link
-                                key={idx}
-                                href={pillar.href}
-                                className={`group bg-white rounded-sm p-8 border shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 ${pillar.accentColor}`}
-                            >
-                                <div>
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className={`w-12 h-12 rounded-sm flex items-center justify-center ${pillar.iconBg}`}>
-                                            <IconComponent size={24} />
-                                        </div>
-                                        <span className={`text-xs px-2.5 py-0.5 rounded-sm font-medium border ${pillar.badgeColor}`}>
-                                            {pillar.badge}
-                                        </span>
-                                    </div>
+            <h1 className="text-3xl md:text-5xl font-bold font-heading tracking-tight leading-tight text-white mb-6">
+              งานวิจัย นวัตกรรม และบริการวิชาการ <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-200 to-white">
+                เพื่อการพัฒนาท้องถิ่นอย่างยั่งยืน
+              </span>
+            </h1>
 
-                                    <h2 className="text-xl font-bold text-slate-900 group-hover:text-scholar-accent transition-colors mb-1 font-heading">
-                                        {pillar.title}
-                                    </h2>
-                                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
-                                        {pillar.subtitle}
-                                    </p>
-                                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
-                                        {pillar.description}
-                                    </p>
-                                </div>
+            <p className="text-slate-300 text-base md:text-lg leading-relaxed font-light">
+              บูรณาการองค์ความรู้ทางสังคมศาสตร์เพื่อตอบสนองการเปลี่ยนแปลงของสังคม สร้างสรรค์งานวิจัยที่มีผลกระทบสูง 
+              เผยแพร่ผลงานสู่เวทีวิชาการสากล และขับเคลื่อนคุณภาพชีวิตชุมชนท้องถิ่นจังหวัดเชียงรายและอนุภูมิภาคลุ่มน้ำโขง
+            </p>
 
-                                <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-sm font-semibold text-slate-700 group-hover:text-scholar-accent transition-colors">
-                                    <span>เข้าสู่ระบบ</span>
-                                    <ArrowRight size={18} className="transform group-hover:translate-x-1 transition-transform" />
-                                </div>
-                            </Link>
-                        );
-                    })}
-                </div>
+            {/* Interactive Hero Search Component */}
+            <ResearchHeroSearch />
+          </div>
 
-                {/* Info Callout Section */}
-                <div className="mt-12 bg-white rounded-sm p-8 border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="max-w-xl">
-                        <h3 className="text-lg font-bold text-slate-900 font-heading mb-2">
-                            ต้องการร่วมงานวิจัยหรือขอรับบริการวิชาการ?
-                        </h3>
-                        <p className="text-sm text-slate-600 leading-relaxed">
-                            ฝ่ายวิจัยและบริการวิชาการ คณะสังคมศาสตร์ ยินดีให้คำปรึกษาและร่วมมือกับองค์กรภาครัฐ ภาคเอกชน และประชาสังคม
-                        </p>
-                    </div>
-                    <div className="flex flex-wrap gap-3 shrink-0">
-                        <Link
-                            href="/contact"
-                            className="px-5 py-2.5 rounded-sm bg-scholar-deep text-white text-sm font-medium hover:bg-slate-800 transition-colors shadow-2xs"
-                        >
-                            ติดต่อฝ่ายวิจัย
-                        </Link>
-                        <Link
-                            href="/research/database"
-                            className="px-5 py-2.5 rounded-sm bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 transition-colors border border-slate-200"
-                        >
-                            ค้นหางานวิจัยทั้งหมด
-                        </Link>
-                    </div>
-                </div>
-            </section>
+          {/* Dynamic Research Stats Bar */}
+          <ResearchStatsBar stats={stats} />
         </div>
-    );
+      </section>
+
+      {/* Main Content Area */}
+      <main className="container mx-auto px-4 pb-24">
+        {/* 4 Pillars of Research Ecosystem */}
+        <ResearchPillarsGrid />
+
+        {/* Dynamic Featured Research Section */}
+        <ResearchFeaturedGrid projects={featuredProjects} />
+
+        {/* UN SDGs Matrix Showcase */}
+        <ResearchSdgMatrix />
+
+        {/* Call-to-Action for Faculty, Partners & Researchers */}
+        <ResearchCallToAction />
+      </main>
+    </div>
+  );
 }

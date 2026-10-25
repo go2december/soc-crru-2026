@@ -22,7 +22,7 @@ tags: ["audit", "database", "admin-dashboard", "gap-analysis"]
 - **Hero Metrics Bar**: ตัวเลขสถิติ 4 ตัวใน Hero (*7 หลักสูตร, 94.8% ได้งานทำ, 40+ ความร่วมมือ, 100% ผู้ทรงคุณวุฒิ*)
 - **Stats Dashboard**: สถิตินวัตกรรมและชุมชนใน [[frontend/components/StatsDashboard.tsx|StatsDashboard.tsx]] (*150+ ชุมชน, 85 นวัตกรรม, 42 MOU, 98% นายจ้างพึงพอใจ*) แม้จะมีตาราง `mous` และ `research_projects` อยู่ในระบบ แต่ไม่ได้ query แบบ Dynamic
 
-### 📖 หมวดเกี่ยวกับสำนักวิชา (`/about`)
+### 📖 หมวดเกี่ยวกับคณะ (`/about`)
 - **ข้อมูลประวัติและความเป็นมา**: ก่อตั้งปี 2546 และ 23+ ปี ใน [[frontend/app/about/page.tsx|about/page.tsx]]
 - **ปรัชญา, วิสัยทัศน์, พันธกิจ 5 ด้าน และอัตลักษณ์-เอกลักษณ์**: เป็นข้อความ static ในโค้ด
 - **โครงสร้างการบริหาร ([[frontend/app/about/structure/page.tsx|structure/page.tsx]])**: แผนผังผู้บริหาร, งาน 4 ฝ่ายของสำนักงานคณบดี, และสายการบังคับบัญชา

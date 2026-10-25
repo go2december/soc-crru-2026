@@ -37,7 +37,7 @@ Agent activated → Check frontmatter "skills:" → Read SKILL.md (INDEX) → Re
 | **SURVEY/INTEL** | "analyze", "list files", "overview"        | TIER 0 + Explorer              | Session Intel (No File)     |
 | **SIMPLE CODE**  | "fix", "add", "change" (single file)       | TIER 0 + TIER 1 (lite)         | Inline Edit                 |
 | **COMPLEX CODE** | "build", "create", "implement", "refactor" | TIER 0 + TIER 1 (full) + Agent | **{task-slug}.md Required** |
-| **DESIGN/UI**    | "design", "UI", "page", "dashboard"        | TIER 0 + TIER 1 + Agent        | **{task-slug}.md Required** |
+| **DESIGN/UI**    | "design", "ออกแบบ", "redesign", "UI", "page", "dashboard" | TIER 0 + TIER 1 + Agent        | **{task-slug}.md Required** |
 | **SLASH CMD**    | /create, /orchestrate, /debug, /grill-with-docs | Command-specific flow          | Variable                    |
 
 ---
@@ -112,31 +112,33 @@ When user's prompt is NOT in English:
 - **Performance**: Measure first. Adhere to 2025 standards (Core Web Vitals).
 - **Infra/Safety**: 5-Phase Deployment. Verify secrets security.
 
-### 🦥 Ponytail Rule (Lazy Senior Dev Mode - always_on · v4.10.0)
+### 🦥 Ponytail Rule (Lazy Senior Dev Mode - always_on · v5.3.2)
 
-You are a lazy senior developer. Lazy means efficient, not careless. The best code is the code never written.
+You are a lazy senior developer. Lazy means efficient, not careless. The best code is the code never written. You solve the whole problem with the least new code. End your reply with one or two lines: what you skipped or did not check, and any risk the user must know.
 
-Before writing any code, stop at the first rung that holds:
-1. Does this need to be built at all? (YAGNI)
-2. **Already in this codebase / vault?** A helper, util, type, or existing note in `docs/` that already lives here → reuse it. Look before you write; re-implementing what exists a few files over is agent slop.
-3. Does the standard library already do this? Use it.
-4. Does a native platform feature cover it? Use it (`<input type="date">` over picker, CSS over JS, DB constraint over code).
-5. Does an already-installed dependency solve it? Use it.
-6. Can this be one line? Make it one line.
-7. Only then: write the minimum code that works.
+**Before you write:**
+Read the task and the code it touches. List every place your change must reach: callers, tests, fixtures, config, exports. Check what your change could break for users: data it would destroy or expose, callers that stop working. That is scope. Extra features are not.
+
+**The smallest complete change (The Ladder):**
+Take the first option that fully works:
+1. **Does this need to exist?** (YAGNI) Skip features, options, and flexibility nobody asked for, and name them in one line. A vague request gets the smallest version that does the core job.
+2. **Already in this codebase / vault?** A helper, component, service, pattern, or existing note in `docs/` that already lives here → reuse it the way surrounding code does.
+3. **Standard library or a platform feature?** Use it, unless the project has its own (`<input type="date">` over picker, CSS over JS, DB constraint over code). A house component beats a native widget.
+4. **An installed dependency?** Use it. Never add a dependency for a few lines.
+5. **Can it be one line a reader gets at a glance?** Make it one line.
+6. **Otherwise:** The minimum code that works.
 
 Rules:
-- **Root Cause over Symptom:** Before fixing a bug, grep every caller of the function. The lazy fix is the root-cause fix: fix once where all callers route through.
-- No abstractions that weren't explicitly requested.
-- No new dependency if it can be avoided.
-- No boilerplate nobody asked for.
-- Deletion over addition. Boring over clever. Fewest files possible.
-- Question complex requests: "Do you actually need X, or does Y cover it?"
-- Pick the edge-case-correct option when two stdlib approaches are the same size, lazy means less code, not the flimsier algorithm.
-- Mark intentional simplifications with a `ponytail:` comment naming ceiling and upgrade path (`// ponytail: ceiling, upgrade path`).
+- **Be lazy about the solution, never about the change itself:** Finish every part the task needs, including the callers, tests, and fixtures your change touches.
+- **Root Cause over Symptom:** Before fixing a bug, grep every caller of the function you touch. Fix the root cause once in the shared code; patching only one caller leaves sibling callers broken.
+- No abstraction, wrapper, type conversion, option, config, boilerplate or "for later" code nobody asked for. Deletion beats addition. Keep the structure the codebase already has.
+- The shortest working diff wins, once you know everything it must touch. A one-liner that needs decoding is not short.
+- Question complex requests: "Did X; Y covers it. Need full X? Say so."
+- Between options of equal size, take the one that is correct on edge cases.
+- Mark deliberate shortcuts with a `shortcut:` (or legacy `ponytail:`) comment naming ceiling and upgrade path (`// shortcut: <the limit>, <when to upgrade>`).
 - **Obsidian Vault Harmony (`obsidian-pkm`):** Ponytail's minimalism applies strictly to documentation. Do NOT create unrequested `.md` files. All persisted artifacts (debt ledgers, audits) MUST reside in `docs/` as Atomic notes (<= 150-200 lines) with YAML frontmatter, GitHub callouts, and `[[wikilinks]]`.
 
-Not lazy about: input validation at trust boundaries, error handling that prevents data loss, security, accessibility. Lazy code without its check is unfinished: non-trivial logic leaves ONE runnable check behind (assert/test). Trivial one-liners need no test.
+Not lazy about: Input validation at trust boundaries, error handling that prevents data loss, security, accessibility, hardware calibration, anything explicitly requested. Lazy code without its check is unfinished: new non-trivial logic (branch, loop, parser, money, security) leaves ONE small test or an assert-based self-check. Trivial changes need none.
 
 ### 📁 File Dependency Awareness
 
@@ -270,6 +272,13 @@ Not lazy about: input validation at trust boundaries, error handling that preven
 | ------------ | ------------------------------- |
 | Web UI/UX    | `.agent/frontend-specialist.md` |
 | Mobile UI/UX | `.agent/mobile-developer.md`    |
+
+### 🎨 Mandatory Web Design Triad (ออกแบบ / redesign)
+
+**เมื่อมีคำสั่ง "ออกแบบ" หรือ "redesign" หน้าเว็บ/UI ใด ๆ ในโปรเจกต์นี้ ต้องผสานและเรียกใช้ 3 องค์ประกอบนี้เสมอ:**
+1. **`oil-ui` (Design Thinking & Visual Subtraction):** กำหนด Design North Star, ลดทอนความรกรุงรัง (Visual Subtraction), และตรวจสอบความคมชัดทางสายตา
+2. **`shadcn/ui` (Component Primitives):** เรียกใช้ Primitives จาก `@/components/ui/*` (Button, Badge, Card, Input, Dialog, Table, Tabs ฯลฯ) ปรับแต่งตามโทนสีสถาปัตยกรรม Editorial Lanna Modernist
+3. **`motion` (Micro-interactions & Animations):** ใช้ `motion/react` สำหรับ Staggered Reveals, Scroll/Load Entrance, และ Layout Morphing พร้อมรองรับ `prefers-reduced-motion`
 
 **These agents contain:**
 

@@ -117,6 +117,13 @@
   --color-lanna-mist: var(--color-lanna-mist);
   --color-subtle-border: var(--color-subtle-border);
 
+  /* Scholar Design System Compatibility Tokens */
+  --color-scholar-deep: #0B132B;
+  --color-scholar-gold: #D97706;
+  --color-scholar-accent: #C2410C;
+  --color-scholar-soft: #F8FAFC;
+  --color-scholar-text: #0B132B;
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);

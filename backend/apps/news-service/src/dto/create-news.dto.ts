@@ -69,5 +69,6 @@ export class CreateNewsDto {
 
   @IsOptional()
   @IsEnum(['DRAFT', 'PENDING_REVIEW', 'APPROVED', 'PUBLISHED', 'REJECTED'])
-  publicationStatus?: 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'REJECTED';
+  publicationStatus?:
+    'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'PUBLISHED' | 'REJECTED';
 }

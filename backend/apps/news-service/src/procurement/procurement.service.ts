@@ -231,8 +231,14 @@ export class ProcurementService {
 
     // Check Editor restrictions
     if (user && !user.roles?.includes('ADMIN')) {
-      if (user.departmentId && existing.departmentId && existing.departmentId !== user.departmentId) {
-        throw new NotFoundException('คุณไม่มีสิทธิ์แก้ไขข้อมูลจัดซื้อจัดจ้างของหน่วยงานอื่น');
+      if (
+        user.departmentId &&
+        existing.departmentId &&
+        existing.departmentId !== user.departmentId
+      ) {
+        throw new NotFoundException(
+          'คุณไม่มีสิทธิ์แก้ไขข้อมูลจัดซื้อจัดจ้างของหน่วยงานอื่น',
+        );
       }
       if (updatePayload.publicationStatus === 'PUBLISHED') {
         updatePayload.publicationStatus = 'PENDING_REVIEW';
@@ -339,8 +345,13 @@ export class ProcurementService {
   async remove(id: string, user?: any) {
     const existing = await this.findOne(id);
     if (user && !user.roles?.includes('ADMIN') && user.departmentId) {
-      if (existing.departmentId && existing.departmentId !== user.departmentId) {
-        throw new NotFoundException('คุณไม่มีสิทธิ์ลบข้อมูลจัดซื้อจัดจ้างของหน่วยงานอื่น');
+      if (
+        existing.departmentId &&
+        existing.departmentId !== user.departmentId
+      ) {
+        throw new NotFoundException(
+          'คุณไม่มีสิทธิ์ลบข้อมูลจัดซื้อจัดจ้างของหน่วยงานอื่น',
+        );
       }
     }
     for (const doc of existing.documents || []) {

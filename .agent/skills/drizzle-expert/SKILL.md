@@ -5,13 +5,13 @@ description: Best practices and coding patterns for using Drizzle ORM with NestJ
 
 # Drizzle ORM Best Practices (NestJS & PostgreSQL)
 
-This guide defines how to write database queries, manage schemas, handle relationships, and run migrations in the SOC-CRRU codebase using **Drizzle ORM** and **NestJS**.
+This guide defines how to write database queries, manage schemas, handle relationships, and run migrations in the SOC-CRRU codebase using **Drizzle ORM (v0.45+)** and **NestJS (v12)**.
 
 ---
 
 ## 🏗️ 1. Database Connection & Service Injection
 
-The database is connected via `DatabaseService` (located in [database.service.ts](file:///e:/web2026/soc-crru-web/backend/libs/database/src/database.service.ts)).
+The database is connected via `DatabaseService` (located in [database.service.ts](file:///e:/web2026/soc-crru-web/backend/libs/database/src/database.service.ts)), which registers the schema with `drizzle(pool, { schema })`.
 
 To use Drizzle in any NestJS service:
 1. Inject `DatabaseService` in the constructor.
@@ -19,7 +19,7 @@ To use Drizzle in any NestJS service:
 
 ```typescript
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from 'db/database'; // Import path configured in tsconfig
+import { DatabaseService } from 'db/database';
 import { eq } from 'drizzle-orm';
 import { staffProfiles } from 'db/database';
 
@@ -42,26 +42,36 @@ export class StaffService {
 
 ## 🔍 2. Drizzle Query Patterns
 
+### 2.1 Relational Queries API (`db.query`) - Recommended for Nested Reads
+Because `DatabaseService` provides the full `{ schema }` to Drizzle, you can leverage typed relational queries with `with`:
+
+```typescript
+// Find first with relations
+const staff = await this.drizzle.db.query.staffProfiles.findFirst({
+  where: (staff, { eq }) => eq(staff.id, id),
+  with: {
+    department: true,
+  },
+});
+
+// Find many with filter & relations
+const activeStaff = await this.drizzle.db.query.staffProfiles.findMany({
+  where: (staff, { eq }) => eq(staff.isActive, true),
+  orderBy: (staff, { desc }) => [desc(staff.createdAt)],
+  limit: 20,
+  with: {
+    department: true,
+  },
+});
+```
+
+### 2.2 Standard SQL-Like Queries (`db.select()`)
 Always import helper operators from `'drizzle-orm'`:
 ```typescript
 import { eq, ne, gt, gte, lt, lte, and, or, ilike, desc, asc, count, SQL } from 'drizzle-orm';
 ```
 
-### Select (Retrieving Data)
-* **Select All Columns**:
-  ```typescript
-  const allStaff = await this.drizzle.db.select().from(staffProfiles);
-  ```
-* **Select Specific Columns**:
-  ```typescript
-  const compactStaff = await this.drizzle.db
-    .select({
-      id: staffProfiles.id,
-      nameTh: staffProfiles.nameTh,
-    })
-    .from(staffProfiles);
-  ```
-* **Filtering and Pagination**:
+* **Select with Filters & Pagination**:
   ```typescript
   const activeStaff = await this.drizzle.db
     .select()
@@ -77,8 +87,7 @@ import { eq, ne, gt, gte, lt, lte, and, or, ilike, desc, asc, count, SQL } from 
     .offset(0);
   ```
 
-### Insert (Creating Data)
-* **Single Insert with Returning**:
+* **Insert with Returning**:
   ```typescript
   const [newStaff] = await this.drizzle.db
     .insert(staffProfiles)
@@ -89,6 +98,7 @@ import { eq, ne, gt, gte, lt, lte, and, or, ilike, desc, asc, count, SQL } from 
     })
     .returning();
   ```
+
 * **Bulk Insert**:
   ```typescript
   await this.drizzle.db.insert(staffProfiles).values([
@@ -97,7 +107,6 @@ import { eq, ne, gt, gte, lt, lte, and, or, ilike, desc, asc, count, SQL } from 
   ]);
   ```
 
-### Update (Modifying Data)
 * **Update with Returning**:
   ```typescript
   const [updated] = await this.drizzle.db
@@ -107,13 +116,12 @@ import { eq, ne, gt, gte, lt, lte, and, or, ilike, desc, asc, count, SQL } from 
     .returning();
   ```
 
-### Delete (Removing Data)
 * **Delete Record**:
   ```typescript
   const [deleted] = await this.drizzle.db
-     .delete(staffProfiles)
-     .where(eq(staffProfiles.id, id))
-     .returning();
+    .delete(staffProfiles)
+    .where(eq(staffProfiles.id, id))
+    .returning();
   ```
 
 ---
@@ -126,21 +134,7 @@ Always define custom columns for aggregation queries to avoid type ambiguities:
 const [result] = await this.drizzle.db
   .select({ count: count() })
   .from(staffProfiles);
-const totalStaff = result.count;
-```
-
-### Relational Joins
-Drizzle supports SQL-style joins:
-```typescript
-const staffWithDepartment = await this.drizzle.db
-  .select({
-    staffId: staffProfiles.id,
-    staffName: staffProfiles.nameTh,
-    departmentName: departments.nameTh,
-  })
-  .from(staffProfiles)
-  .leftJoin(departments, eq(staffProfiles.departmentId, departments.id))
-  .where(eq(staffProfiles.isActive, true));
+const totalStaff = Number(result.count);
 ```
 
 ### Transactions
@@ -166,17 +160,26 @@ await this.drizzle.db.transaction(async (tx) => {
 
 The canonical schema configuration is defined in:
 * `backend/libs/database/src/schema.ts`
+* Configuration file: `backend/drizzle.config.ts`
 
-### Adding a Table / Column
-1. Modify the schema definition in `schema.ts`.
-2. Generate migration script using `drizzle-kit`:
+### Migration Commands (Run inside `backend/` directory)
+1. **Generate Migration Files**:
    ```bash
+   cd backend
    npx drizzle-kit generate
    ```
-3. Run the migrations to update the database:
+2. **Apply Migrations to PostgreSQL**:
    ```bash
-   npm run db:migrate # or run_migration script
+   cd backend
+   npx drizzle-kit migrate
+   ```
+3. **Prototyping / Development Direct Sync**:
+   ```bash
+   cd backend
+   npx drizzle-kit push
    ```
 
+*(Note: There is no `npm run db:migrate` alias in `backend/package.json`; invoke `npx drizzle-kit` commands directly).*
+
 ### Seed Data
-Use seed files in the backend workspace root directory (e.g., `seed.ts`, `seed-chiang-rai-content.ts`) to initialize lookup values or sample records.
+Use seed files in the backend workspace root directory (e.g., `seed.ts`, `seed-chiang-rai-content.ts` executed via `npx tsx <filename>`) to initialize lookup values or sample records.

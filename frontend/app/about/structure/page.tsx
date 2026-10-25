@@ -16,6 +16,9 @@ import {
   ShieldCheck,
   UserCheck,
 } from "lucide-react";
+import { getSiteSettings, DEFAULT_SITE_SETTINGS } from "@/lib/site-settings";
+
+export const revalidate = 60;
 
 export const metadata = {
   title: "โครงสร้างการบริหาร | คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
@@ -23,53 +26,11 @@ export const metadata = {
     "แผนผังโครงสร้างการบริหารงาน สายการบังคับบัญชา สำนักงานคณบดี และสาขาวิชา คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
 };
 
-export default function StructurePage() {
-  const deputyDeans = [
-    {
-      title: "รองคณบดีฝ่ายวิชาการและวิจัย",
-      sub: "Academic & Research Affairs",
-      desc: "กำกับดูแลงานหลักสูตร การจัดการเรียนการสอน งานวิจัย และประกันคุณภาพการศึกษา",
-      accent: "border-t-4 border-amber-500",
-      tag: "Academic",
-    },
-    {
-      title: "รองคณบดีฝ่ายบริหารและยุทธศาสตร์",
-      sub: "Administrative & Strategic Affairs",
-      desc: "กำกับดูแลงานบริหารทั่วไป งานนโยบายและแผน งบประมาณ การเงินและพัสดุ",
-      accent: "border-t-4 border-[#C2410C]",
-      tag: "Strategy",
-    },
-    {
-      title: "รองคณบดีฝ่ายพัฒนานักศึกษาและทำนุบำรุงศิลปวัฒนธรรม",
-      sub: "Student Affairs & Cultural Arts",
-      desc: "กำกับดูแลกิจกรรมพัฒนานักศึกษา ทุนการศึกษา วินัยนักศึกษา และงานศิลปวัฒนธรรม",
-      accent: "border-t-4 border-[#581C87]",
-      tag: "Student Affairs",
-    },
-  ];
-
-  const deanOfficeUnits = [
-    {
-      name: "งานบริหารทั่วไป",
-      en: "General Administration",
-      desc: "งานสารบรรณ ธุรการ บุคลากร ประชาสัมพันธ์ และอาคารสถานที่",
-    },
-    {
-      name: "งานนโยบายและแผน",
-      en: "Policy & Planning",
-      desc: "จัดทำแผนยุทธศาสตร์ แผนปฏิบัติการประจำปี และติดตามผลสัมฤทธิ์",
-    },
-    {
-      name: "งานการเงินและพัสดุ",
-      en: "Finance & Procurement",
-      desc: "บริหารงบประมาณ จัดซื้อจัดจ้าง บัญชี และพัสดุครุภัณฑ์",
-    },
-    {
-      name: "งานบริการการศึกษา",
-      en: "Educational Services",
-      desc: "ทะเบียนและประเมินผล จัดตารางสอน สหกิจศึกษา และงานบัณฑิตศึกษา",
-    },
-  ];
+export default async function StructurePage() {
+  const settings = await getSiteSettings();
+  const structureSections = settings.structureSections?.length
+    ? settings.structureSections
+    : DEFAULT_SITE_SETTINGS.structureSections;
 
   const academicPrograms = [
     {
@@ -261,81 +222,59 @@ export default function StructurePage() {
             </div>
           </div>
 
-          {/* Connector Down to Deputies */}
-          <div className="w-0.5 h-10 bg-slate-300" />
-
-          {/* LEVEL 2: รองคณบดี 3 ฝ่าย (DEPUTY DEANS) */}
-          <div className="w-full max-w-5xl mb-12 relative">
-            {/* Desktop Connector Horizontal Line */}
-            <div className="hidden lg:block absolute top-0 left-[16.6%] right-[16.6%] h-0.5 bg-slate-300" />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-0 lg:pt-6">
-              {deputyDeans.map((pos, idx) => (
-                <div
-                  key={idx}
-                  className={`p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow relative text-center ${pos.accent}`}
-                >
-                  <span className="inline-block px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-bold uppercase tracking-wider mb-2">
-                    {pos.tag}
-                  </span>
-                  <h4 className="text-base font-bold text-[#0B132B] mb-1">
-                    {pos.title}
-                  </h4>
-                  <p className="text-xs font-semibold text-slate-400 mb-2">
-                    {pos.sub}
-                  </p>
-                  <p className="font-body text-xs text-slate-600 leading-relaxed">
-                    {pos.desc}
-                  </p>
+          {/* Dynamic Organizational Structure Sections */}
+          <div className="w-full max-w-5xl space-y-12 mb-12">
+            {structureSections.map((sec) => (
+              <div key={sec.id} className="pt-8 first:pt-4">
+                <div className="flex items-center gap-3 pb-4 mb-6 border-b border-slate-200">
+                  <div className="size-10 rounded-xl bg-orange-50 text-[#C2410C] flex items-center justify-center flex-shrink-0">
+                    <Building2 className="size-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-[#0B132B]">
+                      {sec.title}
+                    </h3>
+                    {(sec.titleEn || sec.description) && (
+                      <p className="text-xs text-slate-500 font-body">
+                        {sec.titleEn} {sec.titleEn && sec.description ? '•' : ''} {sec.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {sec.items.map((item) => (
+                    <div
+                      key={item.id}
+                      className={`p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow relative ${item.accent || 'border-t-4 border-[#C2410C]'}`}
+                    >
+                      {item.tag && (
+                        <span className="inline-block px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-bold uppercase tracking-wider mb-2">
+                          {item.tag}
+                        </span>
+                      )}
+                      <h4 className="text-base font-bold text-[#0B132B] mb-1">
+                        {item.title}
+                      </h4>
+                      {item.subtitle && (
+                        <p className="text-xs font-semibold text-slate-400 mb-2">
+                          {item.subtitle}
+                        </p>
+                      )}
+                      {item.description && (
+                        <p className="font-body text-xs text-slate-600 leading-relaxed whitespace-pre-line">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Connector Down to Divisions */}
-          <div className="w-0.5 h-8 bg-slate-300 mb-2" />
-
-          {/* LEVEL 3: 2 MAIN WINGS (สำนักงานคณบดี & สาขาวิชา) */}
-          <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-12">
-            {/* Wing 1: สำนักงานคณบดี */}
-            <div className="p-7 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
-              <div className="flex items-center gap-3 pb-4 mb-6 border-b border-slate-100">
-                <div className="size-10 rounded-xl bg-orange-50 text-[#C2410C] flex items-center justify-center flex-shrink-0">
-                  <Building2 className="size-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-[#0B132B]">
-                    สำนักงานคณบดี
-                  </h3>
-                  <p className="text-xs text-slate-500 font-body">
-                    Dean&apos;s Office • ฝ่ายสนับสนุนการบริหารจัดการ
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3.5">
-                {deanOfficeUnits.map((unit, uIdx) => (
-                  <div
-                    key={uIdx}
-                    className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-bold text-[#0B132B]">
-                        {unit.name}
-                      </span>
-                      <span className="text-[11px] text-slate-400 font-medium">
-                        {unit.en}
-                      </span>
-                    </div>
-                    <p className="font-body text-xs text-slate-600 leading-relaxed">
-                      {unit.desc}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Wing 2: หลักสูตรและสาขาวิชา */}
+          {/* Wing: หลักสูตรและสาขาวิชา */}
+          <div className="w-full max-w-5xl mb-12">
             <div className="p-7 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
               <div className="flex items-center gap-3 pb-4 mb-6 border-b border-slate-100">
                 <div className="size-10 rounded-xl bg-purple-50 text-[#581C87] flex items-center justify-center flex-shrink-0">

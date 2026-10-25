@@ -11,7 +11,10 @@ export class ShortCoursesService {
   async create(createShortCourseDto: CreateShortCourseDto) {
     const payload: any = {
       ...createShortCourseDto,
-      price: createShortCourseDto.price !== undefined ? String(createShortCourseDto.price) : '0',
+      price:
+        createShortCourseDto.price !== undefined
+          ? String(createShortCourseDto.price)
+          : '0',
     };
 
     const result = await this.drizzle.db
@@ -46,7 +49,10 @@ export class ShortCoursesService {
       query.where(and(...conditions));
     }
 
-    return await query.orderBy(asc(shortCourses.sortOrder), desc(shortCourses.createdAt));
+    return await query.orderBy(
+      asc(shortCourses.sortOrder),
+      desc(shortCourses.createdAt),
+    );
   }
 
   async findAllAdmin() {

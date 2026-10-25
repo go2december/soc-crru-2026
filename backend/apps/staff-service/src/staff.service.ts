@@ -18,7 +18,10 @@ import {
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { CreatePositionDto, UpdatePositionDto } from './dto/position.dto';
-import { CreateResumeRequestDto, ApproveResumeRequestDto } from './dto/create-resume-request.dto';
+import {
+  CreateResumeRequestDto,
+  ApproveResumeRequestDto,
+} from './dto/create-resume-request.dto';
 import { UploadService } from 'upload/upload';
 import { StaffMailService } from './mail.service';
 import { PdfResumeService } from './pdf-resume.service';
@@ -422,27 +425,37 @@ export class StaffService {
   async createResumeRequest(dto: CreateResumeRequestDto) {
     // 1. Anti-Bot Defense: Honeypot check
     if (dto.honeypot && dto.honeypot.trim().length > 0) {
-      throw new BadRequestException('ระบบตรวจพบการส่งข้อมูลอัตโนมัติ (Automated bot detected)');
+      throw new BadRequestException(
+        'ระบบตรวจพบการส่งข้อมูลอัตโนมัติ (Automated bot detected)',
+      );
     }
 
     // 2. Anti-Bot Defense: Time-gate check (minimum 1.5 seconds between modal open and submit)
     if (dto.renderedTime && Date.now() - dto.renderedTime < 1500) {
-      throw new BadRequestException('กรุณากรอกข้อมูลตามขั้นตอนปกติ (Submission too fast)');
+      throw new BadRequestException(
+        'กรุณากรอกข้อมูลตามขั้นตอนปกติ (Submission too fast)',
+      );
     }
 
     // 3. Anti-Bot Defense: Math Challenge Verification
     if (dto.captchaToken && dto.captchaAnswer) {
       const isValid = this.verifyCaptcha(dto.captchaToken, dto.captchaAnswer);
       if (!isValid) {
-        throw new BadRequestException('ผลลัพธ์การตรวจสอบความปลอดภัย (Anti-Bot) ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+        throw new BadRequestException(
+          'ผลลัพธ์การตรวจสอบความปลอดภัย (Anti-Bot) ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง',
+        );
       }
     } else {
-      throw new BadRequestException('กรุณาตอบคำถามยืนยันความปลอดภัยเพื่อป้องกันสแปม');
+      throw new BadRequestException(
+        'กรุณาตอบคำถามยืนยันความปลอดภัยเพื่อป้องกันสแปม',
+      );
     }
 
     const staff = await this.findOne(dto.staffId);
     if (!staff) {
-      throw new NotFoundException(`Staff member with ID ${dto.staffId} not found`);
+      throw new NotFoundException(
+        `Staff member with ID ${dto.staffId} not found`,
+      );
     }
 
     const result = await this.drizzle.db
@@ -460,7 +473,8 @@ export class StaffService {
       .returning();
 
     const request = result[0];
-    const staffName = `${staff.prefixTh || ''} ${staff.firstNameTh} ${staff.lastNameTh}`.trim();
+    const staffName =
+      `${staff.prefixTh || ''} ${staff.firstNameTh} ${staff.lastNameTh}`.trim();
 
     // ส่งอีเมลยืนยันการรับคำร้องไปยังผู้ขอ (ระบุเงื่อนไขจัดส่งไม่เกิน 7 วันทำการ)
     await this.mailService.sendAcknowledgmentEmail({
@@ -486,11 +500,16 @@ export class StaffService {
       success: true,
       requestId: request.id,
       status: request.status,
-      message: 'บันทึกคำขอรับเอกสารประวัติเรียบร้อยแล้ว คณะฯ จะดำเนินการตรวจสอบและจัดส่งให้ทางอีเมลไม่เกิน 7 วันหลังจากได้รับการร้องขอ',
+      message:
+        'บันทึกคำขอรับเอกสารประวัติเรียบร้อยแล้ว คณะฯ จะดำเนินการตรวจสอบและจัดส่งให้ทางอีเมลไม่เกิน 7 วันหลังจากได้รับการร้องขอ',
     };
   }
 
-  async findAllResumeRequests(page: number = 1, limit: number = 20, status?: string) {
+  async findAllResumeRequests(
+    page: number = 1,
+    limit: number = 20,
+    status?: string,
+  ) {
     const offset = (page - 1) * limit;
 
     const baseQuery = this.drizzle.db
@@ -513,7 +532,10 @@ export class StaffService {
         departmentName: departments.nameTh,
       })
       .from(staffResumeRequests)
-      .leftJoin(staffProfiles, eq(staffResumeRequests.staffId, staffProfiles.id))
+      .leftJoin(
+        staffProfiles,
+        eq(staffResumeRequests.staffId, staffProfiles.id),
+      )
       .leftJoin(departments, eq(staffProfiles.departmentId, departments.id));
 
     let query = baseQuery;
@@ -530,7 +552,9 @@ export class StaffService {
       .select({ count: sql<number>`count(*)` })
       .from(staffResumeRequests);
     if (status) {
-      countQuery = countQuery.where(eq(staffResumeRequests.status, status as any)) as any;
+      countQuery = countQuery.where(
+        eq(staffResumeRequests.status, status as any),
+      ) as any;
     }
     const totalRes = await countQuery;
     const total = Number(totalRes[0]?.count || 0);
@@ -554,7 +578,12 @@ export class StaffService {
       })
       .from(staffResumeRequests);
 
-    const counts = countsResult[0] || { total: 0, pending: 0, sent: 0, rejected: 0 };
+    const counts = countsResult[0] || {
+      total: 0,
+      pending: 0,
+      sent: 0,
+      rejected: 0,
+    };
     const totalCount = Number(counts.total || 0);
 
     const now = new Date();
@@ -608,7 +637,10 @@ export class StaffService {
         departmentName: departments.nameTh,
       })
       .from(staffResumeRequests)
-      .leftJoin(staffProfiles, eq(staffResumeRequests.staffId, staffProfiles.id))
+      .leftJoin(
+        staffProfiles,
+        eq(staffResumeRequests.staffId, staffProfiles.id),
+      )
       .leftJoin(departments, eq(staffProfiles.departmentId, departments.id))
       .groupBy(
         staffResumeRequests.staffId,
@@ -622,7 +654,9 @@ export class StaffService {
 
     const topStaff = topStaffRows.map((r) => ({
       staffId: r.staffId,
-      name: `${r.prefixTh || ''}${r.firstNameTh || ''} ${r.lastNameTh || ''}`.trim() || 'บุคลากร',
+      name:
+        `${r.prefixTh || ''}${r.firstNameTh || ''} ${r.lastNameTh || ''}`.trim() ||
+        'บุคลากร',
       department: r.departmentName || 'คณะสังคมศาสตร์',
       count: Number(r.count || 0),
     }));
@@ -639,8 +673,11 @@ export class StaffService {
     };
   }
 
-  async exportResumeRequests(type: 'detailed' | 'summary' = 'detailed'): Promise<string> {
-    const escapeCsv = (val: any) => `"${(val ?? '').toString().replace(/"/g, '""')}"`;
+  async exportResumeRequests(
+    type: 'detailed' | 'summary' = 'detailed',
+  ): Promise<string> {
+    const escapeCsv = (val: any) =>
+      `"${(val ?? '').toString().replace(/"/g, '""')}"`;
     const purposeLabels: Record<string, string> = {
       SPEAKER: 'เทียบเชิญวิทยากร / บรรยาย',
       QA_AUDIT: 'ตรวจประกันคุณภาพ (QA)',
@@ -658,8 +695,12 @@ export class StaffService {
       const stats = await this.getResumeRequestStats();
       const lines: string[] = [];
 
-      lines.push('รายงานสรุปสถิติคำขอข้อมูลประวัติวิทยากร (Staff Resume Requests Summary Report)');
-      lines.push(`คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย | ข้อมูล ณ วันที่,${new Date().toLocaleDateString('th-TH')}`);
+      lines.push(
+        'รายงานสรุปสถิติคำขอข้อมูลประวัติวิทยากร (Staff Resume Requests Summary Report)',
+      );
+      lines.push(
+        `คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย | ข้อมูล ณ วันที่,${new Date().toLocaleDateString('th-TH')}`,
+      );
       lines.push('');
 
       lines.push('1. ภาพรวมตัวชี้วัด (Overview KPIs)');
@@ -679,10 +720,16 @@ export class StaffService {
       }
       lines.push('');
 
-      lines.push('3. รายนามคณาจารย์ที่ได้รับการขอประวัติสูงสุด 5 อันดับแรก (Top 5 Requested Staff)');
-      lines.push('อันดับ,ชื่อ-นามสกุล,สาขาวิชา/สังกัด,จำนวนครั้งที่ถูกขอ (ครั้ง)');
+      lines.push(
+        '3. รายนามคณาจารย์ที่ได้รับการขอประวัติสูงสุด 5 อันดับแรก (Top 5 Requested Staff)',
+      );
+      lines.push(
+        'อันดับ,ชื่อ-นามสกุล,สาขาวิชา/สังกัด,จำนวนครั้งที่ถูกขอ (ครั้ง)',
+      );
       stats.topStaff.forEach((s, idx) => {
-        lines.push(`${idx + 1},${escapeCsv(s.name)},${escapeCsv(s.department)},${s.count}`);
+        lines.push(
+          `${idx + 1},${escapeCsv(s.name)},${escapeCsv(s.department)},${s.count}`,
+        );
       });
 
       return lines.join('\r\n');
@@ -708,7 +755,10 @@ export class StaffService {
         departmentName: departments.nameTh,
       })
       .from(staffResumeRequests)
-      .leftJoin(staffProfiles, eq(staffResumeRequests.staffId, staffProfiles.id))
+      .leftJoin(
+        staffProfiles,
+        eq(staffResumeRequests.staffId, staffProfiles.id),
+      )
       .leftJoin(departments, eq(staffProfiles.departmentId, departments.id))
       .orderBy(desc(staffResumeRequests.createdAt));
 
@@ -731,9 +781,15 @@ export class StaffService {
     const lines = [headers.map(escapeCsv).join(',')];
 
     for (const r of rows) {
-      const staffName = `${r.staffPrefixTh || ''}${r.staffFirstNameTh || ''} ${r.staffLastNameTh || ''}`.trim() || 'บุคลากร';
-      const createdStr = r.createdAt ? new Date(r.createdAt).toLocaleString('th-TH') : '';
-      const sentStr = r.sentAt ? new Date(r.sentAt).toLocaleString('th-TH') : '';
+      const staffName =
+        `${r.staffPrefixTh || ''}${r.staffFirstNameTh || ''} ${r.staffLastNameTh || ''}`.trim() ||
+        'บุคลากร';
+      const createdStr = r.createdAt
+        ? new Date(r.createdAt).toLocaleString('th-TH')
+        : '';
+      const sentStr = r.sentAt
+        ? new Date(r.sentAt).toLocaleString('th-TH')
+        : '';
 
       lines.push(
         [
@@ -766,7 +822,9 @@ export class StaffService {
       .where(eq(staffResumeRequests.id, requestId));
 
     if (requests.length === 0) {
-      throw new NotFoundException(`Resume request with ID ${requestId} not found`);
+      throw new NotFoundException(
+        `Resume request with ID ${requestId} not found`,
+      );
     }
 
     const request = requests[0];
@@ -776,8 +834,12 @@ export class StaffService {
     }
 
     // Generate PDF Resume
-    const pdfBuffer = await this.pdfResumeService.generateStaffResumePdf(staff, request.id);
-    const staffName = `${staff.prefixTh || ''} ${staff.firstNameTh} ${staff.lastNameTh}`.trim();
+    const pdfBuffer = await this.pdfResumeService.generateStaffResumePdf(
+      staff,
+      request.id,
+    );
+    const staffName =
+      `${staff.prefixTh || ''} ${staff.firstNameTh} ${staff.lastNameTh}`.trim();
     const fileName = `CV_${staff.firstNameTh}_${staff.lastNameTh}.pdf`;
 
     // Send email with PDF attached
@@ -811,7 +873,11 @@ export class StaffService {
     };
   }
 
-  async rejectResumeRequest(requestId: string, reason: string, adminUserId?: string) {
+  async rejectResumeRequest(
+    requestId: string,
+    reason: string,
+    adminUserId?: string,
+  ) {
     const updated = await this.drizzle.db
       .update(staffResumeRequests)
       .set({
@@ -824,7 +890,9 @@ export class StaffService {
       .returning();
 
     if (updated.length === 0) {
-      throw new NotFoundException(`Resume request with ID ${requestId} not found`);
+      throw new NotFoundException(
+        `Resume request with ID ${requestId} not found`,
+      );
     }
 
     return {
@@ -834,12 +902,17 @@ export class StaffService {
     };
   }
 
-  async getResumePdfPreview(staffId: string): Promise<{ buffer: Buffer; fileName: string }> {
+  async getResumePdfPreview(
+    staffId: string,
+  ): Promise<{ buffer: Buffer; fileName: string }> {
     const staff = await this.findOne(staffId);
     if (!staff) {
       throw new NotFoundException(`Staff profile with ID ${staffId} not found`);
     }
-    const buffer = await this.pdfResumeService.generateStaffResumePdf(staff, 'PREVIEW');
+    const buffer = await this.pdfResumeService.generateStaffResumePdf(
+      staff,
+      'PREVIEW',
+    );
     const fileName = `CV_${staff.firstNameTh}_${staff.lastNameTh}.pdf`;
     return { buffer, fileName };
   }

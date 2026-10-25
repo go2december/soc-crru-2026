@@ -69,19 +69,25 @@ export class PdfResumeService {
     return null;
   }
 
-  private async resolveStaffPhoto(imageUrl?: string | null): Promise<string | Buffer | null> {
+  private async resolveStaffPhoto(
+    imageUrl?: string | null,
+  ): Promise<string | Buffer | null> {
     if (!imageUrl || typeof imageUrl !== 'string') return null;
 
     // Handle remote web URL (e.g. Unsplash or Cloud Storage) with timeout
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       try {
-        const res = await fetch(imageUrl, { signal: AbortSignal.timeout(2500) });
+        const res = await fetch(imageUrl, {
+          signal: AbortSignal.timeout(2500),
+        });
         if (res.ok) {
           const arrBuf = await res.arrayBuffer();
           return Buffer.from(arrBuf);
         }
       } catch (e) {
-        this.logger.warn(`Could not fetch remote staff photo from ${imageUrl}: ${(e as Error).message}`);
+        this.logger.warn(
+          `Could not fetch remote staff photo from ${imageUrl}: ${(e as Error).message}`,
+        );
       }
       return null;
     }
@@ -94,8 +100,22 @@ export class PdfResumeService {
       path.join(__dirname, '..', '..', cleanPath),
       path.join(__dirname, '..', cleanPath),
       path.join(process.cwd(), 'uploads', 'staff', path.basename(cleanPath)),
-      path.join(process.cwd(), 'backend', 'uploads', 'staff', path.basename(cleanPath)),
-      path.join(__dirname, '..', '..', '..', 'uploads', 'staff', path.basename(cleanPath)),
+      path.join(
+        process.cwd(),
+        'backend',
+        'uploads',
+        'staff',
+        path.basename(cleanPath),
+      ),
+      path.join(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        'uploads',
+        'staff',
+        path.basename(cleanPath),
+      ),
     ];
     for (const c of candidates) {
       if (fs.existsSync(c)) {
@@ -105,7 +125,10 @@ export class PdfResumeService {
     return null;
   }
 
-  async generateStaffResumePdf(staff: StaffData | any, requestId: string): Promise<Buffer> {
+  async generateStaffResumePdf(
+    staff: StaffData | any,
+    requestId: string,
+  ): Promise<Buffer> {
     // Resolve photo beforehand so it can be handled seamlessly inside PDFKit
     const photo = await this.resolveStaffPhoto(staff.imageUrl);
 
@@ -117,7 +140,8 @@ export class PdfResumeService {
           bufferPages: true,
           info: {
             Title: `CV_${staff.firstNameTh}_${staff.lastNameTh}`,
-            Author: 'Faculty of Social Sciences, Chiang Rai Rajabhat University',
+            Author:
+              'Faculty of Social Sciences, Chiang Rai Rajabhat University',
             Subject: 'Official Speaker Bio & Academic Curriculum Vitae',
           },
         });
@@ -148,7 +172,9 @@ export class PdfResumeService {
 
         // ------------------ Header Bar with CRRU & Faculty Logos ------------------
         const crruLogoPath = this.resolveAssetPath('images/crru-logo.png');
-        const facultyLogoPath = this.resolveAssetPath('images/faculty-logo.png');
+        const facultyLogoPath = this.resolveAssetPath(
+          'images/faculty-logo.png',
+        );
 
         // Header Background Banner (University Crimson #7A102E + Gold border #C59B27)
         doc.rect(0, 0, 595.28, 92).fill('#7A102E');
@@ -169,7 +195,10 @@ export class PdfResumeService {
         // Faculty Logo (Right)
         if (facultyLogoPath && fs.existsSync(facultyLogoPath)) {
           try {
-            doc.image(facultyLogoPath, 595.28 - 40 - 54, 18, { width: 54, height: 54 });
+            doc.image(facultyLogoPath, 595.28 - 40 - 54, 18, {
+              width: 54,
+              height: 54,
+            });
           } catch (e) {
             this.logger.warn('Could not render Faculty logo in PDF', e);
           }
@@ -179,13 +208,20 @@ export class PdfResumeService {
           .font(fontToUseBold)
           .fontSize(15)
           .fillColor('#FFFFFF')
-          .text('คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย', headerTextX, 22, { align: 'left' });
+          .text('คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย', headerTextX, 22, {
+            align: 'left',
+          });
 
         doc
           .font(fontToUseRegular)
           .fontSize(10)
           .fillColor('#FCE7F3')
-          .text('Faculty of Social Sciences, Chiang Rai Rajabhat University', headerTextX, 42, { align: 'left' });
+          .text(
+            'Faculty of Social Sciences, Chiang Rai Rajabhat University',
+            headerTextX,
+            42,
+            { align: 'left' },
+          );
 
         doc
           .font(fontToUseRegular)
@@ -200,26 +236,41 @@ export class PdfResumeService {
 
         // ------------------ Data Evaluation & Content Density Calculation ------------------
         const validEducation = Array.isArray(staff.education)
-          ? staff.education.filter((e) => e && (e.detail?.trim() || e.level?.trim()))
+          ? staff.education.filter(
+              (e) => e && (e.detail?.trim() || e.level?.trim()),
+            )
           : [];
 
         const validExpertise = Array.isArray(staff.expertise)
-          ? staff.expertise.filter((x) => typeof x === 'string' && x.trim().length > 0)
+          ? staff.expertise.filter(
+              (x) => typeof x === 'string' && x.trim().length > 0,
+            )
           : [];
 
-        const validBio = typeof staff.bio === 'string' && staff.bio.trim().length > 0 ? staff.bio.trim() : null;
+        const validBio =
+          typeof staff.bio === 'string' && staff.bio.trim().length > 0
+            ? staff.bio.trim()
+            : null;
 
-        const hasScopus = !!(staff.scopusAuthorId && staff.scopusAuthorId.trim());
+        const hasScopus = !!(
+          staff.scopusAuthorId && staff.scopusAuthorId.trim()
+        );
         const hasOrcid = !!(staff.orcidId && staff.orcidId.trim());
-        const hasScholar = !!(staff.googleScholarUrl && staff.googleScholarUrl.trim());
+        const hasScholar = !!(
+          staff.googleScholarUrl && staff.googleScholarUrl.trim()
+        );
         const hasIdentifiers = hasScopus || hasOrcid || hasScholar;
 
         const validProjects = Array.isArray(staff.researchProjects)
-          ? staff.researchProjects.filter((p) => p && (p.titleTh?.trim() || p.titleEn?.trim())).slice(0, 10)
+          ? staff.researchProjects
+              .filter((p) => p && (p.titleTh?.trim() || p.titleEn?.trim()))
+              .slice(0, 10)
           : [];
 
         const validServices = Array.isArray(staff.academicServices)
-          ? staff.academicServices.filter((s) => s && s.title?.trim()).slice(0, 10)
+          ? staff.academicServices
+              .filter((s) => s && s.title?.trim())
+              .slice(0, 10)
           : [];
 
         // Estimate total item points to set optimal vertical rhythm and avoid orphan pages
@@ -248,8 +299,12 @@ export class PdfResumeService {
         // Render photo on the top-right if available
         if (photo) {
           try {
-            doc.rect(photoX - 2, photoY - 2, photoWidth + 4, photoHeight + 4).fill('#E2E8F0');
-            doc.rect(photoX - 1, photoY - 1, photoWidth + 2, photoHeight + 2).fill('#FFFFFF');
+            doc
+              .rect(photoX - 2, photoY - 2, photoWidth + 4, photoHeight + 4)
+              .fill('#E2E8F0');
+            doc
+              .rect(photoX - 1, photoY - 1, photoWidth + 2, photoHeight + 2)
+              .fill('#FFFFFF');
             doc.image(photo, photoX, photoY, {
               width: photoWidth,
               height: photoHeight,
@@ -257,7 +312,11 @@ export class PdfResumeService {
               align: 'center',
               valign: 'center',
             });
-            doc.rect(photoX, photoY, photoWidth, photoHeight).strokeColor('#CBD5E1').lineWidth(0.6).stroke();
+            doc
+              .rect(photoX, photoY, photoWidth, photoHeight)
+              .strokeColor('#CBD5E1')
+              .lineWidth(0.6)
+              .stroke();
           } catch (e) {
             this.logger.warn('Could not render staff photo in PDF', e);
           }
@@ -265,8 +324,12 @@ export class PdfResumeService {
 
         doc.y = 108;
 
-        const fullNameTh = [staff.prefixTh, staff.firstNameTh, staff.lastNameTh].filter(Boolean).join(' ');
-        const fullNameEn = [staff.prefixEn, staff.firstNameEn, staff.lastNameEn].filter(Boolean).join(' ');
+        const fullNameTh = [staff.prefixTh, staff.firstNameTh, staff.lastNameTh]
+          .filter(Boolean)
+          .join(' ');
+        const fullNameEn = [staff.prefixEn, staff.firstNameEn, staff.lastNameEn]
+          .filter(Boolean)
+          .join(' ');
 
         doc
           .font(fontToUseBold)
@@ -285,13 +348,17 @@ export class PdfResumeService {
         doc.moveDown(0.3);
 
         // Conditional Positions (Only display if present)
-        const posList = [staff.adminPosition, staff.academicPosition].filter(Boolean);
+        const posList = [staff.adminPosition, staff.academicPosition].filter(
+          Boolean,
+        );
         if (posList.length > 0) {
           doc
             .font(fontToUseBold)
             .fontSize(9.5)
             .fillColor('#85193C')
-            .text(`ตำแหน่ง: ${posList.join(' • ')}`, 40, doc.y, { width: textWidth });
+            .text(`ตำแหน่ง: ${posList.join(' • ')}`, 40, doc.y, {
+              width: textWidth,
+            });
         }
 
         // Conditional Department (Only display if present)
@@ -301,7 +368,12 @@ export class PdfResumeService {
             .font(fontToUseRegular)
             .fontSize(9.5)
             .fillColor('#334155')
-            .text(`สังกัด: ${deptName.trim()} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`, 40, doc.y, { width: textWidth });
+            .text(
+              `สังกัด: ${deptName.trim()} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`,
+              40,
+              doc.y,
+              { width: textWidth },
+            );
         }
 
         // Conditional Contact Email (Only display if present)
@@ -310,7 +382,12 @@ export class PdfResumeService {
             .font(fontToUseRegular)
             .fontSize(9)
             .fillColor('#0284C7')
-            .text(`อีเมลติดต่อทางราชการ: ${staff.contactEmail.trim()}`, 40, doc.y, { width: textWidth });
+            .text(
+              `อีเมลติดต่อทางราชการ: ${staff.contactEmail.trim()}`,
+              40,
+              doc.y,
+              { width: textWidth },
+            );
         }
 
         // Ensure vertical cursor is below the photo if present
@@ -322,7 +399,12 @@ export class PdfResumeService {
         }
 
         // Horizontal Separation Bar
-        doc.strokeColor('#E2E8F0').lineWidth(0.8).moveTo(40, doc.y).lineTo(555, doc.y).stroke();
+        doc
+          .strokeColor('#E2E8F0')
+          .lineWidth(0.8)
+          .moveTo(40, doc.y)
+          .lineTo(555, doc.y)
+          .stroke();
         doc.moveDown(sectionMargin);
 
         // Page break controller to prevent overflow into footer
@@ -335,7 +417,11 @@ export class PdfResumeService {
               .font(fontToUseBold)
               .fontSize(8.5)
               .fillColor('#FFFFFF')
-              .text(`คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย | เอกสารประวัติทางการ (ต่อ) - ${fullNameTh}`, 40, 8);
+              .text(
+                `คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย | เอกสารประวัติทางการ (ต่อ) - ${fullNameTh}`,
+                40,
+                8,
+              );
             doc.y = 40;
           }
         };
@@ -348,7 +434,11 @@ export class PdfResumeService {
             .font(fontToUseBold)
             .fontSize(10.5)
             .fillColor('#0F172A')
-            .text(`  ${titleTh} ${titleEn ? `(${titleEn})` : ''}`, 46, doc.y + 1);
+            .text(
+              `  ${titleTh} ${titleEn ? `(${titleEn})` : ''}`,
+              46,
+              doc.y + 1,
+            );
           doc.moveDown(sectionMargin);
         };
 
@@ -370,7 +460,10 @@ export class PdfResumeService {
               .font(fontToUseRegular)
               .fontSize(9)
               .fillColor('#334155')
-              .text(`• ${levelLabel}: ${edu.detail || ''}`, { indent: 10, lineGap: itemLineGap });
+              .text(`• ${levelLabel}: ${edu.detail || ''}`, {
+                indent: 10,
+                lineGap: itemLineGap,
+              });
           }
           doc.moveDown(sectionMargin);
         }
@@ -383,7 +476,10 @@ export class PdfResumeService {
             .font(fontToUseRegular)
             .fontSize(9)
             .fillColor('#334155')
-            .text(validExpertise.join('  •  '), { indent: 10, lineGap: itemLineGap });
+            .text(validExpertise.join('  •  '), {
+              indent: 10,
+              lineGap: itemLineGap,
+            });
           doc.moveDown(sectionMargin);
         }
 
@@ -401,14 +497,19 @@ export class PdfResumeService {
 
         // ------------------ 4. Academic Identifiers (Conditional) ------------------
         if (hasIdentifiers) {
-          renderSectionHeader('ฐานข้อมูลผลงานวิชาการระดับสากล', 'Academic Identifiers');
+          renderSectionHeader(
+            'ฐานข้อมูลผลงานวิชาการระดับสากล',
+            'Academic Identifiers',
+          );
           if (hasScopus) {
             ensureSpace(18);
             doc
               .font(fontToUseRegular)
               .fontSize(8.5)
               .fillColor('#334155')
-              .text(`• Scopus Author ID: ${staff.scopusAuthorId.trim()}`, { indent: 10 });
+              .text(`• Scopus Author ID: ${staff.scopusAuthorId.trim()}`, {
+                indent: 10,
+              });
           }
           if (hasOrcid) {
             ensureSpace(18);
@@ -424,14 +525,19 @@ export class PdfResumeService {
               .font(fontToUseRegular)
               .fontSize(8.5)
               .fillColor('#0284C7')
-              .text(`• Google Scholar: ${staff.googleScholarUrl.trim()}`, { indent: 10 });
+              .text(`• Google Scholar: ${staff.googleScholarUrl.trim()}`, {
+                indent: 10,
+              });
           }
           doc.moveDown(sectionMargin);
         }
 
         // ------------------ 5. Research Projects (Max 10, Conditional) ------------------
         if (validProjects.length > 0) {
-          renderSectionHeader('โครงการวิจัยและงานวิชาการเด่น (ล่าสุดไม่เกิน 10 โครงการ)', 'Selected Research Projects');
+          renderSectionHeader(
+            'โครงการวิจัยและงานวิชาการเด่น (ล่าสุดไม่เกิน 10 โครงการ)',
+            'Selected Research Projects',
+          );
           for (const proj of validProjects) {
             ensureSpace(24);
             const title = (proj.titleTh || proj.titleEn || '').trim();
@@ -448,24 +554,36 @@ export class PdfResumeService {
               .font(fontToUseRegular)
               .fontSize(8.5)
               .fillColor('#334155')
-              .text(`• ${title} ${yearStr} ${roleStr}`.trim(), { indent: 10, lineGap: itemLineGap });
+              .text(`• ${title} ${yearStr} ${roleStr}`.trim(), {
+                indent: 10,
+                lineGap: itemLineGap,
+              });
           }
           doc.moveDown(sectionMargin);
         }
 
         // ------------------ 6. Academic Services (Max 10, Conditional) ------------------
         if (validServices.length > 0) {
-          renderSectionHeader('ผลงานบริการวิชาการและพัฒนาชุมชนท้องถิ่น (ล่าสุดไม่เกิน 10 โครงการ)', 'Academic & Community Services');
+          renderSectionHeader(
+            'ผลงานบริการวิชาการและพัฒนาชุมชนท้องถิ่น (ล่าสุดไม่เกิน 10 โครงการ)',
+            'Academic & Community Services',
+          );
           for (const srv of validServices) {
             ensureSpace(24);
             const title = (srv.title || '').trim();
-            const areaStr = srv.area?.trim() ? `(พื้นที่: ${srv.area.trim()})` : '';
-            const roleStr = srv.role === 'LEADER' ? '[หัวหน้าโครงการ]' : '[ผู้ร่วมโครงการ]';
+            const areaStr = srv.area?.trim()
+              ? `(พื้นที่: ${srv.area.trim()})`
+              : '';
+            const roleStr =
+              srv.role === 'LEADER' ? '[หัวหน้าโครงการ]' : '[ผู้ร่วมโครงการ]';
             doc
               .font(fontToUseRegular)
               .fontSize(8.5)
               .fillColor('#334155')
-              .text(`• ${title} ${areaStr} ${roleStr}`.trim(), { indent: 10, lineGap: itemLineGap });
+              .text(`• ${title} ${areaStr} ${roleStr}`.trim(), {
+                indent: 10,
+                lineGap: itemLineGap,
+              });
           }
           doc.moveDown(sectionMargin);
         }
@@ -491,14 +609,22 @@ export class PdfResumeService {
             const boxHeight = 62;
 
             doc.rect(boxX, boxY, boxWidth, boxHeight).fill('#F8FAFC');
-            doc.strokeColor('#CBD5E1').lineWidth(0.7).rect(boxX, boxY, boxWidth, boxHeight).stroke();
+            doc
+              .strokeColor('#CBD5E1')
+              .lineWidth(0.7)
+              .rect(boxX, boxY, boxWidth, boxHeight)
+              .stroke();
 
             // 1. PDPA Notice Header
             doc
               .font(fontToUseBold)
               .fontSize(7.8)
               .fillColor('#7A102E')
-              .text('ข้อความคุ้มครองข้อมูลส่วนบุคคล (PDPA Notice):', boxX + 10, boxY + 6);
+              .text(
+                'ข้อความคุ้มครองข้อมูลส่วนบุคคล (PDPA Notice):',
+                boxX + 10,
+                boxY + 6,
+              );
 
             // 2. PDPA Body Text
             doc
@@ -534,7 +660,10 @@ export class PdfResumeService {
               .font(fontToUseRegular)
               .fontSize(7.5)
               .fillColor('#94A3B8')
-              .text(`หน้า ${i + 1} จาก ${range.count}`, 40, 800, { align: 'right', width: 515 });
+              .text(`หน้า ${i + 1} จาก ${range.count}`, 40, 800, {
+                align: 'right',
+                width: 515,
+              });
           }
         }
 

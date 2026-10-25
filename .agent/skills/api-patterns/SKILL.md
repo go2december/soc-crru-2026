@@ -36,9 +36,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 
 | Need | Skill |
 |------|-------|
-| API implementation | `@[skills/backend-development]` |
-| Data structure | `@[skills/database-design]` |
-| Security details | `@[skills/security-hardening]` |
+| API implementation | `@[skills/soc-crru-backend-nest-drizzle]` |
+| Data structure | `@[skills/database-design]`, `@[skills/drizzle-expert]` |
+| Security details | `@[skills/vulnerability-scanner]` |
 
 ---
 

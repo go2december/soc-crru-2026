@@ -26,6 +26,29 @@ except:
     pass
 
 
+def _add_node_linters(dir_path: Path, linters: list, prefix: str = ""):
+    """Helper to detect Node.js linters in a given directory."""
+    package_json = dir_path / "package.json"
+    if not package_json.exists():
+        return
+    try:
+        pkg = json.loads(package_json.read_text(encoding='utf-8'))
+        scripts = pkg.get("scripts", {})
+        deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
+        
+        # Check for lint script
+        if "lint" in scripts:
+            linters.append({"name": f"{prefix}npm lint", "cmd": ["npm", "run", "lint"], "cwd": dir_path})
+        elif "eslint" in deps:
+            linters.append({"name": f"{prefix}eslint", "cmd": ["npx", "eslint", "."], "cwd": dir_path})
+        
+        # Check for TypeScript
+        if "typescript" in deps or (dir_path / "tsconfig.json").exists():
+            linters.append({"name": f"{prefix}tsc", "cmd": ["npx", "tsc", "--noEmit"], "cwd": dir_path})
+    except Exception:
+        pass
+
+
 def detect_project_type(project_path: Path) -> dict:
     """Detect project type and available linters."""
     result = {
@@ -33,38 +56,37 @@ def detect_project_type(project_path: Path) -> dict:
         "linters": []
     }
     
-    # Node.js project
+    # Direct Node.js project
     package_json = project_path / "package.json"
     if package_json.exists():
         result["type"] = "node"
+        _add_node_linters(project_path, result["linters"], prefix="")
+    else:
+        # Check common subdirectories for monorepo / multi-app (e.g., frontend, backend)
         try:
-            pkg = json.loads(package_json.read_text(encoding='utf-8'))
-            scripts = pkg.get("scripts", {})
-            deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
-            
-            # Check for lint script
-            if "lint" in scripts:
-                result["linters"].append({"name": "npm lint", "cmd": ["npm", "run", "lint"]})
-            elif "eslint" in deps:
-                result["linters"].append({"name": "eslint", "cmd": ["npx", "eslint", "."]})
-            
-            # Check for TypeScript
-            if "typescript" in deps or (project_path / "tsconfig.json").exists():
-                result["linters"].append({"name": "tsc", "cmd": ["npx", "tsc", "--noEmit"]})
-                
-        except:
+            subdirs = [
+                d for d in project_path.iterdir()
+                if d.is_dir() and not d.name.startswith(('.', 'node_modules', 'dist'))
+            ]
+            node_subdirs = [d for d in subdirs if (d / "package.json").exists()]
+            if node_subdirs:
+                result["type"] = "node (monorepo)"
+                for subdir in node_subdirs:
+                    _add_node_linters(subdir, result["linters"], prefix=f"{subdir.name}: ")
+        except Exception:
             pass
     
     # Python project
     if (project_path / "pyproject.toml").exists() or (project_path / "requirements.txt").exists():
-        result["type"] = "python"
+        if result["type"] == "unknown":
+            result["type"] = "python"
         
         # Check for ruff
-        result["linters"].append({"name": "ruff", "cmd": ["ruff", "check", "."]})
+        result["linters"].append({"name": "ruff", "cmd": ["ruff", "check", "."], "cwd": project_path})
         
         # Check for mypy
         if (project_path / "mypy.ini").exists() or (project_path / "pyproject.toml").exists():
-            result["linters"].append({"name": "mypy", "cmd": ["mypy", "."]})
+            result["linters"].append({"name": "mypy", "cmd": ["mypy", "."], "cwd": project_path})
     
     return result
 
@@ -79,7 +101,8 @@ def run_linter(linter: dict, cwd: Path) -> dict:
     }
     
     try:
-        cmd = linter["cmd"]
+        cmd = list(linter["cmd"])
+        run_cwd = linter.get("cwd", cwd)
         
         # Windows compatibility for npm/npx
         if platform.system() == "Windows":
@@ -90,7 +113,7 @@ def run_linter(linter: dict, cwd: Path) -> dict:
         
         proc = subprocess.run(
             cmd,
-            cwd=str(cwd),
+            cwd=str(run_cwd),
             capture_output=True,
             text=True,
             encoding='utf-8',

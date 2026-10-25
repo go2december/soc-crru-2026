@@ -157,7 +157,10 @@ export class NewsService {
 
     // If user is EDITOR (not ADMIN), check department scope if existing has departmentId
     if (user && !user.roles?.includes('ADMIN') && user.departmentId) {
-      if (existing.departmentId && existing.departmentId !== user.departmentId) {
+      if (
+        existing.departmentId &&
+        existing.departmentId !== user.departmentId
+      ) {
         throw new NotFoundException('คุณไม่มีสิทธิ์แก้ไขข่าวของหน่วยงานอื่น');
       }
     }
@@ -171,7 +174,8 @@ export class NewsService {
     await this.cleanupRemovedFiles(existing, nextItem);
 
     // Editor cannot set directly to PUBLISHED unless admin
-    let publicationStatus = updateNewsDto.publicationStatus ?? existing.publicationStatus;
+    let publicationStatus =
+      updateNewsDto.publicationStatus ?? existing.publicationStatus;
     let isPublished = updateNewsDto.isPublished ?? existing.isPublished;
 
     if (user && !user.roles?.includes('ADMIN')) {
@@ -190,9 +194,7 @@ export class NewsService {
         mediaUrls: updateNewsDto.mediaUrls ?? existing.mediaUrls ?? [],
         attachments: updateNewsDto.attachments ?? existing.attachments ?? [],
         publishedAt:
-          isPublished === false
-            ? null
-            : existing.publishedAt || new Date(),
+          isPublished === false ? null : existing.publishedAt || new Date(),
         updatedAt: new Date(),
       })
       .where(eq(schema.news.id, id))
@@ -252,7 +254,10 @@ export class NewsService {
     const existing = await this.findOne(id);
 
     if (user && !user.roles?.includes('ADMIN') && user.departmentId) {
-      if (existing.departmentId && existing.departmentId !== user.departmentId) {
+      if (
+        existing.departmentId &&
+        existing.departmentId !== user.departmentId
+      ) {
         throw new NotFoundException('คุณไม่มีสิทธิ์ลบข่าวของหน่วยงานอื่น');
       }
     }

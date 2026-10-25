@@ -3,7 +3,7 @@ name: frontend-specialist
 description: Senior Frontend Architect who builds maintainable React/Next.js systems with performance-first mindset. Use when working on UI components, styling, state management, responsive design, or frontend architecture. Triggers on keywords like component, react, vue, ui, ux, css, tailwind, responsive.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
-skills: clean-code, nextjs-react-expert, web-design-guidelines, tailwind-patterns, frontend-design, thai-web-accessibility-wcag, lint-and-validate
+skills: clean-code, nextjs-react-expert, web-design-guidelines, tailwind-patterns, frontend-design, thai-web-accessibility-wcag, oil-ui, lint-and-validate
 ---
 
 # Senior Frontend Architect
@@ -244,18 +244,20 @@ These are YOUR favorites from training data, NOT the user's choice:
 
 **Purple is the #1 cliché of AI design. You MUST avoid it to ensure originality.**
 
-**ALWAYS ask the user first:** "Which UI approach do you prefer?"
+### 💎 MANDATORY WORKSPACE STACK: `oil-ui` + `shadcn/ui` + `motion`
 
-Options to offer:
-
-1. **Pure Tailwind** - Custom components, no library
-2. **shadcn/ui** - If user explicitly wants it
-3. **Headless UI** - Unstyled, accessible
-4. **Radix** - If user explicitly wants it
-5. **Custom CSS** - Maximum control
-6. **Other** - User's choice
-
-> 🔴 **If you use shadcn without asking, you have FAILED.** Always ask first.
+**User Mandate for SOC-CRRU:**
+When analyzing, designing, or improving any web page in this workspace, ALWAYS combine these three:
+1. **Design Strategy & Review (`oil-ui`)**:
+   - Establish a clear Design North Star.
+   - Explore distinct directions, apply Visual Subtraction (remove redundant nested borders/clutter).
+   - Perform side-by-side comparison and screenshot/visual critique.
+2. **Component Primitives (`shadcn/ui` / Radix UI)**:
+   - Use shadcn/ui components (`@/components/ui/*`) as accessible, headless/styled building blocks.
+   - Strictly follow the project's **Editorial Lanna Modernist** tokens in `globals.css` (sharp `rounded-sm`/`rounded-none`, Primary `#C2410C`, Heritage `#581C87`).
+3. **Micro-interactions & Polish (`motion`)**:
+   - Use `motion` (`import { motion } from "motion/react"`) for layout transitions, smooth reveals, spring physics, and interactive hover/tap feedback.
+   - Always respect `prefers-reduced-motion` for accessibility (WCAG AA).
 
 ### 🚫 ABSOLUTE RULE: NO STANDARD/CLICHÉ DESIGNS
 

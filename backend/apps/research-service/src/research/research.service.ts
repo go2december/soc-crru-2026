@@ -827,7 +827,11 @@ export class ResearchService {
     await this.ensureStaffProfilesExist(dto.members);
 
     let targetDeptId = dto.department_id;
-    if (user && !user.roles?.includes('ADMIN') && user.roles?.includes('EDITOR')) {
+    if (
+      user &&
+      !user.roles?.includes('ADMIN') &&
+      user.roles?.includes('EDITOR')
+    ) {
       targetDeptId = user.departmentId;
     }
 

@@ -14,8 +14,12 @@ import {
   CheckCircle2,
   FolderGit2,
 } from "lucide-react";
+import { getSiteSettings } from "@/lib/site-settings";
+import { LucideIcon } from "@/components/LucideIcon";
 
-// Data from the Strategic Plan (Verbatim Preserved)
+export const revalidate = 60;
+
+// Data from the Strategic Plan (Verbatim Preserved Fallback)
 const strategies = [
   {
     id: "1",
@@ -123,7 +127,10 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const strategy = strategies.find((s) => s.id === id);
+  const settings = await getSiteSettings();
+  const dbStrat = settings.strategicPlans?.find((s) => s.id === id);
+  const fallbackStrat = strategies.find((s) => s.id === id);
+  const strategy = dbStrat || fallbackStrat;
 
   if (!strategy) {
     return {
@@ -131,9 +138,10 @@ export async function generateMetadata({
     };
   }
 
+  const title = (strategy as any).badge || (strategy as any).title || `ยุทธศาสตร์ที่ ${id}`;
   return {
-    title: `${strategy.title}: ${strategy.name} | แผนยุทธศาสตร์ คณะสังคมศาสตร์ มร.ชร.`,
-    description: `เป้าประสงค์ กลยุทธ์ และโครงการสำคัญ Flagship ของ ${strategy.title} (${strategy.name}) แผนยุทธศาสตร์ 5 ปี คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`,
+    title: `${title}: ${strategy.name} | แผนยุทธศาสตร์ คณะสังคมศาสตร์ มร.ชร.`,
+    description: `เป้าประสงค์ กลยุทธ์ และโครงการสำคัญ Flagship ของ ${title} (${strategy.name}) แผนยุทธศาสตร์ 5 ปี คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`,
   };
 }
 
@@ -143,13 +151,26 @@ export default async function StrategyDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const strategy = strategies.find((s) => s.id === id);
+  const settings = await getSiteSettings();
+  const dbStrategy = settings.strategicPlans?.find((s) => s.id === id);
+  const fallbackStrategy = strategies.find((s) => s.id === id);
 
-  if (!strategy) {
+  if (!dbStrategy && !fallbackStrategy) {
     notFound();
   }
 
-  const Icon = strategy.icon;
+  const strategy = {
+    ...fallbackStrategy,
+    ...dbStrategy,
+    title: dbStrategy?.badge || fallbackStrategy?.title || `ยุทธศาสตร์ที่ ${id}`,
+    name: dbStrategy?.name || fallbackStrategy?.name,
+    subtitle: dbStrategy?.desc || fallbackStrategy?.subtitle,
+    goals: dbStrategy?.objectives?.length ? dbStrategy.objectives : fallbackStrategy?.goals || [],
+    tactics: fallbackStrategy?.tactics || [],
+    projects: fallbackStrategy?.projects || [],
+    kpis: dbStrategy?.kpis || [],
+  };
+
   const currentIndex = strategies.findIndex((s) => s.id === id);
   const prevStrategy = currentIndex > 0 ? strategies[currentIndex - 1] : null;
   const nextStrategy =
@@ -209,7 +230,7 @@ export default async function StrategyDetailPage({
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
             <div className="size-16 sm:size-20 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center text-amber-400 flex-shrink-0">
-              <Icon className="size-8 sm:size-10" strokeWidth={1.75} />
+              <LucideIcon name={strategy.icon as any} className="size-8 sm:size-10" strokeWidth={1.75} />
             </div>
 
             <div>

@@ -186,7 +186,7 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="text-sm sm:text-base font-bold leading-tight tracking-wide text-white group-hover:text-[#F97316] transition-colors">
-                สำนักวิชาสังคมศาสตร์
+                คณะสังคมศาสตร์
               </span>
               <span className="text-[10px] font-semibold text-amber-400 tracking-wider uppercase opacity-90">
                 Chiang Rai Rajabhat University
@@ -228,7 +228,7 @@ export default function Navbar() {
                 >
                   <span className="flex items-center gap-2">
                     <GraduationCap className="size-4" strokeWidth={1.75} />
-                    หลักสูตรทั้งหมด (All Programs)
+                    สำรวจหลักสูตร
                   </span>
                   <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full font-normal">
                     7 สาขาวิชา
@@ -370,7 +370,7 @@ export default function Navbar() {
               <div className="pt-2 border-t border-white/10">
                 <div className="text-xs font-bold text-[#F97316] uppercase tracking-wider mb-2">การจัดการศึกษา</div>
                 <div className="space-y-1 pl-2">
-                  <Link href="/programs" onClick={closeMobileMenu} className="block py-1.5 text-sm font-semibold text-white">หลักสูตรทั้งหมด (7 สาขา)</Link>
+                  <Link href="/programs" onClick={closeMobileMenu} className="block py-1.5 text-sm font-semibold text-white">สำรวจหลักสูตร (7 สาขาวิชา)</Link>
                   <Link href="/programs/social-dev" onClick={closeMobileMenu} className="block py-1 text-xs text-slate-300">สาขานวัตกรรมการพัฒนาสังคม</Link>
                   <Link href="/programs/gis" onClick={closeMobileMenu} className="block py-1 text-xs text-slate-300">สาขาภูมิศาสตร์และภูมิสารสนเทศ</Link>
                   <Link href="/programs/social-psych" onClick={closeMobileMenu} className="block py-1 text-xs text-slate-300">สาขาจิตวิทยาสังคม</Link>

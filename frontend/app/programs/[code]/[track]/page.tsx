@@ -26,10 +26,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         ? ' (ระดับบัณฑิตศึกษา)'
         : ' (หลักสูตร 4 ปีปกติ)';
 
-    const title = `${trackData.nameTh}${planSuffix} | ${trackData.program.nameTh} สำนักวิชาสังคมศาสตร์ มรภ.เชียงราย`;
+    const title = `${trackData.nameTh}${planSuffix} | ${trackData.program.nameTh} คณะสังคมศาสตร์ มรภ.เชียงราย`;
     const description =
       trackData.description ||
-      `ข้อมูล${trackLabel} ${trackData.nameTh} สาขาวิชา${trackData.program.nameTh} สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`;
+      `ข้อมูล${trackLabel} ${trackData.nameTh} สาขาวิชา${trackData.program.nameTh} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`;
     const bannerUrl =
       trackData.bannerUrl ||
       'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop';
@@ -45,7 +45,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         title,
         description,
         url: pageUrl,
-        siteName: 'สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+        siteName: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
         images: [
           {
             url: bannerUrl,
@@ -68,15 +68,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   // 2. Fallback to program concentrations
   const program = await fetchProgramByCode(code);
-  if (!program) return { title: 'ไม่พบหลักสูตร | สำนักวิชาสังคมศาสตร์ มรภ.เชียงราย' };
+  if (!program) return { title: 'ไม่พบหลักสูตร | คณะสังคมศาสตร์ มรภ.เชียงราย' };
 
   const concentration = (program.concentrations || []).find(
     (c) => c.code === track || c.code.toLowerCase() === track.toLowerCase()
   );
 
-  if (!concentration) return { title: `${program.nameTh} | สำนักวิชาสังคมศาสตร์ มรภ.เชียงราย` };
+  if (!concentration) return { title: `${program.nameTh} | คณะสังคมศาสตร์ มรภ.เชียงราย` };
 
-  const title = `${concentration.title} | ${program.nameTh} สำนักวิชาสังคมศาสตร์ มรภ.เชียงราย`;
+  const title = `${concentration.title} | ${program.nameTh} คณะสังคมศาสตร์ มรภ.เชียงราย`;
   const description = concentration.description || program.description;
   const bannerUrl =
     concentration.bannerUrl ||
@@ -92,7 +92,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title,
       description,
       url: pageUrl,
-      siteName: 'สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+      siteName: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
       images: [{ url: bannerUrl, width: 1200, height: 630, alt: concentration.title }],
       type: 'website',
       locale: 'th_TH',
@@ -172,6 +172,7 @@ export default async function ProgramTrackSubPage(props: Props) {
         code: trackData.program.code,
         nameTh: trackData.program.nameTh,
       },
+      admissionStatus: parentProgram?.admissionStatus,
     };
 
     // JSON-LD Structured Data (Course / EducationalOccupationalProgram)
@@ -184,7 +185,7 @@ export default async function ProgramTrackSubPage(props: Props) {
       courseCode: `${code}/${track}`,
       provider: {
         '@type': 'EducationalOrganization',
-        name: 'สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+        name: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
         url: 'https://soc.crru.ac.th',
       },
       educationalCredentialAwarded: trackData.degreeTitleTh || trackData.program.nameTh,
@@ -281,7 +282,7 @@ export default async function ProgramTrackSubPage(props: Props) {
     courseCode: `${code}/${track}`,
     provider: {
       '@type': 'EducationalOrganization',
-      name: 'สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+      name: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
       url: 'https://soc.crru.ac.th',
     },
     educationalCredentialAwarded: concentration.degreeTitle || parentProgram.degreeTitleTh || parentProgram.nameTh,

@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   FileText,
   Download,
-  Calendar,
   Layers,
   ArrowRight,
   ExternalLink,
@@ -87,6 +86,8 @@ export interface ProgramData {
   facebookVideoUrl?: string;
   // Instructors
   instructors?: ProgramInstructor[];
+  // Admission Status
+  admissionStatus?: string;
 }
 
 interface ProgramTemplateProps {
@@ -102,7 +103,6 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
   const ytUrl = social?.youtube || (youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : undefined);
   const lineUrl = social?.line;
   const hasSocials = !!(fbUrl || tiktokUrl || igUrl || ytUrl || lineUrl);
-  const hasFacebookPage = !!fbUrl;
   const hasGallery = (data.galleryImages ?? []).length > 0;
   const hasAttachments = (data.attachments ?? []).length > 0;
   const hasInstructors = (data.instructors ?? []).length > 0;
@@ -169,7 +169,7 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
               </span>
             ) : null}
             <span className="text-scholar-gold text-xs font-semibold px-2 py-1 bg-white/10 rounded-sm border border-scholar-gold/30">
-              สำนักวิชาสังคมศาสตร์ มรภ.เชียงราย
+              คณะสังคมศาสตร์ มรภ.เชียงราย
             </span>
           </div>
 
@@ -294,13 +294,25 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
       {/* =========================================================================
           BREADCRUMB & ADMISSION ALERT STRIP
           ========================================================================= */}
-      <div className="bg-scholar-soft border-b border-gray-200 py-3">
+      <div className="bg-scholar-soft border-b border-gray-200 py-2.5">
         <div className="container mx-auto px-4 max-w-6xl flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
           <Breadcrumb
             items={
               data.parentProgram
                 ? [
                     { label: 'หลักสูตรทั้งหมด', href: '/programs' },
+                    {
+                      label: data.level?.includes('เอก')
+                        ? 'ระดับปริญญาเอก'
+                        : data.level?.includes('โท')
+                        ? 'ระดับปริญญาโท'
+                        : 'ระดับปริญญาตรี',
+                      href: data.level?.includes('เอก')
+                        ? '/programs?level=doctoral'
+                        : data.level?.includes('โท')
+                        ? '/programs?level=master'
+                        : '/programs?level=bachelor',
+                    },
                     { label: data.parentProgram.nameTh, href: `/programs/${data.parentProgram.code}` },
                     { label: data.title },
                   ]
@@ -308,10 +320,10 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                     { label: 'หลักสูตรทั้งหมด', href: '/programs' },
                     {
                       label: data.level?.includes('เอก')
-                        ? 'ปริญญาเอก'
+                        ? 'ระดับปริญญาเอก'
                         : data.level?.includes('โท')
-                        ? 'ปริญญาโท'
-                        : 'ปริญญาตรี',
+                        ? 'ระดับปริญญาโท'
+                        : 'ระดับปริญญาตรี',
                       href: data.level?.includes('เอก')
                         ? '/programs?level=doctoral'
                         : data.level?.includes('โท')
@@ -323,10 +335,18 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
             }
           />
 
-          <div className="flex items-center gap-2 text-scholar-deep">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold">สถานะการรับสมัคร:</span>
-            <span className="text-gray-600">เปิดรับสมัครรอบปัจจุบัน (กู้ยืม กยศ. ได้ 100%)</span>
+          <div className="flex items-center gap-2 text-scholar-deep shrink-0 bg-white/70 sm:bg-transparent px-2.5 py-1 sm:p-0 rounded border border-gray-200/50 sm:border-0 shadow-2xs sm:shadow-none">
+            <span
+              className={`w-2 h-2 rounded-full shrink-0 ${
+                (data.admissionStatus || '').includes('ปิด')
+                  ? 'bg-rose-500'
+                  : 'bg-emerald-500 animate-pulse'
+              }`}
+            />
+            <span className="font-semibold text-slate-800">สถานะการรับสมัคร:</span>
+            <span className="text-slate-600 font-medium">
+              {data.admissionStatus || 'เปิดรับสมัครตรง (มีสิทธิ์ยื่นกู้ยืม กยศ.)'}
+            </span>
           </div>
         </div>
       </div>
@@ -502,7 +522,7 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 text-scholar-deep hover:text-scholar-accent font-bold hover:underline"
                           >
-                            <span>สมัครเรียนสาขานี้ (TCAS)</span>
+                            <span>สมัครเรียนตรงสาขานี้</span>
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         </div>
@@ -783,7 +803,7 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
               <PhoneCall className="w-6 h-6 text-scholar-deep mx-auto mb-2" />
               <h3 className="text-sm font-bold text-scholar-deep mb-1">สอบถามข้อมูลเพิ่มเติม</h3>
               <p className="text-xs text-gray-500 mb-4 leading-relaxed">
-                ฝ่ายวิชาการ สำนักวิชาสังคมศาสตร์ มรภ.เชียงราย
+                ฝ่ายวิชาการ คณะสังคมศาสตร์ มรภ.เชียงราย
               </p>
               <Link
                 href="/contact"
@@ -824,7 +844,7 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
             พร้อมที่จะเป็นส่วนหนึ่งของครอบครัวสังคมศาสตร์แล้วหรือยัง?
           </h2>
           <p className="text-sm text-gray-300 mb-8 font-light">
-            {data.title} • สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
+            {data.title} • คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
           </p>
           <a
             href={admissionUrl}
@@ -832,7 +852,7 @@ export default function ProgramTemplate({ data }: ProgramTemplateProps) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-10 py-3 bg-scholar-accent hover:bg-[#D9341C] text-white text-xs font-bold rounded-sm shadow-lg hover:scale-105 transition-all"
           >
-            <span>สมัครเรียนรอบ TCAS</span>
+            <span>สมัครเรียนออนไลน์ (รับสมัครตรง)</span>
             <ExternalLink className="w-4 h-4" />
           </a>
         </div>

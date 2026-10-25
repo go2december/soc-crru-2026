@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { eq, sql, and } from 'drizzle-orm';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { eq, sql, and, asc } from 'drizzle-orm';
 import {
   DatabaseService,
   programs,
@@ -78,7 +82,11 @@ export class ProgramsService {
   async create(createProgramDto: CreateProgramDto, user?: any) {
     // If editor, enforce user's department
     let targetDeptId = createProgramDto.department_id;
-    if (user && !user.roles?.includes('ADMIN') && user.roles?.includes('EDITOR')) {
+    if (
+      user &&
+      !user.roles?.includes('ADMIN') &&
+      user.roles?.includes('EDITOR')
+    ) {
       targetDeptId = user.departmentId;
     }
 
@@ -104,6 +112,7 @@ export class ProgramsService {
         youtubeVideoUrl: createProgramDto.youtube_video_url,
         facebookVideoUrl: createProgramDto.facebook_video_url,
         socialLinks: createProgramDto.social_links,
+        admissionStatus: createProgramDto.admission_status || 'เปิดรับสมัครตรง (มีสิทธิ์ยื่นกู้ยืม กยศ.)',
       })
       .returning();
 
@@ -201,7 +210,10 @@ export class ProgramsService {
     this.checkScope(user, existing.departmentId);
 
     const updateData: Partial<typeof programs.$inferInsert> = {};
-    if (updateProgramDto.department_id !== undefined && user?.roles?.includes('ADMIN')) {
+    if (
+      updateProgramDto.department_id !== undefined &&
+      user?.roles?.includes('ADMIN')
+    ) {
       updateData.departmentId = updateProgramDto.department_id;
     }
     if (updateProgramDto.code !== undefined)
@@ -240,6 +252,8 @@ export class ProgramsService {
       updateData.facebookVideoUrl = updateProgramDto.facebook_video_url;
     if (updateProgramDto.social_links !== undefined)
       updateData.socialLinks = updateProgramDto.social_links;
+    if (updateProgramDto.admission_status !== undefined)
+      updateData.admissionStatus = updateProgramDto.admission_status;
 
     if (Object.keys(updateData).length > 0) {
       await this.drizzle.db
@@ -322,11 +336,117 @@ export class ProgramsService {
       await this.drizzle.db.insert(programInstructors).values(inserts);
     }
   }
+  async getAllTracks(departmentId?: number, programId?: string) {
+    const conditions: any[] = [];
+    if (programId) {
+      conditions.push(eq(programTracks.programId, programId));
+    }
+    if (departmentId) {
+      conditions.push(eq(programs.departmentId, departmentId));
+    }
+
+    const rows = await this.drizzle.db
+      .select({
+        id: programTracks.id,
+        programId: programTracks.programId,
+        code: programTracks.code,
+        nameTh: programTracks.nameTh,
+        nameEn: programTracks.nameEn,
+        trackType: programTracks.trackType,
+        studyPlanType: programTracks.studyPlanType,
+        degreeTitleTh: programTracks.degreeTitleTh,
+        degreeTitleEn: programTracks.degreeTitleEn,
+        description: programTracks.description,
+        structure: programTracks.structure,
+        careers: programTracks.careers,
+        highlights: programTracks.highlights,
+        bannerUrl: programTracks.bannerUrl,
+        curriculumUrl: programTracks.curriculumUrl,
+        youtubeVideoUrl: programTracks.youtubeVideoUrl,
+        facebookVideoUrl: programTracks.facebookVideoUrl,
+        socialLinks: programTracks.socialLinks,
+        galleryImages: programTracks.galleryImages,
+        attachments: programTracks.attachments,
+        sortOrder: programTracks.sortOrder,
+        isActive: programTracks.isActive,
+        admissionStatus: programTracks.admissionStatus,
+        createdAt: programTracks.createdAt,
+        updatedAt: programTracks.updatedAt,
+        program: {
+          id: programs.id,
+          code: programs.code,
+          nameTh: programs.nameTh,
+          departmentId: programs.departmentId,
+          degreeLevel: programs.degreeLevel,
+          admissionStatus: programs.admissionStatus,
+        },
+      })
+      .from(programTracks)
+      .innerJoin(programs, eq(programTracks.programId, programs.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(asc(programs.code), asc(programTracks.sortOrder), asc(programTracks.nameTh));
+
+    return rows;
+  }
+
+  async getTrackById(trackId: string) {
+    const rows = await this.drizzle.db
+      .select({
+        id: programTracks.id,
+        programId: programTracks.programId,
+        code: programTracks.code,
+        nameTh: programTracks.nameTh,
+        nameEn: programTracks.nameEn,
+        trackType: programTracks.trackType,
+        studyPlanType: programTracks.studyPlanType,
+        degreeTitleTh: programTracks.degreeTitleTh,
+        degreeTitleEn: programTracks.degreeTitleEn,
+        description: programTracks.description,
+        structure: programTracks.structure,
+        careers: programTracks.careers,
+        highlights: programTracks.highlights,
+        bannerUrl: programTracks.bannerUrl,
+        curriculumUrl: programTracks.curriculumUrl,
+        youtubeVideoUrl: programTracks.youtubeVideoUrl,
+        facebookVideoUrl: programTracks.facebookVideoUrl,
+        socialLinks: programTracks.socialLinks,
+        galleryImages: programTracks.galleryImages,
+        attachments: programTracks.attachments,
+        sortOrder: programTracks.sortOrder,
+        isActive: programTracks.isActive,
+        admissionStatus: programTracks.admissionStatus,
+        createdAt: programTracks.createdAt,
+        updatedAt: programTracks.updatedAt,
+        program: {
+          id: programs.id,
+          code: programs.code,
+          nameTh: programs.nameTh,
+          departmentId: programs.departmentId,
+          degreeLevel: programs.degreeLevel,
+          admissionStatus: programs.admissionStatus,
+        },
+      })
+      .from(programTracks)
+      .innerJoin(programs, eq(programTracks.programId, programs.id))
+      .where(eq(programTracks.id, trackId));
+
+    if (rows.length === 0) {
+      throw new NotFoundException(`Track with ID "${trackId}" not found`);
+    }
+
+    return rows[0];
+  }
+
   async getTracks(programId: string) {
     return await this.drizzle.db
       .select()
       .from(programTracks)
-      .where(and(eq(programTracks.programId, programId), eq(programTracks.isActive, true)))
+      .where(
+        and(
+          eq(programTracks.programId, programId),
+          eq(programTracks.isActive, true),
+        ),
+      )
       .orderBy(programTracks.sortOrder);
   }
 
@@ -336,7 +456,9 @@ export class ProgramsService {
       .from(programs)
       .where(eq(programs.code, programCode));
     if (progRes.length === 0) {
-      throw new NotFoundException(`Program with code "${programCode}" not found`);
+      throw new NotFoundException(
+        `Program with code "${programCode}" not found`,
+      );
     }
     const program = progRes[0];
 
@@ -382,7 +504,8 @@ export class ProgramsService {
         nameTh: trackDto.name_th || trackDto.nameTh,
         nameEn: trackDto.name_en || trackDto.nameEn,
         trackType: trackDto.track_type || trackDto.trackType || 'MAJOR',
-        studyPlanType: trackDto.study_plan_type || trackDto.studyPlanType || 'REGULAR_4YR',
+        studyPlanType:
+          trackDto.study_plan_type || trackDto.studyPlanType || 'REGULAR_4YR',
         degreeTitleTh: trackDto.degree_title_th || trackDto.degreeTitleTh,
         degreeTitleEn: trackDto.degree_title_en || trackDto.degreeTitleEn,
         description: trackDto.description,
@@ -392,12 +515,14 @@ export class ProgramsService {
         bannerUrl: trackDto.banner_url || trackDto.bannerUrl,
         curriculumUrl: trackDto.curriculum_url || trackDto.curriculumUrl,
         youtubeVideoUrl: trackDto.youtube_video_url || trackDto.youtubeVideoUrl,
-        facebookVideoUrl: trackDto.facebook_video_url || trackDto.facebookVideoUrl,
+        facebookVideoUrl:
+          trackDto.facebook_video_url || trackDto.facebookVideoUrl,
         socialLinks: trackDto.social_links || trackDto.socialLinks,
         galleryImages: trackDto.gallery_images || trackDto.galleryImages,
         attachments: trackDto.attachments,
         sortOrder: trackDto.sort_order ?? trackDto.sortOrder ?? 0,
         isActive: trackDto.is_active ?? trackDto.isActive ?? true,
+        admissionStatus: trackDto.admission_status || trackDto.admissionStatus || null,
       })
       .returning();
 
@@ -424,35 +549,67 @@ export class ProgramsService {
     if (trackDto.nameTh !== undefined) updateData.nameTh = trackDto.nameTh;
     if (trackDto.name_en !== undefined) updateData.nameEn = trackDto.name_en;
     if (trackDto.nameEn !== undefined) updateData.nameEn = trackDto.nameEn;
-    if (trackDto.track_type !== undefined) updateData.trackType = trackDto.track_type;
-    if (trackDto.trackType !== undefined) updateData.trackType = trackDto.trackType;
-    if (trackDto.study_plan_type !== undefined) updateData.studyPlanType = trackDto.study_plan_type;
-    if (trackDto.studyPlanType !== undefined) updateData.studyPlanType = trackDto.studyPlanType;
-    if (trackDto.degree_title_th !== undefined) updateData.degreeTitleTh = trackDto.degree_title_th;
-    if (trackDto.degreeTitleTh !== undefined) updateData.degreeTitleTh = trackDto.degreeTitleTh;
-    if (trackDto.degree_title_en !== undefined) updateData.degreeTitleEn = trackDto.degree_title_en;
-    if (trackDto.degreeTitleEn !== undefined) updateData.degreeTitleEn = trackDto.degreeTitleEn;
-    if (trackDto.description !== undefined) updateData.description = trackDto.description;
-    if (trackDto.structure !== undefined) updateData.structure = trackDto.structure;
+    if (trackDto.track_type !== undefined)
+      updateData.trackType = trackDto.track_type;
+    if (trackDto.trackType !== undefined)
+      updateData.trackType = trackDto.trackType;
+    if (trackDto.study_plan_type !== undefined)
+      updateData.studyPlanType = trackDto.study_plan_type;
+    if (trackDto.studyPlanType !== undefined)
+      updateData.studyPlanType = trackDto.studyPlanType;
+    if (trackDto.degree_title_th !== undefined)
+      updateData.degreeTitleTh = trackDto.degree_title_th;
+    if (trackDto.degreeTitleTh !== undefined)
+      updateData.degreeTitleTh = trackDto.degreeTitleTh;
+    if (trackDto.degree_title_en !== undefined)
+      updateData.degreeTitleEn = trackDto.degree_title_en;
+    if (trackDto.degreeTitleEn !== undefined)
+      updateData.degreeTitleEn = trackDto.degreeTitleEn;
+    if (trackDto.description !== undefined)
+      updateData.description = trackDto.description;
+    if (trackDto.structure !== undefined)
+      updateData.structure = trackDto.structure;
     if (trackDto.careers !== undefined) updateData.careers = trackDto.careers;
-    if (trackDto.highlights !== undefined) updateData.highlights = trackDto.highlights;
-    if (trackDto.banner_url !== undefined) updateData.bannerUrl = trackDto.banner_url;
-    if (trackDto.bannerUrl !== undefined) updateData.bannerUrl = trackDto.bannerUrl;
-    if (trackDto.curriculum_url !== undefined) updateData.curriculumUrl = trackDto.curriculum_url;
-    if (trackDto.curriculumUrl !== undefined) updateData.curriculumUrl = trackDto.curriculumUrl;
-    if (trackDto.youtube_video_url !== undefined) updateData.youtubeVideoUrl = trackDto.youtube_video_url;
-    if (trackDto.youtubeVideoUrl !== undefined) updateData.youtubeVideoUrl = trackDto.youtubeVideoUrl;
-    if (trackDto.facebook_video_url !== undefined) updateData.facebookVideoUrl = trackDto.facebook_video_url;
-    if (trackDto.facebookVideoUrl !== undefined) updateData.facebookVideoUrl = trackDto.facebookVideoUrl;
-    if (trackDto.social_links !== undefined) updateData.socialLinks = trackDto.social_links;
-    if (trackDto.socialLinks !== undefined) updateData.socialLinks = trackDto.socialLinks;
-    if (trackDto.gallery_images !== undefined) updateData.galleryImages = trackDto.gallery_images;
-    if (trackDto.galleryImages !== undefined) updateData.galleryImages = trackDto.galleryImages;
-    if (trackDto.attachments !== undefined) updateData.attachments = trackDto.attachments;
-    if (trackDto.sort_order !== undefined) updateData.sortOrder = trackDto.sort_order;
-    if (trackDto.sortOrder !== undefined) updateData.sortOrder = trackDto.sortOrder;
-    if (trackDto.is_active !== undefined) updateData.isActive = trackDto.is_active;
-    if (trackDto.isActive !== undefined) updateData.isActive = trackDto.isActive;
+    if (trackDto.highlights !== undefined)
+      updateData.highlights = trackDto.highlights;
+    if (trackDto.banner_url !== undefined)
+      updateData.bannerUrl = trackDto.banner_url;
+    if (trackDto.bannerUrl !== undefined)
+      updateData.bannerUrl = trackDto.bannerUrl;
+    if (trackDto.curriculum_url !== undefined)
+      updateData.curriculumUrl = trackDto.curriculum_url;
+    if (trackDto.curriculumUrl !== undefined)
+      updateData.curriculumUrl = trackDto.curriculumUrl;
+    if (trackDto.youtube_video_url !== undefined)
+      updateData.youtubeVideoUrl = trackDto.youtube_video_url;
+    if (trackDto.youtubeVideoUrl !== undefined)
+      updateData.youtubeVideoUrl = trackDto.youtubeVideoUrl;
+    if (trackDto.facebook_video_url !== undefined)
+      updateData.facebookVideoUrl = trackDto.facebook_video_url;
+    if (trackDto.facebookVideoUrl !== undefined)
+      updateData.facebookVideoUrl = trackDto.facebookVideoUrl;
+    if (trackDto.social_links !== undefined)
+      updateData.socialLinks = trackDto.social_links;
+    if (trackDto.socialLinks !== undefined)
+      updateData.socialLinks = trackDto.socialLinks;
+    if (trackDto.gallery_images !== undefined)
+      updateData.galleryImages = trackDto.gallery_images;
+    if (trackDto.galleryImages !== undefined)
+      updateData.galleryImages = trackDto.galleryImages;
+    if (trackDto.attachments !== undefined)
+      updateData.attachments = trackDto.attachments;
+    if (trackDto.sort_order !== undefined)
+      updateData.sortOrder = trackDto.sort_order;
+    if (trackDto.sortOrder !== undefined)
+      updateData.sortOrder = trackDto.sortOrder;
+    if (trackDto.is_active !== undefined)
+      updateData.isActive = trackDto.is_active;
+    if (trackDto.isActive !== undefined)
+      updateData.isActive = trackDto.isActive;
+    if (trackDto.admission_status !== undefined)
+      updateData.admissionStatus = trackDto.admission_status;
+    if (trackDto.admissionStatus !== undefined)
+      updateData.admissionStatus = trackDto.admissionStatus;
 
     const updated = await this.drizzle.db
       .update(programTracks)
@@ -483,5 +640,4 @@ export class ProgramsService {
 
     return { deleted: true };
   }
-
 }

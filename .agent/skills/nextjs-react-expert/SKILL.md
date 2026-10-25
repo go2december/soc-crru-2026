@@ -32,8 +32,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 | `7-js-javascript-performance.md`        | ⚪ **LOW-MEDIUM**  | 12 rules | Micro-optimizations, caching, loop performance                  |
 | `8-advanced-advanced-patterns.md`       | 🔵 **VARIABLE**    | 3 rules  | Advanced React patterns, useLatest, init-once                   |
 | `9-cache-components.md`                | 🔴 **CRITICAL**    | 4 sections | **Next.js 16+ Only**: `use cache`, `cacheLife`, PPR, `cacheTag` |
+| `10-react-19-modern-patterns.md`       | 🟠 **HIGH**        | 4 sections | **React 19 Native**: `ref` prop, `useActionState`, `useOptimistic`, `<Context>` |
 
-**Total: 57 rules across 8 categories**
+**Total: 61 rules across 9 categories**
 
 ---
 
@@ -71,6 +72,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 🚀 **Next.js 16+ Performance (Caching & PPR)**
   → Read Section 9: Cache Components
+
+⚛️ **React 19 Primitives (ref prop, useActionState, useOptimistic)**
+  → Read Section 10: React 19 Modern Patterns
 ```
 
 ---

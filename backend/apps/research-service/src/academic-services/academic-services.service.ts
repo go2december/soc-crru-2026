@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import {
   DatabaseService,
   academicServices,
@@ -75,7 +79,11 @@ export class AcademicServicesService {
     const { members, ...data } = createDto;
 
     let targetDeptId = data.department_id;
-    if (user && !user.roles?.includes('ADMIN') && user.roles?.includes('EDITOR')) {
+    if (
+      user &&
+      !user.roles?.includes('ADMIN') &&
+      user.roles?.includes('EDITOR')
+    ) {
       targetDeptId = user.departmentId;
     }
 
@@ -131,7 +139,9 @@ export class AcademicServicesService {
   }
 
   async findAllAdmin(departmentId?: number) {
-    const condition = departmentId ? eq(academicServices.departmentId, departmentId) : undefined;
+    const condition = departmentId
+      ? eq(academicServices.departmentId, departmentId)
+      : undefined;
     const services = await this.drizzleService.db
       .select()
       .from(academicServices)
@@ -258,7 +268,8 @@ export class AcademicServicesService {
           contactEmail: 'social@crru.ac.th',
           contactPhone: '0-5377-6000 ต่อ 1600',
           officeHours: 'จันทร์ - ศุกร์ 08:30 - 16:30 น. (เว้นวันหยุดราชการ)',
-          officeLocation: 'สำนักงานคณบดี อาคาร 1 ชั้น 2 คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+          officeLocation:
+            'สำนักงานคณบดี อาคาร 1 ชั้น 2 คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
           responseTime: 'เจ้าหน้าที่จะติดต่อกลับภายใน 1-2 วันทำการ',
           pdfFormUrl: '/forms/academic-service-request.pdf',
           docxFormUrl: '/forms/academic-service-request.docx',
@@ -293,4 +304,3 @@ export class AcademicServicesService {
     return updated;
   }
 }
-

@@ -84,7 +84,11 @@ export class ResearchController {
   ) {
     // If editor, force their department
     let deptId = departmentId ? Number(departmentId) : undefined;
-    if (req?.user && !req.user.roles?.includes('ADMIN') && req.user.roles?.includes('EDITOR')) {
+    if (
+      req?.user &&
+      !req.user.roles?.includes('ADMIN') &&
+      req.user.roles?.includes('EDITOR')
+    ) {
       deptId = req.user.departmentId;
     }
 

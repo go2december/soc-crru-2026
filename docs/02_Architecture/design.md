@@ -7,7 +7,7 @@ aliases: ["Design System", "Color Guide", "UI Guidelines"]
 
 # 🎨 SOC-CRRU Design System & Color Architecture
 
-> [!important] สถาปัตยกรรมดีไซน์สำหรับสำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
+> [!important] สถาปัตยกรรมดีไซน์สำหรับคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
 > เอกสารนี้วิเคราะห์และกำหนดชุดสี (Palette), Typography, Component Tokens (Tailwind CSS v4 + shadcn/ui), และสถาปัตยกรรมแอนิเมชัน (Motion & GSAP) ตามเกณฑ์ WCAG 2.1 AA เพื่อใช้เป็นพิมพ์เขียวหลักก่อนเริ่มการพัฒนา
 
 ---

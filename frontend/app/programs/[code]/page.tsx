@@ -16,13 +16,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const program = await fetchProgramByCode(code);
 
   if (!program) {
-    return { title: 'ไม่พบหลักสูตร | สำนักวิชาสังคมศาสตร์ มรภ.เชียงราย' };
+    return { title: 'ไม่พบหลักสูตร | คณะสังคมศาสตร์ มรภ.เชียงราย' };
   }
 
-  const title = `${program.nameTh} (${program.degreeTitleTh || 'หลักสูตรวิชาการ'}) | สำนักวิชาสังคมศาสตร์ มรภ.เชียงราย`;
+  const title = `${program.nameTh} (${program.degreeTitleTh || 'หลักสูตรวิชาการ'}) | คณะสังคมศาสตร์ มรภ.เชียงราย`;
   const description =
     program.description ||
-    `ข้อมูลหลักสูตร ${program.nameTh} สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`;
+    `ข้อมูลหลักสูตร ${program.nameTh} คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`;
   const bannerUrl =
     program.bannerUrl ||
     'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop';
@@ -36,7 +36,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title,
       description,
       url: pageUrl,
-      siteName: 'สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+      siteName: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
       images: [
         {
           url: bannerUrl,
@@ -123,6 +123,7 @@ export default async function ProgramDynamicsPage(props: Props) {
     youtubeVideoUrl: program.youtubeVideoUrl,
     facebookVideoUrl: program.facebookVideoUrl,
     instructors: program.instructors as ProgramInstructor[] | undefined,
+    admissionStatus: program.admissionStatus,
   };
 
   // JSON-LD Structured Data for Degree Program
@@ -133,7 +134,7 @@ export default async function ProgramDynamicsPage(props: Props) {
     description: program.description,
     provider: {
       '@type': 'EducationalOrganization',
-      name: 'สำนักวิชาสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+      name: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
       url: 'https://soc.crru.ac.th',
     },
     educationalCredentialAwarded: program.degreeTitleTh || program.nameTh,

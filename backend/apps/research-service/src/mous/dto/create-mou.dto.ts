@@ -9,7 +9,12 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export const MOU_PARTNER_TYPES = ['GOVERNMENT', 'COMMUNITY', 'ACADEMIC', 'PRIVATE'] as const;
+export const MOU_PARTNER_TYPES = [
+  'GOVERNMENT',
+  'COMMUNITY',
+  'ACADEMIC',
+  'PRIVATE',
+] as const;
 export type MouPartnerType = (typeof MOU_PARTNER_TYPES)[number];
 
 export class CreateMouDto {

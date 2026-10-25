@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DatabaseService, studentServices, studentDocuments } from 'db/database';
+import {
+  DatabaseService,
+  studentServices,
+  studentDocuments,
+} from 'db/database';
 import { UploadService } from 'upload/upload';
 import { CreateStudentServiceDto } from './dto/create-student-service.dto';
 import { UpdateStudentServiceDto } from './dto/update-student-service.dto';
@@ -35,14 +39,20 @@ export class StudentServicesService {
       query.where(and(...conditions));
     }
 
-    return await query.orderBy(asc(studentServices.displayOrder), desc(studentServices.createdAt));
+    return await query.orderBy(
+      asc(studentServices.displayOrder),
+      desc(studentServices.createdAt),
+    );
   }
 
   async findAllAdmin() {
     return await this.drizzle.db
       .select()
       .from(studentServices)
-      .orderBy(asc(studentServices.displayOrder), desc(studentServices.createdAt));
+      .orderBy(
+        asc(studentServices.displayOrder),
+        desc(studentServices.createdAt),
+      );
   }
 
   async findOne(id: string) {
@@ -87,8 +97,13 @@ export class StudentServicesService {
 
   async remove(id: string) {
     await this.findOne(id);
-    await this.drizzle.db.delete(studentServices).where(eq(studentServices.id, id));
-    return { success: true, message: `Student service with ID "${id}" has been removed` };
+    await this.drizzle.db
+      .delete(studentServices)
+      .where(eq(studentServices.id, id));
+    return {
+      success: true,
+      message: `Student service with ID "${id}" has been removed`,
+    };
   }
 
   // ==========================================
@@ -112,14 +127,20 @@ export class StudentServicesService {
       query.where(and(...conditions));
     }
 
-    return await query.orderBy(asc(studentDocuments.displayOrder), desc(studentDocuments.createdAt));
+    return await query.orderBy(
+      asc(studentDocuments.displayOrder),
+      desc(studentDocuments.createdAt),
+    );
   }
 
   async findAllDocsAdmin() {
     return await this.drizzle.db
       .select()
       .from(studentDocuments)
-      .orderBy(asc(studentDocuments.displayOrder), desc(studentDocuments.createdAt));
+      .orderBy(
+        asc(studentDocuments.displayOrder),
+        desc(studentDocuments.createdAt),
+      );
   }
 
   async findOneDoc(id: string) {
@@ -168,10 +189,15 @@ export class StudentServicesService {
 
   async removeDoc(id: string) {
     const existing = await this.findOneDoc(id);
-    await this.drizzle.db.delete(studentDocuments).where(eq(studentDocuments.id, id));
+    await this.drizzle.db
+      .delete(studentDocuments)
+      .where(eq(studentDocuments.id, id));
     if (existing.fileUrl) {
       await this.uploadService.deleteProgramsFile(existing.fileUrl);
     }
-    return { success: true, message: `Student document with ID "${id}" has been removed` };
+    return {
+      success: true,
+      message: `Student document with ID "${id}" has been removed`,
+    };
   }
 }

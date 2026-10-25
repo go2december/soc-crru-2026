@@ -10,6 +10,10 @@ import {
   Sparkles,
   Layers,
 } from "lucide-react";
+import { getSiteSettings, DEFAULT_SITE_SETTINGS } from "@/lib/site-settings";
+import { LucideIcon } from "@/components/LucideIcon";
+
+export const revalidate = 60;
 
 export const metadata = {
   title:
@@ -18,61 +22,11 @@ export const metadata = {
     "4 ประเด็นยุทธศาสตร์หลัก แผนยุทธศาสตร์ 5 ปี (พ.ศ. 2565 - 2569) ฉบับทบทวน พ.ศ. 2566 คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
 };
 
-export default function StrategicPlanPage() {
-  const strategies = [
-    {
-      id: "1",
-      number: "01",
-      badge: "ยุทธศาสตร์ที่ 1",
-      name: "การยกระดับคุณภาพการศึกษา",
-      desc: "Elevating Education Quality",
-      icon: GraduationCap,
-      summary:
-        "มุ่งผลิตบัณฑิตนวัตกรมืออาชีพ ทักษะสูง ตอบโจทย์การพัฒนาพื้นที่ พร้อมหลักสูตรปริญญาและคลังหน่วยกิต (Credit Bank)",
-      color: "from-amber-500 to-[#C2410C]",
-      borderHover: "hover:border-[#C2410C]",
-      accentBg: "bg-amber-50 text-[#C2410C]",
-    },
-    {
-      id: "2",
-      number: "02",
-      badge: "ยุทธศาสตร์ที่ 2",
-      name: "การพัฒนางานวิจัย นวัตกรรม และงานสร้างสรรค์",
-      desc: "Research, Innovation, and Creative Works",
-      icon: Lightbulb,
-      summary:
-        "ส่งเสริมงานวิจัยเชิงสร้างสรรค์เพื่อแก้ปัญหาชุมชนอย่างมีส่วนร่วม และยกระดับขีดความสามารถนักวิจัยสู่สากล (Talent Mobility)",
-      color: "from-[#C2410C] to-[#9A3412]",
-      borderHover: "hover:border-[#C2410C]",
-      accentBg: "bg-orange-50 text-[#C2410C]",
-    },
-    {
-      id: "3",
-      number: "03",
-      badge: "ยุทธศาสตร์ที่ 3",
-      name: "การพัฒนาท้องถิ่น",
-      desc: "Local Development",
-      icon: Landmark,
-      summary:
-        "ส่งเสริมการเรียนรู้ตลอดชีวิต (Lifelong Learning) สร้างความร่วมมือจตุรภาคี และหนุนผู้ประกอบการท้องถิ่น (Local Startups)",
-      color: "from-[#581C87] to-[#3B0764]",
-      borderHover: "hover:border-[#581C87]",
-      accentBg: "bg-purple-50 text-[#581C87]",
-    },
-    {
-      id: "4",
-      number: "04",
-      badge: "ยุทธศาสตร์ที่ 4",
-      name: "การพัฒนาระบบ กลไก และการบริหารจัดการ",
-      desc: "System, Mechanism, and Management Development",
-      icon: Cog,
-      summary:
-        "ปฏิรูประบบการบริหารจัดการตามหลักธรรมาภิบาล ยกระดับสู่มาตรฐานสากล (AUN-QA) และสร้างองค์กรแห่งความสุข (Happy Organization)",
-      color: "from-slate-700 to-[#0B132B]",
-      borderHover: "hover:border-[#0B132B]",
-      accentBg: "bg-slate-100 text-[#0B132B]",
-    },
-  ];
+export default async function StrategicPlanPage() {
+  const settings = await getSiteSettings();
+  const strategies = settings.strategicPlans?.length
+    ? settings.strategicPlans
+    : DEFAULT_SITE_SETTINGS.strategicPlans;
 
   return (
     <main className="min-h-screen bg-[#F8FAFC] font-sans text-slate-800 pb-24">
@@ -124,13 +78,12 @@ export default function StrategicPlanPage() {
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight mb-4">
               แผนยุทธศาสตร์ 5 ปี <br className="hidden sm:inline" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-[#F97316] to-[#C2410C]">
-                4 ประเด็นยุทธศาสตร์หลัก
+                {strategies.length} ประเด็นยุทธศาสตร์หลัก
               </span>
             </h1>
 
             <p className="text-base sm:text-lg text-slate-300 font-body leading-relaxed max-w-2xl">
-              กรอบการดำเนินงานตามแผนยุทธศาสตร์ 5 ปี (พ.ศ. 2565 - 2569) ฉบับทบทวน พ.ศ. 2566
-              เพื่อขับเคลื่อนคณะสังคมศาสตร์สู่ความเป็นเลิศทางวิชาการและนวัตกรรมเพื่อท้องถิ่น
+              กรอบการดำเนินงานตามแผนยุทธศาสตร์ 5 ปี เพื่อขับเคลื่อนคณะสังคมศาสตร์สู่ความเป็นเลิศทางวิชาการและนวัตกรรมเพื่อท้องถิ่น
             </p>
           </div>
         </div>
@@ -142,7 +95,7 @@ export default function StrategicPlanPage() {
           <div className="flex items-center justify-between overflow-x-auto no-scrollbar py-3 gap-6 text-xs sm:text-sm font-semibold whitespace-nowrap">
             <div className="flex items-center gap-2 text-slate-700">
               <span className="px-3 py-1.5 rounded-lg text-[#C2410C] bg-orange-50/80 font-bold">
-                4 ประเด็นยุทธศาสตร์
+                {strategies.length} ประเด็นยุทธศาสตร์
               </span>
             </div>
 
@@ -182,23 +135,22 @@ export default function StrategicPlanPage() {
         <section id="strategic-issues">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {strategies.map((strat) => {
-              const Icon = strat.icon;
               return (
                 <Link
                   href={`/about/strategy/${strat.id}`}
                   key={strat.id}
-                  className={`group relative flex flex-col justify-between p-7 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 ${strat.borderHover}`}
+                  className={`group relative flex flex-col justify-between p-7 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 ${strat.borderHover || 'hover:border-[#C2410C]'}`}
                 >
                   <div>
                     {/* Top Accent & Icon */}
                     <div className="flex items-center justify-between mb-5">
                       <div
-                        className={`size-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${strat.accentBg}`}
+                        className={`size-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${strat.accentBg || 'bg-orange-50 text-[#C2410C]'}`}
                       >
-                        <Icon className="size-7" strokeWidth={1.75} />
+                        <LucideIcon name={strat.icon} className="size-7" strokeWidth={1.75} />
                       </div>
                       <span className="text-3xl font-black text-slate-200 font-mono group-hover:text-[#C2410C]/40 transition-colors">
-                        {strat.number}
+                        {strat.number || strat.id}
                       </span>
                     </div>
 

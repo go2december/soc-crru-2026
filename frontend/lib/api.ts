@@ -117,6 +117,7 @@ export interface Program {
     facebookVideoUrl?: string;
     // Instructors
     instructors?: ProgramInstructor[];
+    admissionStatus?: string;
 }
 
 export { getApiBaseUrl, getAssetUrl, apiFetch } from './api-config';
