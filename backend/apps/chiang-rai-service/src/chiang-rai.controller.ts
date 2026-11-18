@@ -7,8 +7,10 @@ import {
   Param,
   Query,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ChiangRaiService } from './chiang-rai.service';
+import { JwtAuthGuard, RolesGuard, Roles } from 'shared/shared';
 
 @Controller('chiang-rai')
 export class ChiangRaiController {
@@ -45,17 +47,23 @@ export class ChiangRaiController {
   }
 
   @Post('artifacts')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async createArtifact(@Body() body: any) {
     // In production, add DTO validation here
     return this.service.createArtifact(body);
   }
 
   @Put('artifacts/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async updateArtifact(@Param('id') id: string, @Body() body: any) {
     return this.service.updateArtifact(id, body);
   }
 
   @Delete('artifacts/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async deleteArtifact(@Param('id') id: string) {
     return this.service.deleteArtifact(id);
   }
@@ -66,6 +74,8 @@ export class ChiangRaiController {
   }
 
   @Get('articles/by-id/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async getArticleById(@Param('id') id: string) {
     return this.service.getArticleById(id);
   }
@@ -76,16 +86,22 @@ export class ChiangRaiController {
   }
 
   @Post('articles')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async createArticle(@Body() body: any) {
     return this.service.createArticle(body);
   }
 
   @Put('articles/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async updateArticle(@Param('id') id: string, @Body() body: any) {
     return this.service.updateArticle(id, body);
   }
 
   @Delete('articles/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async deleteArticle(@Param('id') id: string) {
     return this.service.deleteArticle(id);
   }
@@ -100,6 +116,8 @@ export class ChiangRaiController {
   }
 
   @Get('activities/by-id/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async getActivityById(@Param('id') id: string) {
     return this.service.getActivityById(id);
   }
@@ -110,16 +128,22 @@ export class ChiangRaiController {
   }
 
   @Post('activities')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async createActivity(@Body() body: any) {
     return this.service.createActivity(body);
   }
 
   @Put('activities/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async updateActivity(@Param('id') id: string, @Body() body: any) {
     return this.service.updateActivity(id, body);
   }
 
   @Delete('activities/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async deleteActivity(@Param('id') id: string) {
     return this.service.deleteActivity(id);
   }
@@ -137,26 +161,36 @@ export class ChiangRaiController {
   }
 
   @Post('staff')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async createStaff(@Body() body: any) {
     return this.service.createStaff(body);
   }
 
   @Put('staff/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async updateStaff(@Param('id') id: string, @Body() body: any) {
     return this.service.updateStaff(id, body);
   }
 
   @Delete('staff/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async deleteStaff(@Param('id') id: string) {
     return this.service.deleteStaff(id);
   }
 
   @Get('admin/faculty-staff')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async getFacultyStaffList() {
     return this.service.getFacultyStaffList();
   }
 
   @Post('staff/import')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async importStaff(
     @Body()
     body: {
@@ -178,6 +212,8 @@ export class ChiangRaiController {
   }
 
   @Put('config')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async updateConfig(@Body() body: any) {
     return this.service.updateConfig(body);
   }
@@ -193,6 +229,8 @@ export class ChiangRaiController {
   }
 
   @Get('learning-sites/by-id/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async getLearningSiteById(@Param('id') id: string) {
     return this.service.getLearningSiteById(id);
   }
@@ -203,16 +241,22 @@ export class ChiangRaiController {
   }
 
   @Post('learning-sites')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async createLearningSite(@Body() body: any) {
     return this.service.createLearningSite(body);
   }
 
   @Put('learning-sites/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async updateLearningSite(@Param('id') id: string, @Body() body: any) {
     return this.service.updateLearningSite(id, body);
   }
 
   @Delete('learning-sites/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR', 'STAFF')
   async deleteLearningSite(@Param('id') id: string) {
     return this.service.deleteLearningSite(id);
   }

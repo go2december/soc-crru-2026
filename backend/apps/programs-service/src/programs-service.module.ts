@@ -9,6 +9,7 @@ import { ShortCoursesModule } from './short-courses/short-courses.module';
 import { StudentServicesModule } from './student-services/student-services.module';
 import { StaffServicesModule } from './staff-services/staff-services.module';
 import { SiteSettingsModule } from './site-settings/site-settings.module';
+import { BannersModule } from './banners/banners.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SiteSettingsModule } from './site-settings/site-settings.module';
     StudentServicesModule,
     StaffServicesModule,
     SiteSettingsModule,
+    BannersModule,
   ],
   exports: [
     ProgramsModule,
@@ -31,6 +33,7 @@ import { SiteSettingsModule } from './site-settings/site-settings.module';
     StudentServicesModule,
     StaffServicesModule,
     SiteSettingsModule,
+    BannersModule,
   ],
 })
 export class ProgramsServiceModule {}

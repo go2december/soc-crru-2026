@@ -334,14 +334,15 @@ export default function Navbar() {
           </ul>
         </div>
 
-        {/* Action Button */}
-        <div className="flex items-center gap-3">
+        {/* Action Button: Icon-Only Staff Login */}
+        <div className="flex items-center">
           <Link
             href="/admin/login"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#C2410C] hover:bg-[#9A3412] text-white font-medium text-xs sm:text-sm shadow-sm hover:shadow transition-all duration-200 active:scale-95"
+            aria-label="เข้าสู่ระบบสำหรับบุคลากร"
+            title="เข้าสู่ระบบสำหรับบุคลากร"
+            className="inline-flex items-center justify-center size-10 rounded-sm bg-[#C2410C] hover:bg-[#9A3412] text-white shadow-xs transition-all duration-200 active:scale-95"
           >
-            <LogIn className="size-4" strokeWidth={1.75} />
-            <span>เข้าสู่ระบบ</span>
+            <LogIn className="size-4.5" strokeWidth={1.75} />
           </Link>
         </div>
       </div>

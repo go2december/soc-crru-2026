@@ -1,44 +1,60 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { motion, AnimatePresence } from "motion/react";
+import Image from "next/image";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
   Users,
   Compass,
   HeartHandshake,
   BookOpen,
   Coffee,
-  Sparkles,
   ArrowRight,
   GraduationCap,
+  ChevronLeft,
   ChevronRight,
-  Layers,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Program, getAssetUrl } from "@/lib/api";
 
-// Register ScrollTrigger plugin with GSAP
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-interface ProgramItem {
+export interface ProgramItem {
   id: string;
   degree: string;
   degreeType: "saffron" | "slate" | "lotus";
   title: string;
   engTitle: string;
   description: string;
-  tracks: string[];
   duration: string;
   href: string;
+  image: string;
+  imageAlt: string;
   icon: typeof Users;
 }
 
-const programs: ProgramItem[] = [
+const fallbackImageByCode: Record<string, string> = {
+  "social-dev": "/images/programs/social-dev.jpg",
+  gis: "/images/programs/gis.jpg",
+  "social-psych": "/images/programs/social-psych.jpg",
+  "social-sci": "/images/programs/social-sci.jpg",
+  "home-eco": "/images/programs/home-eco.jpg",
+  "regional-dev": "/images/programs/regional-dev.jpg",
+  "regional-dev-ma": "/images/programs/regional-dev.jpg",
+  "regional-dev-phd": "/images/programs/regional-dev.jpg",
+};
+
+const iconByCode: Record<string, typeof Users> = {
+  "social-dev": Users,
+  gis: Compass,
+  "social-psych": HeartHandshake,
+  "social-sci": BookOpen,
+  "home-eco": Coffee,
+  "regional-dev": GraduationCap,
+  "regional-dev-ma": GraduationCap,
+  "regional-dev-phd": GraduationCap,
+};
+
+const defaultPrograms: ProgramItem[] = [
   {
     id: "social-dev",
     degree: "ศศ.บ. 4 ปี",
@@ -47,9 +63,10 @@ const programs: ProgramItem[] = [
     engTitle: "Social Innovation & Community Development",
     description:
       "สร้างผู้นำการเปลี่ยนแปลง การจัดการโครงการพัฒนา และการวิจัยนโยบายชุมชนท้องถิ่นสู่ระดับสากล",
-    tracks: ["การจัดการนวัตกรรมสังคม", "การพัฒนาชุมชนเชิงพื้นที่"],
-    duration: "4 ปี (126 หน่วยกิต)",
+    duration: "4 ปี · 126 หน่วยกิต",
     href: "/programs/social-dev",
+    image: "/images/programs/social-dev.jpg",
+    imageAlt: "นักศึกษาและนักวิจัยร่วมออกแบบนวัตกรรมพัฒนาชุมชนท้องถิ่น",
     icon: Users,
   },
   {
@@ -60,9 +77,10 @@ const programs: ProgramItem[] = [
     engTitle: "Geography & Geo-Informatics (GIS)",
     description:
       "การวิเคราะห์ข้อมูลเชิงพื้นที่ รีโมตเซนซิง โดรนสำรวจ และการวางผังเมืองและสิ่งแวดล้อมยุคดิจิทัล",
-    tracks: ["เทคโนโลยีภูมิสารสนเทศ", "การจัดการทรัพยากรและผังเมือง"],
-    duration: "4 ปี (130 หน่วยกิต)",
+    duration: "4 ปี · 130 หน่วยกิต",
     href: "/programs/gis",
+    image: "/images/programs/gis.jpg",
+    imageAlt: "การวิเคราะห์ข้อมูลภูมิสารสนเทศ แผนที่ดิจิทัล และเทคโนโลยีโดรนสำรวจ",
     icon: Compass,
   },
   {
@@ -73,9 +91,10 @@ const programs: ProgramItem[] = [
     engTitle: "Social Psychology & Human Wellbeing",
     description:
       "เข้าใจพฤติกรรมมนุษย์ การให้คำปรึกษา การส่งเสริมสุขภาวะทางจิต และการพัฒนาทรัพยากรมนุษย์ในองค์กร",
-    tracks: ["จิตวิทยาการให้คำปรึกษา", "จิตวิทยาองค์กรและชุมชน"],
-    duration: "4 ปี (128 หน่วยกิต)",
+    duration: "4 ปี · 128 หน่วยกิต",
     href: "/programs/social-psych",
+    image: "/images/programs/social-psych.jpg",
+    imageAlt: "ห้องปฏิบัติการจิตวิทยาสังคมและการให้คำปรึกษาเพื่อสุขภาวะ",
     icon: HeartHandshake,
   },
   {
@@ -86,9 +105,10 @@ const programs: ProgramItem[] = [
     engTitle: "Social Sciences & Public Management",
     description:
       "บูรณาการสังคม วัฒนธรรม เศรษฐกิจชายแดน และการบริหารจัดการนโยบายสาธารณะลุ่มน้ำโขง",
-    tracks: ["การจัดการสังคมและวัฒนธรรม", "นโยบายสาธารณะและการพัฒนา"],
-    duration: "4 ปี (124 หน่วยกิต)",
+    duration: "4 ปี · 124 หน่วยกิต",
     href: "/programs/social-sci",
+    image: "/images/programs/social-sci.jpg",
+    imageAlt: "ห้องสัมมนานโยบายสาธารณะและสังคมศาสตร์ลุ่มน้ำโขง",
     icon: BookOpen,
   },
   {
@@ -99,9 +119,10 @@ const programs: ProgramItem[] = [
     engTitle: "Applied Home Economics & Lanna Gastronomy",
     description:
       "วิทยาศาสตร์อาหาร ศิลปะการจัดเลี้ยง โภชนาการ และการต่อยอดภูมิปัญญาสมุนไพรและอาหารล้านนาเชิงพาณิชย์",
-    tracks: ["นวัตกรรมอาหารและโภชนาการ", "การออกแบบธุรกิจบริการและจัดเลี้ยง"],
-    duration: "4 ปี (125 หน่วยกิต)",
+    duration: "4 ปี · 125 หน่วยกิต",
     href: "/programs/home-eco",
+    image: "/images/programs/home-eco.jpg",
+    imageAlt: "นวัตกรรมอาหารล้านนาและศิลปะการจัดเลี้ยงเชิงสร้างสรรค์",
     icon: Coffee,
   },
   {
@@ -112,200 +133,479 @@ const programs: ProgramItem[] = [
     engTitle: "Regional Development Strategies (M.A. & Ph.D.)",
     description:
       "หลักสูตรระดับบัณฑิตศึกษา สำหรับนักบริหารและนักวิจัย เพื่อกำหนดยุทธศาสตร์การพัฒนาพื้นที่ลุ่มน้ำโขง",
-    tracks: ["การวิจัยนโยบายเชิงยุทธศาสตร์", "การพัฒนาความร่วมมือชายแดน"],
     duration: "2 - 3 ปี",
     href: "/programs/regional-dev-ma",
+    image: "/images/programs/regional-dev.jpg",
+    imageAlt: "ห้องวิจัยยุทธศาสตร์การพัฒนาภูมิภาคและอนุภูมิภาคลุ่มน้ำโขง",
     icon: GraduationCap,
   },
 ];
 
-export default function CurriculumDeck() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const scrollTrackRef = useRef<HTMLDivElement>(null);
+function mapApiProgramToItem(p: Program, idx: number): ProgramItem {
+  const isGrad =
+    p.degreeLevel === "MASTER" || p.degreeLevel === "DOCTORAL" || p.degreeLevel === "PHD";
+
+  let degreeLabel = "ศศ.บ. 4 ปี";
+  if (p.degreeLevel === "MASTER") {
+    degreeLabel = "ศศ.ม.";
+  } else if (p.degreeLevel === "DOCTORAL" || p.degreeLevel === "PHD") {
+    degreeLabel = "ปร.ด.";
+  } else if (p.degreeTitleTh?.includes("วิทยาศาสตรบัณฑิต") || p.code === "gis") {
+    degreeLabel = "วท.บ. 4 ปี";
+  }
+
+  const durationBase = isGrad ? "2 - 3 ปี" : "4 ปี";
+  const duration = p.structure?.totalCredits
+    ? `${durationBase} · ${p.structure.totalCredits} หน่วยกิต`
+    : durationBase;
+
+  const resolvedImage = p.bannerUrl
+    ? getAssetUrl(p.bannerUrl)
+    : fallbackImageByCode[p.code] || "/images/programs/social-dev.jpg";
+
+  return {
+    id: p.code || p.id,
+    degree: degreeLabel,
+    degreeType: isGrad ? "lotus" : idx % 2 === 0 ? "saffron" : "slate",
+    title: p.nameTh,
+    engTitle: p.degreeTitleEn || p.code,
+    description: p.description || "",
+    duration,
+    href: `/programs/${p.code}`,
+    image: resolvedImage,
+    imageAlt: `ภาพประกอบหลักสูตร ${p.nameTh}`,
+    icon: iconByCode[p.code] || GraduationCap,
+  };
+}
+
+const tabs = [
+  { id: "all" as const, label: "ทั้งหมด" },
+  { id: "ug" as const, label: "ปริญญาตรี" },
+  { id: "grad" as const, label: "บัณฑิตศึกษา" },
+];
+
+const degreeOrder: Record<string, number> = {
+  BACHELOR: 1,
+  MASTER: 2,
+  DOCTORAL: 3,
+  PHD: 3,
+};
+
+export default function CurriculumDeck({
+  apiPrograms,
+}: {
+  apiPrograms?: (Program & { isActive?: boolean })[];
+}) {
   const [activeTab, setActiveTab] = useState<"all" | "ug" | "grad">("all");
+  const shouldReduceMotion = useReducedMotion();
+  const trackRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      // Respect accessibility reduced motion
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      if (prefersReducedMotion || !sectionRef.current || !scrollTrackRef.current) return;
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
-      // Only enable pinned horizontal scroll on desktop (min-width: 1024px)
-      const mm = gsap.matchMedia();
-
-      mm.add("(min-width: 1024px)", () => {
-        const track = scrollTrackRef.current;
-        if (!track) return;
-
-        const totalScrollWidth = track.scrollWidth - track.clientWidth;
-
-        if (totalScrollWidth > 0) {
-          gsap.to(track, {
-            x: -totalScrollWidth,
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              pin: true,
-              scrub: 1,
-              start: "top 12%",
-              end: () => `+=${totalScrollWidth + 400}`,
-              invalidateOnRefresh: true,
-            },
-          });
-        }
-      });
-
-      return () => mm.revert();
-    },
-    { scope: sectionRef }
-  );
-
-  const filteredPrograms = programs.filter((p) => {
-    if (activeTab === "ug") return p.degreeType !== "lotus";
-    if (activeTab === "grad") return p.degreeType === "lotus";
-    return true;
+  const dragStateRef = useRef({
+    isDown: false,
+    startX: 0,
+    scrollLeft: 0,
+    hasMoved: false,
   });
+
+  const items = useMemo(() => {
+    if (!apiPrograms || apiPrograms.length === 0) return defaultPrograms;
+    const activeOnly = apiPrograms
+      .filter((p) => p.isActive !== false)
+      .sort(
+        (a, b) =>
+          (degreeOrder[a.degreeLevel] ?? 99) - (degreeOrder[b.degreeLevel] ?? 99)
+      );
+    if (activeOnly.length === 0) return defaultPrograms;
+    return activeOnly.map(mapApiProgramToItem);
+  }, [apiPrograms]);
+
+  const ugCount = items.filter((p) => p.degreeType !== "lotus").length;
+  const gradCount = items.filter((p) => p.degreeType === "lotus").length;
+
+  const filteredPrograms = useMemo(() => {
+    if (activeTab === "ug") return items.filter((p) => p.degreeType !== "lotus");
+    if (activeTab === "grad") return items.filter((p) => p.degreeType === "lotus");
+    return items;
+  }, [items, activeTab]);
+
+  const updateScrollState = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 2) {
+      setCanScrollLeft(false);
+      setCanScrollRight(false);
+      setScrollProgress(1);
+      return;
+    }
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft < maxScroll - 4);
+    setScrollProgress(Math.min(1, Math.max(0, el.scrollLeft / maxScroll)));
+  }, []);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollTo({ left: 0, behavior: "auto" });
+    const raf = requestAnimationFrame(updateScrollState);
+    return () => cancelAnimationFrame(raf);
+  }, [activeTab, filteredPrograms.length, updateScrollState]);
+
+  useEffect(() => {
+    window.addEventListener("resize", updateScrollState);
+    return () => window.removeEventListener("resize", updateScrollState);
+  }, [updateScrollState]);
+
+  const scrollByCard = (direction: "prev" | "next") => {
+    const el = trackRef.current;
+    if (!el) return;
+    const step = Math.min(el.clientWidth * 0.8, 380);
+    el.scrollBy({
+      left: direction === "next" ? step : -step,
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+    });
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    const el = trackRef.current;
+    if (!el) return;
+    dragStateRef.current = {
+      isDown: true,
+      startX: e.clientX,
+      scrollLeft: el.scrollLeft,
+      hasMoved: false,
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragStateRef.current;
+    if (!drag.isDown) return;
+    const el = trackRef.current;
+    if (!el) return;
+    const delta = e.clientX - drag.startX;
+    if (Math.abs(delta) > 6) {
+      if (!drag.hasMoved) {
+        drag.hasMoved = true;
+        setIsDragging(true);
+      }
+      el.scrollLeft = drag.scrollLeft - delta;
+    }
+  };
+
+  const endMouseDrag = () => {
+    if (!dragStateRef.current.isDown) return;
+    dragStateRef.current.isDown = false;
+    setIsDragging(false);
+  };
+
+  const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (dragStateRef.current.hasMoved) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragStateRef.current.hasMoved = false;
+    }
+  };
+
+  const getTabCount = (id: "all" | "ug" | "grad") => {
+    if (id === "ug") return ugCount;
+    if (id === "grad") return gradCount;
+    return items.length;
+  };
 
   return (
     <section
       id="programs-showcase"
-      ref={sectionRef}
-      className="py-20 sm:py-28 bg-white border-t border-slate-200/80 overflow-hidden"
+      aria-labelledby="programs-heading"
+      className="py-16 sm:py-20 bg-[#F8FAFC] border-b border-slate-200/80 overflow-x-clip"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-[#C2410C] tracking-wider uppercase mb-3">
-              <span className="w-2 h-2 rounded-full bg-[#C2410C]" />
-              Academic Programs & Tracks
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header + Controls */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 sm:mb-10">
+          <div className="max-w-2xl min-w-0">
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-[#C2410C] tracking-wide mb-2">
+              <span className="w-5 h-[2px] bg-[#C2410C]" aria-hidden="true" />
+              <span>หลักสูตรที่เปิดสอน · คณะสังคมศาสตร์</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#0B132B] tracking-tight leading-tight">
-              หลักสูตรที่ตอบโจทย์อนาคต
+            <h2
+              id="programs-heading"
+              className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] tracking-tight leading-tight"
+            >
+              หลักสูตรระดับปริญญาตรี โท และเอก
             </h2>
-            <p className="font-body text-slate-600 mt-3 text-base sm:text-lg">
-              ผสานทฤษฎีทางสังคมศาสตร์เข้ากับการลงมือปฏิบัติจริงในพื้นที่ภาคเหนือและอนุภูมิภาคลุ่มน้ำโขง
+            <p className="font-body text-slate-600 mt-2 text-sm sm:text-base">
+              เลือกเส้นทางการเรียนที่ใช่ ทั้งสายสังคม เทคโนโลยี และนวัตกรรม
             </p>
           </div>
 
-          {/* Tab Filter (Motion animated indicator) */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold self-start md:self-end">
-            <button
-              onClick={() => setActiveTab("all")}
-              className={`px-3.5 py-1.5 rounded-lg transition-all ${
-                activeTab === "all"
-                  ? "bg-white text-[#0B132B] shadow-xs"
-                  : "text-slate-600 hover:text-[#0B132B]"
-              }`}
+          {/* Filter Tabs + Arrow Controls */}
+          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 shrink-0">
+            <div
+              role="tablist"
+              aria-label="กรองหลักสูตรตามระดับการศึกษา"
+              className="inline-flex items-center gap-1 p-1 rounded-sm bg-white border border-slate-200 text-xs font-semibold"
             >
-              ทั้งหมด (7)
-            </button>
-            <button
-              onClick={() => setActiveTab("ug")}
-              className={`px-3.5 py-1.5 rounded-lg transition-all ${
-                activeTab === "ug"
-                  ? "bg-white text-[#0B132B] shadow-xs"
-                  : "text-slate-600 hover:text-[#0B132B]"
-              }`}
-            >
-              ปริญญาตรี (5)
-            </button>
-            <button
-              onClick={() => setActiveTab("grad")}
-              className={`px-3.5 py-1.5 rounded-lg transition-all ${
-                activeTab === "grad"
-                  ? "bg-white text-[#0B132B] shadow-xs"
-                  : "text-slate-600 hover:text-[#0B132B]"
-              }`}
-            >
-              บัณฑิตศึกษา (2)
-            </button>
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative px-3.5 py-2 rounded-sm transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C] focus-visible:ring-offset-1 ${
+                      isActive ? "text-white" : "text-slate-600 hover:text-[#0B132B]"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="curriculum-tab-pill"
+                        transition={
+                          shouldReduceMotion
+                            ? { duration: 0 }
+                            : { type: "spring", stiffness: 420, damping: 34 }
+                        }
+                        className="absolute inset-0 bg-[#0B132B] rounded-sm"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span className="relative z-10">
+                      {tab.label} ({getTabCount(tab.id)})
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Prev / Next Filmstrip Buttons */}
+            <div className="inline-flex items-center gap-1.5">
+              <motion.button
+                type="button"
+                aria-label="เลื่อนดูหลักสูตรก่อนหน้า"
+                disabled={!canScrollLeft}
+                onClick={() => scrollByCard("prev")}
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
+                className="w-9 h-9 rounded-sm border border-slate-200 bg-white text-[#0B132B] flex items-center justify-center transition-colors hover:border-[#C2410C] hover:text-[#C2410C] disabled:opacity-35 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C]"
+              >
+                <ChevronLeft className="size-4" strokeWidth={2} />
+              </motion.button>
+              <motion.button
+                type="button"
+                aria-label="เลื่อนดูหลักสูตรถัดไป"
+                disabled={!canScrollRight}
+                onClick={() => scrollByCard("next")}
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
+                className="w-9 h-9 rounded-sm border border-slate-200 bg-white text-[#0B132B] flex items-center justify-center transition-colors hover:border-[#C2410C] hover:text-[#C2410C] disabled:opacity-35 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C]"
+              >
+                <ChevronRight className="size-4" strokeWidth={2} />
+              </motion.button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Horizontal Stream / Scroll Deck */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div
-          ref={scrollTrackRef}
-          className="flex flex-col lg:flex-row gap-6 lg:w-max pb-4"
-        >
-          {filteredPrograms.map((prog) => {
-            const Icon = prog.icon;
-            return (
-              <motion.div
-                key={prog.id}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className="w-full lg:w-[380px] p-7 rounded-2xl bg-[#F8FAFC] border border-slate-200/90 hover:border-[#C2410C]/40 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col justify-between shrink-0 group"
-              >
-                <div>
-                  {/* Top Meta info */}
-                  <div className="flex items-center justify-between mb-5">
-                    <Badge variant={prog.degreeType}>{prog.degree}</Badge>
-                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 group-hover:text-[#C2410C] group-hover:border-[#C2410C]/30 transition-colors shadow-2xs">
-                      <Icon className="size-5" strokeWidth={1.75} />
-                    </div>
-                  </div>
+        {/* Single-Row Editorial Filmstrip */}
+        {filteredPrograms.length === 0 ? (
+          <div className="rounded-sm border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+            ยังไม่มีข้อมูลหลักสูตรในหมวดหมู่นี้
+          </div>
+        ) : (
+          <>
+            <div
+              ref={trackRef}
+              onScroll={updateScrollState}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={endMouseDrag}
+              onPointerCancel={endMouseDrag}
+              onPointerLeave={endMouseDrag}
+              onClickCapture={handleClickCapture}
+              className={`flex gap-5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+                isDragging
+                  ? "cursor-grabbing select-none snap-none scroll-auto"
+                  : "cursor-grab snap-x snap-mandatory scroll-smooth"
+              }`}
+            >
+              <AnimatePresence mode="popLayout" initial={false}>
+                {filteredPrograms.map((prog, idx) => {
+                  const Icon = prog.icon;
+                  const isGrad = prog.degreeType === "lotus";
+                  const isDynamicAsset =
+                    prog.image.startsWith("/uploads/") || prog.image.startsWith("http");
 
-                  {/* Program Titles */}
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#0B132B] group-hover:text-[#C2410C] transition-colors mb-1.5 leading-snug">
-                    {prog.title}
-                  </h3>
-                  <div className="text-xs font-medium text-slate-400 mb-4 line-clamp-1">
-                    {prog.engTitle}
-                  </div>
+                  const accentBar =
+                    prog.degreeType === "saffron"
+                      ? "bg-[#C2410C]"
+                      : isGrad
+                        ? "bg-[#581C87]"
+                        : "bg-[#0B132B]";
 
-                  <p className="font-body text-sm text-slate-600 leading-relaxed mb-6">
-                    {prog.description}
-                  </p>
-
-                  {/* Concentration / Tracks list */}
-                  <div className="space-y-1.5 pt-4 border-t border-slate-200/70 mb-6">
-                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <Layers className="size-3" strokeWidth={2} />
-                      <span>แขนงวิชาเฉพาะทาง</span>
-                    </div>
-                    {prog.tracks.map((track, i) => (
-                      <div
-                        key={i}
-                        className="text-xs font-medium text-slate-700 flex items-center gap-2"
+                  return (
+                    <motion.div
+                      key={prog.id}
+                      layout={!shouldReduceMotion}
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.96 }}
+                      transition={
+                        shouldReduceMotion
+                          ? { duration: 0 }
+                          : {
+                              duration: 0.3,
+                              delay: Math.min(idx * 0.04, 0.2),
+                              ease: [0.22, 1, 0.36, 1],
+                            }
+                      }
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
+                      className="snap-start shrink-0 w-[82vw] sm:w-[330px] lg:w-[360px]"
+                    >
+                      <Link
+                        href={prog.href}
+                        draggable={false}
+                        className={`group relative h-full overflow-hidden rounded-sm border transition-all duration-300 flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C] focus-visible:ring-offset-2 ${
+                          isGrad
+                            ? "bg-[#0B132B] border-[#0B132B] text-white hover:border-[#581C87] hover:shadow-xl"
+                            : "bg-white border-slate-200 text-[#0B132B] hover:border-[#C2410C] hover:shadow-lg"
+                        }`}
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#C2410C]/70" />
-                        <span>{track}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                        <div>
+                          {/* Top Accent Hairline */}
+                          <div className={`h-1 w-full ${accentBar}`} />
 
-                {/* Footer Link */}
-                <div className="pt-4 border-t border-slate-200/80 flex items-center justify-between text-xs font-semibold text-slate-700">
-                  <span className="text-slate-500 font-mono">{prog.duration}</span>
-                  <Link
-                    href={prog.href}
-                    className="inline-flex items-center gap-1.5 text-[#C2410C] font-bold group-hover:translate-x-1 transition-transform"
-                  >
-                    <span>รายละเอียดหลักสูตร</span>
-                    <ChevronRight className="size-3.5" strokeWidth={2.2} />
-                  </Link>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
+                          {/* 16:10 Program Image Frame */}
+                          <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
+                            <Image
+                              src={prog.image}
+                              alt={prog.imageAlt}
+                              fill
+                              draggable={false}
+                              unoptimized={isDynamicAsset}
+                              sizes="(max-width: 640px) 82vw, 360px"
+                              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+                            />
+                            <div
+                              className="absolute inset-0 bg-gradient-to-t from-[#0B132B]/70 via-[#0B132B]/10 to-transparent pointer-events-none"
+                              aria-hidden="true"
+                            />
 
-      {/* Explore All Hub Link */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center">
-        <Link
-          href="/programs"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-100 hover:bg-[#0B132B] text-[#0B132B] hover:text-white font-medium text-sm transition-all duration-200"
-        >
-          <GraduationCap className="size-4" strokeWidth={1.75} />
-          <span>ดูรายละเอียดหลักสูตรและเกณฑ์รับสมัครทั้งหมด</span>
-          <ArrowRight className="size-4" strokeWidth={2} />
-        </Link>
+                            {/* Index & Icon */}
+                            <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-sm bg-[#0B132B]/85 text-white font-mono text-[11px] font-bold tracking-wider">
+                                {String(idx + 1).padStart(2, "0")}
+                              </span>
+                              <div
+                                className={`w-8 h-8 rounded-sm flex items-center justify-center border transition-colors ${
+                                  isGrad
+                                    ? "bg-[#581C87]/90 border-white/20 text-white"
+                                    : "bg-white/95 border-slate-200/80 text-[#0B132B] group-hover:text-[#C2410C]"
+                                }`}
+                              >
+                                <Icon className="size-4" strokeWidth={1.8} />
+                              </div>
+                            </div>
+
+                            {/* Degree Badge on Image Bottom-Left */}
+                            <div className="absolute bottom-3 left-3">
+                              <Badge
+                                variant={prog.degreeType}
+                                className={
+                                  isGrad
+                                    ? "rounded-sm bg-[#581C87] text-white border-[#581C87]"
+                                    : "rounded-sm bg-white/95 text-[#0B132B] border-white/60"
+                                }
+                              >
+                                {prog.degree}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {/* Concise Editorial Body */}
+                          <div className="p-5 min-w-0">
+                            <h3
+                              className={`text-lg font-bold leading-snug mb-1 line-clamp-1 transition-colors ${
+                                isGrad
+                                  ? "text-white group-hover:text-amber-300"
+                                  : "text-[#0B132B] group-hover:text-[#C2410C]"
+                              }`}
+                            >
+                              {prog.title}
+                            </h3>
+                            <div className="text-xs font-medium text-slate-400 mb-2.5 line-clamp-1">
+                              {prog.engTitle}
+                            </div>
+                            <p
+                              className={`font-body text-sm leading-relaxed line-clamp-2 ${
+                                isGrad ? "text-slate-300" : "text-slate-600"
+                              }`}
+                            >
+                              {prog.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Compact Card Footer + Hover Saffron Sweep */}
+                        <div className="relative px-5 pb-4 pt-3 border-t border-slate-100/80 flex items-center justify-between text-xs font-semibold">
+                          <span
+                            className={`font-mono text-[11px] ${
+                              isGrad ? "text-slate-400" : "text-slate-500"
+                            }`}
+                          >
+                            {prog.duration}
+                          </span>
+                          <span
+                            className={`inline-flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform ${
+                              isGrad ? "text-amber-300" : "text-[#C2410C]"
+                            }`}
+                          >
+                            <span>ดูรายละเอียด</span>
+                            <ChevronRight className="size-3.5" strokeWidth={2.2} />
+                          </span>
+
+                          {/* Animated Bottom Sweep */}
+                          <span
+                            className={`absolute bottom-0 left-0 right-0 h-[2px] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${
+                              isGrad ? "bg-amber-400" : "bg-[#C2410C]"
+                            }`}
+                            aria-hidden="true"
+                          />
+                        </div>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+
+            {/* Filmstrip Progress Bar & All Programs CTA */}
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="w-full sm:max-w-xs flex items-center gap-3">
+                <div className="flex-1 h-1 bg-slate-200 rounded-none overflow-hidden">
+                  <div
+                    className="h-full bg-[#C2410C] transition-all duration-200 ease-out"
+                    style={{ width: `${Math.max(18, Math.round(scrollProgress * 100))}%` }}
+                  />
+                </div>
+                <span className="text-[11px] font-mono text-slate-500 shrink-0">
+                  {filteredPrograms.length} หลักสูตร
+                </span>
+              </div>
+
+              <Link
+                href="/programs"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-[#0B132B] hover:bg-slate-800 text-white font-medium text-xs sm:text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C] focus-visible:ring-offset-2 shrink-0"
+              >
+                <GraduationCap className="size-4 text-[#C2410C]" strokeWidth={1.75} />
+                <span>ดูหลักสูตรและเกณฑ์รับสมัครทั้งหมด</span>
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

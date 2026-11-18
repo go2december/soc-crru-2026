@@ -11,6 +11,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from 'upload/upload';
 import { JwtAuthGuard, RolesGuard, Roles } from 'shared/shared';
 
+const IMAGE_UPLOAD_LIMITS = { fileSize: 10 * 1024 * 1024 }; // 10 MB
+const DOC_UPLOAD_LIMITS = { fileSize: 25 * 1024 * 1024 }; // 25 MB
+
 @Controller('upload')
 @UseGuards(JwtAuthGuard, RolesGuard) // Protect upload route
 export class UploadController {
@@ -18,7 +21,7 @@ export class UploadController {
 
   @Post('staff')
   @Roles('ADMIN', 'EDITOR', 'STAFF') // Allow staff to upload
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: IMAGE_UPLOAD_LIMITS }))
   async uploadStaffImage(@UploadedFile() file: Express.Multer.File) {
     const imageUrl = await this.uploadService.saveStaffImage(file);
     return { url: imageUrl };
@@ -26,7 +29,7 @@ export class UploadController {
 
   @Post('chiang-rai')
   @Roles('ADMIN', 'EDITOR', 'STAFF')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: IMAGE_UPLOAD_LIMITS }))
   async uploadChiangRaiImage(@UploadedFile() file: Express.Multer.File) {
     const imageUrl = await this.uploadService.saveChiangRaiImage(file);
     return { url: imageUrl };
@@ -34,7 +37,7 @@ export class UploadController {
 
   @Post('research')
   @Roles('ADMIN', 'EDITOR', 'STAFF')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: IMAGE_UPLOAD_LIMITS }))
   async uploadResearchImage(@UploadedFile() file: Express.Multer.File) {
     const imageUrl = await this.uploadService.saveResearchImage(file);
     return { url: imageUrl };
@@ -42,7 +45,7 @@ export class UploadController {
 
   @Post('news')
   @Roles('ADMIN', 'EDITOR', 'STAFF')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: IMAGE_UPLOAD_LIMITS }))
   async uploadNewsImage(@UploadedFile() file: Express.Multer.File) {
     const imageUrl = await this.uploadService.saveNewsImage(file);
     return { url: imageUrl };
@@ -50,17 +53,32 @@ export class UploadController {
 
   @Post('news/attachment')
   @Roles('ADMIN', 'EDITOR', 'STAFF')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: DOC_UPLOAD_LIMITS }))
   async uploadNewsAttachment(@UploadedFile() file: Express.Multer.File) {
     return this.uploadService.saveNewsAttachment(file);
   }
 
   @Post('course')
   @Roles('ADMIN', 'EDITOR', 'STAFF')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: IMAGE_UPLOAD_LIMITS }))
   async uploadCourseImage(@UploadedFile() file: Express.Multer.File) {
     const imageUrl = await this.uploadService.saveCourseImage(file);
     return { url: imageUrl };
+  }
+
+  @Post('banner')
+  @Roles('ADMIN', 'EDITOR')
+  @UseInterceptors(FileInterceptor('file', { limits: IMAGE_UPLOAD_LIMITS }))
+  async uploadBannerImage(@UploadedFile() file: Express.Multer.File) {
+    const imageUrl = await this.uploadService.saveBannerImage(file);
+    return { url: imageUrl };
+  }
+
+  @Delete('banner')
+  @Roles('ADMIN', 'EDITOR')
+  async deleteBannerImage(@Body('url') url: string) {
+    const deleted = await this.uploadService.deleteBannerImage(url);
+    return { deleted };
   }
 
   @Delete('chiang-rai')
@@ -86,7 +104,7 @@ export class UploadController {
 
   @Post('programs')
   @Roles('ADMIN', 'EDITOR', 'STAFF') // Allow staff/editors to upload
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: DOC_UPLOAD_LIMITS }))
   async uploadProgramsFile(@UploadedFile() file: Express.Multer.File) {
     const fileUrl = await this.uploadService.saveProgramsFile(file);
     return { url: fileUrl };
@@ -101,7 +119,7 @@ export class UploadController {
 
   @Post('procurement')
   @Roles('ADMIN', 'EDITOR', 'STAFF')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: DOC_UPLOAD_LIMITS }))
   async uploadProcurementFile(@UploadedFile() file: Express.Multer.File) {
     return this.uploadService.saveProcurementFile(file);
   }

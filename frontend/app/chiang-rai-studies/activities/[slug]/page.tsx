@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import {
     Calendar,
     ArrowLeft,
@@ -238,7 +239,7 @@ export default async function ActivityDetailPage(props: { params: Promise<{ slug
                                 prose-strong:text-[#2e1065]
                                 prose-li:text-stone-700 prose-li:leading-relaxed
                                 prose-hr:border-purple-100"
-                            dangerouslySetInnerHTML={{ __html: processedContent || '<p class="text-stone-400 italic">ไม่มีเนื้อหาเพิ่มเติม</p>' }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(processedContent) || '<p class="text-stone-400 italic">ไม่มีเนื้อหาเพิ่มเติม</p>' }}
                         />
                     </div>
                 </article>

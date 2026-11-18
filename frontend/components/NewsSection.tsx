@@ -16,17 +16,16 @@ export default async function NewsSection() {
   const newsList = featuredNews ? items.slice(1) : [];
 
   return (
-    <section className="py-20 sm:py-24 bg-white">
+    <section className="py-16 sm:py-20 bg-[#F8FAFC]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex justify-between items-end mb-12">
+        <div className="flex justify-between items-end mb-10">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C2410C] tracking-wider uppercase mb-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C2410C]" />
-              News & Announcements
+            <div className="text-xs font-bold text-[#C2410C] tracking-wide mb-2">
+              ประชาสัมพันธ์และกิจกรรม · คณะสังคมศาสตร์
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0B132B] tracking-tight">
-              ข่าวสารและกิจกรรม
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#0B132B] tracking-tight">
+              ข่าวสารและประชาสัมพันธ์
             </h2>
           </div>
           <Link
@@ -45,7 +44,7 @@ export default async function NewsSection() {
               href={`/news/${featuredNews.slug}`}
               className="lg:col-span-2 group cursor-pointer block"
             >
-              <div className="relative h-[280px] sm:h-[400px] rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 mb-5 bg-slate-100">
+              <div className="relative h-[280px] sm:h-[400px] rounded-sm overflow-hidden shadow-sm border border-slate-200/80 mb-5 bg-slate-100">
                 {featuredNews.thumbnailUrl ? (
                   <Image
                     src={
@@ -90,7 +89,7 @@ export default async function NewsSection() {
                   href={`/news/${news.slug}`}
                   className="flex gap-4 group cursor-pointer border-b border-slate-100 pb-5 last:border-0 last:pb-0"
                 >
-                  <div className="relative w-28 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-slate-100 border border-slate-200/80">
+                  <div className="relative w-28 h-20 flex-shrink-0 rounded-sm overflow-hidden bg-slate-100 border border-slate-200/80">
                     {news.thumbnailUrl ? (
                       <Image
                         src={
@@ -127,7 +126,7 @@ export default async function NewsSection() {
 
               <Link
                 href="/news"
-                className="md:hidden inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-[#0B132B] hover:bg-slate-50 transition-colors mt-2"
+                className="md:hidden inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm border border-slate-200 bg-white text-sm font-semibold text-[#0B132B] hover:bg-slate-50 transition-colors mt-2"
               >
                 <span>ดูข่าวทั้งหมด</span>
                 <ArrowRight className="size-4" strokeWidth={2} />
@@ -135,7 +134,7 @@ export default async function NewsSection() {
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-slate-200 py-12 text-center text-slate-500">
+          <div className="rounded-sm border border-dashed border-slate-200 bg-white py-12 text-center text-slate-500">
             ยังไม่มีข่าวสารที่เผยแพร่ในขณะนี้
           </div>
         )}

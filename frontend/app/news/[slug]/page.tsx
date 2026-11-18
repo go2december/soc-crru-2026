@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import {
   ArrowLeft,
   CalendarDays,
@@ -161,7 +162,7 @@ export default async function FacultyNewsDetailPage(props: { params: Promise<{ s
         
         <div className="space-y-12">
           {/* Article text */}
-          <article className="prose prose-base sm:prose-lg max-w-none prose-headings:font-bold prose-headings:text-base-content prose-p:text-base-content/80 prose-a:text-primary hover:prose-a:text-primary/80 prose-img:rounded-sm prose-img:shadow-md" dangerouslySetInnerHTML={{ __html: fixedContent }} />
+          <article className="prose prose-base sm:prose-lg max-w-none prose-headings:font-bold prose-headings:text-base-content prose-p:text-base-content/80 prose-a:text-primary hover:prose-a:text-primary/80 prose-img:rounded-sm prose-img:shadow-md" dangerouslySetInnerHTML={{ __html: sanitizeHtml(fixedContent) }} />
 
           {/* Gallery Section */}
           <GalleryClient galleryImages={galleryImages} />

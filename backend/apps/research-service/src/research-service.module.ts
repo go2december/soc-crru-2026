@@ -5,6 +5,7 @@ import { UploadModule } from 'upload/upload';
 import { ResearchModule } from './research/research.module';
 import { AcademicServicesModule } from './academic-services/academic-services.module';
 import { MousModule } from './mous/mous.module';
+import { JournalModule } from './journal/journal.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { MousModule } from './mous/mous.module';
     ResearchModule,
     AcademicServicesModule,
     MousModule,
+    JournalModule,
   ],
-  exports: [ResearchModule, AcademicServicesModule, MousModule],
+  exports: [ResearchModule, AcademicServicesModule, MousModule, JournalModule],
 })
 export class ResearchServiceModule {}

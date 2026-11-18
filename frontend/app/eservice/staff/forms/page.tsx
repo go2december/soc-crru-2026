@@ -95,8 +95,6 @@ export default function StaffFormsPage() {
           <nav className="flex items-center justify-center gap-1.5 text-xs text-white/80 mb-4 flex-wrap">
             <Link href="/" className="hover:text-white transition-colors">หน้าหลัก</Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <Link href="/eservice" className="hover:text-white transition-colors">ระบบสารสนเทศ (E-Services)</Link>
-            <ChevronRight className="w-3.5 h-3.5" />
             <Link href="/eservice/staff" className="hover:text-white transition-colors">บริการสำหรับบุคลากร</Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <span className="text-amber-300 font-semibold">แบบฟอร์มคำร้องและเอกสาร</span>
@@ -217,7 +215,7 @@ export default function StaffFormsPage() {
             <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center text-slate-500">
               <FileText className="w-12 h-12 mx-auto text-slate-300 mb-3" />
               <p className="text-base font-semibold">ไม่พบแบบฟอร์มคำร้องที่ตรงกับคำค้นหา</p>
-              <p className="text-sm text-slate-400 mt-1">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่ "ทั้งหมด"</p>
+              <p className="text-sm text-slate-400 mt-1">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่ &ldquo;ทั้งหมด&rdquo;</p>
               <button
                 onClick={() => {
                   setSelectedCategory('ALL');

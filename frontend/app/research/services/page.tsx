@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
-import Breadcrumb from '@/components/Breadcrumb';
+import JsonLd from '@/components/seo/JsonLd';
 import { AcademicServiceItem } from '@/lib/academic-services';
 import { getApiBaseUrl } from '@/lib/api-config';
 import AcademicServicesClient from './AcademicServicesClient';
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'บริการวิชาการแก่สังคม | คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
@@ -18,6 +20,7 @@ export const metadata: Metadata = {
     url: '/research/services',
     type: 'website',
     locale: 'th_TH',
+    siteName: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
   },
 };
 
@@ -39,40 +42,32 @@ async function getServices(): Promise<AcademicServiceItem[]> {
 export default async function AcademicServicesPage() {
   const projects = await getServices();
 
+  // Structured Data Schema for Webometrics & Google Search
+  const jsonLdSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'บริการวิชาการแก่สังคม คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    description:
+      'พันธกิจสัมพันธ์เพื่อสังคม ถ่ายทอดองค์ความรู้และงานวิจัยสู่ชุมชนท้องถิ่น คณะสังคมศาสตร์ มรภ.เชียงราย',
+    url: 'https://soc.crru.ac.th/research/services',
+    publisher: {
+      '@type': 'CollegeOrUniversity',
+      name: 'คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+      url: 'https://soc.crru.ac.th',
+    },
+    hasPart: projects.slice(0, 10).map((p) => ({
+      '@type': 'ResearchProject',
+      name: p.title,
+      description: p.description || '',
+      url: `https://soc.crru.ac.th/research/services/${p.id}`,
+      areaServed: p.area || 'จังหวัดเชียงราย',
+    })),
+  };
+
   return (
-    <div className="bg-slate-50/50 min-h-screen font-sans text-slate-800 pb-20">
-      {/* 1. HERO HEADER (Scholar Deep Authority Theme) */}
-      <section className="relative bg-gradient-to-b from-scholar-deep to-slate-900 text-white pt-24 pb-16 overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#f14627_1px,transparent_1px)] [background-size:16px_16px]" />
-        <div className="container mx-auto px-4 relative z-10 max-w-7xl">
-          <Breadcrumb
-            items={[
-              { label: 'หน้าหลัก', href: '/' },
-              { label: 'วิจัยและนวัตกรรม', href: '/research' },
-              { label: 'บริการวิชาการแก่สังคม' },
-            ]}
-          />
-
-          <div className="max-w-3xl mt-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-scholar-gold/20 border border-scholar-gold/30 text-scholar-gold text-xs font-semibold uppercase tracking-wider mb-3 backdrop-blur-sm">
-              <span className="w-2 h-2 rounded-full bg-scholar-gold animate-pulse" />
-              Social Engagement & Academic Services
-            </div>
-            <h1 className="text-3xl md:text-5xl font-bold font-heading tracking-tight leading-tight text-white mb-4">
-              บริการวิชาการแก่สังคม
-            </h1>
-            <p className="text-slate-300 text-base md:text-lg leading-relaxed font-light">
-              &ldquo;พันธกิจสัมพันธ์เพื่อสังคม&rdquo; นำองค์ความรู้ทางสังคมศาสตร์สู่ชุมชนท้องถิ่น
-              ร่วมสร้างสรรค์การพัฒนาที่ยั่งยืน ยกระดับคุณภาพชีวิต และเสริมสร้างความเข้มแข็งแก่ชุมชนภาคเหนือ
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. MAIN CONTENT AREA */}
-      <main className="container mx-auto px-4 max-w-7xl pt-10 pb-20 relative z-10">
-        <AcademicServicesClient initialProjects={projects} />
-      </main>
+    <div className="bg-stone-50/50 min-h-screen font-sans text-slate-800">
+      <JsonLd data={jsonLdSchema} />
+      <AcademicServicesClient initialProjects={projects} />
     </div>
   );
 }

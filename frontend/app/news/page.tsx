@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, CalendarDays, Newspaper, Paperclip } from 'lucide-react';
+import { ArrowRight, CalendarDays, Newspaper, Paperclip, Images } from 'lucide-react';
 import {
   FACULTY_NEWS_CATEGORY_LABELS,
   FACULTY_NEWS_CATEGORY_STYLES,
@@ -17,12 +17,10 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata(
-  { searchParams }: Props
-): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const resolvedParams = await searchParams;
   const category = resolvedParams.category as string | undefined;
-  
+
   const baseTitle = 'ข่าวสารคณะสังคมศาสตร์ | มหาวิทยาลัยราชภัฏเชียงราย';
   if (category && Object.keys(FACULTY_NEWS_CATEGORY_LABELS).includes(category)) {
     return {
@@ -33,7 +31,8 @@ export async function generateMetadata(
 
   return {
     title: baseTitle,
-    description: 'ติดตามข่าวประชาสัมพันธ์ กิจกรรม ประกาศ และสมัครงานของคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
+    description:
+      'ติดตามข่าวประชาสัมพันธ์ กิจกรรม ประกาศ และสมัครงานของคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย',
     alternates: {
       canonical: '/news',
     },
@@ -45,223 +44,278 @@ export default async function FacultyNewsPage(props: Props) {
   const currentCategory = resolvedParams.category as string | undefined;
   const pageStr = resolvedParams.page as string | undefined;
   const currentPage = pageStr ? parseInt(pageStr, 10) : 1;
-  
-  const { data: newsList, meta } = await fetchFacultyNewsList(currentCategory, currentPage, 12);
-  
-  const isFiltered = !!currentCategory;
 
-  // We only show "Featured" and "Latest" if we are on the first page and not filtered
+  const { data: newsList, meta } = await fetchFacultyNewsList(currentCategory, currentPage, 12);
+
+  const isFiltered = !!currentCategory;
   const isFirstPageGeneral = !isFiltered && currentPage === 1;
 
   const featured = isFirstPageGeneral ? newsList[0] || null : null;
   const restItems = isFirstPageGeneral ? (featured ? newsList.slice(1) : []) : [];
   const latestItems = isFirstPageGeneral ? restItems.slice(0, 4) : [];
-  
-  // If not first page general, the grid items are ALL the items returned
   const gridItems = isFirstPageGeneral ? restItems.slice(4) : newsList;
 
   const categories = [
     { value: '', label: 'ทั้งหมด' },
-    ...Object.entries(FACULTY_NEWS_CATEGORY_LABELS).map(([k, v]) => ({ value: k, label: v }))
+    ...Object.entries(FACULTY_NEWS_CATEGORY_LABELS).map(([k, v]) => ({ value: k, label: v })),
   ];
 
+  const activeCategoryLabel =
+    isFiltered && Object.keys(FACULTY_NEWS_CATEGORY_LABELS).includes(currentCategory)
+      ? FACULTY_NEWS_CATEGORY_LABELS[currentCategory as FacultyNewsCategory]
+      : null;
+
   return (
-    <div className="bg-base-100 min-h-screen">
-      <section className="bg-gradient-to-br from-scholar-deep via-slate-900 to-scholar-accent text-white">
-        <div className="container mx-auto px-4 py-14 sm:py-16 lg:py-24">
-          <div className="max-w-3xl space-y-5">
-            <div className="badge badge-outline h-auto border-white/30 bg-white/10 px-4 py-3 text-center text-white backdrop-blur-sm">Faculty Newsroom</div>
-            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold leading-tight">
-              {isFiltered ? FACULTY_NEWS_CATEGORY_LABELS[currentCategory as FacultyNewsCategory] : 'ข่าวสาร กิจกรรม ประกาศ และสมัครงาน'}
-            </h1>
-            <p className="text-sm text-white/80 sm:text-base md:text-lg lg:text-xl">
-              {isFiltered 
-                ? `รวม${FACULTY_NEWS_CATEGORY_LABELS[currentCategory as FacultyNewsCategory]}ทั้งหมดของคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`
-                : 'ศูนย์รวมข่าวสารล่าสุดของคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย พร้อมไฟล์เอกสารดาวน์โหลดและภาพประกอบครบถ้วน'}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Category Tabs */}
-      <section className="border-b border-base-300 bg-base-100 sticky top-0 md:top-[64px] z-20 shadow-sm mix-blend-normal">
-        <div className="container mx-auto px-4">
-          <div className="flex overflow-x-auto whitespace-nowrap py-1 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            <div className="flex gap-2 p-2">
-              {categories.map((cat) => {
-                const isActive = (currentCategory || '') === cat.value;
-                return (
-                  <Link 
-                    key={cat.label} 
-                    href={cat.value ? `/news?category=${cat.value}` : '/news'}
-                    className={`btn btn-sm sm:btn-md rounded-full border-transparent transition-all px-5 ${
-                      isActive 
-                        ? 'bg-primary text-primary-content hover:bg-primary/90 shadow-md ring-2 ring-primary/20' 
-                        : 'bg-base-200 text-base-content/80 hover:bg-base-300 hover:text-base-content'
-                    }`}
-                  >
-                    {cat.label}
-                  </Link>
-                );
-              })}
+    <div className="bg-[#F8FAFC] min-h-screen text-slate-800">
+      {/* Editorial Newsroom Header */}
+      <section className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-3xl space-y-3">
+              <div className="text-xs font-bold text-[#C2410C] tracking-wide">
+                ข่าวสารและประชาสัมพันธ์ · คณะสังคมศาสตร์
+              </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#0B132B] tracking-tight leading-tight">
+                {activeCategoryLabel || 'ข่าวสาร กิจกรรม ประกาศ และสมัครงาน'}
+              </h1>
+              <p className="font-body text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl">
+                {activeCategoryLabel
+                  ? `รวม${activeCategoryLabel}ทั้งหมดของคณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย`
+                  : 'ศูนย์รวมข่าวประชาสัมพันธ์ กิจกรรมวิชาการ ประกาศสำคัญ และข่าวรับสมัครบุคลากรของคณะสังคมศาสตร์'}
+              </p>
             </div>
+
+            {meta.total > 0 && (
+              <div className="shrink-0 px-4 py-2.5 rounded-sm bg-[#F8FAFC] border border-slate-200 text-xs text-slate-600">
+                พบทั้งหมด <span className="font-mono font-bold text-[#0B132B]">{meta.total}</span> รายการ
+              </div>
+            )}
           </div>
         </div>
       </section>
 
+      {/* Sticky Category Filter Tabs */}
+      <section className="sticky top-0 md:top-[64px] z-20 bg-white/95 backdrop-blur-xs border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div
+            className="flex items-center gap-2 overflow-x-auto whitespace-nowrap py-3"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {categories.map((cat) => {
+              const isActive = (currentCategory || '') === cat.value;
+              return (
+                <Link
+                  key={cat.label}
+                  href={cat.value ? `/news?category=${cat.value}` : '/news'}
+                  className={`px-4 py-2 rounded-sm text-xs sm:text-sm font-semibold transition-colors border shrink-0 ${
+                    isActive
+                      ? 'bg-[#0B132B] text-white border-[#0B132B]'
+                      : 'bg-[#F8FAFC] text-slate-700 border-slate-200 hover:border-[#C2410C] hover:text-[#C2410C]'
+                  }`}
+                >
+                  {cat.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Lead Editorial Spread (Page 1 Unfiltered) */}
       {isFirstPageGeneral && (
-        <section className="container mx-auto px-4 py-10 lg:py-14">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-6">
           {featured ? (
-            <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr] xl:gap-12">
-              {/* Featured Article */}
-              <Link href={`/news/${featured.slug}`} className="group relative flex flex-col overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-                <figure className="relative w-full shrink-0 overflow-hidden bg-base-200 aspect-[4/3] sm:aspect-[16/9] lg:aspect-[16/10] xl:aspect-[16/9]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+              {/* Featured Story */}
+              <Link
+                href={`/news/${featured.slug}`}
+                className="lg:col-span-7 group flex flex-col overflow-hidden rounded-sm border border-slate-200 bg-white shadow-2xs hover:border-[#C2410C] hover:shadow-md transition-all duration-200"
+              >
+                <figure className="relative w-full aspect-[16/9] overflow-hidden bg-slate-100 border-b border-slate-200">
                   {featured.thumbnailUrl ? (
                     <Image
                       src={getFacultyNewsServerAssetUrl(featured.thumbnailUrl) || featured.thumbnailUrl}
                       alt={featured.title}
                       fill
                       unoptimized
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       priority
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-base-200 text-base-content/30 transition-transform duration-700 group-hover:scale-105">
-                      <Newspaper className="h-16 w-16" />
+                    <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-300">
+                      <Newspaper className="size-14" strokeWidth={1.5} />
                     </div>
                   )}
-                  {/* Subtle gradient overlay at bottom of image */}
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
-                </figure>
-                
-                <div className="flex flex-1 flex-col gap-4 p-6 sm:p-8 relative z-10 bg-base-100">
-                  <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <span className={`rounded-full px-3 py-1 font-medium whitespace-nowrap ${FACULTY_NEWS_CATEGORY_STYLES[featured.category]}`}>
+                  <div className="absolute top-3.5 left-3.5">
+                    <span
+                      className={`inline-block rounded-sm px-2.5 py-1 text-xs font-semibold shadow-2xs ${
+                        FACULTY_NEWS_CATEGORY_STYLES[featured.category]
+                      }`}
+                    >
                       {FACULTY_NEWS_CATEGORY_LABELS[featured.category]}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-base-content/60">
-                      <CalendarDays className="h-4 w-4" />
+                  </div>
+                </figure>
+
+                <div className="flex flex-1 flex-col p-6 sm:p-8">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mb-3">
+                    <span className="inline-flex items-center gap-1.5">
+                      <CalendarDays className="size-3.5 text-slate-400" strokeWidth={1.75} />
                       {formatFacultyNewsDate(featured.publishedAt)}
                     </span>
                     {!!featured.attachments?.length && (
-                      <span className="inline-flex items-center gap-1.5 text-base-content/60">
-                        <Paperclip className="h-4 w-4" />
-                        {featured.attachments.length} ไฟล์
+                      <span className="inline-flex items-center gap-1.5">
+                        <Paperclip className="size-3.5 text-slate-400" strokeWidth={1.75} />
+                        {featured.attachments.length} เอกสารแนบ
                       </span>
                     )}
                   </div>
-                  
-                  <h2 className="text-2xl font-bold leading-snug text-base-content transition-colors duration-300 group-hover:text-primary sm:text-3xl lg:text-4xl">{featured.title}</h2>
-                  <p className="line-clamp-3 text-sm text-base-content/70 sm:text-base lg:text-lg">{extractFacultyNewsExcerpt(featured.content, 260)}</p>
-                  
-                  <div className="mt-auto pt-4 flex items-center justify-start sm:justify-end">
-                    <span className="btn btn-primary btn-sm gap-2 rounded-full px-6 sm:btn-md shadow-sm transition-all group-hover:shadow-md">
-                      อ่านข่าวนี้ <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </span>
+
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#0B132B] leading-snug group-hover:text-[#C2410C] transition-colors mb-3">
+                    {featured.title}
+                  </h2>
+
+                  <p className="font-body text-sm sm:text-base text-slate-600 line-clamp-3 leading-relaxed mb-6">
+                    {extractFacultyNewsExcerpt(featured.content, 240)}
+                  </p>
+
+                  <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-xs sm:text-sm font-semibold text-[#C2410C]">
+                    <span>อ่านข่าวฉบับเต็ม</span>
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                   </div>
                 </div>
               </Link>
 
               {/* Latest Updates Sidebar */}
-              <div className="flex flex-col space-y-6 rounded-3xl border border-base-300 bg-base-200/30 p-6 lg:p-8">
-                <div className="flex flex-col gap-1.5 pb-3 border-b border-base-300/60 sm:flex-row sm:items-end sm:justify-between">
-                  <h2 className="text-xl font-bold text-base-content md:text-2xl">อัปเดตล่าสุด</h2>
-                  <span className="text-sm font-medium text-base-content/50">เรื่องที่น่าสนใจ</span>
+              <div className="lg:col-span-5 flex flex-col rounded-sm border border-slate-200 bg-white">
+                <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                  <h2 className="text-base sm:text-lg font-extrabold text-[#0B132B]">
+                    อัปเดตล่าสุด
+                  </h2>
+                  <span className="text-xs font-mono text-slate-400">LATEST</span>
                 </div>
-                
-                <div className="flex flex-col gap-4">
+
+                <div className="flex-1 divide-y divide-slate-100">
                   {latestItems.length > 0 ? (
                     latestItems.map((item) => (
-                      <Link key={item.id} href={`/news/${item.slug}`} className="group flex flex-col gap-2 rounded-2xl border border-transparent bg-base-100 p-5 shadow-sm ring-1 ring-base-300/50 transition-all duration-300 hover:-translate-y-0.5 hover:ring-scholar-accent/30 hover:shadow-md">
-                        <div className="flex flex-wrap items-center gap-2.5 text-xs">
-                          <span className={`rounded-full px-2.5 py-0.5 font-medium whitespace-nowrap ${FACULTY_NEWS_CATEGORY_STYLES[item.category]}`}>
+                      <Link
+                        key={item.id}
+                        href={`/news/${item.slug}`}
+                        className="group block px-6 py-4 hover:bg-[#F8FAFC] border-l-2 border-l-transparent hover:border-l-[#C2410C] transition-all"
+                      >
+                        <div className="flex items-center gap-2.5 text-xs mb-1.5">
+                          <span
+                            className={`rounded-sm px-2 py-0.5 font-semibold ${
+                              FACULTY_NEWS_CATEGORY_STYLES[item.category]
+                            }`}
+                          >
                             {FACULTY_NEWS_CATEGORY_LABELS[item.category]}
                           </span>
-                          <span className="text-base-content/50 font-medium">{formatFacultyNewsDate(item.publishedAt)}</span>
+                          <span className="text-slate-400">
+                            {formatFacultyNewsDate(item.publishedAt)}
+                          </span>
                         </div>
-                        <h3 className="line-clamp-2 text-sm font-bold leading-relaxed text-base-content transition-colors group-hover:text-primary sm:text-base">{item.title}</h3>
+                        <h3 className="text-sm sm:text-base font-bold text-[#0B132B] leading-snug line-clamp-2 group-hover:text-[#C2410C] transition-colors">
+                          {item.title}
+                        </h3>
                       </Link>
                     ))
                   ) : (
-                    <div className="flex h-40 flex-col items-center justify-center rounded-2xl border border-dashed border-base-300 bg-base-100 text-center text-base-content/40">
-                      <Newspaper className="mb-2 h-8 w-8 opacity-50" />
-                      <span className="text-sm font-medium">ไม่มีรายการอัปเดตเพิ่มเติม</span>
+                    <div className="flex h-48 flex-col items-center justify-center p-6 text-center text-slate-400">
+                      <Newspaper className="mb-2 size-8 opacity-50" strokeWidth={1.5} />
+                      <span className="text-sm">ไม่มีรายการอัปเดตเพิ่มเติม</span>
                     </div>
                   )}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-base-300 bg-base-200/30 py-24 text-center">
-              <Newspaper className="mb-4 h-16 w-16 text-base-content/20" />
-              <h2 className="text-2xl font-bold text-base-content">ยังไม่มีข่าวที่เผยแพร่</h2>
-              <p className="mt-2 text-base-content/60 max-w-md">เมื่อมีข่าวสารใหม่ ระบบจะนำมาแสดงผลในหน้านี้โดยอัตโนมัติ ติดตามข่าวอัปเดตได้ที่นี่</p>
+            <div className="flex flex-col items-center justify-center rounded-sm border border-dashed border-slate-300 bg-white py-20 text-center px-4">
+              <Newspaper className="mb-4 size-12 text-slate-300" strokeWidth={1.5} />
+              <h2 className="text-xl font-bold text-[#0B132B]">ยังไม่มีข่าวที่เผยแพร่</h2>
+              <p className="mt-2 text-sm text-slate-500 max-w-md">
+                เมื่อมีข่าวสารใหม่ ระบบจะนำมาแสดงผลในหน้านี้โดยอัตโนมัติ
+              </p>
             </div>
           )}
         </section>
       )}
 
-      {/* Grid rendering (Either older items or filtered items) */}
-      <section className={`container mx-auto px-4 pb-16 lg:pb-24 ${isFiltered ? 'pt-10 lg:pt-14' : ''}`}>
+      {/* Archive / Filtered Grid */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-16 sm:pb-20">
         {!isFiltered && gridItems.length > 0 && (
-          <div className="mb-8 flex flex-col gap-2 border-b border-base-300 pb-4 sm:flex-row sm:items-end sm:justify-between">
-            <h2 className="text-2xl font-bold text-base-content md:text-3xl">ข่าวและประกาศอื่นๆ</h2>
-            <span className="text-sm font-medium text-base-content/50">รวบรวมเรื่องราวทั้งหมดที่ผ่านมา</span>
-          </div>
-        )}
-
-        {isFiltered && gridItems.length > 0 && (
-          <div className="mb-8 flex flex-col gap-2 pb-4 border-b border-base-300">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-2 bg-primary rounded-full"></div>
-              <h2 className="text-2xl font-bold text-base-content md:text-3xl">
-                {FACULTY_NEWS_CATEGORY_LABELS[currentCategory as FacultyNewsCategory]}
-              </h2>
-            </div>
-            <span className="text-sm font-medium text-base-content/50">พบทั้งหมด {gridItems.length} รายการ</span>
+          <div className="mb-8 pb-3 border-b border-slate-200 flex items-end justify-between">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#0B132B]">
+              ข่าวและประกาศที่ผ่านมา
+            </h2>
+            <span className="text-xs text-slate-500">ทั้งหมด {gridItems.length} รายการในหน้านี้</span>
           </div>
         )}
 
         {gridItems.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {gridItems.map((item) => (
-              <Link key={item.id} href={`/news/${item.slug}`} className="group flex flex-col overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                <figure className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-base-200">
+              <Link
+                key={item.id}
+                href={`/news/${item.slug}`}
+                className="group flex flex-col overflow-hidden rounded-sm border border-slate-200 bg-white shadow-2xs hover:border-[#C2410C] hover:shadow-md transition-all duration-200"
+              >
+                <figure className="relative aspect-[16/10] w-full shrink-0 overflow-hidden bg-slate-100 border-b border-slate-100">
                   {item.thumbnailUrl ? (
                     <Image
                       src={getFacultyNewsServerAssetUrl(item.thumbnailUrl) || item.thumbnailUrl}
                       alt={item.title}
                       fill
                       unoptimized
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-base-200 text-base-content/30 transition-transform duration-500 group-hover:scale-105">
-                      <Newspaper className="h-10 w-10" />
+                    <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-300">
+                      <Newspaper className="size-10" strokeWidth={1.5} />
                     </div>
                   )}
                 </figure>
-                <div className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <span className={`rounded-full px-2.5 py-1 font-medium whitespace-nowrap ${FACULTY_NEWS_CATEGORY_STYLES[item.category]}`}>
+
+                <div className="flex flex-1 flex-col p-5 sm:p-6">
+                  <div className="flex flex-wrap items-center gap-2.5 text-xs mb-2.5">
+                    <span
+                      className={`rounded-sm px-2 py-0.5 font-semibold ${
+                        FACULTY_NEWS_CATEGORY_STYLES[item.category]
+                      }`}
+                    >
                       {FACULTY_NEWS_CATEGORY_LABELS[item.category]}
                     </span>
-                    <span className="text-base-content/50 font-medium">{formatFacultyNewsDate(item.publishedAt)}</span>
-                  </div>
-                  <h3 className="line-clamp-2 text-base font-bold leading-snug text-base-content transition-colors group-hover:text-primary sm:text-lg">{item.title}</h3>
-                  <p className="line-clamp-2 text-sm text-base-content/60 leading-relaxed">{extractFacultyNewsExcerpt(item.content)}</p>
-                  
-                  <div className="mt-auto pt-5 flex items-center justify-between gap-4 text-xs font-medium text-base-content/50">
-                    <span className="flex items-center gap-1.5 transition-colors group-hover:text-primary">
-                      <ArrowRight className="h-3.5 w-3.5 -rotate-45" /> อ่านต่อ
+                    <span className="text-slate-400">
+                      {formatFacultyNewsDate(item.publishedAt)}
                     </span>
-                    <div className="flex gap-3">
+                  </div>
+
+                  <h3 className="text-base sm:text-lg font-bold text-[#0B132B] leading-snug line-clamp-2 group-hover:text-[#C2410C] transition-colors mb-2">
+                    {item.title}
+                  </h3>
+
+                  <p className="font-body text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4">
+                    {extractFacultyNewsExcerpt(item.content)}
+                  </p>
+
+                  <div className="mt-auto pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                    <span className="inline-flex items-center gap-1 font-semibold text-[#C2410C]">
+                      <span>อ่านต่อ</span>
+                      <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                    <div className="flex items-center gap-3">
                       {!!item.mediaUrls?.length && (
-                        <span>{item.mediaUrls.length} รูป</span>
+                        <span className="inline-flex items-center gap-1">
+                          <Images className="size-3.5" />
+                          {item.mediaUrls.length}
+                        </span>
                       )}
                       {!!item.attachments?.length && (
-                        <span>{item.attachments.length} ไฟล์</span>
+                        <span className="inline-flex items-center gap-1">
+                          <Paperclip className="size-3.5" />
+                          {item.attachments.length}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -271,11 +325,16 @@ export default async function FacultyNewsPage(props: Props) {
           </div>
         ) : (
           isFiltered && (
-            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-base-300 bg-base-200/30 py-24 text-center">
-              <Newspaper className="mb-4 h-16 w-16 text-base-content/20" />
-              <h2 className="text-2xl font-bold text-base-content">ยังไม่มีรายการในหมวดหมู่นี้</h2>
-              <p className="mt-2 text-base-content/60 max-w-md">ขณะนี้ยังไม่มี{FACULTY_NEWS_CATEGORY_LABELS[currentCategory as FacultyNewsCategory]} กลับไปอ่านข่าวทั้งหมดได้โดยเลือกที่หมวดหมู่ "ทั้งหมด"</p>
-              <Link href="/news" className="btn btn-outline btn-sm mt-6 rounded-full px-6">
+            <div className="flex flex-col items-center justify-center rounded-sm border border-dashed border-slate-300 bg-white py-20 text-center px-4">
+              <Newspaper className="mb-4 size-12 text-slate-300" strokeWidth={1.5} />
+              <h2 className="text-xl font-bold text-[#0B132B]">ยังไม่มีรายการในหมวดหมู่นี้</h2>
+              <p className="mt-2 text-sm text-slate-500 max-w-md">
+                ขณะนี้ยังไม่มี{activeCategoryLabel || 'รายการ'} สามารถเลือกดูข่าวทั้งหมดได้
+              </p>
+              <Link
+                href="/news"
+                className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-[#0B132B] text-white text-xs sm:text-sm font-semibold hover:bg-slate-800 transition-colors"
+              >
                 ดูข่าวทั้งหมด
               </Link>
             </div>
@@ -283,17 +342,18 @@ export default async function FacultyNewsPage(props: Props) {
         )}
 
         {meta.totalPages > 1 && (
-          <MinimalPagination 
-            currentPage={meta.page}
-            totalPages={meta.totalPages}
-            basePath="/news"
-            searchParams={{
-              ...(currentCategory ? { category: currentCategory } : {})
-            }}
-          />
+          <div className="mt-10">
+            <MinimalPagination
+              currentPage={meta.page}
+              totalPages={meta.totalPages}
+              basePath="/news"
+              searchParams={{
+                ...(currentCategory ? { category: currentCategory } : {}),
+              }}
+            />
+          </div>
         )}
       </section>
     </div>
   );
 }
-

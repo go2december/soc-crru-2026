@@ -8,6 +8,7 @@ import { th } from 'date-fns/locale';
 import ArticleActions from './ArticleActions';
 import CiteModal from '@/components/research/CiteModal';
 import JsonLd from '@/components/seo/JsonLd';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
 
 interface Article {
@@ -212,7 +213,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
 
                         <div
                             className="prose prose-lg prose-stone max-w-none prose-headings:font-bold prose-headings:text-[#2e1065] prose-a:text-[#702963] prose-img:rounded-sm prose-img:shadow-md mb-12"
-                            dangerouslySetInnerHTML={{ __html: article.content }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.content) }}
                         />
 
                         {/* Media Groups Logic */}

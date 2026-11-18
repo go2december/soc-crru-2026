@@ -24,7 +24,9 @@ import {
     Award,
     Handshake,
     Layers,
-    FileCheck
+    FileCheck,
+    BookMarked,
+    Images
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -165,11 +167,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {
             title: 'Content',
             items: [
+                { href: '/admin/banners', label: 'แบนเนอร์สไลด์หน้าแรก', icon: Images, minLevel: 2 },
                 { href: '/admin/news', label: 'ข่าวสาร', icon: Newspaper, minLevel: 2, badgeKey: 'news' as const },
                 { href: '/admin/procurement', label: 'จัดซื้อจัดจ้าง', icon: ClipboardList, minLevel: 2, badgeKey: 'procurement' as const },
                 { href: '/admin/research', label: 'งานวิจัย', icon: FlaskConical, minLevel: 2 },
                 { href: '/admin/academic-services', label: 'บริการวิชาการ', icon: BookOpen, minLevel: 2 },
                 { href: '/admin/mou', label: 'ความร่วมมือและ MOU', icon: Handshake, minLevel: 2 },
+                { href: '/admin/journal', label: 'วารสารวิชาการ', icon: BookMarked, minLevel: 2 },
                 { href: '/admin/programs', label: 'หลักสูตร', icon: GraduationCap, minLevel: 2 },
                 { href: '/admin/short-courses', label: 'คอร์สระยะสั้น/Credit Bank', icon: Award, minLevel: 2 },
                 { href: '/admin/student-services', label: 'บริการนักศึกษา & เอกสาร', icon: Layers, minLevel: 2 },

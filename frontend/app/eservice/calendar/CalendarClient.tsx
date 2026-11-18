@@ -2,740 +2,331 @@
 
 import React, { useState, useMemo, useSyncExternalStore } from 'react';
 import {
-    format,
-    addMonths,
-    subMonths,
-    startOfMonth,
-    endOfMonth,
-    startOfWeek,
-    endOfWeek,
-    eachDayOfInterval,
-    isSameMonth,
-    isSameDay,
-    isToday,
-    parseISO
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
+  parseISO,
 } from 'date-fns';
-import {
-    Calendar as CalendarIcon,
-    ChevronLeft,
-    ChevronRight,
-    LayoutGrid,
-    List,
-    Clock,
-    MapPin,
-    Search,
-    ExternalLink,
-    CalendarPlus,
-    X,
-    RotateCw
-} from 'lucide-react';
 import { CalendarEvent } from '@/lib/calendar/ical-parser';
+import CalendarHero from './components/CalendarHero';
+import CalendarOfficialBanner from './components/CalendarOfficialBanner';
+import CalendarControlBar from './components/CalendarControlBar';
+import CalendarMonthGrid from './components/CalendarMonthGrid';
+import CalendarAgendaList from './components/CalendarAgendaList';
+import CalendarEventDialog from './components/CalendarEventDialog';
 
 interface CalendarClientProps {
-    initialEvents: CalendarEvent[];
+  initialEvents: CalendarEvent[];
 }
 
 const emptySubscribe = () => () => {};
 
-// Official React 18/19 pattern to detect client hydration without cascading renders
 function useMounted() {
-    return useSyncExternalStore(
-        emptySubscribe,
-        () => true,
-        () => false
-    );
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 }
 
 const THAI_MONTHS = [
-    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+  'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
 ];
 
-const THAI_DAYS_SHORT = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-
-// High-contrast, WCAG AA/AAA compliant color tokens (Adhering to Purple Ban)
 interface EventCategoryStyle {
-    badgeText: string;
-    chipBg: string;      // High-contrast solid background with white text
-    listRibbon: string;  // Left date ribbon for Agenda view
-    badgeClass: string;
-    dotColor: string;
+  badgeText: string;
+  chipBg: string;
+  listRibbon: string;
+  badgeClass: string;
+  dotColor: string;
 }
 
 function getEventStyle(title: string = ''): EventCategoryStyle {
-    const t = (title || '').toLowerCase();
+  const t = (title || '').toLowerCase();
 
-    if (t.includes('สอบ') || t.includes('exam') || t.includes('คะแนน') || t.includes('เกรด')) {
-        return {
-            badgeText: 'การสอบ / วัดผล',
-            chipBg: 'bg-rose-600 hover:bg-rose-700 text-white shadow-xs',
-            listRibbon: 'bg-rose-600 text-white',
-            badgeClass: 'bg-rose-600 text-white border-none font-semibold',
-            dotColor: 'bg-rose-500'
-        };
-    }
-
-    if (t.includes('ประชุม') || t.includes('meeting') || t.includes('office') || t.includes('คณะกรรมการ')) {
-        return {
-            badgeText: 'การประชุม',
-            chipBg: 'bg-sky-600 hover:bg-sky-700 text-white shadow-xs',
-            listRibbon: 'bg-sky-600 text-white',
-            badgeClass: 'bg-sky-600 text-white border-none font-semibold',
-            dotColor: 'bg-sky-500'
-        };
-    }
-
-    if (t.includes('อบรม') || t.includes('สัมมนา') || t.includes('workshop') || t.includes('โครงการ') || t.includes('พัฒนา') || t.includes('ทักษะ')) {
-        return {
-            badgeText: 'อบรม / โครงการ',
-            chipBg: 'bg-amber-600 hover:bg-amber-700 text-white shadow-xs',
-            listRibbon: 'bg-amber-600 text-white',
-            badgeClass: 'bg-amber-600 text-white border-none font-semibold',
-            dotColor: 'bg-amber-500'
-        };
-    }
-
-    if (t.includes('กิจกรรม') || t.includes('วันสำคัญ') || t.includes('สถาปนา') || t.includes('ประกวด') || t.includes('รำลึก')) {
-        return {
-            badgeText: 'กิจกรรม / วันสำคัญ',
-            chipBg: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs',
-            listRibbon: 'bg-emerald-600 text-white',
-            badgeClass: 'bg-emerald-600 text-white border-none font-semibold',
-            dotColor: 'bg-emerald-500'
-        };
-    }
-
-    // Default / General Academic Event (CRRU Slate)
+  if (t.includes('สอบ') || t.includes('exam') || t.includes('คะแนน') || t.includes('เกรด')) {
     return {
-        badgeText: 'วิชาการ / ทั่วไป',
-        chipBg: 'bg-slate-700 hover:bg-slate-800 text-white shadow-xs',
-        listRibbon: 'bg-slate-700 text-white',
-        badgeClass: 'bg-slate-700 text-white border-none font-semibold',
-        dotColor: 'bg-slate-500'
+      badgeText: 'การสอบ / วัดผล',
+      chipBg: 'bg-rose-700 hover:bg-rose-800 text-white shadow-2xs',
+      listRibbon: 'bg-rose-700 text-white',
+      badgeClass: 'bg-rose-50 text-rose-800 border border-rose-200',
+      dotColor: 'bg-rose-500',
     };
+  }
+
+  if (t.includes('ประชุม') || t.includes('meeting') || t.includes('office') || t.includes('คณะกรรมการ')) {
+    return {
+      badgeText: 'การประชุม',
+      chipBg: 'bg-slate-800 hover:bg-slate-900 text-white shadow-2xs',
+      listRibbon: 'bg-slate-800 text-white',
+      badgeClass: 'bg-stone-100 text-slate-800 border border-stone-300',
+      dotColor: 'bg-slate-500',
+    };
+  }
+
+  if (t.includes('อบรม') || t.includes('สัมมนา') || t.includes('workshop') || t.includes('โครงการ') || t.includes('พัฒนา') || t.includes('ทักษะ')) {
+    return {
+      badgeText: 'อบรม / โครงการ',
+      chipBg: 'bg-amber-600 hover:bg-amber-700 text-white shadow-2xs',
+      listRibbon: 'bg-amber-600 text-white',
+      badgeClass: 'bg-amber-50 text-amber-800 border border-amber-200',
+      dotColor: 'bg-amber-500',
+    };
+  }
+
+  if (t.includes('กิจกรรม') || t.includes('วันสำคัญ') || t.includes('สถาปนา') || t.includes('ประกวด') || t.includes('รำลึก')) {
+    return {
+      badgeText: 'กิจกรรม / วันสำคัญ',
+      chipBg: 'bg-emerald-700 hover:bg-emerald-800 text-white shadow-2xs',
+      listRibbon: 'bg-emerald-700 text-white',
+      badgeClass: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+      dotColor: 'bg-emerald-500',
+    };
+  }
+
+  // Default / Academic
+  return {
+    badgeText: 'วิชาการ / ทั่วไป',
+    chipBg: 'bg-primary hover:bg-[#9A3412] text-white shadow-2xs',
+    listRibbon: 'bg-primary text-white',
+    badgeClass: 'bg-orange-50 text-primary border border-orange-200',
+    dotColor: 'bg-primary',
+  };
 }
 
 function formatThaiMonthYear(date: Date) {
-    const month = THAI_MONTHS[date.getMonth()];
-    const yearBe = date.getFullYear() + 543;
-    const yearCe = date.getFullYear();
-    return `${month} ${yearBe} (${yearCe})`;
+  const month = THAI_MONTHS[date.getMonth()];
+  const yearBe = date.getFullYear() + 543;
+  return `${month} พ.ศ. ${yearBe}`;
 }
 
 function formatThaiDateFull(date: Date) {
-    return date.toLocaleDateString('th-TH', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+  return date.toLocaleDateString('th-TH', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }
 
 function formatEventTime(startIso: string, endIso: string, isAllDay: boolean) {
-    if (isAllDay) {
-        return 'ตลอดทั้งวัน (All-day)';
-    }
+  if (isAllDay) {
+    return 'ตลอดทั้งวัน (All-day)';
+  }
 
-    const startDate = new Date(startIso);
-    const endDate = new Date(endIso);
+  const startDate = new Date(startIso);
+  const endDate = new Date(endIso);
 
-    const startTime = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-    const endTime = endDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  const startTime = startDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  const endTime = endDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 
-    if (isSameDay(startDate, endDate)) {
-        return `${startTime} - ${endTime} น.`;
-    }
+  if (isSameDay(startDate, endDate)) {
+    return `${startTime} - ${endTime} น.`;
+  }
 
-    return `${formatThaiDateFull(startDate)} ${startTime} น. - ${formatThaiDateFull(endDate)} ${endTime} น.`;
+  return `${formatThaiDateFull(startDate)} ${startTime} น. - ${formatThaiDateFull(endDate)} ${endTime} น.`;
 }
 
 function createGoogleCalendarUrl(event: CalendarEvent): string {
-    const title = encodeURIComponent(event.title || 'กิจกรรมคณะสังคมศาสตร์');
-    const details = encodeURIComponent(event.description || '');
-    const location = encodeURIComponent(event.location || '');
+  const title = encodeURIComponent(event.title || 'กิจกรรมคณะสังคมศาสตร์');
+  const details = encodeURIComponent(event.description || '');
+  const location = encodeURIComponent(event.location || '');
 
-    const startObj = new Date(event.start);
-    const endObj = new Date(event.end);
+  const startObj = new Date(event.start);
+  const endObj = new Date(event.end);
 
-    const formatDateForGCal = (d: Date, isAllDay: boolean) => {
-        if (isAllDay) {
-            return format(d, 'yyyyMMdd');
-        }
-        return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
+  const formatDateForGCal = (d: Date, isAllDay: boolean) => {
+    if (isAllDay) {
+      return format(d, 'yyyyMMdd');
+    }
+    return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
 
-    const dates = `${formatDateForGCal(startObj, event.isAllDay)}/${formatDateForGCal(endObj, event.isAllDay)}`;
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+  const dates = `${formatDateForGCal(startObj, event.isAllDay)}/${formatDateForGCal(endObj, event.isAllDay)}`;
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
 }
 
 export default function CalendarClient({ initialEvents }: CalendarClientProps) {
-    const isMounted = useMounted();
-    const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
-    const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
-    const [viewMode, setViewMode] = useState<'grid' | 'agenda'>('grid');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-    const [selectedDateEvents, setSelectedDateEvents] = useState<{ date: Date; events: CalendarEvent[] } | null>(null);
-    const [isRefreshing, setIsRefreshing] = useState(false);
+  const isMounted = useMounted();
+  const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
+  const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
+  const [viewMode, setViewMode] = useState<'grid' | 'agenda'>('grid');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-    // Refresh events from /api/calendar
-    const handleRefresh = async () => {
-        try {
-            setIsRefreshing(true);
-            const res = await fetch('/api/calendar', { cache: 'no-store' });
-            const data = await res.json();
-            if (data.success && Array.isArray(data.events)) {
-                setEvents(data.events);
-            }
-        } catch (err) {
-            console.error('Failed to reload calendar data:', err);
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
+  // Refresh events from /api/calendar
+  const handleRefresh = async () => {
+    try {
+      setIsRefreshing(true);
+      const res = await fetch('/api/calendar', { cache: 'no-store' });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.events)) {
+        setEvents(data.events);
+      }
+    } catch (err) {
+      console.error('Failed to reload calendar data:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-    // Filter events by search query
-    const filteredEvents = useMemo(() => {
-        if (!searchQuery.trim()) return events;
-        const q = searchQuery.toLowerCase().trim();
-        return events.filter(
-            evt =>
-                evt.title.toLowerCase().includes(q) ||
-                (evt.description && evt.description.toLowerCase().includes(q)) ||
-                (evt.location && evt.location.toLowerCase().includes(q))
-        );
-    }, [events, searchQuery]);
+  const handleOpenEventDialog = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setDialogOpen(true);
+  };
 
-    // Grid days calculations
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(monthStart);
-    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 }); // Sunday start
-    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
-    const gridDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+  const handleSelectDay = (_day: Date, dayEvents: CalendarEvent[]) => {
+    if (dayEvents.length === 1) {
+      handleOpenEventDialog(dayEvents[0]);
+    } else if (dayEvents.length > 1) {
+      // In grid view, click on day with multiple events switches to agenda or opens first
+      handleOpenEventDialog(dayEvents[0]);
+    }
+  };
 
-    // Events in current visible month for Agenda view
-    const currentMonthEvents = useMemo(() => {
-        return filteredEvents.filter(evt => {
-            const d = parseISO(evt.start);
-            return isSameMonth(d, currentMonth);
-        });
-    }, [filteredEvents, currentMonth]);
+  // Filter events
+  const filteredEvents = useMemo(() => {
+    if (!searchQuery.trim()) return events;
+    const q = searchQuery.toLowerCase().trim();
+    return events.filter(
+      (evt) =>
+        evt.title.toLowerCase().includes(q) ||
+        (evt.description && evt.description.toLowerCase().includes(q)) ||
+        (evt.location && evt.location.toLowerCase().includes(q))
+    );
+  }, [events, searchQuery]);
 
-    // Navigation
-    const nextMonth = () => setCurrentMonth(prev => addMonths(prev, 1));
-    const prevMonth = () => setCurrentMonth(prev => subMonths(prev, 1));
-    const goToToday = () => setCurrentMonth(new Date());
+  // Calculations for month stats
+  const stats = useMemo(() => {
+    const totalEventsCount = events.length;
+    let examEventsCount = 0;
+    let meetingEventsCount = 0;
+    let trainingEventsCount = 0;
 
-    // Map events by day in Grid view
-    const getEventsForDay = (day: Date) => {
-        return filteredEvents.filter(evt => {
-            const start = parseISO(evt.start);
-            const end = parseISO(evt.end);
-
-            if (isSameDay(start, day)) return true;
-            if (evt.isAllDay && day >= start && day < end) return true;
-            if (!evt.isAllDay && day >= start && day <= end) return true;
-            return false;
-        });
-    };
-
-    // Return clean skeleton during SSR to completely prevent hydration mismatch
-    if (!isMounted) {
-        return (
-            <div className="space-y-6 animate-pulse">
-                {/* Control Bar Skeleton */}
-                <div className="bg-base-100 rounded-2xl p-4 sm:p-6 shadow-sm border border-base-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="h-9 w-28 bg-base-200 rounded-xl" />
-                        <div className="h-7 w-48 bg-base-200 rounded-lg" />
-                    </div>
-                    <div className="flex items-center gap-3 w-full md:w-auto">
-                        <div className="h-8 w-48 bg-base-200 rounded-lg flex-1 md:flex-initial" />
-                        <div className="h-8 w-36 bg-base-200 rounded-xl" />
-                    </div>
-                </div>
-
-                {/* Calendar Grid Skeleton */}
-                <div className="bg-base-100 rounded-2xl shadow-sm border border-base-200 overflow-hidden p-4">
-                    <div className="grid grid-cols-7 gap-2 mb-3 text-center">
-                        {THAI_DAYS_SHORT.map(d => (
-                            <div key={d} className="h-6 bg-base-200/60 rounded font-medium text-xs flex items-center justify-center text-base-content/40">
-                                {d}
-                            </div>
-                        ))}
-                    </div>
-                    <div className="grid grid-cols-7 gap-2">
-                        {Array.from({ length: 35 }).map((_, i) => (
-                            <div key={i} className="min-h-[95px] sm:min-h-[125px] bg-base-200/40 rounded-xl border border-base-200/30 p-2 flex flex-col justify-between">
-                                <div className="w-6 h-6 bg-base-200 rounded-full" />
-                                {i % 4 === 0 && <div className="h-4 w-full bg-base-200/80 rounded" />}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
+    for (const evt of events) {
+      const t = evt.title.toLowerCase();
+      if (t.includes('สอบ') || t.includes('exam')) examEventsCount++;
+      else if (t.includes('ประชุม') || t.includes('meeting')) meetingEventsCount++;
+      else if (t.includes('อบรม') || t.includes('สัมมนา') || t.includes('โครงการ')) trainingEventsCount++;
     }
 
+    return {
+      totalEventsCount,
+      examEventsCount,
+      meetingEventsCount,
+      trainingEventsCount,
+    };
+  }, [events]);
+
+  // Grid days calculations
+  const monthStart = startOfMonth(currentMonth);
+  const monthEnd = endOfMonth(monthStart);
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  const gridDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+  // Events in current visible month for Agenda view
+  const currentMonthEvents = useMemo(() => {
+    return filteredEvents.filter((evt) => {
+      const d = parseISO(evt.start);
+      return isSameMonth(d, currentMonth);
+    });
+  }, [filteredEvents, currentMonth]);
+
+  const nextMonth = () => setCurrentMonth((prev) => addMonths(prev, 1));
+  const prevMonth = () => setCurrentMonth((prev) => subMonths(prev, 1));
+  const goToToday = () => setCurrentMonth(new Date());
+
+  const getEventsForDay = (day: Date) => {
+    return filteredEvents.filter((evt) => {
+      const start = parseISO(evt.start);
+      const end = parseISO(evt.end);
+
+      if (isSameDay(start, day)) return true;
+      if (evt.isAllDay && day >= start && day < end) return true;
+      if (!evt.isAllDay && day >= start && day <= end) return true;
+      return false;
+    });
+  };
+
+  if (!isMounted) {
     return (
-        <div className="space-y-6">
-            {/* Control & Filter Header */}
-            <div className="bg-base-100 rounded-2xl p-4 sm:p-6 shadow-sm border border-base-200">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    {/* Month Title & Nav */}
-                    <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-                        <div className="flex items-center rounded-xl bg-base-200/80 p-1 border border-base-300">
-                            <button
-                                onClick={prevMonth}
-                                className="btn btn-ghost btn-sm btn-square"
-                                aria-label="เดือนก่อนหน้า"
-                            >
-                                <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={goToToday}
-                                className="btn btn-ghost btn-sm px-3 text-xs font-semibold"
-                            >
-                                วันนี้
-                            </button>
-                            <button
-                                onClick={nextMonth}
-                                className="btn btn-ghost btn-sm btn-square"
-                                aria-label="เดือนถัดไป"
-                            >
-                                <ChevronRight className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-base-content font-heading">
-                            {formatThaiMonthYear(currentMonth)}
-                        </h2>
-
-                        <button
-                            onClick={handleRefresh}
-                            disabled={isRefreshing}
-                            className="btn btn-ghost btn-circle btn-sm"
-                            title="รีเฟรชข้อมูลจาก Google Calendar"
-                        >
-                            <RotateCw className={`w-4 h-4 text-base-content/70 ${isRefreshing ? 'animate-spin' : ''}`} />
-                        </button>
-                    </div>
-
-                    {/* Search & View Switcher */}
-                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                        {/* Search input */}
-                        <div className="relative flex-1 sm:w-60">
-                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={e => setSearchQuery(e.target.value)}
-                                placeholder="ค้นหากิจกรรม, สถานที่..."
-                                className="input input-sm input-bordered w-full pl-9 rounded-lg text-sm bg-base-100"
-                            />
-                            {searchQuery && (
-                                <button
-                                    onClick={() => setSearchQuery('')}
-                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content"
-                                >
-                                    <X className="w-3.5 h-3.5" />
-                                </button>
-                            )}
-                        </div>
-
-                        {/* View Switcher Toggle */}
-                        <div className="join bg-base-200/80 p-1 rounded-xl border border-base-300">
-                            <button
-                                onClick={() => setViewMode('grid')}
-                                className={`join-item btn btn-sm border-none ${
-                                    viewMode === 'grid'
-                                        ? 'bg-primary text-primary-content shadow-sm'
-                                        : 'btn-ghost'
-                                }`}
-                            >
-                                <LayoutGrid className="w-4 h-4 mr-1.5" />
-                                <span>ตารางเดือน</span>
-                            </button>
-                            <button
-                                onClick={() => setViewMode('agenda')}
-                                className={`join-item btn btn-sm border-none ${
-                                    viewMode === 'agenda'
-                                        ? 'bg-primary text-primary-content shadow-sm'
-                                        : 'btn-ghost'
-                                }`}
-                            >
-                                <List className="w-4 h-4 mr-1.5" />
-                                <span>รายการ</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Category Color Legend Bar for instant readability */}
-                <div className="flex items-center gap-3 sm:gap-5 overflow-x-auto pt-3 border-t border-base-200 text-xs text-base-content/80 mt-3">
-                    <span className="text-base-content/50 text-[11px] font-semibold shrink-0">หมวดหมู่:</span>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="w-2.5 h-2.5 rounded-full bg-rose-600" />
-                        <span className="font-medium">การสอบ / วัดผล</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="w-2.5 h-2.5 rounded-full bg-sky-600" />
-                        <span className="font-medium">การประชุม</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-600" />
-                        <span className="font-medium">อบรม / โครงการ</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
-                        <span className="font-medium">กิจกรรม / วันสำคัญ</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="w-2.5 h-2.5 rounded-full bg-slate-700" />
-                        <span className="font-medium">วิชาการ / ทั่วไป</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* View Mode: Month Grid */}
-            {viewMode === 'grid' ? (
-                <div className="bg-base-100 rounded-2xl shadow-sm border border-base-200 overflow-hidden">
-                    {/* Days of Week Header */}
-                    <div className="grid grid-cols-7 border-b border-base-200 bg-base-200/40 text-center font-medium text-xs sm:text-sm text-base-content/70 py-3">
-                        {THAI_DAYS_SHORT.map((dayName, idx) => (
-                            <div
-                                key={dayName}
-                                className={idx === 0 ? 'text-red-600 font-semibold' : idx === 6 ? 'text-blue-600 font-semibold' : ''}
-                            >
-                                {dayName}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Calendar Days Matrix */}
-                    <div className="grid grid-cols-7 auto-rows-fr divide-x divide-base-200 divide-y">
-                        {gridDays.map(day => {
-                            const isCurrentMonth = isSameMonth(day, currentMonth);
-                            const isDayToday = isToday(day);
-                            const dayEvents = getEventsForDay(day);
-
-                            return (
-                                <div
-                                    key={day.toISOString()}
-                                    onClick={() => {
-                                        if (dayEvents.length > 0) {
-                                            setSelectedDateEvents({ date: day, events: dayEvents });
-                                        }
-                                    }}
-                                    className={`min-h-[95px] sm:min-h-[125px] p-1.5 sm:p-2 transition-colors flex flex-col justify-between ${
-                                        isCurrentMonth ? 'bg-base-100 hover:bg-base-200/30' : 'bg-base-200/20 opacity-40'
-                                    } ${dayEvents.length > 0 ? 'cursor-pointer' : ''}`}
-                                >
-                                    {/* Date Number Badge */}
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span
-                                            className={`inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 text-xs sm:text-sm rounded-full font-medium ${
-                                                isDayToday
-                                                    ? 'bg-primary text-primary-content font-bold shadow-sm'
-                                                    : isCurrentMonth
-                                                    ? 'text-base-content'
-                                                    : 'text-base-content/40'
-                                            }`}
-                                        >
-                                            {format(day, 'd')}
-                                        </span>
-                                        {dayEvents.length > 0 && (
-                                            <span className="sm:hidden w-1.5 h-1.5 rounded-full bg-primary" />
-                                        )}
-                                    </div>
-
-                                    {/* Event Chips List */}
-                                    <div className="space-y-1 flex-1 overflow-hidden">
-                                        {dayEvents.slice(0, 3).map(evt => {
-                                            const style = getEventStyle(evt.title);
-                                            return (
-                                                <button
-                                                    key={evt.id}
-                                                    onClick={e => {
-                                                        e.stopPropagation();
-                                                        setSelectedEvent(evt);
-                                                    }}
-                                                    className={`w-full text-left truncate text-xs px-2 py-0.5 rounded-md font-semibold transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer block ${style.chipBg}`}
-                                                    title={evt.title}
-                                                >
-                                                    <span className="truncate block leading-tight">{evt.title}</span>
-                                                </button>
-                                            );
-                                        })}
-
-                                        {dayEvents.length > 3 && (
-                                            <div className="text-[10px] text-base-content/60 font-semibold px-1">
-                                                +{dayEvents.length - 3} รายการ
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            ) : (
-                /* View Mode: Agenda / List */
-                <div className="bg-base-100 rounded-2xl shadow-sm border border-base-200 p-4 sm:p-6">
-                    {currentMonthEvents.length === 0 ? (
-                        <div className="text-center py-16 text-base-content/60">
-                            <CalendarIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                            <p className="text-lg font-medium">ไม่มีกิจกรรมในเดือนนี้</p>
-                            <p className="text-sm mt-1">สามารถเปลี่ยนเดือนเพื่อดูกิจกรรมช่วงอื่น หรือค้นหากิจกรรมที่ต้องการ</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {currentMonthEvents.map(evt => {
-                                const style = getEventStyle(evt.title);
-                                const startDate = parseISO(evt.start);
-                                return (
-                                    <div
-                                        key={evt.id}
-                                        onClick={() => setSelectedEvent(evt)}
-                                        className="group card bg-base-100 border border-base-200 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer overflow-hidden flex-col sm:flex-row"
-                                    >
-                                        {/* Date Ribbon */}
-                                        <div
-                                            className={`sm:w-28 flex flex-row sm:flex-col items-center justify-between sm:justify-center p-3 sm:p-4 border-b sm:border-b-0 sm:border-r border-base-200 ${style.listRibbon}`}
-                                        >
-                                            <span className="text-xs uppercase tracking-wider font-semibold opacity-90">
-                                                {format(startDate, 'EEE')}
-                                            </span>
-                                            <span className="text-2xl sm:text-3xl font-black leading-none my-0 sm:my-1">
-                                                {format(startDate, 'd')}
-                                            </span>
-                                            <span className="text-xs opacity-95 font-semibold">
-                                                {THAI_MONTHS[startDate.getMonth()]}
-                                            </span>
-                                        </div>
-
-                                        {/* Content info */}
-                                        <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-1.5">
-                                                    <span className={`badge badge-sm ${style.badgeClass}`}>
-                                                        {style.badgeText}
-                                                    </span>
-                                                </div>
-                                                <h3 className="font-bold text-lg text-base-content group-hover:text-primary transition-colors">
-                                                    {evt.title}
-                                                </h3>
-                                                <div className="flex flex-wrap items-center gap-y-1 gap-x-4 mt-2 text-xs text-base-content/70">
-                                                    <span className="inline-flex items-center gap-1.5">
-                                                        <Clock className="w-3.5 h-3.5 text-primary" />
-                                                        {formatEventTime(evt.start, evt.end, evt.isAllDay)}
-                                                    </span>
-                                                    {evt.location && (
-                                                        <span className="inline-flex items-center gap-1.5 text-base-content/80 font-medium">
-                                                            <MapPin className="w-3.5 h-3.5 text-rose-500" />
-                                                            {evt.location}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {evt.description && (
-                                                <p className="mt-3 text-xs sm:text-sm text-base-content/70 line-clamp-2">
-                                                    {evt.description}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Quick Subscription / Google Calendar Link Banner */}
-            <div className="card bg-base-200/60 border border-base-300">
-                <div className="card-body p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <CalendarIcon className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm sm:text-base">ซิงค์ปฏิทินกับ Google Calendar หรือมือถือของคุณ</h4>
-                            <p className="text-xs text-base-content/60">
-                                ติดตามกำหนดการสอบและการประชุมคณะสังคมศาสตร์ได้แบบ Real-time
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <a
-                            href="https://calendar.google.com/calendar/u/0/r?cid=c_classroome6d5584c@group.calendar.google.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-outline btn-sm gap-2"
-                        >
-                            <ExternalLink className="w-4 h-4" />
-                            เปิดใน Google Calendar
-                        </a>
-                        <a
-                            href="https://calendar.google.com/calendar/ical/c_classroome6d5584c%40group.calendar.google.com/public/basic.ics"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-primary btn-sm gap-2"
-                        >
-                            <CalendarPlus className="w-4 h-4" />
-                            นำเข้า iCal (.ics)
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            {/* Single Event Detail Modal */}
-            {selectedEvent && (
-                <div className="modal modal-open modal-bottom sm:modal-middle">
-                    <div className="modal-box max-w-lg p-6 relative">
-                        <button
-                            onClick={() => setSelectedEvent(null)}
-                            className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3"
-                            aria-label="ปิด"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
-
-                        <div className="flex items-center gap-2 mb-3 flex-wrap">
-                            <span className={`badge badge-sm ${getEventStyle(selectedEvent.title).badgeClass}`}>
-                                {getEventStyle(selectedEvent.title).badgeText}
-                            </span>
-                            <span className="badge badge-outline badge-sm">Google Calendar</span>
-                            {selectedEvent.isAllDay && <span className="badge badge-ghost badge-sm">ตลอดวัน</span>}
-                        </div>
-
-                        <h3 className="font-bold text-xl text-base-content leading-snug">
-                            {selectedEvent.title}
-                        </h3>
-
-                        <div className="space-y-3 mt-5 text-sm">
-                            <div className="flex items-start gap-3 p-3 bg-base-200/60 rounded-xl">
-                                <Clock className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                                <div>
-                                    <div className="font-medium text-xs text-base-content/60">วันและเวลา</div>
-                                    <div className="text-base-content font-semibold mt-0.5">
-                                        {formatEventTime(selectedEvent.start, selectedEvent.end, selectedEvent.isAllDay)}
-                                    </div>
-                                    <div className="text-xs text-base-content/60 mt-0.5">
-                                        {formatThaiDateFull(parseISO(selectedEvent.start))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {selectedEvent.location && (
-                                <div className="flex items-start gap-3 p-3 bg-base-200/60 rounded-xl">
-                                    <MapPin className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                                    <div>
-                                        <div className="font-medium text-xs text-base-content/60">สถานที่</div>
-                                        <div className="text-base-content font-semibold mt-0.5">
-                                            {selectedEvent.location}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {selectedEvent.description && (
-                                <div className="p-3 bg-base-200/40 rounded-xl border border-base-200">
-                                    <div className="font-medium text-xs text-base-content/60 mb-1">
-                                        รายละเอียดเพิ่มเติม (Description)
-                                    </div>
-                                    <p className="text-xs sm:text-sm text-base-content/80 whitespace-pre-wrap leading-relaxed">
-                                        {selectedEvent.description}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Modal Actions */}
-                        <div className="modal-action mt-6 flex flex-col sm:flex-row gap-2">
-                            <a
-                                href={createGoogleCalendarUrl(selectedEvent)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-primary btn-sm flex-1 gap-2"
-                            >
-                                <CalendarPlus className="w-4 h-4" />
-                                เพิ่มลง Google Calendar ของฉัน
-                            </a>
-                            <button
-                                onClick={() => setSelectedEvent(null)}
-                                className="btn btn-ghost btn-sm"
-                            >
-                                ปิด
-                            </button>
-                        </div>
-                    </div>
-                    <div className="modal-backdrop bg-black/40" onClick={() => setSelectedEvent(null)} />
-                </div>
-            )}
-
-            {/* Date Events List Modal (When clicking a day cell on mobile or day with many events) */}
-            {selectedDateEvents && !selectedEvent && (
-                <div className="modal modal-open modal-bottom sm:modal-middle">
-                    <div className="modal-box max-w-md p-6 relative">
-                        <button
-                            onClick={() => setSelectedDateEvents(null)}
-                            className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3"
-                            aria-label="ปิด"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
-
-                        <h3 className="font-bold text-lg text-base-content">
-                            กิจกรรมประจำ{formatThaiDateFull(selectedDateEvents.date)}
-                        </h3>
-                        <p className="text-xs text-base-content/60 mt-0.5 mb-4">
-                            พบ {selectedDateEvents.events.length} กิจกรรม
-                        </p>
-
-                        <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-                            {selectedDateEvents.events.map(evt => {
-                                const style = getEventStyle(evt.title);
-                                return (
-                                    <div
-                                        key={evt.id}
-                                        onClick={() => {
-                                            setSelectedDateEvents(null);
-                                            setSelectedEvent(evt);
-                                        }}
-                                        className="p-3 rounded-xl border border-base-200 bg-base-100 hover:border-primary/50 hover:shadow-sm cursor-pointer transition-all flex items-start gap-3"
-                                    >
-                                        <div className={`w-3 h-3 rounded-full mt-1 shrink-0 ${style.dotColor}`} />
-                                        <div className="flex-1">
-                                            <div className="font-bold text-sm text-base-content">{evt.title}</div>
-                                            <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-base-content/70">
-                                                <span className={`badge badge-xs ${style.badgeClass}`}>
-                                                    {style.badgeText}
-                                                </span>
-                                                <span className="inline-flex items-center gap-1">
-                                                    <Clock className="w-3 h-3 text-primary" />
-                                                    {formatEventTime(evt.start, evt.end, evt.isAllDay)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        <div className="modal-action mt-4">
-                            <button
-                                onClick={() => setSelectedDateEvents(null)}
-                                className="btn btn-sm btn-ghost"
-                            >
-                                ปิด
-                            </button>
-                        </div>
-                    </div>
-                    <div className="modal-backdrop bg-black/40" onClick={() => setSelectedDateEvents(null)} />
-                </div>
-            )}
-        </div>
+      <div className="container mx-auto px-4 max-w-7xl pt-10 pb-20 font-sans animate-pulse">
+        <div className="h-64 bg-stone-200/60 rounded-sm mb-6" />
+        <div className="h-96 bg-stone-100 rounded-sm" />
+      </div>
     );
+  }
+
+  return (
+    <>
+      {/* 1. HERO SECTION (Editorial Lanna + Quick Stats Ribbon) */}
+      <CalendarHero
+        totalEventsCount={stats.totalEventsCount}
+        examEventsCount={stats.examEventsCount}
+        meetingEventsCount={stats.meetingEventsCount}
+        trainingEventsCount={stats.trainingEventsCount}
+      />
+
+      {/* 2. MAIN WORKSPACE CONTAINER */}
+      <main className="container mx-auto px-4 max-w-7xl pt-10 pb-20 relative z-10 font-sans">
+        {/* 2.1 Official Academic Schedule Banner */}
+        <CalendarOfficialBanner />
+
+        {/* 2.2 Calendar Control Bar */}
+        <CalendarControlBar
+          currentMonthLabel={formatThaiMonthYear(currentMonth)}
+          onPrevMonth={prevMonth}
+          onNextMonth={nextMonth}
+          onGoToToday={goToToday}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onRefresh={handleRefresh}
+          isRefreshing={isRefreshing}
+          totalFilteredCount={filteredEvents.length}
+        />
+
+        {/* 2.3 Dual Mode View (Monthly Grid vs Agenda List) */}
+        {viewMode === 'grid' ? (
+          <CalendarMonthGrid
+            gridDays={gridDays}
+            currentMonth={currentMonth}
+            getEventsForDay={getEventsForDay}
+            getEventStyle={getEventStyle}
+            onSelectEvent={handleOpenEventDialog}
+            onSelectDay={handleSelectDay}
+          />
+        ) : (
+          <CalendarAgendaList
+            events={currentMonthEvents}
+            getEventStyle={getEventStyle}
+            formatEventTime={formatEventTime}
+            onSelectEvent={handleOpenEventDialog}
+          />
+        )}
+
+        {/* 2.4 Event Details Dialog */}
+        <CalendarEventDialog
+          event={selectedEvent}
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          getEventStyle={getEventStyle}
+          formatEventTime={formatEventTime}
+          createGoogleCalendarUrl={createGoogleCalendarUrl}
+        />
+      </main>
+    </>
+  );
 }

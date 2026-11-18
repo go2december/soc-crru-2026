@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import ImageLightbox from './ImageLightbox';
 import SharePrintButton from '@/components/chiang-rai/SharePrintButton';
 import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 
 const API_URL = getApiBaseUrl();
 
@@ -251,7 +252,7 @@ export default async function ArtifactDetailPage({ params }: { params: Promise<{
                                 prose-p:font-light prose-p:mb-8
                                 prose-strong:text-orange-600 prose-strong:font-bold
                                 prose-img:rounded-3xl prose-img:shadow-xl">
-                                <div dangerouslySetInnerHTML={{ __html: artifact.content }} />
+                                <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(artifact.content) }} />
                             </div>
                         ) : (
                             <div className="py-20 text-center text-purple-300 bg-white rounded-[2rem] border-2 border-dashed border-purple-50">

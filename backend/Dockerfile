@@ -2,7 +2,7 @@ FROM node:26-alpine AS builder
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY package.json ./
 
 RUN npm install
 
@@ -18,10 +18,10 @@ ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY package.json ./
 
 # Install only production dependencies
-RUN npm install --only=production
+RUN npm install --omit=dev
 
 COPY . .
 

@@ -14,6 +14,7 @@ export class UploadService {
   private readonly researchUploadDir = './uploads/research';
   private readonly procurementUploadDir = './uploads/procurement';
   private readonly coursesUploadDir = './uploads/courses';
+  private readonly bannersUploadDir = './uploads/banners';
 
   constructor() {
     // Ensure upload directories exist
@@ -40,6 +41,9 @@ export class UploadService {
     }
     if (!fs.existsSync(this.coursesUploadDir)) {
       fs.mkdirSync(this.coursesUploadDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.bannersUploadDir)) {
+      fs.mkdirSync(this.bannersUploadDir, { recursive: true });
     }
   }
 
@@ -209,26 +213,37 @@ export class UploadService {
     }
   }
 
-  async deleteNewsFile(fileUrl: string): Promise<boolean> {
-    if (
-      !fileUrl ||
-      (!fileUrl.startsWith('/uploads/news/') &&
-        !fileUrl.startsWith('/uploads/news/attachments/'))
-    ) {
+  private async safeUnlinkInDir(
+    allowedDir: string,
+    fileUrl: string,
+    expectedPrefix: string,
+  ): Promise<boolean> {
+    if (!fileUrl || !fileUrl.startsWith(expectedPrefix)) {
       return false;
     }
 
-    const relativePath = fileUrl.replace(/^\/uploads\//, '');
-    const filepath = path.join(process.cwd(), 'uploads', relativePath);
+    const baseDir = path.resolve(allowedDir);
+    const relativeSubpath = fileUrl.slice(expectedPrefix.length);
+    if (!relativeSubpath || relativeSubpath.includes('\0')) {
+      return false;
+    }
+
+    const resolvedTarget = path.resolve(baseDir, relativeSubpath);
+    if (!resolvedTarget.startsWith(baseDir + path.sep)) {
+      return false;
+    }
 
     try {
-      await fs.promises.access(filepath);
-      await fs.promises.unlink(filepath);
+      await fs.promises.access(resolvedTarget);
+      await fs.promises.unlink(resolvedTarget);
       return true;
-    } catch (error) {
-      console.error('Delete news file error:', error);
+    } catch {
       return false;
     }
+  }
+
+  async deleteNewsFile(fileUrl: string): Promise<boolean> {
+    return this.safeUnlinkInDir(this.newsUploadDir, fileUrl, '/uploads/news/');
   }
 
   async saveChiangRaiImage(file: Express.Multer.File): Promise<string> {
@@ -395,6 +410,25 @@ export class UploadService {
           .toFile(baseFilepath + '.webp');
         return `/uploads/programs/${filename}.webp`;
       } else {
+        const ext = path.extname(sanitizedOriginalName).toLowerCase();
+        const allowedDocExts = [
+          '.pdf',
+          '.doc',
+          '.docx',
+          '.xls',
+          '.xlsx',
+          '.ppt',
+          '.pptx',
+          '.zip',
+        ];
+        if (
+          !allowedDocExts.includes(ext) ||
+          !this.validateMagicBytes(file.buffer, ['pdf', 'office', 'archive'])
+        ) {
+          throw new BadRequestException(
+            'Security rejection: Only valid image, PDF, Office, or ZIP files are allowed.',
+          );
+        }
         await fs.promises.writeFile(baseFilepath, file.buffer);
         return `/uploads/programs/${filename}`;
       }
@@ -465,21 +499,11 @@ export class UploadService {
   }
 
   async deleteProcurementFile(fileUrl: string): Promise<boolean> {
-    if (!fileUrl || !fileUrl.startsWith('/uploads/procurement/')) {
-      return false;
-    }
-
-    const relativePath = fileUrl.replace(/^\/uploads\//, '');
-    const filepath = path.join(process.cwd(), 'uploads', relativePath);
-
-    try {
-      await fs.promises.access(filepath);
-      await fs.promises.unlink(filepath);
-      return true;
-    } catch (error) {
-      console.error('Delete procurement file error:', error);
-      return false;
-    }
+    return this.safeUnlinkInDir(
+      this.procurementUploadDir,
+      fileUrl,
+      '/uploads/procurement/',
+    );
   }
 
   async saveCourseImage(file: Express.Multer.File): Promise<string> {
@@ -508,5 +532,44 @@ export class UploadService {
       console.error('Course image processing error:', error);
       throw new BadRequestException('Failed to process course image');
     }
+  }
+
+  async saveBannerImage(file: Express.Multer.File): Promise<string> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    if (
+      !file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/) ||
+      !this.validateMagicBytes(file.buffer, ['image'])
+    ) {
+      throw new BadRequestException('Unsupported or invalid image file');
+    }
+
+    const filename = `${uuidv4()}.webp`;
+    const filepath = path.join(this.bannersUploadDir, filename);
+
+    try {
+      await sharp(file.buffer)
+        .resize(1920, null, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .webp({ quality: 85 })
+        .toFile(filepath);
+
+      return `/uploads/banners/${filename}`;
+    } catch (error) {
+      console.error('Banner image processing error:', error);
+      throw new BadRequestException('Failed to process banner image');
+    }
+  }
+
+  async deleteBannerImage(fileUrl: string): Promise<boolean> {
+    return this.safeUnlinkInDir(
+      this.bannersUploadDir,
+      fileUrl,
+      '/uploads/banners/',
+    );
   }
 }

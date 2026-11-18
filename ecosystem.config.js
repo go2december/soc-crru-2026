@@ -25,10 +25,14 @@ function loadEnv() {
 
 const rootEnv = loadEnv();
 
-const dbUrl = rootEnv.DATABASE_URL || 'postgresql://soc_admin:Soc0903297444@localhost:5432/soc_db';
-const jwtSecret = rootEnv.JWT_SECRET || 'super-secret-key-change-this-in-production';
+const dbUrl = rootEnv.DATABASE_URL;
+const jwtSecret = rootEnv.JWT_SECRET;
 const googleClientId = rootEnv.GOOGLE_CLIENT_ID || '';
 const googleClientSecret = rootEnv.GOOGLE_CLIENT_SECRET || '';
+
+if (!dbUrl || !jwtSecret) {
+  throw new Error('Missing required DATABASE_URL or JWT_SECRET in .env');
+}
 
 module.exports = {
   apps: [
@@ -38,6 +42,7 @@ module.exports = {
       script: 'dist/apps/api-gateway/main.js',
       cwd: './backend',
       env: {
+        NODE_ENV: 'production',
         PORT: 4201, // Single unified backend port
         DATABASE_URL: dbUrl,
         JWT_SECRET: jwtSecret,

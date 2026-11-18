@@ -1,8 +1,8 @@
 export const MOU_PARTNER_TYPES = [
-  { value: 'GOVERNMENT', label: 'ภาครัฐและองค์กรปกครองส่วนท้องถิ่น', badgeColor: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { value: 'COMMUNITY', label: 'ภาคประชาสังคมและชุมชน', badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { value: 'ACADEMIC', label: 'สถาบันการศึกษาและนานาชาติ', badgeColor: 'bg-purple-50 text-purple-700 border-purple-200' },
-  { value: 'PRIVATE', label: 'ภาคเอกชนและวิสาหกิจชุมชน', badgeColor: 'bg-amber-50 text-amber-700 border-amber-200' },
+  { value: 'GOVERNMENT', label: 'ภาครัฐและองค์กรปกครองส่วนท้องถิ่น', badgeColor: 'bg-sky-50 text-sky-800 border-sky-200' },
+  { value: 'COMMUNITY', label: 'ภาคประชาสังคมและชุมชน', badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+  { value: 'ACADEMIC', label: 'สถาบันการศึกษาและนานาชาติ', badgeColor: 'bg-stone-100 text-stone-800 border-stone-300' },
+  { value: 'PRIVATE', label: 'ภาคเอกชนและวิสาหกิจชุมชน', badgeColor: 'bg-amber-50 text-amber-800 border-amber-200' },
 ] as const;
 
 export type MouPartnerType = (typeof MOU_PARTNER_TYPES)[number]['value'];

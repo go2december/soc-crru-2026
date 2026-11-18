@@ -75,6 +75,19 @@ export default function AdminFacultySettingsPage() {
 
       const token = localStorage.getItem('admin_token');
       const payload = {
+        announcementText: settings.announcementText,
+        announcementLink: settings.announcementLink,
+        isAnnouncementActive: settings.isAnnouncementActive,
+        heroHeadlineTh: settings.heroHeadlineTh,
+        heroSubtextTh: settings.heroSubtextTh,
+        manualProgramsCount: settings.manualProgramsCount ?? null,
+        employabilityRate: settings.employabilityRate,
+        manualPartnershipsCount: settings.manualPartnershipsCount ?? null,
+        lecturersRate: settings.lecturersRate,
+        communitiesCount: settings.communitiesCount,
+        manualInnovationsCount: settings.manualInnovationsCount ?? null,
+        manualMousCount: settings.manualMousCount ?? null,
+        employerSatisfactionRate: settings.employerSatisfactionRate,
         historyFoundedYear: settings.historyFoundedYear,
         historyContentTh: settings.historyContentTh,
         philosophyTh: settings.philosophyTh,
@@ -109,7 +122,7 @@ export default function AdminFacultySettingsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          paths: ['/about', '/about/structure', '/about/strategy'],
+          paths: ['/', '/about', '/about/structure', '/about/strategy'],
         }),
       }).catch((e) => console.warn('Revalidate trigger failed:', e));
 
@@ -193,9 +206,12 @@ export default function AdminFacultySettingsPage() {
         </div>
       )}
 
-      {/* 4 Focused Tabs */}
-      <Tabs defaultValue="overview" className="space-y-6">
+      {/* 5 Focused Tabs */}
+      <Tabs defaultValue="homepage" className="space-y-6">
         <TabsList className="bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto flex flex-wrap h-auto gap-1">
+          <TabsTrigger value="homepage" className="rounded-lg px-4 py-2 font-medium text-xs sm:text-sm">
+            🏠 หน้าแรก & สถิติ
+          </TabsTrigger>
           <TabsTrigger value="overview" className="rounded-lg px-4 py-2 font-medium text-xs sm:text-sm">
             🏛️ ข้อมูลทั่วไป & อัตลักษณ์
           </TabsTrigger>
@@ -209,6 +225,215 @@ export default function AdminFacultySettingsPage() {
             🎯 แผนยุทธศาสตร์ (เพิ่ม/ลดได้)
           </TabsTrigger>
         </TabsList>
+
+        {/* ======================================================== */}
+        {/* TAB 0: HOMEPAGE HERO & METRICS */}
+        {/* ======================================================== */}
+        <TabsContent value="homepage" className="space-y-6">
+          <Card className="border-slate-200 shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base font-bold text-slate-900">
+                แถบประกาศด่วนด้านบนสไลด์หน้าแรก
+              </CardTitle>
+              <CardDescription>
+                เปิด/ปิด แก้ไขข้อความ และตั้งค่าลิงก์ปลายทางของแถบประกาศที่แสดงด้านบนสุดของหน้าแรก
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <label className="flex items-center gap-2.5 text-sm font-medium text-slate-800 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.isAnnouncementActive}
+                  onChange={(e) => setSettings({ ...settings, isAnnouncementActive: e.target.checked })}
+                  className="size-4 accent-[#C2410C]"
+                />
+                แสดงแถบประกาศด้านบน Hero
+              </label>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="announcementText" className="text-xs font-semibold text-slate-700">
+                    ข้อความแถบประกาศ
+                  </Label>
+                  <Input
+                    id="announcementText"
+                    value={settings.announcementText || ''}
+                    onChange={(e) => setSettings({ ...settings, announcementText: e.target.value })}
+                    placeholder="เปิดรับสมัครนักศึกษาใหม่ 2569 (รับสมัครตรง ไม่ต้องสอบ)"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="announcementLink" className="text-xs font-semibold text-slate-700">
+                    ลิงก์ปลายทางแถบประกาศ
+                  </Label>
+                  <Input
+                    id="announcementLink"
+                    value={settings.announcementLink || ''}
+                    onChange={(e) => setSettings({ ...settings, announcementLink: e.target.value })}
+                    placeholder="/admissions"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="heroHeadlineTh" className="text-xs font-semibold text-slate-700">
+                  พาดหัวหลัก Hero (เว้นว่างเพื่อใช้ค่าเริ่มต้นของระบบ)
+                </Label>
+                <Input
+                  id="heroHeadlineTh"
+                  value={settings.heroHeadlineTh || ''}
+                  onChange={(e) => setSettings({ ...settings, heroHeadlineTh: e.target.value })}
+                  placeholder="ศาสตร์แห่งมนุษย์และสังคม เพื่อการพัฒนาล้านนาสู่สากล"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="heroSubtextTh" className="text-xs font-semibold text-slate-700">
+                  คำโปรยรอง Hero
+                </Label>
+                <Textarea
+                  id="heroSubtextTh"
+                  rows={3}
+                  value={settings.heroSubtextTh || ''}
+                  onChange={(e) => setSettings({ ...settings, heroSubtextTh: e.target.value })}
+                  placeholder="คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย มุ่งสร้างบัณฑิตนักปฏิบัติ..."
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200 shadow-xs">
+            <CardHeader>
+              <CardTitle className="text-base font-bold text-slate-900">
+                ตัวเลขสถิติหน้าแรก (Hybrid Metrics & Social Impact)
+              </CardTitle>
+              <CardDescription>
+                ช่องที่เป็นตัวเลข Override หากเว้นว่าง ระบบจะดึงจำนวนจริงจากฐานข้อมูลให้อัตโนมัติ
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="manualProgramsCount" className="text-xs font-semibold text-slate-700">
+                  จำนวนหลักสูตร (ใน DB: {settings.liveDbCounts?.programs ?? '-'})
+                </Label>
+                <Input
+                  id="manualProgramsCount"
+                  type="number"
+                  value={settings.manualProgramsCount ?? ''}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      manualProgramsCount: e.target.value === '' ? null : Number(e.target.value),
+                    })
+                  }
+                  placeholder="เว้นว่าง = ใช้ค่าจาก DB"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="employabilityRate" className="text-xs font-semibold text-slate-700">
+                  อัตราการได้งานทำของบัณฑิต
+                </Label>
+                <Input
+                  id="employabilityRate"
+                  value={settings.employabilityRate || ''}
+                  onChange={(e) => setSettings({ ...settings, employabilityRate: e.target.value })}
+                  placeholder="94.8%"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="manualPartnershipsCount" className="text-xs font-semibold text-slate-700">
+                  เครือข่ายความร่วมมือ Hero (ใน DB: {settings.liveDbCounts?.mous ?? '-'})
+                </Label>
+                <Input
+                  id="manualPartnershipsCount"
+                  type="number"
+                  value={settings.manualPartnershipsCount ?? ''}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      manualPartnershipsCount: e.target.value === '' ? null : Number(e.target.value),
+                    })
+                  }
+                  placeholder="เว้นว่าง = ใช้ค่าจาก DB"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="lecturersRate" className="text-xs font-semibold text-slate-700">
+                  สัดส่วนอาจารย์ผู้ทรงคุณวุฒิ
+                </Label>
+                <Input
+                  id="lecturersRate"
+                  value={settings.lecturersRate || ''}
+                  onChange={(e) => setSettings({ ...settings, lecturersRate: e.target.value })}
+                  placeholder="100%"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="communitiesCount" className="text-xs font-semibold text-slate-700">
+                  ชุมชนเครือข่ายที่ร่วมพัฒนา
+                </Label>
+                <Input
+                  id="communitiesCount"
+                  value={settings.communitiesCount || ''}
+                  onChange={(e) => setSettings({ ...settings, communitiesCount: e.target.value })}
+                  placeholder="150+"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="manualInnovationsCount" className="text-xs font-semibold text-slate-700">
+                  โครงการนวัตกรรม/วิจัย (ใน DB: {settings.liveDbCounts?.research ?? '-'})
+                </Label>
+                <Input
+                  id="manualInnovationsCount"
+                  type="number"
+                  value={settings.manualInnovationsCount ?? ''}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      manualInnovationsCount: e.target.value === '' ? null : Number(e.target.value),
+                    })
+                  }
+                  placeholder="เว้นว่าง = ใช้ค่าจาก DB"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="manualMousCount" className="text-xs font-semibold text-slate-700">
+                  จำนวน MOU องค์กรภาคี (ใน DB: {settings.liveDbCounts?.mous ?? '-'})
+                </Label>
+                <Input
+                  id="manualMousCount"
+                  type="number"
+                  value={settings.manualMousCount ?? ''}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      manualMousCount: e.target.value === '' ? null : Number(e.target.value),
+                    })
+                  }
+                  placeholder="เว้นว่าง = ใช้ค่าจาก DB"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="employerSatisfactionRate" className="text-xs font-semibold text-slate-700">
+                  ความพึงพอใจผู้ใช้บัณฑิต
+                </Label>
+                <Input
+                  id="employerSatisfactionRate"
+                  value={settings.employerSatisfactionRate || ''}
+                  onChange={(e) => setSettings({ ...settings, employerSatisfactionRate: e.target.value })}
+                  placeholder="98%"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* ======================================================== */}
         {/* TAB 1: OVERVIEW & IDENTITY */}

@@ -6,12 +6,8 @@ import {
   Download,
   ExternalLink,
   ChevronLeft,
-  Calendar,
   Building,
   Coins,
-  ClipboardList,
-  CheckCircle2,
-  Share2,
 } from 'lucide-react';
 import {
   fetchProcurementById,
@@ -62,10 +58,6 @@ export default async function ProcurementDetailPage(props: Props) {
           <nav className="flex items-center gap-2 text-xs text-white/70">
             <Link href="/" className="hover:text-white transition-colors">
               หน้าแรก
-            </Link>
-            <span>/</span>
-            <Link href="/eservice" className="hover:text-white transition-colors">
-              ระบบสารสนเทศ
             </Link>
             <span>/</span>
             <Link href="/eservice/procurement" className="hover:text-white transition-colors">

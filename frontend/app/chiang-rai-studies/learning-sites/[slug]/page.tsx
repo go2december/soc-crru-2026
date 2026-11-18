@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 
 import JsonLd from '@/components/seo/JsonLd';
+import { sanitizeHtml } from '@/lib/sanitize-html';
 import CiteModal from '@/components/research/CiteModal';
 import ArticleActions from '../../articles/[slug]/ArticleActions';
 import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
@@ -238,7 +239,7 @@ export default async function LearningSiteDetailPage({ params }: { params: Promi
                                 prose-strong:text-[#2e1065]
                                 prose-li:text-stone-700 prose-li:leading-relaxed
                                 prose-hr:border-purple-100"
-                            dangerouslySetInnerHTML={{ __html: processedContent }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(processedContent) }}
                         />
                     </div>
                 </article>

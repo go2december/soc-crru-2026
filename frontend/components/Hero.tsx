@@ -1,216 +1,285 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
-  GraduationCap,
-  Sparkles,
-  Users,
-  Award,
+  ArrowLeft,
   ChevronRight,
-  Search,
+  Megaphone,
+  Pause,
+  Play,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { SiteSettings } from "@/lib/site-settings";
+import { BannerItem } from "@/lib/banners";
+import { getAssetUrl } from "@/lib/api-config";
 
-export default function Hero() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const subtextRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
+interface HeroProps {
+  settings: SiteSettings;
+  banners: BannerItem[];
+}
 
-  useGSAP(
-    () => {
-      // Check for user's reduced-motion preference
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
+const DEFAULT_BANNERS: BannerItem[] = [
+  {
+    id: -1,
+    title: "เปิดรับสมัครนักศึกษาใหม่ คณะสังคมศาสตร์",
+    subtitle: "หลักสูตรระดับปริญญาตรี ปริญญาโท และปริญญาเอก ประจำปีการศึกษา 2569",
+    badgeText: "ประชาสัมพันธ์",
+    imageUrl: "/images/admission-brochure.png",
+    linkUrl: "/admissions",
+    order: 1,
+    isActive: true,
+  },
+  {
+    id: -2,
+    title: "หลักสูตรที่มุ่งสร้างบัณฑิตนักปฏิบัติ",
+    subtitle: "5 สาขาวิชาปริญญาตรี และหลักสูตรบัณฑิตศึกษาด้านการพัฒนาภูมิภาค",
+    badgeText: "หลักสูตร",
+    imageUrl: "/images/startup-banner.png",
+    linkUrl: "/programs",
+    order: 2,
+    isActive: true,
+  },
+  {
+    id: -3,
+    title: "ศูนย์วิจัยและนวัตกรรมเพื่อการพัฒนาท้องถิ่น",
+    subtitle: "ขับเคลื่อนองค์ความรู้และงานวิจัยรับใช้สังคมสู่ความยั่งยืนในอนุภูมิภาคลุ่มน้ำโขง",
+    badgeText: "วิจัยและนวัตกรรม",
+    imageUrl: "/images/research-banner.png",
+    linkUrl: "/research",
+    order: 3,
+    isActive: true,
+  },
+  {
+    id: -4,
+    title: "เทคโนโลยีภูมิสารสนเทศและนวัตกรรมสังคม",
+    subtitle: "ผสานศาสตร์ทางสังคมเข้ากับเทคโนโลยีดิจิทัลและข้อมูลเชิงพื้นที่สมัยใหม่",
+    badgeText: "นวัตกรรม",
+    imageUrl: "/images/programs/gis.jpg",
+    linkUrl: "/programs",
+    order: 4,
+    isActive: true,
+  },
+  {
+    id: -5,
+    title: "คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย",
+    subtitle: "ศูนย์กลางการเรียนรู้และการพัฒนาสังคมอย่างยั่งยืนในภาคเหนือ",
+    badgeText: "แนะนำคณะ",
+    imageUrl: "/images/history-banner.png",
+    linkUrl: "/about",
+    order: 5,
+    isActive: true,
+  },
+];
 
-      if (prefersReducedMotion) return;
+export default function Hero({ settings, banners }: HeroProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+  const slides = banners.length > 0 ? banners : DEFAULT_BANNERS;
+  const safeIndex = currentIndex % slides.length;
+  const activeBanner = slides[safeIndex];
 
-      tl.from(".hero-badge", {
-        opacity: 0,
-        y: -15,
-        duration: 0.6,
-        delay: 0.1,
-      })
-        .from(
-          headlineRef.current,
-          {
-            opacity: 0,
-            y: 35,
-            duration: 0.85,
-            stagger: 0.08,
-          },
-          "-=0.3"
-        )
-        .from(
-          subtextRef.current,
-          {
-            opacity: 0,
-            y: 20,
-            duration: 0.7,
-          },
-          "-=0.5"
-        )
-        .from(
-          ctaRef.current,
-          {
-            opacity: 0,
-            y: 20,
-            duration: 0.6,
-          },
-          "-=0.4"
-        )
-        .from(
-          ".hero-stat-card",
-          {
-            opacity: 0,
-            y: 25,
-            stagger: 0.1,
-            duration: 0.7,
-          },
-          "-=0.3"
-        );
-    },
-    { scope: containerRef }
-  );
+  const nextSlide = useCallback(() => {
+    if (slides.length <= 1) return;
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
+
+  const prevSlide = useCallback(() => {
+    if (slides.length <= 1) return;
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
+
+  useEffect(() => {
+    if (slides.length <= 1 || isPaused || prefersReducedMotion) return;
+    const timer = setInterval(nextSlide, 6000);
+    return () => clearInterval(timer);
+  }, [slides.length, isPaused, prefersReducedMotion, nextSlide]);
 
   return (
-    <section
-      ref={containerRef}
-      className="relative overflow-hidden bg-[#F8FAFC] pt-12 pb-18 sm:pt-16 sm:pb-24 border-b border-slate-200/80"
-    >
-      {/* Subtle Atmospheric Canvas Backdrop (No AI neon gradient blobs) */}
-      <div className="absolute inset-0 pointer-events-none select-none opacity-40">
-        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-orange-100/70 blur-3xl" />
-        <div className="absolute top-1/2 -left-28 w-80 h-80 rounded-full bg-slate-200/60 blur-3xl" />
-        <div
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage: `radial-gradient(#0B132B 1px, transparent 1px)`,
-            backgroundSize: "28px 28px",
-          }}
-        />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Top Tag Announcement */}
-        <div className="hero-badge inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-xs mb-8">
-          <span className="w-2 h-2 rounded-full bg-[#C2410C] animate-pulse" />
-          <span className="text-xs font-semibold text-slate-800">
-            เปิดรับสมัครนักศึกษาใหม่ 2569 (รับสมัครตรง ไม่ต้องสอบ)
-          </span>
-          <span className="text-slate-300">|</span>
-          <Link
-            href="/admissions"
-            className="text-xs font-semibold text-[#C2410C] flex items-center gap-1 hover:underline"
-          >
-            <span>รายละเอียด</span>
-            <ChevronRight className="size-3" strokeWidth={2} />
-          </Link>
-        </div>
-
-        {/* Editorial Typographic Headline */}
-        <div className="max-w-4xl">
-          <h1
-            ref={headlineRef}
-            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#0B132B] leading-[1.12] mb-6"
-          >
-            ศาสตร์แห่งมนุษย์และสังคม <br className="hidden sm:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0B132B] via-[#C2410C] to-[#C2410C]">
-              เพื่อการพัฒนาล้านนาสู่สากล
-            </span>
-          </h1>
-
-          <p
-            ref={subtextRef}
-            className="font-body text-base sm:text-xl text-slate-600 leading-relaxed max-w-2xl mb-10"
-          >
-            คณะสังคมศาสตร์ มหาวิทยาลัยราชภัฏเชียงราย
-            มุ่งสร้างบัณฑิตนักปฏิบัติที่มีจิตสำนึกชุมชน เข้าใจพลวัตสังคมโลก
-            และขับเคลื่อนการพัฒนาอย่างยั่งยืน
-          </p>
-
-          {/* Action CTAs */}
-          <div ref={ctaRef} className="flex flex-wrap items-center gap-4 pt-2">
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+    <section className="w-full bg-white border-b border-slate-200">
+      {/* Institutional Announcement Strip (full-width bar when active) */}
+      {settings.isAnnouncementActive && settings.announcementText && (
+        <div className="w-full bg-[#F8FAFC] border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Megaphone className="size-4 text-[#C2410C] shrink-0" strokeWidth={1.75} />
+              <span className="text-xs sm:text-sm font-medium text-slate-800 truncate">
+                {settings.announcementText}
+              </span>
+            </div>
+            {settings.announcementLink && (
               <Link
-                href="#programs-showcase"
-                className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#0B132B] hover:bg-slate-800 text-white font-medium text-base shadow-sm hover:shadow-md transition-all"
+                href={settings.announcementLink}
+                className="text-xs font-semibold text-[#C2410C] inline-flex items-center gap-1 hover:underline shrink-0"
               >
-                <span>สำรวจหลักสูตรทั้งหมด</span>
-                <ArrowRight className="size-4 text-[#C2410C]" strokeWidth={2.2} />
+                <span>อ่านประกาศ</span>
+                <ChevronRight className="size-3.5" strokeWidth={2} />
               </Link>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/admissions"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-[#0B132B] font-medium text-base shadow-xs transition-colors"
-              >
-                <Sparkles className="size-4 text-[#C2410C]" strokeWidth={1.75} />
-                <span>สมัครเข้าศึกษา 2569</span>
-              </Link>
-            </motion.div>
+            )}
           </div>
         </div>
+      )}
 
-        {/* Real Metrics Highlight Bar */}
-        <div
-          ref={statsRef}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-white rounded-2xl border border-slate-200/90 shadow-xs"
-        >
-          <div className="hero-stat-card p-4 border-r border-slate-100 last:border-0">
-            <div className="flex items-center gap-2 text-slate-400 mb-1">
-              <GraduationCap className="size-4 text-[#C2410C]" strokeWidth={1.75} />
-              <span className="text-xs font-semibold uppercase tracking-wider">Programs</span>
-            </div>
-            <div className="text-3xl font-extrabold text-[#0B132B]">7</div>
-            <div className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
-              สาขาวิชา ป.ตรี-โท-เอก
-            </div>
-          </div>
+      {/* Full-Bleed PR Slide */}
+      <div
+        className="w-full"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onFocus={() => setIsPaused(true)}
+        onBlur={() => setIsPaused(false)}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft") prevSlide();
+          if (e.key === "ArrowRight") nextSlide();
+        }}
+        tabIndex={0}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="แบนเนอร์ประชาสัมพันธ์คณะสังคมศาสตร์"
+      >
+        <div className="relative w-full h-[380px] sm:h-[480px] lg:h-[560px] bg-[#0B132B] overflow-hidden">
+          {activeBanner && (
+            <>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeBanner.id}
+                  initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0.3, scale: 1.03 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0.3 }}
+                  transition={{ duration: 0.55, ease: "easeOut" }}
+                  className="absolute inset-0"
+                >
+                  <img
+                    src={getAssetUrl(activeBanner.imageUrl)}
+                    alt={activeBanner.title || "แบนเนอร์ประชาสัมพันธ์คณะสังคมศาสตร์"}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B132B]/90 via-[#0B132B]/35 to-transparent" />
+                </motion.div>
+              </AnimatePresence>
 
-          <div className="hero-stat-card p-4 border-r border-slate-100 last:border-0">
-            <div className="flex items-center gap-2 text-slate-400 mb-1">
-              <Award className="size-4 text-[#C2410C]" strokeWidth={1.75} />
-              <span className="text-xs font-semibold uppercase tracking-wider">Employability</span>
-            </div>
-            <div className="text-3xl font-extrabold text-[#C2410C]">94.8%</div>
-            <div className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
-              อัตราการได้งานทำของบัณฑิต
-            </div>
-          </div>
+              {/* Top-Right Controls aligned to content container */}
+              <div className="absolute inset-x-0 top-5 z-20 pointer-events-none">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end items-center gap-2">
+                  {slides.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setIsPaused((p) => !p)}
+                      className="pointer-events-auto size-8 rounded-sm bg-[#0B132B]/75 backdrop-blur-xs border border-white/15 text-white flex items-center justify-center hover:bg-[#0B132B] transition-colors"
+                      aria-label={isPaused ? "เล่นสไลด์อัตโนมัติ" : "หยุดสไลด์ชั่วคราว"}
+                    >
+                      {isPaused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}
+                    </button>
+                  )}
+                  <div className="pointer-events-auto px-2.5 py-1 rounded-sm bg-[#0B132B]/75 backdrop-blur-xs border border-white/15 text-white font-mono text-xs font-semibold tabular-nums">
+                    {String(safeIndex + 1).padStart(2, "0")} /{" "}
+                    {String(slides.length).padStart(2, "0")}
+                  </div>
+                </div>
+              </div>
 
-          <div className="hero-stat-card p-4 border-r border-slate-100 last:border-0">
-            <div className="flex items-center gap-2 text-slate-400 mb-1">
-              <Users className="size-4 text-[#C2410C]" strokeWidth={1.75} />
-              <span className="text-xs font-semibold uppercase tracking-wider">Partnership</span>
-            </div>
-            <div className="text-3xl font-extrabold text-[#0B132B]">40+</div>
-            <div className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
-              เครือข่ายความร่วมมือชุมชน
-            </div>
-          </div>
+              {/* Bottom Caption & Navigation aligned to content container */}
+              <div className="absolute inset-x-0 bottom-0 z-20 py-7 sm:py-10 lg:py-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row sm:items-end justify-between gap-5">
+                  <div className="space-y-2.5 max-w-2xl min-w-0">
+                    {activeBanner.badgeText && (
+                      <span className="inline-block px-2.5 py-0.5 rounded-sm bg-[#C2410C] text-white text-xs font-semibold">
+                        {activeBanner.badgeText}
+                      </span>
+                    )}
+                    {activeBanner.title && (
+                      <h1 className="text-2xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-white leading-tight line-clamp-2 drop-shadow-xs">
+                        {activeBanner.title}
+                      </h1>
+                    )}
+                    {activeBanner.subtitle && (
+                      <p className="text-xs sm:text-base text-slate-200 line-clamp-2 max-w-xl">
+                        {activeBanner.subtitle}
+                      </p>
+                    )}
+                    {activeBanner.linkUrl && (
+                      <div className="pt-1">
+                        <Link
+                          href={activeBanner.linkUrl}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-[#C2410C] hover:bg-[#C2410C]/90 text-white text-xs sm:text-sm font-semibold transition-colors shadow-xs"
+                        >
+                          <span>ดูรายละเอียด</span>
+                          <ArrowRight className="size-3.5" />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
 
-          <div className="hero-stat-card p-4">
-            <div className="flex items-center gap-2 text-slate-400 mb-1">
-              <Sparkles className="size-4 text-[#581C87]" strokeWidth={1.75} />
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#581C87]">Heritage</span>
-            </div>
-            <div className="text-3xl font-extrabold text-[#581C87]">100%</div>
-            <div className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
-              อาจารย์ผู้ทรงคุณวุฒิ
-            </div>
-          </div>
+                  {slides.length > 1 && (
+                    <div className="flex items-center gap-1.5 shrink-0 self-end">
+                      <button
+                        type="button"
+                        onClick={prevSlide}
+                        className="size-10 rounded-sm bg-white/15 hover:bg-white/25 active:scale-95 backdrop-blur-xs border border-white/20 text-white flex items-center justify-center transition-all"
+                        aria-label="สไลด์ก่อนหน้า"
+                      >
+                        <ArrowLeft className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={nextSlide}
+                        className="size-10 rounded-sm bg-white/15 hover:bg-[#C2410C] active:scale-95 backdrop-blur-xs border border-white/20 text-white flex items-center justify-center transition-all"
+                        aria-label="สไลด์ถัดไป"
+                      >
+                        <ArrowRight className="size-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
+
+        {/* Compact Editorial Index Bar (supports any number of slides) */}
+        {slides.length > 1 && (
+          <div className="w-full bg-white border-t border-slate-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex overflow-x-auto divide-x divide-slate-200 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {slides.map((slide, idx) => {
+                const isActive = idx === safeIndex;
+                return (
+                  <button
+                    key={slide.id}
+                    type="button"
+                    onClick={() => setCurrentIndex(idx)}
+                    className={`relative text-left py-2.5 px-3 min-w-[165px] sm:min-w-[130px] flex-1 shrink-0 flex items-center gap-2 transition-colors ${
+                      isActive ? "bg-orange-50/70" : "hover:bg-slate-50"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId={prefersReducedMotion ? undefined : "hero-bar-indicator"}
+                        transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                        className="absolute inset-x-0 top-0 h-0.5 bg-[#C2410C]"
+                      />
+                    )}
+                    <span
+                      className={`font-mono text-[11px] font-bold tabular-nums shrink-0 ${
+                        isActive ? "text-[#C2410C]" : "text-slate-400"
+                      }`}
+                    >
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className={`text-xs font-semibold truncate ${
+                        isActive ? "text-[#0B132B]" : "text-slate-600"
+                      }`}
+                    >
+                      {slide.title || "แบนเนอร์ประชาสัมพันธ์"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -594,9 +594,17 @@ export const news = pgTable('news', {
 
 export const banners = pgTable('banners', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  title: varchar('title', { length: 255 }),
+  subtitle: text('subtitle'),
+  badgeText: varchar('badge_text', { length: 100 }),
   imageUrl: varchar('image_url', { length: 500 }).notNull(),
   linkUrl: varchar('link_url', { length: 500 }),
   order: integer('order').default(0).notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  startDate: timestamp('start_date'),
+  endDate: timestamp('end_date'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // ------------------------------------------
@@ -1425,3 +1433,35 @@ export const siteSettings = pgTable('site_settings', {
 
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+// ==========================================
+// Journal Editorial Board Schema (วารสารสังคมศาสตร์วิชาการ)
+// รองรับระบบ CRUD กองบรรณาธิการในอนาคต
+// ==========================================
+export const journalEditorialRoleGroupEnum = pgEnum('journal_editorial_role_group', [
+  'ADVISOR',          // ที่ปรึกษาวารสาร
+  'EDITOR_IN_CHIEF',  // บรรณาธิการบริหาร
+  'ASSOCIATE_EDITOR', // ผู้ช่วยบรรณาธิการ
+  'JOURNAL_MANAGER',  // ผู้จัดการวารสาร
+  'EDITORIAL_BOARD',  // กองบรรณาธิการผู้ทรงคุณวุฒิ
+]);
+
+export const journalEditorialBoard = pgTable('journal_editorial_board', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  roleTitle: varchar('role_title', { length: 255 }).notNull(), // e.g. 'บรรณาธิการ', 'ที่ปรึกษาวารสาร'
+  roleGroup: journalEditorialRoleGroupEnum('role_group').notNull().default('EDITORIAL_BOARD'),
+  academicTitle: varchar('academic_title', { length: 100 }), // e.g. 'ผศ.ดร.', 'ศ.เกียรติคุณ ดร.'
+  position: varchar('position', { length: 255 }), // e.g. 'คณบดีสำนักวิชาสังคมศาสตร์'
+  institution: varchar('institution', { length: 255 }).notNull(), // e.g. 'มหาวิทยาลัยราชภัฏเชียงราย'
+  expertise: text('expertise'), // e.g. 'สังคมวิทยา, ประวัติศาสตร์'
+  email: varchar('email', { length: 255 }),
+  displayOrder: integer('display_order').default(0).notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export type JournalEditorialBoardMember = typeof journalEditorialBoard.$inferSelect;
+export type NewJournalEditorialBoardMember = typeof journalEditorialBoard.$inferInsert;
+

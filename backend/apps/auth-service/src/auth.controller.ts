@@ -10,6 +10,7 @@ import {
   Body,
   Delete as NestDelete,
   Query,
+  ForbiddenException,
 } from '@nestjs/common';
 import { RolesEnum } from './roles.enum';
 import { AuthService } from './auth.service';
@@ -34,8 +35,14 @@ export class AuthController {
     @Res() res: Response,
     @Query('callbackPath') callbackPath?: string,
   ) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException('Dev login is disabled in production');
+    }
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
-    const cbPath = callbackPath || '/admin/callback';
+    const cbPath =
+      callbackPath && /^\/[a-zA-Z0-9/_-]+$/.test(callbackPath)
+        ? callbackPath
+        : '/admin/callback';
     try {
       const token = await this.authService.loginAsDevAdmin();
       res.redirect(`${frontendUrl}${cbPath}?token=${token.accessToken}`);
@@ -51,6 +58,9 @@ export class AuthController {
   // Dev Login (JSON response - no redirect)
   @Post('dev/token')
   async devLoginToken() {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException('Dev login is disabled in production');
+    }
     const token = await this.authService.loginAsDevAdmin();
     return {
       accessToken: token.accessToken,
@@ -72,6 +82,8 @@ export class AuthController {
   }
 
   @Post('blacklist/check')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolesEnum.ADMIN)
   async checkBlacklist(@Body('token') token: string) {
     const isBlacklisted = await this.authService.isTokenBlacklisted(token);
     return { isBlacklisted };
@@ -115,7 +127,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RolesEnum.ADMIN)
   async getAuditLogs(@Query('limit') limit?: string) {
-    const limitNum = limit ? parseInt(limit, 10) : 100;
+    const parsed = limit ? parseInt(limit, 10) : 100;
+    const limitNum = Number.isFinite(parsed)
+      ? Math.min(Math.max(parsed, 1), 500)
+      : 100;
     return this.authService.getAuditLogs(limitNum);
   }
 

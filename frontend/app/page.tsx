@@ -1,16 +1,24 @@
 import Hero from "@/components/Hero";
 import CurriculumDeck from "@/components/CurriculumDeck";
-import StatsDashboard from "@/components/StatsDashboard";
 import NewsSection from "@/components/NewsSection";
+import AdmissionsBanner from "@/components/AdmissionsBanner";
+import { getSiteSettings } from "@/lib/site-settings";
+import { getActiveBanners } from "@/lib/banners";
+import { fetchPrograms } from "@/lib/api";
 
-export default function Home() {
+export default async function Home() {
+  const [settings, banners, programs] = await Promise.all([
+    getSiteSettings(),
+    getActiveBanners(),
+    fetchPrograms(),
+  ]);
+
   return (
     <div className="bg-[#F8FAFC] font-sans text-slate-800">
-      <Hero />
-      <CurriculumDeck />
-      <StatsDashboard />
+      <Hero settings={settings} banners={banners} />
+      <CurriculumDeck apiPrograms={programs} />
       <NewsSection />
+      <AdmissionsBanner />
     </div>
   );
 }
-

@@ -12,7 +12,15 @@ import { JwtStrategy } from 'shared/shared';
     DatabaseModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'soc-crru-secret-key-2026',
+      secret:
+        process.env.JWT_SECRET ||
+        (process.env.NODE_ENV === 'production'
+          ? (() => {
+              throw new Error(
+                'JWT_SECRET environment variable must be set in production',
+              );
+            })()
+          : 'dev-only-jwt-secret-do-not-use-in-prod'),
       signOptions: { expiresIn: '7d' }, // Token หมดอายุใน 7 วัน
     }),
   ],

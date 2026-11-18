@@ -273,12 +273,14 @@ Not lazy about: Input validation at trust boundaries, error handling that preven
 | Web UI/UX    | `.agent/frontend-specialist.md` |
 | Mobile UI/UX | `.agent/mobile-developer.md`    |
 
-### 🎨 Mandatory Web Design Triad (ออกแบบ / redesign)
+### 🎨 Mandatory Web Design Stack (อัตโนมัติทุกงานออกแบบ / สร้าง / แก้ไข UI)
 
-**เมื่อมีคำสั่ง "ออกแบบ" หรือ "redesign" หน้าเว็บ/UI ใด ๆ ในโปรเจกต์นี้ ต้องผสานและเรียกใช้ 3 องค์ประกอบนี้เสมอ:**
-1. **`oil-ui` (Design Thinking & Visual Subtraction):** กำหนด Design North Star, ลดทอนความรกรุงรัง (Visual Subtraction), และตรวจสอบความคมชัดทางสายตา
-2. **`shadcn/ui` (Component Primitives):** เรียกใช้ Primitives จาก `@/components/ui/*` (Button, Badge, Card, Input, Dialog, Table, Tabs ฯลฯ) ปรับแต่งตามโทนสีสถาปัตยกรรม Editorial Lanna Modernist
-3. **`motion` (Micro-interactions & Animations):** ใช้ `motion/react` สำหรับ Staggered Reveals, Scroll/Load Entrance, และ Layout Morphing พร้อมรองรับ `prefers-reduced-motion`
+**ทุกครั้งที่มีการสร้าง ออกแบบ (design) ปรับโฉม (redesign) หรือแก้ไขหน้าเว็บ/UI ใด ๆ ในโปรเจกต์นี้ ต้องอ่านและใช้ Skills เหล่านี้ร่วมกันโดยอัตโนมัติ (ไม่ต้องรอให้ผู้ใช้สั่งซ้ำ):**
+1. **`hallmark` (Anti-AI-Slop):** หลีกเลี่ยงหน้าตาแบบ AI template (generic cards, gradient overload, สูตร layout ซ้ำซาก) และสร้างเอกลักษณ์เฉพาะตัวของหน้า
+2. **`oil-ui` (Design Thinking & Visual Subtraction):** กำหนด Design North Star, ลดทอนความรกรุงรัง (Visual Subtraction), และตรวจสอบความคมชัดทางสายตา
+3. **`emil-design-eng` & `apple-design` (Craft & Motion Polish):** ขัดเกลารายละเอียด UI, spring physics, tactile restraint, และ optical typography
+4. **`frontend-design` + `soc-crru-public-frontend` (หรือ `soc-crru-admin-dashboard` สำหรับ Admin):** คุมโทนสถาปัตยกรรม **Editorial Lanna Modernist** และมาตรฐาน Next.js App Router ของโปรเจกต์
+5. **`shadcn/ui` & `motion`:** เรียกใช้ Primitives จาก `@/components/ui/*` และ `motion/react` (Staggered Reveals, Scroll/Load Entrance, Layout Morphing) พร้อมรองรับ `prefers-reduced-motion` เสมอ
 
 **These agents contain:**
 

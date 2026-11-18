@@ -653,6 +653,9 @@ export class AuthService implements OnModuleInit {
 
   // สำหรับ Dev Mode เท่านั้น
   async loginAsDevAdmin() {
+    if (process.env.NODE_ENV === 'production') {
+      throw new UnauthorizedException('Dev login is disabled in production');
+    }
     const devEmail = 'admin@soc.crru.ac.th';
 
     // เช็คว่ามี user นี้หรือยัง

@@ -13,6 +13,7 @@ aliases: ["Index", "Home"]
 
 ## 🚀 1. Active Space (พื้นที่ทำงานปัจจุบัน)
 โฟลเดอร์นี้ใช้เป็นจุดพักไฟล์สำหรับฟีเจอร์หรือบัคที่เรากำลังแก้อยู่ **(ห้ามเก็บของเก่าไว้เด็ดขาด)**
+- `[[01_Active_Tasks/plan-redesign-research-journal.md|📋 Plan: Redesign /research/journal Module (Editorial Lanna Modernist)]]`
 - `[[01_Active_Tasks/plan-separate-program-tracks-forms.md|📋 Plan: Separate Forms & Tables for Programs and Tracks/Majors]]`
 - `[[01_Active_Tasks/plan-site-settings-and-about-cms.md|📋 Plan: Centralized Site Settings & About/Home CMS Module]]`
 - `[[01_Active_Tasks/audit-database-admin-gap-analysis.md|🔍 Audit: Database & Admin Dashboard Content Gap Analysis]]`
