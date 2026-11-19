@@ -6,6 +6,7 @@ import { StaffController } from './staff.controller';
 import { StaffService } from './staff.service';
 import { StaffMailService } from './mail.service';
 import { PdfResumeService } from './pdf-resume.service';
+import { OpenAlexService } from './openalex.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { PdfResumeService } from './pdf-resume.service';
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [StaffController],
-  providers: [StaffService, StaffMailService, PdfResumeService],
-  exports: [StaffService, StaffMailService, PdfResumeService],
+  providers: [StaffService, StaffMailService, PdfResumeService, OpenAlexService],
+  exports: [StaffService, StaffMailService, PdfResumeService, OpenAlexService],
 })
 export class StaffServiceModule {}

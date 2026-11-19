@@ -6,6 +6,7 @@ import {
 import {
   DatabaseService,
   staffProfiles,
+  staffPublications,
   departments,
   academicPositions,
   adminPositions,
@@ -94,6 +95,8 @@ export class StaffService {
         googleScholarUrl: staffProfiles.googleScholarUrl,
         orcidId: staffProfiles.orcidId,
         scopusAuthorId: staffProfiles.scopusAuthorId,
+        openalexAuthorId: staffProfiles.openalexAuthorId,
+        openalexSyncedAt: staffProfiles.openalexSyncedAt,
         sortOrder: staffProfiles.sortOrder,
         isExecutive: staffProfiles.isExecutive,
         departmentId: staffProfiles.departmentId,
@@ -155,6 +158,8 @@ export class StaffService {
         googleScholarUrl: staffProfiles.googleScholarUrl,
         orcidId: staffProfiles.orcidId,
         scopusAuthorId: staffProfiles.scopusAuthorId,
+        openalexAuthorId: staffProfiles.openalexAuthorId,
+        openalexSyncedAt: staffProfiles.openalexSyncedAt,
         sortOrder: staffProfiles.sortOrder,
         departmentId: staffProfiles.departmentId,
         userId: staffProfiles.userId,
@@ -232,10 +237,34 @@ export class StaffService {
       )
       .orderBy(desc(academicServices.createdAt));
 
+    const publications = await this.drizzle.db
+      .select({
+        id: staffPublications.id,
+        openalexWorkId: staffPublications.openalexWorkId,
+        doi: staffPublications.doi,
+        title: staffPublications.title,
+        publicationYear: staffPublications.publicationYear,
+        publicationDate: staffPublications.publicationDate,
+        journalName: staffPublications.journalName,
+        type: staffPublications.type,
+        citedByCount: staffPublications.citedByCount,
+        isOa: staffPublications.isOa,
+        oaUrl: staffPublications.oaUrl,
+        authors: staffPublications.authors,
+        syncedAt: staffPublications.syncedAt,
+      })
+      .from(staffPublications)
+      .where(eq(staffPublications.staffProfileId, id))
+      .orderBy(
+        desc(staffPublications.publicationYear),
+        desc(staffPublications.citedByCount),
+      );
+
     return {
       ...result[0],
       researchProjects: projects,
       academicServices: services,
+      publications,
     };
   }
 

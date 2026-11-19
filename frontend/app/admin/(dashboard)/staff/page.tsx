@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useStaffData, Staff } from './hooks/useStaffData';
 import StaffForm from './components/StaffForm';
-import { Users, Edit3, Plus, Search, Trash2, Link2, Crown, UserX, AlertTriangle, Globe, Fingerprint, BookOpen, FileCheck } from 'lucide-react';
+import { Users, Edit3, Plus, Search, Trash2, Link2, Crown, UserX, AlertTriangle, Globe, Fingerprint, BookOpen, FileCheck, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,8 @@ export default function AdminStaffPage() {
     const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
     const [staffToDelete, setStaffToDelete] = useState<Staff | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [syncingAll, setSyncingAll] = useState(false);
+    const [syncingStaffId, setSyncingStaffId] = useState<string | null>(null);
 
     useEffect(() => {
         setPage(1);
@@ -120,6 +122,58 @@ export default function AdminStaffPage() {
         }
     };
 
+    const handleSyncOne = async (staff: Staff) => {
+        setSyncingStaffId(staff.id);
+        const token = localStorage.getItem('admin_token');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+
+        try {
+            const res = await fetch(`${apiUrl}/api/staff/${staff.id}/sync-openalex`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                await refetch();
+                alert(`ซิงค์ OpenAlex สำเร็จ: ${getFullName(staff)} (${data.syncedCount} บทความ)`);
+            } else {
+                const err = await res.text();
+                alert(`ซิงค์ OpenAlex ไม่สำเร็จ: ${err}`);
+            }
+        } catch (error) {
+            console.error('Error syncing OpenAlex:', error);
+            alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+        } finally {
+            setSyncingStaffId(null);
+        }
+    };
+
+    const handleSyncAll = async () => {
+        setSyncingAll(true);
+        const token = localStorage.getItem('admin_token');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+
+        try {
+            const res = await fetch(`${apiUrl}/api/staff/sync-openalex-all`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                await refetch();
+                alert(`ซิงค์ OpenAlex ทั้งหมดเสร็จสิ้น: สำเร็จ ${data.succeeded}/${data.totalEligible} คน (รวม ${data.totalWorksSynced} บทความ)`);
+            } else {
+                const err = await res.text();
+                alert(`ซิงค์ OpenAlex ทั้งหมดไม่สำเร็จ: ${err}`);
+            }
+        } catch (error) {
+            console.error('Error syncing all OpenAlex:', error);
+            alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+        } finally {
+            setSyncingAll(false);
+        }
+    };
+
     const normalizedSearch = searchTerm.trim().toLowerCase();
     const visibleStaff = normalizedSearch
         ? staffList.filter(staff =>
@@ -165,6 +219,15 @@ export default function AdminStaffPage() {
                             <Search className="h-5 w-5" />
                         </span>
                     </div>
+                    <Button
+                        variant="outline"
+                        onClick={handleSyncAll}
+                        disabled={syncingAll}
+                        className="gap-2 whitespace-nowrap border-sky-200 text-sky-700 hover:bg-sky-50"
+                    >
+                        <RefreshCw className={cn("h-4 w-4", syncingAll && "animate-spin")} />
+                        {syncingAll ? 'กำลังซิงค์...' : 'Sync OpenAlex'}
+                    </Button>
                     <Link href="/admin/staff/resume-requests">
                         <Button
                             variant="outline"
@@ -249,6 +312,11 @@ export default function AdminStaffPage() {
                                                                     <BookOpen className="w-3 h-3" /> Scopus
                                                                 </span>
                                                             ) : null}
+                                                            {staff.openalexAuthorId ? (
+                                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-medium font-mono" title={`OpenAlex: ${staff.openalexAuthorId}`}>
+                                                                    <Globe className="w-3 h-3" /> OpenAlex
+                                                                </span>
+                                                            ) : null}
                                                             {staff.staffType === 'ACADEMIC' && !staff.googleScholarUrl && !staff.orcidId && !staff.scopusAuthorId && (
                                                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-slate-100 text-slate-400 border border-slate-200 text-[10px]" title="ยังไม่ได้เชื่อมต่อข้อมูล Webometrics">
                                                                     ยังไม่ระบุ Webometrics
@@ -283,6 +351,18 @@ export default function AdminStaffPage() {
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 <div className="flex justify-end gap-2">
+                                                    {(staff.orcidId || staff.openalexAuthorId) && (
+                                                        <Button
+                                                            onClick={() => handleSyncOne(staff)}
+                                                            disabled={syncingStaffId === staff.id || syncingAll}
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-sky-700"
+                                                            title="ซิงค์ผลงานจาก OpenAlex"
+                                                        >
+                                                            <RefreshCw className={cn("w-4 h-4", syncingStaffId === staff.id && "animate-spin")} />
+                                                        </Button>
+                                                    )}
                                                     <Button
                                                         onClick={() => handleOpenModal(staff)}
                                                         variant="ghost"

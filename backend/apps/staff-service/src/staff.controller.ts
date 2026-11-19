@@ -12,6 +12,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { StaffService } from './staff.service';
+import { OpenAlexService } from './openalex.service';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { CreatePositionDto, UpdatePositionDto } from './dto/position.dto';
@@ -23,7 +24,10 @@ import { JwtAuthGuard, RolesGuard, Roles } from 'shared/shared';
 
 @Controller('staff')
 export class StaffController {
-  constructor(private readonly staffService: StaffService) {}
+  constructor(
+    private readonly staffService: StaffService,
+    private readonly openAlexService: OpenAlexService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -199,6 +203,20 @@ export class StaffController {
         message: err.message || 'Error generating PDF preview',
       });
     }
+  }
+
+  @Post('sync-openalex-all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  syncOpenAlexAll() {
+    return this.openAlexService.syncAllStaff();
+  }
+
+  @Post(':id/sync-openalex')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  syncOpenAlexOne(@Param('id') id: string) {
+    return this.openAlexService.syncStaffById(id);
   }
 
   @Get(':id')

@@ -11,6 +11,7 @@ import {
   pgEnum,
   jsonb,
   index,
+  uniqueIndex,
   primaryKey,
   real,
   serial,
@@ -159,6 +160,8 @@ export const staffProfiles = pgTable('staff_profiles', {
   googleScholarUrl: varchar('google_scholar_url', { length: 500 }),
   orcidId: varchar('orcid_id', { length: 100 }),
   scopusAuthorId: varchar('scopus_author_id', { length: 100 }),
+  openalexAuthorId: varchar('openalex_author_id', { length: 100 }),
+  openalexSyncedAt: timestamp('openalex_synced_at'),
 
   // ข้อมูลเพิ่มเติม
   expertise: text('expertise').array(),
@@ -168,6 +171,37 @@ export const staffProfiles = pgTable('staff_profiles', {
   sortOrder: integer('sort_order').default(0).notNull(), // สำหรับเรียงลำดับการแสดงผล
   isExecutive: boolean('is_executive').default(false).notNull(), // สถานะผู้บริหาร (แยกจากประเภทบุคลากร)
 });
+
+export const staffPublications = pgTable(
+  'staff_publications',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    staffProfileId: uuid('staff_profile_id')
+      .notNull()
+      .references(() => staffProfiles.id, { onDelete: 'cascade' }),
+    openalexWorkId: varchar('openalex_work_id', { length: 100 }).notNull(),
+    doi: varchar('doi', { length: 255 }),
+    title: text('title').notNull(),
+    publicationYear: integer('publication_year'),
+    publicationDate: varchar('publication_date', { length: 20 }),
+    journalName: varchar('journal_name', { length: 500 }),
+    type: varchar('type', { length: 100 }),
+    citedByCount: integer('cited_by_count').default(0).notNull(),
+    isOa: boolean('is_oa').default(false).notNull(),
+    oaUrl: varchar('oa_url', { length: 1000 }),
+    authors: jsonb('authors').$type<string[]>(),
+    syncedAt: timestamp('synced_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    staffWorkUniqueIdx: uniqueIndex('staff_publications_staff_work_idx').on(
+      table.staffProfileId,
+      table.openalexWorkId,
+    ),
+    staffProfileIdx: index('staff_publications_staff_id_idx').on(
+      table.staffProfileId,
+    ),
+  }),
+);
 
 export const staffResumeRequests = pgTable('staff_resume_requests', {
   id: uuid('id').primaryKey().defaultRandom(),

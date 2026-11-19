@@ -78,6 +78,7 @@ export default function StaffProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [showAllPublications, setShowAllPublications] = useState(false);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 
   // Print Protection: intercept Ctrl+P / Cmd+P
@@ -683,6 +684,118 @@ export default function StaffProfilePage() {
                           <span>ขอประวัติวิจัยฉบับเต็ม</span>
                         </button>
                       </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* OpenAlex Academic Publications */}
+              {Boolean(staff.publications && staff.publications.length > 0) && (
+                <div className="mb-8">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-2 border-b border-slate-200/90">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2 font-heading">
+                        <BookOpen className="size-4 text-[#C2410C]" />
+                        ผลงานตีพิมพ์วิชาการ (OpenAlex)
+                      </h3>
+                      <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
+                        {staff.publications!.length} บทความ
+                      </span>
+                      <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                        อ้างอิงรวม {staff.publications!.reduce((sum, p) => sum + (p.citedByCount || 0), 0)} ครั้ง
+                      </span>
+                    </div>
+                    {staff.openalexAuthorId && (
+                      <a
+                        href={`https://openalex.org/${staff.openalexAuthorId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-[#C2410C] hover:underline font-semibold inline-flex items-center gap-1 transition-colors"
+                      >
+                        โปรไฟล์ OpenAlex <ExternalLink className="size-3" />
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    {(showAllPublications ? staff.publications! : staff.publications!.slice(0, 5)).map((pub) => (
+                      <div
+                        key={pub.id}
+                        className="p-4 bg-white border border-slate-200/90 rounded-xl hover:border-amber-500/60 transition-all shadow-2xs hover:shadow-xs"
+                      >
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          {pub.publicationYear && (
+                            <span className="text-[11px] font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
+                              ค.ศ. {pub.publicationYear}
+                            </span>
+                          )}
+                          {pub.isOa && (
+                            <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                              Open Access
+                            </span>
+                          )}
+                          <span className="text-[11px] font-medium text-amber-800 bg-amber-50/80 border border-amber-200/80 px-2 py-0.5 rounded-full">
+                            Cited by {pub.citedByCount}
+                          </span>
+                        </div>
+
+                        <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                          {pub.title}
+                        </h4>
+
+                        {pub.journalName && (
+                          <p className="text-xs text-slate-600 mt-1 font-medium">
+                            {pub.journalName}
+                          </p>
+                        )}
+
+                        {pub.authors && pub.authors.length > 0 && (
+                          <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
+                            {pub.authors.slice(0, 4).join(', ')}
+                            {pub.authors.length > 4 ? ' et al.' : ''}
+                          </p>
+                        )}
+
+                        <div className="mt-3 pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <span className="text-[11px] font-mono text-slate-400">
+                            {pub.doi ? `DOI: ${pub.doi}` : pub.openalexWorkId}
+                          </span>
+                          <div className="flex items-center gap-3">
+                            {pub.doi && (
+                              <a
+                                href={`https://doi.org/${pub.doi}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-semibold text-[#0B132B] hover:text-[#C2410C] inline-flex items-center gap-1"
+                              >
+                                DOI <ExternalLink className="size-3" />
+                              </a>
+                            )}
+                            {pub.oaUrl && (
+                              <a
+                                href={pub.oaUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 inline-flex items-center gap-1"
+                              >
+                                อ่านบทความ <ExternalLink className="size-3" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {staff.publications!.length > 5 && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllPublications((prev) => !prev)}
+                        className="w-full py-2.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 rounded-xl transition-colors"
+                      >
+                        {showAllPublications
+                          ? 'แสดงน้อยลง'
+                          : `แสดงผลงานทั้งหมด (${staff.publications!.length} บทความ)`}
+                      </button>
                     )}
                   </div>
                 </div>

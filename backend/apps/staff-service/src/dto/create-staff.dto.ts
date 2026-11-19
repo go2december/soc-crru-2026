@@ -83,6 +83,10 @@ export class CreateStaffDto {
   @IsOptional()
   scopusAuthorId?: string;
 
+  @IsString()
+  @IsOptional()
+  openalexAuthorId?: string;
+
   // ข้อมูลเพิ่มเติม
   @IsArray()
   @IsString({ each: true })

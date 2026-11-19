@@ -31,6 +31,22 @@ export interface LinkedAcademicService {
     createdAt: string;
 }
 
+export interface StaffPublication {
+    id: string;
+    openalexWorkId: string;
+    doi: string | null;
+    title: string;
+    publicationYear: number | null;
+    publicationDate: string | null;
+    journalName: string | null;
+    type: string | null;
+    citedByCount: number;
+    isOa: boolean;
+    oaUrl: string | null;
+    authors: string[] | null;
+    syncedAt: string;
+}
+
 export interface Staff {
     id: string;
     prefixTh: string | null;
@@ -53,12 +69,15 @@ export interface Staff {
     googleScholarUrl: string | null;
     orcidId: string | null;
     scopusAuthorId: string | null;
+    openalexAuthorId?: string | null;
+    openalexSyncedAt?: string | null;
     sortOrder: number;
     department: string | null;
     departmentEn: string | null;
     isExecutive: boolean;
     researchProjects?: LinkedResearchProject[];
     academicServices?: LinkedAcademicService[];
+    publications?: StaffPublication[];
 }
 
 export interface StaffNameFields {
@@ -160,4 +179,13 @@ export const getScopusLink = (val: string | null | undefined): string => {
     if (!val) return '';
     const trimmed = val.trim();
     return trimmed.startsWith('http') ? trimmed : `https://www.scopus.com/authid/detail.uri?authorId=${trimmed}`;
+};
+
+/**
+ * Normalizes OpenAlex Author URL from ID or full URL
+ */
+export const getOpenAlexLink = (val: string | null | undefined): string => {
+    if (!val) return '';
+    const trimmed = val.trim();
+    return trimmed.startsWith('http') ? trimmed : `https://openalex.org/${trimmed.replace(/^\/+/, '')}`;
 };

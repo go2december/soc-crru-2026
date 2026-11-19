@@ -5,6 +5,8 @@ import {
     getGoogleScholarLink,
     getOrcidLink,
     getScopusLink,
+    getOpenAlexLink,
+    StaffPublication,
 } from '@/lib/staff';
 import { getApiBaseUrl, getAssetUrl } from '@/lib/api-config';
 
@@ -70,6 +72,7 @@ export default async function StaffDetailLayout({
 }) {
     const { id } = await params;
     let personSchema = null;
+    let publicationsSchema: Record<string, unknown>[] = [];
 
     try {
         const res = await fetch(`${API_URL}/api/staff/${id}`, { next: { revalidate: 60 } });
@@ -79,6 +82,7 @@ export default async function StaffDetailLayout({
             const hasScholar = Boolean(staff.googleScholarUrl);
             const hasOrcid = Boolean(staff.orcidId);
             const hasScopus = Boolean(staff.scopusAuthorId);
+            const hasOpenAlex = Boolean(staff.openalexAuthorId);
 
             personSchema = {
                 "@context": "https://schema.org",
@@ -108,8 +112,26 @@ export default async function StaffDetailLayout({
                     hasScholar ? getGoogleScholarLink(staff.googleScholarUrl) : null,
                     hasOrcid ? getOrcidLink(staff.orcidId) : null,
                     hasScopus ? getScopusLink(staff.scopusAuthorId) : null,
+                    hasOpenAlex ? getOpenAlexLink(staff.openalexAuthorId) : null,
                 ].filter(Boolean),
             };
+
+            if (Array.isArray(staff.publications) && staff.publications.length > 0) {
+                publicationsSchema = (staff.publications as StaffPublication[]).slice(0, 20).map((pub) => ({
+                    "@context": "https://schema.org",
+                    "@type": "ScholarlyArticle",
+                    "headline": pub.title,
+                    "datePublished": pub.publicationDate || (pub.publicationYear ? String(pub.publicationYear) : undefined),
+                    "author": pub.authors?.length
+                        ? pub.authors.map((name) => ({ "@type": "Person", name }))
+                        : [{ "@type": "Person", name: getFullNameEn(staff) || getFullName(staff) }],
+                    "isPartOf": pub.journalName
+                        ? { "@type": "Periodical", name: pub.journalName }
+                        : undefined,
+                    "sameAs": pub.doi ? `https://doi.org/${pub.doi}` : getOpenAlexLink(pub.openalexWorkId),
+                    "url": pub.oaUrl || (pub.doi ? `https://doi.org/${pub.doi}` : getOpenAlexLink(pub.openalexWorkId)),
+                }));
+            }
         }
     } catch (err) {
         console.error('[StaffDetailLayout] fetch error:', err);
@@ -121,6 +143,12 @@ export default async function StaffDetailLayout({
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+                />
+            )}
+            {publicationsSchema.length > 0 && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(publicationsSchema) }}
                 />
             )}
             {children}

@@ -42,6 +42,7 @@ export default function StaffForm({ initialData, departments, users, academicPos
         googleScholarUrl: '',
         orcidId: '',
         scopusAuthorId: '',
+        openalexAuthorId: '',
         departmentId: '',
         userId: '',
         isExecutive: false,
@@ -76,6 +77,7 @@ export default function StaffForm({ initialData, departments, users, academicPos
                 googleScholarUrl: initialData.googleScholarUrl || '',
                 orcidId: initialData.orcidId || '',
                 scopusAuthorId: initialData.scopusAuthorId || '',
+                openalexAuthorId: initialData.openalexAuthorId || '',
                 departmentId: initialData.departmentId ? initialData.departmentId.toString() : '',
                 userId: initialData.userId || '',
                 isExecutive: initialData.isExecutive || false,
@@ -159,6 +161,7 @@ export default function StaffForm({ initialData, departments, users, academicPos
             googleScholarUrl: cleanString(formData.googleScholarUrl),
             orcidId: cleanString(formData.orcidId),
             scopusAuthorId: cleanString(formData.scopusAuthorId),
+            openalexAuthorId: cleanString(formData.openalexAuthorId),
             imageUrl: cleanString(formData.imageUrl),
             education: eduList,
             expertise: expertiseList,
@@ -567,6 +570,32 @@ export default function StaffForm({ initialData, departments, users, academicPos
                                 className="text-xs bg-white"
                             />
                             <p className="text-[11px] text-muted-foreground">รหัส Author ID ในฐานข้อมูล Scopus (เช่น 57200000000)</p>
+                        </div>
+
+                        {/* OpenAlex Author ID */}
+                        <div className="space-y-2 rounded-xl border border-sky-100 bg-sky-50/30 p-4 md:col-span-3">
+                            <div className="flex items-center justify-between">
+                                <Label className="font-bold text-sky-950 flex items-center gap-1.5 text-xs">
+                                    <Globe className="w-4 h-4 text-sky-600" /> OpenAlex Author ID (Optional — ระบบจะค้นหาจาก ORCID ให้อัตโนมัติเมื่อ Sync)
+                                </Label>
+                                {formData.openalexAuthorId && (
+                                    <a
+                                        href={formData.openalexAuthorId.startsWith('http') ? formData.openalexAuthorId : `https://openalex.org/${formData.openalexAuthorId}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[11px] text-sky-600 hover:underline flex items-center gap-0.5"
+                                    >
+                                        เปิดดู <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                )}
+                            </div>
+                            <Input
+                                type="text"
+                                value={formData.openalexAuthorId}
+                                onChange={e => setFormData({ ...formData, openalexAuthorId: e.target.value })}
+                                placeholder="A5001234567 (เว้นว่างได้ถ้ามี ORCID)"
+                                className="text-xs bg-white"
+                            />
                         </div>
                     </div>
                 </div>

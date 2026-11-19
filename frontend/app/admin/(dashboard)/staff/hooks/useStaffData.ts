@@ -30,6 +30,8 @@ export interface Staff {
     googleScholarUrl: string | null;
     orcidId: string | null;
     scopusAuthorId: string | null;
+    openalexAuthorId?: string | null;
+    openalexSyncedAt?: string | null;
     department: string | null;
     departmentId: number | null;
     sortOrder: number;
