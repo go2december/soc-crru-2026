@@ -54,7 +54,7 @@ tags: [status, overview]
 ### 💤 Low Priority (รอให้ระบบนิ่งก่อน)
 - [ ] **Full-text search:** ปรับปรุงระบบค้นหาให้ไวขึ้น
 - [ ] **Performance Testing:** ทดสอบความเร็วในการโหลด
-- [ ] **Deployment Plan:** เตรียมย้ายขึ้น Server จริง (Production)
+- [ ] **Deployment Plan:** เตรียมย้ายขึ้น Server จริง (Production) — *อย่าลืมทำ Production Deploy Checklist ของ OpenAlex ใน `[[plan-openalex-integration]]`*
 
 ---
 *👉 อ้างอิงจากไฟล์เดิม: `[[../99_Archive/WORKFLOW-project-status]]`*

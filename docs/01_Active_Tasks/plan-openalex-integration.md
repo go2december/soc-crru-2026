@@ -37,3 +37,10 @@ updated_at: "2026-11-19"
 ## 5. Verification
 - Run `npx drizzle-kit push` (หรือตรวจสอบ migration), `npm run build` และ `npm test` ใน `backend/`
 - Run `npm run lint` / `npx tsc --noEmit` ใน `frontend/`
+
+## 6. Production Deploy Checklist (กันลืม)
+
+> [!warning] **สิ่งที่ต้องทำเมื่อ Deploy ขึ้น Production Server**
+> 1. **Database Migration:** รัน `npx tsx scripts/migrate_openalex_publications.ts` ใน `backend/` เพื่อสร้างคอลัมน์ `openalex_author_id`, `openalex_synced_at` และตาราง `staff_publications`
+> 2. **Environment Variable:** ตั้งค่า `OPENALEX_MAILTO` ใน `.env` ของ Backend (เช่น `OPENALEX_MAILTO=soc@crru.ac.th`) สำหรับ OpenAlex Polite Pool
+> 3. **Production Build & Smoke Test:** รัน `npm run build` ใน `frontend/` และทดสอบกด `Sync OpenAlex` ใน Admin (`/admin/staff`) กับอาจารย์ที่มี ORCID จริงเพื่อยืนยันการเชื่อมต่อ OpenAlex API จากเครื่อง Server
